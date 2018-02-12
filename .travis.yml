@@ -10,7 +10,14 @@ cache:
 
 install:
   - sudo apt-get update -qq
-  - sudo apt-get install -y -qq python-numpy libvtk6.3 libvtk6-dev unzip libflann-dev wget mercurial git gcc cmake python-numpy freeglut3 freeglut3-dev libglew1.5 libglew1.5-dev libglu1-mesa libglu1-mesa-dev libgl1-mesa-glx libgl1-mesa-dev libxmu-dev libxi-dev  libboost-all-dev cvs libgoogle-glog-dev libatlas-base-dev gfortran  gtk2.0 libgtk2.0-dev l libyaml-dev
+  - sudo apt-get install -y -qq unzip libflann-dev wget libyaml-cpp-dev mercurial git gcc cmake  python-numpy freeglut3 freeglut3-dev  libglew1.5 libglew1.5-dev libglu1-mesa libglu1-mesa-dev libgl1-mesa-glx libgl1-mesa-dev  libxmu-dev libxi-dev  libboost-all-dev cvs  gfortran  libatlas-base-dev  libgoogle-glog-dev libgtk2.0-dev libvtk5.8 libvtk5-dev dictionaries-common
+  - sudo /usr/share/debconf/fix_db.pl
+  - sudo dpkg-reconfigure dictionaries-common
+  - sudo apt-get update -qq 
+  - sudo apt-get install -y -qq gtk2.0
+
+
+
 
 script:
   - git config --global user.email "you@example.com"
