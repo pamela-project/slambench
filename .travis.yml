@@ -2,6 +2,11 @@ language: cpp
 dist: precise
 sudo: required
 
+cache:
+  directories:
+  - deps
+  - datasets
+
 addons:
   apt:
     sources:
