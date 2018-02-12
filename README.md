@@ -1,5 +1,8 @@
 # slambench2
 
+This repository is not ready to be used (yet!)
+
+[![Build Status](https://travis-ci.org/pamela-project/slambench2.svg?branch=master)](https://travis-ci.org/pamela-project/slambench2)
 
 ## File organisation
 
