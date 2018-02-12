@@ -20,4 +20,18 @@ script:
   - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-5 /usr/bin/g++
   - gcc --version
   - make toon
+  - make eigen3
+  - make suitesparse
+  - make g2o
+  - make cvd
+  - make flann
+  - make gvars
+  - make freeimage
+  - make pangolin
+  - make opengv
+  - make opencv
+  - make brisk
+  - make ceres
+  - make pcl
+  - make opentuner
   - ls deps
