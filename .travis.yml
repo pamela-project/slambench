@@ -25,4 +25,12 @@ script:
   - gcc --version
   - make toon
   - make eigen3
-
+  - make suitesparse
+  - make g2o
+  - make cvd
+  - make flann
+  - make gvars
+  - make freeimage
+  - make pangolin
+  - make opengv
+  - make opencv
