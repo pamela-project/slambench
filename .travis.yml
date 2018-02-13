@@ -36,5 +36,5 @@ script:
   - make opencv
   - make brisk
   - make ceres
-  - make pcl
+  - make pcl -j4
   - ls deps

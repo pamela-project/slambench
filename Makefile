@@ -26,6 +26,7 @@ infos :
 ROOT_DIR=$(shell pwd)
 DEPS_DIR=$(ROOT_DIR)/deps
 REPOS_DIR=$(DEPS_DIR)/repos
+DEPS_BUILD_DIR=$(DEPS_DIR)/build
 DEPS_ARGS=
 DEPS_ENV=
 
