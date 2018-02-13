@@ -15,10 +15,10 @@ ${DEPS_DIR}/pcl : ${REPOS_DIR}/pcl eigen3 flann
 		echo "ERROR: PCL requires EIGEN to be fully functional (make eigen).";\
 		exit 1;\
 	fi;
-	mkdir ${REPOS_DIR}/pcl/build -p
-	rm ${REPOS_DIR}/pcl/build/* -rf
+	mkdir ${DEPS_BUILD_DIR}/pcl/ -p
+	rm ${DEPS_BUILD_DIR}/pcl//* -rf
 	sed -i.bak "s/\(find_package.*\) mpi/\1/" ${REPOS_DIR}/pcl/cmake/pcl_find_boost.cmake # PCL should not need MPI !
-	cd ${REPOS_DIR}/pcl/build && cmake .. \
+	cd ${DEPS_BUILD_DIR}/pcl/ && cmake ${REPOS_DIR}/pcl \
 	-DBUILD_common=TRUE                \
 	-DBUILD_octree=TRUE               \
 	-DBUILD_io=TRUE                   \
@@ -30,7 +30,7 @@ ${DEPS_DIR}/pcl : ${REPOS_DIR}/pcl eigen3 flann
 	-DBUILD_geometry=TRUE             \
 	-DBUILD_features=TRUE             \
 	-DBUILD_ml=TRUE                   \
-	-DBUILD_segmentation=TRUE         \
+	-DBUILD_segmentation=FALSE         \
 	-DBUILD_surface=TRUE              \
 	-DBUILD_outofcore=FALSE              \
 	-DBUILD_examples=FALSE            \
@@ -38,18 +38,18 @@ ${DEPS_DIR}/pcl : ${REPOS_DIR}/pcl eigen3 flann
 	-DBUILD_registration=TRUE          \
 	-DBUILD_keypoints=TRUE            \
 	-DBUILD_tracking=FALSE             \
-	-DBUILD_recognition=TRUE          \
+	-DBUILD_recognition=FALSE          \
 	-DBUILD_stereo=FALSE               \
-	-DBUILD_visualization=TRUE         \
+	-DBUILD_visualization=FALSE         \
 	-DBUILD_tools=FALSE \
 	"-DCMAKE_INSTALL_PREFIX:PATH=$@" \
 	-DEIGEN_INCLUDE_DIR=${EIGEN3_INCLUDE_DIR} \
 	-DFLANN_LIBRARY=${FLANN_LIBRARY} -DCMAKE_BUILD_TYPE=RELEASE \
-	-DFLANN_INCLUDE_DIR=${FLANN_INCLUDE_DIR} > ${REPOS_DIR}/pcl/build/build.log.tmp 2>&1
-	if cat ${REPOS_DIR}/pcl/build/build.log.tmp | grep "Requires external library" ; then echo "Error with deps of PCL." ; exit 1 ; fi
-	+cd ${REPOS_DIR}/pcl/build && make 
+	-DFLANN_INCLUDE_DIR=${FLANN_INCLUDE_DIR} # > ${DEPS_BUILD_DIR}/pcl//build.log.tmp 2>&1
+	if cat ${DEPS_BUILD_DIR}/pcl//build.log.tmp | grep "Requires external library" ; then echo "Error with deps of PCL." ; exit 1 ; fi
+	+cd ${DEPS_BUILD_DIR}/pcl/ && make 
 	mkdir -p $@
-	cd ${REPOS_DIR}/pcl/build && make install
+	cd ${DEPS_BUILD_DIR}/pcl/ && make install
 
 pcl : 
 	+if [ ! -d ${DEPS_DIR}/$@ ] ; then make ${DEPS_DIR}/$@ ; else echo "$@ skipped."; fi
