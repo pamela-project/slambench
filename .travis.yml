@@ -33,4 +33,4 @@ script:
   - make freeimage
   - make pangolin
   - make opengv
-  - make opencv
+
