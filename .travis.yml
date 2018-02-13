@@ -36,6 +36,4 @@ script:
   - make opencv
   - make brisk
   - make ceres
-  - make pcl
-  - make opentuner
-  - ls deps
+
