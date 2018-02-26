@@ -1,4 +1,9 @@
 ECHO=/bin/echo
+READ=read
+REMOVE_GIT=rm -rf benchmarks/$@/src/original/.git
+
+#READ=echo skip ||
+#REMOVE_GIT=
 
 ####################################
 #### SLAMBENCH  INFOS (DEFAULT) ####
@@ -263,10 +268,11 @@ efusion:
 	@echo    "    Used repository: https://github.com/bbodin/ElasticFusion"
 	@echo "================================================================================================================="
 	@echo ""
-	@read -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/efusion/src/ -p
 	rm benchmarks/efusion/src/original -rf
 	git clone https://github.com/bbodin/ElasticFusion benchmarks/efusion/src/original
+	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/efusion/CMakeLists.txt
 	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/efusion/CMakeLists.txt
 
@@ -278,10 +284,11 @@ infinitam:
 	@echo    "    Used repository: https://github.com/bbodin/InfiniTAM"
 	@echo "================================================================================================================="
 	@echo ""
-	@read -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/infinitam/src/ -p
 	rm benchmarks/infinitam/src/original -rf
 	git clone https://github.com/bbodin/InfiniTAM.git benchmarks/infinitam/src/original
+	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/infinitam/CMakeLists.txt
 	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/infinitam/CMakeLists.txt
 
@@ -293,10 +300,11 @@ lsdslam:
 	@echo    "    Used repository : https://github.com/pamela-project/lsd_slam.git"  
 	@echo "================================================================================================================="
 	@echo ""
-	@read -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/lsdslam/src/ -p
 	rm benchmarks/lsdslam/src/original -rf
 	git clone  https://github.com/pamela-project/lsd_slam.git benchmarks/lsdslam/src/original
+	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/lsdslam/CMakeLists.txt
 	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/lsdslam/CMakeLists.txt
 
@@ -307,10 +315,11 @@ orbslam2:
 	@echo    "    Used repository: https://github.com/pamela-project/ORB_SLAM2"  
 	@echo "================================================================================================================="
 	@echo ""
-	@read -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/orbslam2/src/ -p
 	rm benchmarks/orbslam2/src/original -rf
 	git clone  https://github.com/pamela-project/ORB_SLAM2.git benchmarks/orbslam2/src/original
+	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/orbslam2/CMakeLists.txt
 	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/orbslam2/CMakeLists.txt
 
@@ -322,10 +331,11 @@ monoslam:
 	@echo    "    Used repository: https://github.com/bbodin/SceneLib2"  
 	@echo "================================================================================================================="
 	@echo ""
-	@read -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/monoslam/src/ -p
 	rm benchmarks/monoslam/src/original -rf
 	git clone  https://github.com/bbodin/SceneLib2  benchmarks/monoslam/src/original
+	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/monoslam/CMakeLists.txt
 	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/monoslam/CMakeLists.txt
 
@@ -336,10 +346,11 @@ ptam:
 	@echo    "    Used repository: https://github.com/bbodin/PTAM-GPL"  
 	@echo "================================================================================================================="
 	@echo ""
-	@read -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/ptam/src/ -p
 	rm benchmarks/ptam/src/original -rf
 	git clone   https://github.com/bbodin/PTAM-GPL  benchmarks/ptam/src/original
+	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/ptam/CMakeLists.txt
 	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/ptam/CMakeLists.txt
 
@@ -350,10 +361,11 @@ okvis:
 	@echo    "    Used repository: https://github.com/bbodin/okvis"  
 	@echo "================================================================================================================="
 	@echo ""
-	@read -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/okvis/src/ -p
 	rm benchmarks/okvis/src/original -rf
 	git clone  https://github.com/bbodin/okvis   benchmarks/okvis/src/original
+	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/okvis/CMakeLists.txt
 	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/okvis/CMakeLists.txt
 
@@ -364,10 +376,11 @@ svo:
 	@echo    "    Used repository: https://github.com/pamela-project/rpg_svo.git"  
 	@echo "================================================================================================================="
 	@echo ""
-	@read -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/svo/src/ -p
 	rm benchmarks/svo/src/original -rf
 	git clone  https://github.com/pamela-project/rpg_svo.git   benchmarks/svo/src/original
+	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/svo/CMakeLists.txt
 	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/svo/CMakeLists.txt
 
@@ -378,13 +391,16 @@ kfusion:
 	@echo    "    Used repository: https://github.com/pamela-project/kfusion"  
 	@echo "================================================================================================================="
 	@echo ""
-	@read -p "Are you sure you want to download this use-cases (y/N) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@${READ} -p "Are you sure you want to download this use-cases (y/N) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/kfusion/src/ -p
 	rm benchmarks/kfusion/src/original -rf
 	git clone   https://github.com/pamela-project/kfusion   benchmarks/kfusion/src/original
+	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/kfusion/CMakeLists.txt
 	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/kfusion/CMakeLists.txt
 
+
+algorithms : efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo
 
 
 datasets :
