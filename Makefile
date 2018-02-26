@@ -274,7 +274,7 @@ efusion:
 	git clone https://github.com/bbodin/ElasticFusion benchmarks/efusion/src/original
 	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/efusion/CMakeLists.txt
-	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/efusion/CMakeLists.txt
+	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
 
 infinitam:
@@ -290,7 +290,7 @@ infinitam:
 	git clone https://github.com/bbodin/InfiniTAM.git benchmarks/infinitam/src/original
 	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/infinitam/CMakeLists.txt
-	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/infinitam/CMakeLists.txt
+	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
 
 lsdslam:
@@ -306,7 +306,7 @@ lsdslam:
 	git clone  https://github.com/pamela-project/lsd_slam.git benchmarks/lsdslam/src/original
 	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/lsdslam/CMakeLists.txt
-	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/lsdslam/CMakeLists.txt
+	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
 orbslam2:
 	@echo "================================================================================================================="
@@ -321,7 +321,7 @@ orbslam2:
 	git clone  https://github.com/pamela-project/ORB_SLAM2.git benchmarks/orbslam2/src/original
 	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/orbslam2/CMakeLists.txt
-	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/orbslam2/CMakeLists.txt
+	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
 
 monoslam:
@@ -337,7 +337,7 @@ monoslam:
 	git clone  https://github.com/bbodin/SceneLib2  benchmarks/monoslam/src/original
 	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/monoslam/CMakeLists.txt
-	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/monoslam/CMakeLists.txt
+	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
 ptam:
 	@echo "================================================================================================================="
@@ -352,7 +352,7 @@ ptam:
 	git clone   https://github.com/bbodin/PTAM-GPL  benchmarks/ptam/src/original
 	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/ptam/CMakeLists.txt
-	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/ptam/CMakeLists.txt
+	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
 okvis:
 	@echo "================================================================================================================="
@@ -367,7 +367,7 @@ okvis:
 	git clone  https://github.com/bbodin/okvis   benchmarks/okvis/src/original
 	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/okvis/CMakeLists.txt
-	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/okvis/CMakeLists.txt
+	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
 svo: 
 	@echo "================================================================================================================="
@@ -382,7 +382,7 @@ svo:
 	git clone  https://github.com/pamela-project/rpg_svo.git   benchmarks/svo/src/original
 	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/svo/CMakeLists.txt
-	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/svo/CMakeLists.txt
+	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
 kfusion:
 	@echo "================================================================================================================="
@@ -397,7 +397,7 @@ kfusion:
 	git clone   https://github.com/pamela-project/kfusion   benchmarks/kfusion/src/original
 	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/kfusion/CMakeLists.txt
-	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/kfusion/CMakeLists.txt
+	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
 
 algorithms : efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo
