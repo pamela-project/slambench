@@ -1,0 +1,91 @@
+/*
+
+ Copyright (c) 2017 University of Edinburgh, Imperial College, University of Manchester.
+ Developed in the PAMELA project, EPSRC Programme Grant EP/K008730/1
+
+ This code is licensed under the MIT License.
+
+ */
+
+
+#ifndef IO_IMAGEDATAFORMATTER_H
+#define IO_IMAGEDATAFORMATTER_H
+
+#include "io/sensor/CameraSensor.h"
+#include "io/sensor/DepthSensor.h"
+#include "io/format/DataFormatter.h"
+
+#include <cassert>
+
+namespace slambench {
+	namespace io {
+		template<pixelformat::EPixelFormat pxl_format> class PixelData {
+			PixelData(void *data);
+		};
+		
+		template<> class PixelData<pixelformat::RGB_III_888> {
+		public:
+			PixelData(const void *data) { 
+				const char *cdata = (const char*)data;
+				_r = cdata[0];
+				_g = cdata[1];
+				_b = cdata[2];
+			}
+			
+			static const size_t Size = 3;
+					
+		private:
+			uint8_t _r, _g, _b;
+			
+		public:
+			static_assert(sizeof(_r) + sizeof(_g) + sizeof(_b) == Size, "Size mismatch!");
+			
+			uint8_t R() const { return _r; }
+			uint8_t G() const { return _g; }
+			uint8_t B() const { return _b; }
+				
+		};
+		
+		template<> class PixelData<pixelformat::D_F_32> {
+		public:
+			PixelData(const void* data) {
+				const float *fdata = (const float*)data;
+				_d = *fdata;
+			}
+			
+		private:
+			float _d;
+			
+		public:
+			float D() const { return _d; }
+			
+			static const size_t Size = 4;
+			static_assert(sizeof(_d) == Size, "Size mismatch");
+		};
+				
+		template<pixelformat::EPixelFormat pxl_format> class RasterImageFormatter : public DataFormatter {
+		public:
+			typedef PixelData<pxl_format> pixel_t;
+			
+			RasterImageFormatter(Sensor *sensor, void *data) : DataFormatter(sensor, data) {
+				assert(sensor->GetType() == CameraSensor::kCameraType || sensor->GetType() == DepthSensor::kDepthType);
+			}
+			
+			CameraSensor *GetCamera() { return (CameraSensor*)DataFormatter::GetSensor(); }
+			const CameraSensor *GetCamera() const { return (CameraSensor*)DataFormatter::GetSensor(); }
+			size_t Line() const { return GetCamera()->Width * pixel_t::Size; }
+			size_t Stride() const { return pixel_t::Size; }
+			
+			pixel_t Get(uint32_t x, uint32_t y) const {
+				const char *data = (const char*)Data();
+				data += Line() * y;
+				data += Stride() * x;
+				
+				return pixel_t(data);
+			}
+		};		
+	}
+}
+
+#endif /* IO_IMAGEDATAFORMATTER_H */
+

@@ -1,0 +1,183 @@
+From 24cca203f2e4e1de89fb858b7b018d86abb99c8a Mon Sep 17 00:00:00 2001
+From: "Bruno Bodin (zebulon)" <bbodin@inf.ed.ac.uk>
+Date: Tue, 26 Apr 2016 14:58:30 +0100
+Subject: [PATCH] test
+
+---
+ Android.mk                                              | 12 +++++++-----
+ Application.mk                                          |  3 +--
+ Include/OniPlatform.h                                   |  2 ++
+ Packaging/ReleaseVersion.py                             |  4 ++--
+ Source/Core/OniContext.cpp                              | 15 ++++++---------
+ Source/Drivers/OniFile/DataRecords.cpp                  | 14 ++++++++++++++
+ ThirdParty/PSCommon/XnLib/Include/XnPlatform.h          |  2 ++
+ ThirdParty/PSCommon/XnLib/Source/XnLogAndroidWriter.cpp |  2 +-
+ 8 files changed, 35 insertions(+), 19 deletions(-)
+
+diff --git a/Android.mk b/Android.mk
+index 4e3e26b..c7ee11b 100644
+--- a/Android.mk
++++ b/Android.mk
+@@ -24,13 +24,15 @@ endif
+ # Setup OpenNI2 local variables
+ OPENNI2_CFLAGS := -O3 -ftree-vectorize -ffast-math -funroll-loops -fPIC -fvisibility=hidden
+ 
+-ifeq ($(ARCH_ARM_HAVE_ARMV7A),true) 
+-	OPENNI2_CFLAGS += -march=armv7-a -mfloat-abi=softfp -mtune=cortex-a9 -mfpu=vfp
+-endif
+ 
+-ifeq ($(ARCH_ARM_HAVE_NEON),true)
+-	OPENNI2_CFLAGS += -mfpu=neon -DHAVE_NEON=1 -flax-vector-conversions
++ifeq ($(TARGET_ARCH),arm64)
++	OPENNI2_CFLAGS += -march=armv8-a -DHAVE_NEON=1 -flax-vector-conversions
++else
++ifeq ($(TARGET_ARCH),arm)
++	OPENNI2_CFLAGS += -march=armv7-a -mfloat-abi=softfp -mtune=cortex-a9 -mfpu=vfp  -mfpu=neon -DHAVE_NEON=1 -flax-vector-conversions
+ endif
++endif
++
+ 
+ # Recurse through all subdirs
+ include $(call all-subdir-makefiles)
+diff --git a/Application.mk b/Application.mk
+index 9c7ff56..67982a6 100644
+--- a/Application.mk
++++ b/Application.mk
+@@ -21,5 +21,4 @@
+ APP_PLATFORM := android-9
+ 
+ # Use ARM v7a instruction set
+-APP_ABI := armeabi-v7a
+-ARCH_ARM_HAVE_ARMV7A := true
+\ No newline at end of file
++APP_ABI := armeabi-v7a arm64-v8a
+diff --git a/Include/OniPlatform.h b/Include/OniPlatform.h
+index 602b4ba..6b1d7ef 100644
+--- a/Include/OniPlatform.h
++++ b/Include/OniPlatform.h
+@@ -37,6 +37,8 @@
+ #	include "Win32/OniPlatformWin32.h"
+ #elif defined (ANDROID) && defined (__arm__)
+ #	include "Android-Arm/OniPlatformAndroid-Arm.h"
++#elif defined (ANDROID) && defined (__aarch64__)
++#	include "Android-Arm/OniPlatformAndroid-Arm.h"
+ #elif (__linux__ && (i386 || __x86_64__))
+ #	include "Linux-x86/OniPlatformLinux-x86.h"
+ #elif (__linux__ && __arm__)
+diff --git a/Packaging/ReleaseVersion.py b/Packaging/ReleaseVersion.py
+index e2fdf5f..4413e6a 100755
+--- a/Packaging/ReleaseVersion.py
++++ b/Packaging/ReleaseVersion.py
+@@ -113,14 +113,14 @@ if plat == 'android':
+     os.symlink('../../../', buildDir + '/jni/OpenNI2')
+     shutil.copy('../Android.mk', buildDir + '/jni')
+     shutil.copy('../Application.mk', buildDir + '/jni')
+-    rc = subprocess.call([ ndkDir + '/ndk-build', '-C', buildDir, '-j8' ])
++    rc = subprocess.call([ ndkDir + '/ndk-build', '-C', buildDir, '-j1' ])
+     if rc != 0:
+         print 'Build failed!'
+         sys.exit(3)
+ 
+     finalFile = finalDir + '/' + outputDir + '.tar'
+     
+-    shutil.move(buildDir + '/libs/armeabi-v7a', outputDir)
++    shutil.move(buildDir + '/libs/', outputDir)
+     
+     # add config files
+     shutil.copy('../Config/OpenNI.ini', outputDir)
+diff --git a/Source/Core/OniContext.cpp b/Source/Core/OniContext.cpp
+index 153c7c6..cf13851 100644
+--- a/Source/Core/OniContext.cpp
++++ b/Source/Core/OniContext.cpp
+@@ -23,8 +23,8 @@
+ #include <XnLog.h>
+ #include <XnOSCpp.h>
+ 
+-static const char* ONI_CONFIGURATION_FILE = "OpenNI.ini";
+-static const char* ONI_DEFAULT_DRIVERS_REPOSITORY = "OpenNI2" XN_FILE_DIR_SEP "Drivers";
++static const char* ONI_CONFIGURATION_FILE         = "/data/ni/OpenNI.ini";
++static const char* ONI_DEFAULT_DRIVERS_REPOSITORY = "/data/ni/";
+ 
+ #define XN_MASK_ONI_CONTEXT "OniContext"
+ 
+@@ -84,15 +84,12 @@ OniStatus Context::initialize()
+ 	XnBool configurationFileExists = FALSE;
+ 
+ 	// Search the module directory for OpenNI.ini.
+-	xnOSStrCopy(strOniConfigurationFile, strBaseDir, XN_FILE_MAX_PATH);
+-	rc = xnOSAppendFilePath(strOniConfigurationFile, ONI_CONFIGURATION_FILE, XN_FILE_MAX_PATH);
+-	if (rc == XN_STATUS_OK)
+-	{
+-		xnOSDoesFileExist(strOniConfigurationFile, &configurationFileExists);
+-	}
++	xnOSStrCopy(strOniConfigurationFile, ONI_CONFIGURATION_FILE, XN_FILE_MAX_PATH);
++	xnOSDoesFileExist(strOniConfigurationFile, &configurationFileExists);
++
+ 
+ #ifdef ONI_PLATFORM_ANDROID_OS
+-	xnLogSetMaskMinSeverity(XN_LOG_MASK_ALL, (XnLogSeverity)0);
++	xnLogSetMaskMinSeverity(XN_LOG_MASK_ALL, (XnLogSeverity)3);
+ 	xnLogSetAndroidOutput(TRUE);
+ #endif
+ 	
+diff --git a/Source/Drivers/OniFile/DataRecords.cpp b/Source/Drivers/OniFile/DataRecords.cpp
+index bffc7e6..17bad91 100644
+--- a/Source/Drivers/OniFile/DataRecords.cpp
++++ b/Source/Drivers/OniFile/DataRecords.cpp
+@@ -667,6 +667,8 @@ XnStatus GeneralPropRecord::Decode()
+ 	XnUInt8* pData = const_cast<XnUInt8*>(GetReadPos());
+ 
+ #if (XN_PLATFORM == XN_PLATFORM_LINUX_ARM || XN_PLATFORM == XN_PLATFORM_ARC || XN_PLATFORM == XN_PLATFORM_ANDROID_ARM)
++
++#if __arm__
+ 	// under ARM we have some alignment issues. Move this buffer so it will be aligned.
+ 	XnUInt32 nAlignFix = XN_DEFAULT_MEM_ALIGN - ((XnUInt32)pData % XN_DEFAULT_MEM_ALIGN);
+ 	if (nAlignFix != 0)
+@@ -674,6 +676,18 @@ XnStatus GeneralPropRecord::Decode()
+ 		xnOSMemMove(pData + nAlignFix, pData, m_nPropDataSize);
+ 		pData += nAlignFix;
+ 	}
++#elif __aarch64__
++	// under ARM we have some alignment issues. Move this buffer so it will be aligned.
++	XnUInt64 nAlignFix = XN_DEFAULT_MEM_ALIGN - ((XnUInt64)pData % XN_DEFAULT_MEM_ALIGN);
++	if (nAlignFix != 0)
++	{
++		xnOSMemMove(pData + nAlignFix, pData, m_nPropDataSize);
++		pData += nAlignFix;
++	}
++#else
++#error "Unsupported ARM platform"
++#endif
++
+ #endif
+ 
+ 	m_pPropData = pData;
+diff --git a/ThirdParty/PSCommon/XnLib/Include/XnPlatform.h b/ThirdParty/PSCommon/XnLib/Include/XnPlatform.h
+index 07e8192..1abfc71 100644
+--- a/ThirdParty/PSCommon/XnLib/Include/XnPlatform.h
++++ b/ThirdParty/PSCommon/XnLib/Include/XnPlatform.h
+@@ -49,6 +49,8 @@
+ #include "Win32/XnPlatformWin32.h"
+ #elif defined (ANDROID) && defined (__arm__)
+ #include "Android-Arm/XnPlatformAndroid-Arm.h"
++#elif defined (ANDROID) && defined (__aarch64__)
++#include "Android-Arm/XnPlatformAndroid-Arm.h"
+ #elif (__linux__ && (i386 || __x86_64__))
+ #include "Linux-x86/XnPlatformLinux-x86.h"
+ #elif (__linux__ && __arm__)
+diff --git a/ThirdParty/PSCommon/XnLib/Source/XnLogAndroidWriter.cpp b/ThirdParty/PSCommon/XnLib/Source/XnLogAndroidWriter.cpp
+index 6c9b6c1..32b27b7 100644
+--- a/ThirdParty/PSCommon/XnLib/Source/XnLogAndroidWriter.cpp
++++ b/ThirdParty/PSCommon/XnLib/Source/XnLogAndroidWriter.cpp
+@@ -58,7 +58,7 @@ void XnLogAndroidWriter::WriteEntry(const XnLogEntry* pEntry)
+ #ifdef XN_PLATFORM_ANDROID_OS
+ 	ALOGE("OpenNI2: %s\n", pEntry->strMessage);
+ #else
+-	__android_log_print(OpenNISeverityToAndroid(pEntry->nSeverity), "OpenNI", pEntry->strMessage);
++	__android_log_print(OpenNISeverityToAndroid(pEntry->nSeverity), "OpenNI", "%s", pEntry->strMessage);
+ #endif
+ }
+ 
+-- 
+2.4.11
+

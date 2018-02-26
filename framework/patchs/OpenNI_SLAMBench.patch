@@ -1,0 +1,167 @@
+From 1e72c95f8eccb42e1b81330c5428d64bac4dedba Mon Sep 17 00:00:00 2001
+From: "Bruno Bodin (zebulon)" <bbodin@inf.ed.ac.uk>
+Date: Sun, 7 Jun 2015 14:08:10 +0100
+Subject: [PATCH 1/2] temp fix
+
+---
+ Platform/Android/Samples/SamplesAssistant/jni/Android.mk | 2 +-
+ Platform/Android/jni/Application.mk                      | 2 +-
+ Platform/Android/jni/OpenNI.jni/Android.mk               | 2 +-
+ Platform/Android/jni/OpenNI/Android.mk                   | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/Platform/Android/Samples/SamplesAssistant/jni/Android.mk b/Platform/Android/Samples/SamplesAssistant/jni/Android.mk
+index e4b980d..9515e8d 100644
+--- a/Platform/Android/Samples/SamplesAssistant/jni/Android.mk
++++ b/Platform/Android/Samples/SamplesAssistant/jni/Android.mk
+@@ -25,7 +25,7 @@ LOCAL_C_INCLUDES := \
+ 
+ LOCAL_CFLAGS:= -fvisibility=hidden -DXN_EXPORTS
+ 
+-LOCAL_LDFLAGS += -Wl,--export-dynamic --dynamic-linker
++LOCAL_LDFLAGS += -Wl,--export-dynamic
+ 
+ LOCAL_LDLIBS := -llog
+ LOCAL_LDLIBS += $(OPENNI_DIR)/Platform/Android/libs/armeabi-v7a/libOpenNI.so
+diff --git a/Platform/Android/jni/Application.mk b/Platform/Android/jni/Application.mk
+index 6d2da24..4f04cd6 100644
+--- a/Platform/Android/jni/Application.mk
++++ b/Platform/Android/jni/Application.mk
+@@ -10,7 +10,7 @@ APP_CFLAGS := -O3 -ftree-vectorize -ffast-math -funroll-loops
+ APP_CFLAGS += -fPIC
+ 
+ ifeq ($(APP_ABI),armeabi-v7a)
+-	APP_CFLAGS += -march=armv7-a -mfloat-abi=softfp -mtune=cortex-a9 -mfp=vfpv3-d16 -mfpu=vfp
++	APP_CFLAGS += -march=armv7-a -mfloat-abi=softfp -mtune=cortex-a9  -mfpu=vfp
+ 
+ # optionally add NEON to compilation flags.
+ # to activate, run: "ndk-build USE_NEON=1"
+diff --git a/Platform/Android/jni/OpenNI.jni/Android.mk b/Platform/Android/jni/OpenNI.jni/Android.mk
+index 30b332c..f79566f 100644
+--- a/Platform/Android/jni/OpenNI.jni/Android.mk
++++ b/Platform/Android/jni/OpenNI.jni/Android.mk
+@@ -22,7 +22,7 @@ LOCAL_C_INCLUDES := \
+ 
+ LOCAL_CFLAGS:= -fvisibility=hidden -DXN_EXPORTS
+ 
+-LOCAL_LDFLAGS += -Wl,--export-dynamic --dynamic-linker
++LOCAL_LDFLAGS += -Wl,--export-dynamic 
+ 
+ LOCAL_LDLIBS := -llog
+ 
+diff --git a/Platform/Android/jni/OpenNI/Android.mk b/Platform/Android/jni/OpenNI/Android.mk
+index 06acac6..b1b36e7 100644
+--- a/Platform/Android/jni/OpenNI/Android.mk
++++ b/Platform/Android/jni/OpenNI/Android.mk
+@@ -28,7 +28,7 @@ LOCAL_C_INCLUDES := \
+ 
+ LOCAL_CFLAGS:= -fvisibility=hidden -DXN_EXPORTS
+ 
+-LOCAL_LDFLAGS += -Wl,--export-dynamic --dynamic-linker 
++LOCAL_LDFLAGS += -Wl,--export-dynamic
+ 
+ LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/../../../../Include
+ LOCAL_SHARED_LIBRARIES := libusb 
+-- 
+2.4.11
+
+
+From 3340ca042133bcf5e747f13278d2c25bfdaacf0a Mon Sep 17 00:00:00 2001
+From: "Bruno Bodin (zebulon)" <bbodin@inf.ed.ac.uk>
+Date: Tue, 26 Apr 2016 14:31:00 +0100
+Subject: [PATCH 2/2] add aarch64
+
+---
+ Include/XnPlatform.h                  |  6 ++++--
+ Platform/Android/jni/Application.mk   | 16 +++++++---------
+ Source/Modules/Common/DataRecords.cpp | 15 +++++++++++++++
+ 3 files changed, 26 insertions(+), 11 deletions(-)
+
+diff --git a/Include/XnPlatform.h b/Include/XnPlatform.h
+index c5e2b9b..cfda4d8 100644
+--- a/Include/XnPlatform.h
++++ b/Include/XnPlatform.h
+@@ -61,11 +61,13 @@
+ 
+ 	#include "Win32/XnPlatformWin32.h"
+ #elif defined(ANDROID) && defined(__arm__)
+-	#include "Android-Arm/XnPlatformAndroid-Arm.h"
++#include "Android-Arm/XnPlatformAndroid-Arm.h"
++#elif defined(ANDROID) && defined(__aarch64__)
++#include "Android-Arm/XnPlatformAndroid-Arm.h"
+ #elif (linux && (i386 || __x86_64__))
+ 	#include "Linux-x86/XnPlatformLinux-x86.h"
+ #elif (linux && __arm__)
+-	#include "Linux-Arm/XnPlatformLinux-Arm.h"
++#include "Linux-Arm/XnPlatformLinux-Arm.h"
+ #elif _ARC
+ 	#include "ARC/XnPlatformARC.h"
+ #elif (__APPLE__)
+diff --git a/Platform/Android/jni/Application.mk b/Platform/Android/jni/Application.mk
+index 4f04cd6..2854ed5 100644
+--- a/Platform/Android/jni/Application.mk
++++ b/Platform/Android/jni/Application.mk
+@@ -3,20 +3,18 @@ APP_STL := gnustl_static
+ # Android >= v2.3
+ APP_PLATFORM := android-9
+ 
+-# Build ARMv7-A machine code.
+-APP_ABI := armeabi-v7a
++# Build ARMv7-A and arm64-v8a machine code.
++APP_ABI :=  arm64-v8a armeabi-v7a
+ APP_CFLAGS := -O3 -ftree-vectorize -ffast-math -funroll-loops
+ 
+ APP_CFLAGS += -fPIC
+ 
+-ifeq ($(APP_ABI),armeabi-v7a)
+-	APP_CFLAGS += -march=armv7-a -mfloat-abi=softfp -mtune=cortex-a9  -mfpu=vfp
+ 
+-# optionally add NEON to compilation flags.
+-# to activate, run: "ndk-build USE_NEON=1"
+-ifdef USE_NEON
+-$(call __ndk_info,Building everything with NEON support!)
+-	APP_CFLAGS += -mfpu=neon -DHAVE_NEON=1 -flax-vector-conversions
++ifeq ($(TARGET_ARCH),arm64)
++	APP_CFLAGS += -march=armv8-a -DHAVE_NEON=1 -flax-vector-conversions
++else
++ifeq ($(TARGET_ARCH),arm)
++	APP_CFLAGS += -march=armv7-a -mfloat-abi=softfp -mtune=cortex-a9 -mfpu=vfp  -mfpu=neon -DHAVE_NEON=1 -flax-vector-conversions
+ endif
+ endif
+ 
+diff --git a/Source/Modules/Common/DataRecords.cpp b/Source/Modules/Common/DataRecords.cpp
+index 37e8dcd..9306c28 100644
+--- a/Source/Modules/Common/DataRecords.cpp
++++ b/Source/Modules/Common/DataRecords.cpp
+@@ -656,6 +656,8 @@ XnStatus GeneralPropRecord::Decode()
+ 	XnUInt8* pData = const_cast<XnUInt8*>(GetReadPos());
+ 
+ #if (XN_PLATFORM == XN_PLATFORM_LINUX_ARM || XN_PLATFORM == XN_PLATFORM_ARC || XN_PLATFORM == XN_PLATFORM_ANDROID_ARM)
++    #if __arm__
++
+ 	// under ARM we have some alignment issues. Move this buffer so it will be aligned.
+ 	XnUInt32 nAlignFix = XN_DEFAULT_MEM_ALIGN - ((XnUInt32)pData % XN_DEFAULT_MEM_ALIGN);
+ 	if (nAlignFix != 0)
+@@ -663,6 +665,19 @@ XnStatus GeneralPropRecord::Decode()
+ 		xnOSMemMove(pData + nAlignFix, pData, m_nPropDataSize);
+ 		pData += nAlignFix;
+ 	}
++#elif __aarch64__
++	// under ARM we have some alignment issues. Move this buffer so it will be aligned.
++	XnUInt64 nAlignFix = XN_DEFAULT_MEM_ALIGN - ((XnUInt64)pData % XN_DEFAULT_MEM_ALIGN);
++	if (nAlignFix != 0)
++	{
++		xnOSMemMove(pData + nAlignFix, pData, m_nPropDataSize);
++		pData += nAlignFix;
++	}
++#else
++#error "Unsupported ARM platform"
++#endif
++
++
+ #endif
+ 
+ 	m_pPropData = pData;
+-- 
+2.4.11
+
