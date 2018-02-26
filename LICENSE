@@ -56,6 +56,10 @@ The SLAM algorithms that are using SLAMbench and that can be downloaded in the "
  - ElasticFusion (Elastic Fusion license)
  - InfiniTAM (Oxford/Isis licence)
 
+Several of those SLAM systems include third-party libraries:
+ - Sophus (MIT)
+ - vikit_common (no licence file found)
+
 The additionnal dependencies used by those algorithms are that can be downloaded in the "deps" folder have the following licences:
  - OpenCV (BSD)
  - G2O (BSD)
