@@ -1,6 +1,6 @@
 ECHO=/bin/echo
 READ=read
-REMOVE_GIT=rm -rf benchmarks/$@/src/original/.git
+REMOVE_GIT=rm -rf benchmarks/$@/src/*/.git
 
 #READ=echo skip ||
 #REMOVE_GIT=
@@ -269,11 +269,11 @@ efusion:
 	@echo "================================================================================================================="
 	@echo ""
 	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
-	mkdir benchmarks/efusion/src/ -p
-	rm benchmarks/efusion/src/original -rf
-	git clone https://github.com/bbodin/ElasticFusion benchmarks/efusion/src/original
+	mkdir benchmarks/$@/src/ -p
+	rm benchmarks/$@/src/original -rf
+	git clone https://github.com/bbodin/ElasticFusion benchmarks/$@/src/original
 	${REMOVE_GIT}
-	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/efusion/CMakeLists.txt
+	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/$@/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
 
@@ -303,7 +303,9 @@ lsdslam:
 	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/lsdslam/src/ -p
 	rm benchmarks/lsdslam/src/original -rf
-	git clone  https://github.com/pamela-project/lsd_slam.git benchmarks/lsdslam/src/original
+	rm benchmarks/lsdslam/src/cpp -rf
+	git clone --branch master https://github.com/pamela-project/lsd_slam.git benchmarks/lsdslam/src/original
+	git clone --branch cpp    https://github.com/pamela-project/lsd_slam.git benchmarks/lsdslam/src/cpp
 	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/lsdslam/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
@@ -318,7 +320,7 @@ orbslam2:
 	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/orbslam2/src/ -p
 	rm benchmarks/orbslam2/src/original -rf
-	git clone  https://github.com/pamela-project/ORB_SLAM2.git benchmarks/orbslam2/src/original
+	git clone --branch master  https://github.com/pamela-project/ORB_SLAM2.git benchmarks/orbslam2/src/original
 	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/orbslam2/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
