@@ -1,0 +1,70 @@
+FROM fedora:24
+
+# Dependencies
+##################################################################
+
+RUN dnf install -y emacs gtk2-devel vtk-devel  cmake make git mercurial wget unzip gcc gcc-c++ lapack blas lapack-devel blas-devel findutils  cvs  glut-devel glew-devel boost-devel glog-devel gflags-devel libXmu-devel libyaml libyaml-devel yaml-cpp-devel tar
+
+
+# Prepare
+##################################################################
+
+RUN git config --global user.email "you@example.com"
+RUN git config --global user.name "Your Name"
+
+# Copy
+##################################################################
+
+RUN mkdir /slambench2
+COPY ./slambench2/ /slambench2/
+RUN ls /slambench2
+
+
+# Build deps
+##################################################################
+
+RUN make -C /slambench2  toon
+RUN make -C /slambench2  eigen3
+RUN make -C /slambench2  cvd
+RUN make -C /slambench2  flann
+RUN make -C /slambench2  freeimage
+RUN make -C /slambench2  g2o
+RUN make -C /slambench2  gvars
+RUN make -C /slambench2  opencv
+RUN make -C /slambench2  opengv
+RUN make -C /slambench2  opentuner
+RUN make -C /slambench2  pangolin
+RUN make -C /slambench2  pcl
+RUN make -C /slambench2  suitesparse
+RUN make -C /slambench2  brisk
+RUN make -C /slambench2  ceres 
+
+
+# Build slambench2
+##################################################################
+
+RUN make -C /slambench2 slambench
+RUN make -C /slambench2 slambench APPS=okvis
+RUN make -C /slambench2 slambench APPS=ptam
+RUN make -C /slambench2 slambench APPS=orbslam2
+RUN make -C /slambench2 slambench APPS=kfusion
+RUN make -C /slambench2 slambench APPS=monoslam
+RUN make -C /slambench2 slambench APPS=lsdslam
+RUN make -C /slambench2 slambench APPS=efusion
+
+
+# Test slambench2
+##################################################################
+
+
+RUN make -C /slambench2 datasets/ICL_NUIM/living_room_traj2_loop.slam
+
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libkfusion-cpp-library.so -fl 30 -s 5 -d  1.71,2.4,1.152 -z 8
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libkfusion-openmp-library.so -fl 30 -s 5 -d  1.71,2.4,1.152 -z 8
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libkfusion-notoon-library.so -fl 30 -s 5 -d  1.71,2.4,1.152 -z 8
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/liblsdslam-cpp-library.so -fl 30
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libinfinitam-cuda-library.so -fl 30
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libmonoslam-sequential-library.so -fl 30
+#RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libptam-original_mp-library.so -fl 30
+#RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libokvis-original-library.so -fl 30
+

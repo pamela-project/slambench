@@ -24,15 +24,6 @@
 
 # Ignore benchmarks folders
 
-/benchmarks/efusion
-/benchmarks/infinitam
-/benchmarks/kfusion
-/benchmarks/lsdslam
-/benchmarks/monoslam
-/benchmarks/okvis
-/benchmarks/orbslam
-/benchmarks/ptam
-/benchmarks/svo
 
 
 # Exotic builds

@@ -1,0 +1,58 @@
+FROM ubuntu:14.04
+
+# Dependencies
+##################################################################
+
+RUN apt-get -y update && apt-get -y install unzip libflann-dev wget libyaml-cpp-dev mercurial git gcc cmake  python-numpy freeglut3 freeglut3-dev  libglew1.5 libglew1.5-dev libglu1-mesa libglu1-mesa-dev libgl1-mesa-glx libgl1-mesa-dev  libxmu-dev libxi-dev  libboost-all-dev cvs  gfortran  libatlas-base-dev  libgoogle-glog-dev libgtk2.0-dev libvtk5.8 libvtk5-dev dictionaries-common
+RUN /usr/share/debconf/fix_db.pl
+RUN dpkg-reconfigure dictionaries-common
+RUN apt-get -y update && apt-get -y install gtk2.0
+
+# Prepare
+##################################################################
+
+RUN git config --global user.email "you@example.com"
+RUN git config --global user.name "Your Name"
+
+
+# Copy deps building system only
+##################################################################
+
+RUN mkdir -p /slambench2/framework
+COPY ./slambench2/Makefile /slambench2/Makefile
+COPY ./slambench2/framework/makefiles /slambench2/framework/makefiles
+RUN ls -alp /slambench2/ /slambench2/framework/makefiles
+
+
+# Build deps
+##################################################################
+
+RUN make -C /slambench2  toon eigen3 cvd flann freeimage g2o gvars opencv opengv opentuner pangolin pcl suitesparse  brisk ceres 
+
+# Copy entire slambench folder
+##################################################################
+
+COPY ./slambench2 /slambench2
+
+# Build slambench2
+##################################################################
+
+RUN make -C /slambench2 slambench APPS=all
+
+
+# Test slambench2
+##################################################################
+
+
+RUN make -C /slambench2 datasets/ICL_NUIM/living_room_traj2_loop.slam
+
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libkfusion-cpp-library.so -fl 30 -s 5 -d  1.71,2.4,1.152 -z 8
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libkfusion-openmp-library.so -fl 30 -s 5 -d  1.71,2.4,1.152 -z 8
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libkfusion-notoon-library.so -fl 30 -s 5 -d  1.71,2.4,1.152 -z 8
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/liblsdslam-cpp-library.so -fl 30
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libinfinitam-cpp-library.so -fl 30
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libinfinitam-openmp-library.so -fl 30
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libmonoslam-sequential-library.so -fl 30
+#RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libptam-original_mp-library.so -fl 30
+#RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libokvis-original-library.so -fl 30
+

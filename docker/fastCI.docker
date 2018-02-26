@@ -1,0 +1,39 @@
+FROM fedora:26
+
+# Dependencies
+##################################################################
+
+RUN  dnf install -y git wget gcc gcc-c++ make mercurial cmake unzip
+RUN  dnf install -y yaml-cpp-devel
+
+# Prepare
+##################################################################
+
+RUN git config --global user.email "you@example.com"
+RUN git config --global user.name "Your Name"
+
+# Copy
+##################################################################
+
+RUN mkdir /slambench2
+COPY ./slambench2/ /slambench2/
+RUN ls /slambench2
+
+
+# Build deps
+##################################################################
+
+RUN make -C /slambench2  toon
+RUN make -C /slambench2  eigen3
+
+# Build slambench2
+##################################################################
+
+RUN make -C /slambench2 slambench APPS=kfusion
+
+# Test slambench2
+##################################################################
+
+RUN make -C /slambench2 datasets/TUM/freiburg1/rgbd_dataset_freiburg1_desk.slam
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_desk.slam  -load ./build/lib/libkfusion-cpp-library.so -fl 30 -s 5 -d  1.71,2.4,1.152 -z 8
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_desk.slam  -load ./build/lib/libkfusion-cpp-library.so=kf1  -load ./build/lib/libkfusion-openmp-library.so=kf2 -fl 30 -kf1-s 5 -kf2-s 5 -kf1-d  1.71,2.4,1.152 -kf1-z 8 -kf2-d  1.71,2.4,1.152 -kf2-z 8
