@@ -158,6 +158,7 @@ deps :
 	+make toon
 
 
+.PHONY: deps
 
 
 build/Makefile : framework/CMakeLists.txt
@@ -185,6 +186,9 @@ slambench: build/Makefile
 	@echo -n "  - build/bin/io-inspect-file:     " ; if [ -f build/bin/io-inspect-file ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
 	@echo -n "  - build/bin/io-readply:          " ; if [ -f build/bin/io-readply ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
 	@echo ""
+	@echo "The list of current use-case libraries available is:"
+	@echo ""                                                                      
+	@for f in `ls build/lib/lib*-library.so 2> /dev/null || echo Nothing` ; do echo $$f ; done
 	@echo ""
 	@echo "As a next step we suggest you to run \"make usecases\" or \"make slambench APPS=all\"."
 	@echo ""
