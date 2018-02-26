@@ -1,0 +1,42 @@
+# Docker files
+/docker/tmp
+/docker/nvidia-driver.run
+
+# Build files
+/build/
+/install/
+/android-build/
+
+# Eclipse and other IDE files
+.cproject
+.project
+.settings/
+.idea
+*~
+
+# Python
+*.pyc
+
+# Dependencies 
+/deps
+/android-deps/
+
+
+
+# Exotic builds
+
+/benchmarks/monoslam/src/arm_m7/scenelib2/support/*.o
+/benchmarks/monoslam/src/arm_m7/scenelib2/*.o
+/benchmarks/monoslam/src/arm_m7/scenelib2/improc/*.o
+/benchmarks/monoslam/src/arm_m7/*.o
+/benchmarks/monoslam/src/arm_m7/*.a
+/benchmarks/monoslam/src/arm_m7/benchmark
+
+
+# DSE Files
+/opentuner.db/
+
+# Paper results
+paper/*.aux
+paper/*.pdf
+paper/*.tex
