@@ -5,20 +5,21 @@ ECHO=/bin/echo
 ####################################
 
 infos :
-	@${ECHO} -e "\n*** SLAMBench is an evaluation framework for SLAM algorithms. *** \n\n\
-	  * Use-cases are provided :"
-	@for f in `ls -F benchmarks|grep /`;do ${ECHO} "    -  $$f"; done
+	@${ECHO} -e "\n*** SLAMBench is an evaluation framework for SLAM algorithms. *** "
 	@${ECHO} -e "\n\
-	  * To compile the SLAMBench framework you just need to type :\n\
-	     - make slambench\n\n\
-	  * To compile the use-cases as well :\n\
-	     - make slambench APPS=\"kfusion;lsdslam\"\n\n\
-	  * Please note several dependencies are needed to compile SLAMBench and its use-cases.\n\
-	    If you may have already them installed on your system,\n\
-	    we propose you to download and install them automatically using the following command :\n\
-	     - make deps\n\
-	  * Finally to run SLAM system with a particular dataset we recommand to run:\
-	     - make datasets\
+	  (1) First, several dependencies are needed to compile SLAMBench and its use-cases.\n\
+	      If you may have already them installed on your system,\n\
+	      we propose you to download and install them automatically using the following command :\n\
+	      - \033[1;32mmake deps\033[0m\n\n\
+	      - \033[1;32mmake gcc_cuda (If you do not have a compatible toolchain for CUDA)\033[0m\n\n\
+	  (2) Then, to compile the SLAMBench framework you just need to type :\n\
+	      - \033[1;32mmake slambench\033[0m\n\n\
+	  (3) To compile the use-cases as well :\n\
+	      - \033[1;32mmake slambench APPS=\"kfusion;lsdslam\"\033[0m\n\n\
+	      However these use-cases are not distributed with SLAMBench, you will have to download them using the command:\n\
+	      - \033[1;32mmake usecases\033[0m\n\n\
+	  (4) Finally to run SLAM system with a particular dataset we recommand to run:\n\
+	      - \033[1;32mmake datasets\033[0m\n\n\
 	"
 
 ####################################
@@ -171,22 +172,77 @@ slambench: build/Makefile
 	@echo ""
 	@echo "================================================================================================================="
 	@echo "The SLAMBench library should have been compiled, you will find binaries in build/bin, and libraries in build/lib."
-	@echo "If you want to test SLAMBench with existing SLAM algorithms, please run \"make slambench APPS=slam1,slam2,...\""
 	@echo ""
 	@echo "The list of current binaries is: "
-	@echo ""                                                                                
-	@for f in `ls build/bin/* 2> /dev/null || echo Nothing` ; do echo $$f ; done
 	@echo ""
-	@echo "The list of current libraries is:           "
-	@echo ""                                                                      
-	@for f in `ls build/lib/lib*-library.so 2> /dev/null || echo Nothing` ; do echo $$f ; done
+	@echo "Loaders available: "
+	@echo -n "  - build/bin/benchmark_loader:    " ; if [ -f build/bin/benchmark_loader ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies? did you try make pangolin)\033[0m" ; fi
+	@echo -n "  - build/bin/pangolin_loader:     " ; if [ -f build/bin/pangolin_loader ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies? did you try make pcl)\033[0m" ; fi
 	@echo ""
-	@echo "Current list of compatible SLAM systems is :"
-	@echo `ls benchmarks | grep -v CMake`
+	@echo "Tools/Debugger available: "
+	@echo -n "  - build/bin/pointcloud_aligner:  " ; if [ -f build/bin/pointcloud_aligner ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
+	@echo -n "  - build/bin/dataset-generator:   " ; if [ -f build/bin/dataset-generator ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
+	@echo -n "  - build/bin/io-inspect-file:     " ; if [ -f build/bin/io-inspect-file ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
+	@echo -n "  - build/bin/io-readply:          " ; if [ -f build/bin/io-readply ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
+	@echo ""
+	@echo ""
+	@echo "As a next step we suggest you to run \"make usecases\" or \"make slambench APPS=all\"."
+	@echo ""
 	@echo "================================================================================================================="
-	@echo "================================================================================================================="
 	@echo ""
-	@echo "If you did not find what you expected, please make sure you correctly specified names in the APPS argument       "
+
+usecases: 
+	@echo ""
+	@echo "================================================================================================================="
+	@echo -e "Current list of compatible SLAM systems (alphabetical order). If you are using one of those SLAM algorithms, \033[1;31mplease refer to their respective publications\033[0m:"
+	@echo ""
+
+	@echo -n "  - ElasticFusion [Whelan et al, IJRR'16]: " ; if [ -f benchmarks/efusion ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make efusion)\033[0m" ; fi
+	@echo    "    repository: https://github.com/mp3guy/ElasticFusion"
+	@echo    "    available targets are : efusion"
+	@echo    ""
+
+	@echo -n "  - InfiniTAMv2 [Kahler et al, ISMAR'15]: " ; if [ -f benchmarks/infinitam ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make infinitam)\033[0m" ; fi
+	@echo    "    repository: https://github.com/ethz-asl/infinitam"
+	@echo    "    available targets are : infinitam"
+	@echo ""
+
+	@echo -n "  - KFusion [Newcombe et al. ISMAR'11]: " ; if [ -f benchmarks/kfusion ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make kfusion)\033[0m" ; fi
+	@echo    "    repository: https://github.com/GerhardR/kfusion"
+	@echo    "    available targets are : kfusion"
+	@echo    ""
+
+	@echo -n "  - LSDSLAM [Engel et al, ECCV'14]: " ; if [ -f benchmarks/lsdslam ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make lsdslam)\033[0m" ; fi
+	@echo    "    repository: https://github.com/tum-vision/lsd_slam"
+	@echo    "    available targets are : lsdslam"
+	@echo ""
+
+	@echo -n "  - MonoSLAM [Davison et al, TPAMI'07]: " ; if [ -f benchmarks/monoslam ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make monoslam)\033[0m" ; fi
+	@echo    "    repository: https://github.com/hanmekim/SceneLib2"
+	@echo    "    available targets are : monoslam"
+	@echo ""
+
+	@echo -n "  - OKVIS [Leutenegger et al, IJRR'15]: " ; if [ -f benchmarks/okvis ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make okvis)\033[0m" ; fi
+	@echo    "    repository: https://github.com/ethz-asl/okvis"
+	@echo    "    available targets are : okvis"
+	@echo ""
+
+	@echo -n "  - ORBSLAM2 [Mur-Artal et al, TOR'15 and TOR'17]: " ; if [ -f benchmarks/orbslam2 ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make orbslam2)\033[0m" ; fi
+	@echo    "    repository: https://github.com/raulmur/ORB_SLAM2"
+	@echo    "    available targets are : orbslam2"
+	@echo ""
+
+	@echo -n "  - PTAM [Klein et al, ISMAR'07 and ECCV'08]: " ; if [ -f benchmarks/ptam ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make ptam)\033[0m" ; fi
+	@echo    "    repository: https://github.com/Oxford-PTAM/PTAM-GPL"
+	@echo    "    available targets are : ptam"
+	@echo ""
+
+	@echo -n "  - SVO [Forster et al, ICRA'14]: " ; if [ -f benchmarks/svo ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make svo)\033[0m" ; fi
+	@echo    "    repository: https://github.com/uzh-rpg/rpg_svo"
+	@echo    "    available targets are : svo"
+	@echo ""
+
+	@echo "If you want to test SLAMBench with existing SLAM algorithms, once you have download it please run \"make slambench APPS=slam1,slam2,...\""
 	@echo "   e.g. make slambench APPS=kfusion,orbslam2"
 	@echo "   You can also use \"make slambench APPS=all\" to compile them all."
 	@echo ""
@@ -196,21 +252,136 @@ slambench: build/Makefile
 
 
 
-benchmarks :
-	@echo ""
+efusion: 
 	@echo "================================================================================================================="
-	@echo "SLAMBench integrates tools to automatically download compatible slam systems."
-	@echo ""
-	@echo "The list of current slam systems is:                                                                                 "
-	@for f in `ls -F benchmarks|grep /`;do ${ECHO} "    -  $$f"; done
-	@echo ""
-	@echo "If you did not find what you expected, you can download a system using make, list of existing systems is available using       "
-	@echo "   - make benchmarkslist"
+	@echo    "  - ElasticFusion [Whelan et al, IJRR'16]: " 
+	@echo    "    Original repository: https://github.com/mp3guy/ElasticFusion"
+	@echo    "    Used repository: https://github.com/bbodin/ElasticFusion"
 	@echo "================================================================================================================="
+	@echo ""
+	@read -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	mkdir benchmarks/efusion/src/ -p
+	rm benchmarks/efusion/src/original -rf
+	git clone https://github.com/bbodin/ElasticFusion benchmarks/efusion/src/original
+	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/efusion/CMakeLists.txt
+	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/efusion/CMakeLists.txt
 
 
-benchmarkslist:
-	@echo "Feature no implemented."
+infinitam:
+	@echo "================================================================================================================="
+	@echo    "  - InfiniTAMv2 [Kahler et al, ISMAR'15]: " 
+	@echo    "    Original repository: https://github.com/ethz-asl/infinitam"
+	@echo    "    Used repository: https://github.com/bbodin/InfiniTAM"
+	@echo "================================================================================================================="
+	@echo ""
+	@read -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	mkdir benchmarks/infinitam/src/ -p
+	rm benchmarks/infinitam/src/original -rf
+	git clone https://github.com/bbodin/InfiniTAM.git benchmarks/infinitam/src/original
+	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/infinitam/CMakeLists.txt
+	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/infinitam/CMakeLists.txt
+
+
+lsdslam:
+	@echo "================================================================================================================="
+	@echo    "  - LSDSLAM [Engel et al, ECCV'14]: " 
+	@echo    "    Original repository: https://github.com/tum-vision/lsd_slam"
+	@echo    "    Used repository : https://github.com/pamela-project/lsd_slam.git"  
+	@echo "================================================================================================================="
+	@echo ""
+	@read -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	mkdir benchmarks/lsdslam/src/ -p
+	rm benchmarks/lsdslam/src/original -rf
+	git clone  https://github.com/pamela-project/lsd_slam.git benchmarks/lsdslam/src/original
+	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/lsdslam/CMakeLists.txt
+	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/lsdslam/CMakeLists.txt
+
+orbslam2:
+	@echo "================================================================================================================="
+	@echo    "  - ORBSLAM2 [Mur-Artal et al, TOR'15 and TOR'17]: "
+	@echo    "    Original repository: https://github.com/raulmur/ORB_SLAM2"
+	@echo    "    Used repository: https://github.com/pamela-project/ORB_SLAM2"  
+	@echo "================================================================================================================="
+	@echo ""
+	@read -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	mkdir benchmarks/orbslam2/src/ -p
+	rm benchmarks/orbslam2/src/original -rf
+	git clone  https://github.com/pamela-project/ORB_SLAM2.git benchmarks/orbslam2/src/original
+	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/orbslam2/CMakeLists.txt
+	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/orbslam2/CMakeLists.txt
+
+
+monoslam:
+	@echo "================================================================================================================="
+	@echo    "  - MonoSLAM [Davison et al, TPAMI'07]: " 
+	@echo    "    Original repository: https://github.com/hanmekim/SceneLib2"
+	@echo    "    Used repository: https://github.com/bbodin/SceneLib2"  
+	@echo "================================================================================================================="
+	@echo ""
+	@read -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	mkdir benchmarks/monoslam/src/ -p
+	rm benchmarks/monoslam/src/original -rf
+	git clone  https://github.com/bbodin/SceneLib2  benchmarks/monoslam/src/original
+	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/monoslam/CMakeLists.txt
+	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/monoslam/CMakeLists.txt
+
+ptam:
+	@echo "================================================================================================================="
+	@echo    "  - PTAM [Klein et al, ISMAR'07 and ECCV'08]: " 
+	@echo    "    Original repository: https://github.com/Oxford-PTAM/PTAM-GPL"
+	@echo    "    Used repository: https://github.com/bbodin/PTAM-GPL"  
+	@echo "================================================================================================================="
+	@echo ""
+	@read -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	mkdir benchmarks/ptam/src/ -p
+	rm benchmarks/ptam/src/original -rf
+	git clone   https://github.com/bbodin/PTAM-GPL  benchmarks/ptam/src/original
+	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/ptam/CMakeLists.txt
+	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/ptam/CMakeLists.txt
+
+okvis:
+	@echo "================================================================================================================="
+	@echo    "  - OKVIS [Leutenegger et al, IJRR'15]: " 
+	@echo    "    Original repository: https://github.com/ethz-asl/okvis"
+	@echo    "    Used repository: https://github.com/bbodin/okvis"  
+	@echo "================================================================================================================="
+	@echo ""
+	@read -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	mkdir benchmarks/okvis/src/ -p
+	rm benchmarks/okvis/src/original -rf
+	git clone  https://github.com/bbodin/okvis   benchmarks/okvis/src/original
+	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/okvis/CMakeLists.txt
+	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/okvis/CMakeLists.txt
+
+svo: 
+	@echo "================================================================================================================="
+	@echo    "  - SVO [Forster et al, ICRA'14]: " 
+	@echo    "    Original repository: https://github.com/uzh-rpg/rpg_svo"
+	@echo    "    Used repository: https://github.com/pamela-project/rpg_svo.git"  
+	@echo "================================================================================================================="
+	@echo ""
+	@read -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	mkdir benchmarks/svo/src/ -p
+	rm benchmarks/svo/src/original -rf
+	git clone  https://github.com/pamela-project/rpg_svo.git   benchmarks/svo/src/original
+	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/svo/CMakeLists.txt
+	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/svo/CMakeLists.txt
+
+kfusion:
+	@echo "================================================================================================================="
+	@echo    "  - KFusion [Newcombe et al. ISMAR'11]: " 
+	@echo    "    repository: https://github.com/GerhardR/kfusion"
+	@echo    "    Used repository: https://github.com/pamela-project/kfusion"  
+	@echo "================================================================================================================="
+	@echo ""
+	@read -p "Are you sure you want to download this use-cases (y/N) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	mkdir benchmarks/kfusion/src/ -p
+	rm benchmarks/kfusion/src/original -rf
+	git clone   https://github.com/pamela-project/kfusion   benchmarks/kfusion/src/original
+	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/kfusion/CMakeLists.txt
+	@echo "ADD_SUBDIRECTORY(./src/original)"     >> benchmarks/kfusion/CMakeLists.txt
+
+
 
 datasets :
 	@echo ""
@@ -220,11 +391,17 @@ datasets :
 	@echo "The list of current dataset is:                                                                                 "
 	@for f in `find datasets/ | grep [.]slam` ; do echo "   - $$f" ; done
 	@echo ""
-	@echo "If you did not find what you expected, you can make a dataset using make, list of existing datasets is available using       "
-	@echo "   - make datasetslist"
+	@echo "If you do not find datasets in this list, you can use make to download them (make datasetlist). "
+	@echo "Here is a list of the datasets available."
+	@echo -e "If you are using one of those dataset, \033[1;31mplease refer to their respective publications\033[0m:"
+	@echo "   - TUM RGB-D SLAM dataset [Sturm et al, IROS'12]: https://vision.in.tum.de/data/datasets/rgbd-dataset"
+	@echo "   - ICL-NUIM dataset [Handa et al, ICRA'14]: https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html"
+	@echo "   - EuRoC MAV Dataset [Burri et al, IJJR'16]: https://projects.asl.ethz.ch/datasets/doku.php"
+	@echo "   - SVO sample dataset [Forster et al, ICRA 2014]: https://github.com/uzh-rpg/rpg_svo"
 	@echo "================================================================================================================="
 
 datasetslist:
+	@echo ""
 	@echo "### ICL-NUIM Living Room"
 	@echo ""
 	@echo "make ./datasets/ICL_NUIM/living_room_traj0_loop.slam"
@@ -290,6 +467,15 @@ datasetslist:
 	@echo "### SVO test dataset"
 	@echo ""
 	@echo "make datasets/SVO/artificial.slam"
+	@echo ""
+	@echo ""
+	@echo "================================================================================================================="
+	@echo -e "If you are using one of those dataset, \033[1;31mplease refer to their respective publications\033[0m:"
+	@echo "   - TUM RGB-D SLAM dataset [Sturm et al, IROS'12]: https://vision.in.tum.de/data/datasets/rgbd-dataset"
+	@echo "   - ICL-NUIM dataset [Handa et al, ICRA'14]: https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html"
+	@echo "   - EuRoC MAV Dataset [Burri et al, IJJR'16]: https://projects.asl.ethz.ch/datasets/doku.php"
+	@echo "   - SVO sample dataset [Forster et al, ICRA 2014]: https://github.com/uzh-rpg/rpg_svo"
+	@echo "================================================================================================================="
 
 .PHONY: slambench benchmarks benchmarkslist datasets datasetslist
 
