@@ -23,6 +23,7 @@ script:
   - git config --global user.email "you@example.com"
   - git config --global user.name "Your Name"
   - gcc --version
+  - ls deps
   - make toon
   - make eigen3
   - make suitesparse
@@ -38,3 +39,4 @@ script:
   - make ceres
   - make pcl -j4
   - ls deps
+  - make slambench
