@@ -31,9 +31,9 @@ benchmarks/okvis/
 benchmarks/orbslam2/
 benchmarks/ptam/
 benchmarks/svo/
+benchmarks/monoslam/
 
 #benchmarks/kfusion/
-#benchmarks/monoslam/
 
 
 
