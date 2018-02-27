@@ -54,3 +54,8 @@ benchmarks/monoslam/
 paper/*.aux
 paper/*.pdf
 paper/*.tex
+
+
+# Datasets
+
+/datasets
