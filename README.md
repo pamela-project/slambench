@@ -332,46 +332,94 @@ bool sb_update_outputs(SLAMBenchUI * );
 In this section we will present those functions one by one.
 
 
-### void sb_new_slam_configuration(SLAMBenchConfiguration ** slam_settings) ; ###
+### bool sb_new_slam_configuration(SLAMBenchLibraryHelper * slam_settings)  ###
 
-This function ....
+This function is called first, and only once, SLAM systems is expected to provide its parameters.
+
+Example :
+
+```
+
+ bool sb_new_slam_configuration(SLAMBenchLibraryHelper * slam_settings)  {
+     slam_settings->addParameter(TypedParameter<float>("c", "confidence",     "Confidence",      &confidence, &default_confidence));
+     slam_settings->addParameter(TypedParameter<float>("d", "depth",          "Depth",           &depth,      &default_depth));
+     slam_settings->addParameter(TypedParameter<int>  ("td", "textureDim",      "textureDim",       &textureDim,      &default_textureDim));
+     return true;
+ }
+
+```
+
+should always return ``true`` or an exception will be raised.
+
+ 
+### bool sb_init_slam_system(SLAMBenchLibraryHelper * slam_settings)   ###
+
+This function is called second, and only once, SLAM systems is expected to allocate memory, retrieve sensor informations.
 
 
-### bool sb_init_slam_system(SLAMBenchConfiguration * slam_settings) ; ###
+To retrieve sensor there is ``SensorFinder`` :
+```
+	slambench::io::CameraSensorFinder sensor_finder;
+	auto rgb_sensor = sensor_finder.FindOne(slam_settings->get_sensors(), {{"camera_type", "rgb"}});
+```
 
-This function ...
+SLAM systems are also expected to define there output, there is one mandatory output, the pose:
 
-### bool sb_update_frame (Sensor * type) ; ###
+```
+pose_output = new slambench::outputs::Output("Pose", slambench::values::VT_POSE, true);
+slam_settings->GetOutputManager().RegisterOutput(pose_output);
+should always return ``true`` or an exception will be raised.
+```
 
-This function ...
+### bool sb_update_frame (SLAMBenchLibraryHelper *  slam_settings, slambench::io::SLAMFrame* s)  ### 
 
-### bool sb_process_once () ; ###
+The frame ```s``` is the next frame to process in the dataset (ordered by timestamps).
 
-This function ...
+When ```sb_update_frame``` return ```false```, then ```sb_update_frame``` will be directly call again with the next frame, if it return ```true````, then ```sb_process_once``` will be called once.
 
-### sb_float3        sb_get_position () ; ###
-This function ...
+### bool sb_process_once (SLAMBenchLibraryHelper * slam_settings)   ###  
+ 
+should always return ``true`` or an exception will be raised.
+
+### bool sb_clean_slam_system()  ###
+
+This function is called last, and only once, SLAM systems is expected to clean everything (free memory).
+
+```
+ bool sb_clean_slam_system() {
+     delete eFusion;
+     delete inputRGB;
+     delete inputDepth;
+     return true;
+ }
+
+```
+
+should always return ``true`` or an exception will be raised.
+
+### bool sb_update_outputs(SLAMBenchLibraryHelper * slam_settings, const slambench::TimeStamp *timestamp)  ###  
+
+The algorithm will return visible outputs (Pose, Point cloud, Frames) as defined by the ```sb_init_slam_system``` function.
+
+Example :
+
+```
+
+ bool sb_update_outputs(SLAMBenchLibraryHelper *lib, const slambench::TimeStamp *ts_p) {
+		slambench::TimeStamp ts = *ts_p;
+
+		if(pose_output->IsActive()) {
+			// Get the current pose as an eigen matrix
+			Eigen::Matrix4f mat = eFusion->getCurrPose();
+
+			std::lock_guard<FastLock> lock (lib->GetOutputManager().GetLock());
+			pose_output->AddPoint(ts, new slambench::values::PoseValue(mat));
+		}
 
 
-### bool             sb_get_tracked  () ; ###
+```
 
-This function ...
-
-### bool sb_save_map (const char * , map_format); ###
-
-This function ...
-
-### bool sb_clean_slam_system(); ###
-
-This function ...
-
-### bool sb_initialize_ui( SLAMBenchUI * ui ); ###
-
-This function ...
-
-### bool sb_update_ui(SLAMBenchUI * ); ###
-
-This function ...
+should always return ``true`` or an exception will be raised.
 
 
 # Know issues #
