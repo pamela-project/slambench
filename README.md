@@ -40,14 +40,14 @@ SLAMBench has currently been used with the following SLAM algorithms :
   ***IMPORTANT: If you use any of those algorithms in scientific publications, you should refer to the respective publications. ***
 
 
-In addition, if you use SLAMBench in scientific publications, we would appreciate citations to the following paper (http://arxiv.org/abs/1410.2167):
+In addition, if you use SLAMBench in scientific publications, we would appreciate citations to the following paper [https://www.research.ed.ac.uk/](https://www.research.ed.ac.uk/portal/en/publications/slambench2-multiobjective-headtohead-benchmarking-for-visual-slam(c3d189db-68ae-4182-8e46-d812db2955c9).html):
 ```
-@inproceedings{Nardi2015,
-    author={Nardi, Luigi and Bodin, Bruno and Zia, M. Zeeshan and Mawer, John and Nisbet, Andy and Kelly, Paul H. J. and Davison, Andrew J. and Luj\'an, Mikel and O'Boyle, Michael F. P. and Riley, Graham and Topham, Nigel and Furber, Steve},
-    title = "{Introducing SLAMBench, a performance and accuracy benchmarking methodology for SLAM}",
-    booktitle = "{IEEE Intl. Conf. on Robotics and Automation (ICRA)}",
-    year = {2015},
-    month = {May}
+@inproceedings{Bodin2018,
+	author    = "Bruno Bodin and Harry Wagstaff and Sajad Saeedi and Luigi Nardi and Emanuele Vespa and Mayer, {John H} and Andy Nisbet and Mikel Luján and Steve Furber and Davison, {Andrew J} and Kelly, {Paul H.J.} and Michael O'Boyle",
+	title     = "SLAMBench2: Multi-Objective Head-to-Head Benchmarking for Visual SLAM",
+  	booktitle = "{IEEE Intl. Conf. on Robotics and Automation (ICRA)}",
+   	year = {2018},
+   	month = {May}
     }
 ```
 
