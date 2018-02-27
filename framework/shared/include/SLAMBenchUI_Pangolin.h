@@ -111,16 +111,12 @@ class SLAMBenchUI_Pangolin : public SLAMBenchUI
 
         // RGB View
         pangolin::OpenGlRenderState s_cam;
-        unsigned int          RGBSize[2];
-        pangolin::GlTexture * RGBImg;
-        unsigned char *       RGBImgBuffer;
         GLuint vbo;
 
 		std::vector<uint> feature_texture_ids;
 		uint32_t next_feature_texture_id_idx;
 		
         uint textureId[MAX_WINDOW];
-		bool getFollowPoseButton (std::string context_name, VisibleElementIdentifier name , std::vector < pangolin::Var<bool> * > & visible_items);
 		std::condition_variable step_cv;
 		std::mutex step_mutex;
 		bool isFreeRunning;

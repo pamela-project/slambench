@@ -43,13 +43,8 @@ bool sb_process_once (SLAMBenchLibraryHelper * slam_settings) ;
 
 
 /*
- * At any time, the SLAM system needs to provide the camera pose and a status of tracking
- * sb_get_pose: update the value of mat (must not look at the value of mat)
- * sb_get_tracked: return true or false if traked or not
+ * At any time, the SLAM system needs to provide its outputs
  * */
-
-bool sb_get_tracked  (bool *tracked) ;
-bool sb_get_map      (slambench::values::PointCloudValue  *map) ;
 
 bool sb_update_outputs(SLAMBenchLibraryHelper *lib, const slambench::TimeStamp *latest_output);
 
@@ -69,8 +64,6 @@ bool c_sb_new_slam_configuration(void * slam_settings) ;
 bool c_sb_init_slam_system(void* slam_settings) ;
 bool c_sb_update_frame (void * slam_settings, void * type) ;
 bool c_sb_process_once (void * slam_settings) ;
-bool c_sb_get_tracked  (void *) ;
-bool c_sb_get_map  (void *) ;
 bool c_sb_update_outputs(void *lib, void *timestamp);
 bool c_sb_clean_slam_system();
 

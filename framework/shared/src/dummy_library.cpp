@@ -30,34 +30,7 @@ bool sb_clean_slam_system() {
     return false;
 }
 
-
-/**
- * Getters
- */
-
-
-bool sb_get_pose (Eigen::Matrix4f * mat)  {
-  return false;
-}
-
-bool sb_get_tracked  (bool* tracking)  {
-  return false;
-}
-
-
-
-/**
- * GUI sb_initialize_ui
- */
-
-
-
-
-bool sb_initialize_ui(SLAMBenchUI *ui) {
-    return false;
-}
-
-bool sb_update_ui(SLAMBenchUI *ui) {
-    return false;
+bool sb_update_outputs(SLAMBenchLibraryHelper *lib, const slambench::TimeStamp *timestamp) {
+	return false;
 }
 

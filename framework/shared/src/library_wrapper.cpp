@@ -30,18 +30,9 @@ extern "C" {
 		return sb_process_once((SLAMBenchLibraryHelper *) slam_settings);
 	}
 
-	bool c_sb_get_tracked  (void * arg) {
-		return sb_get_tracked((bool*)arg);
-	}
-
-	bool c_sb_get_map (void * lib) {
-		return sb_get_map((slambench::values::PointCloudValue *)lib);
-	}
-
 	bool c_sb_clean_slam_system(){
 		return sb_clean_slam_system();
 	}
-
 	
 	bool c_sb_update_outputs(void *lib, void *timestamp) {
 		return sb_update_outputs((SLAMBenchLibraryHelper*)lib, (const slambench::TimeStamp *)timestamp);

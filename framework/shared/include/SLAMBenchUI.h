@@ -4,7 +4,6 @@
 
 // #define DEBUG_MUTEXES
 
-#include <SLAMBenchUITypes.h>
 #include <outputs/OutputManager.h>
 
 #include <cstdlib>
@@ -25,11 +24,6 @@
  * ********************** SLAMBenchUI
  * ************************************************************************************************
  */
-
-typedef std::vector<std::pair< VisibleElementIdentifier , void * >> ui_context;
-typedef std::map<std::string, ui_context>                           ui_contexts_pool;
-
-
 
 class SLAMBenchUI
 {
