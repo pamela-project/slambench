@@ -49,3 +49,5 @@ script:
   - make slambench APPS=orbslam2 -j4
   - make slambench APPS=ptam -j4
   - make slambench APPS=svo -j4
+  - make slambench APPS=kfusion -j4
+  - make slambench APPS=all -j4
