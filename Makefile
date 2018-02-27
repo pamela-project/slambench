@@ -1,5 +1,5 @@
 ECHO=/bin/echo
-READ=read
+READ:=read
 REMOVE_GIT=rm -rf benchmarks/$@/src/*/.git
 
 #READ=echo skip ||
