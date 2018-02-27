@@ -38,8 +38,6 @@ public:
     bool            (* c_sb_init_slam_system)(SLAMBenchLibraryHelper * ) ;
     bool            (* c_sb_update_frame) (SLAMBenchLibraryHelper *, slambench::io::SLAMFrame * ) ;
     bool            (* c_sb_process_once) (SLAMBenchLibraryHelper *) ;
-    bool            (* c_sb_get_tracked)  (bool*) ;
-    bool            (* c_sb_get_map)  (slambench::values::PointCloudValue *) ;
     bool            (* c_sb_clean_slam_system)();
     bool            (* c_sb_update_outputs)(SLAMBenchLibraryHelper *, const slambench::TimeStamp *ts);
 
@@ -60,8 +58,6 @@ public:
 		c_sb_init_slam_system(nullptr) ,
 		c_sb_update_frame(nullptr) ,
 		c_sb_process_once(nullptr) ,
-		c_sb_get_tracked(nullptr) ,
-		c_sb_get_map(nullptr) ,
 		c_sb_clean_slam_system(nullptr) ,
 		c_sb_update_outputs(nullptr)
 	{}

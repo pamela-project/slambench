@@ -77,8 +77,6 @@ void SLAMBenchConfiguration::add_library(std::string so_file, std::string identi
 	LOAD_FUNC(lib_ptr,c_sb_new_slam_configuration);
 	LOAD_FUNC(lib_ptr,c_sb_update_frame);
 	LOAD_FUNC(lib_ptr,c_sb_process_once);
-	LOAD_FUNC(lib_ptr,c_sb_get_map);
-	LOAD_FUNC(lib_ptr,c_sb_get_tracked);
 	LOAD_FUNC(lib_ptr,c_sb_clean_slam_system);
 	LOAD_FUNC(lib_ptr,c_sb_update_outputs);
 	this->libs.push_back(lib_ptr);
@@ -401,15 +399,6 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 			
 			lib->GetMetricManager().EndFrame();
 
-
-			// ********* [[ ALGO METRICS : TRACKED ]] *********
-
-			bool       tracked  = false;
-
-			if (!lib->c_sb_get_tracked (&tracked)) {
-				std::cerr << "lib->c_sb_get_tracked failed." << std::endl;
-				exit(1);
-			}
 		}
 
 
