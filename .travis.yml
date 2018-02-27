@@ -42,3 +42,10 @@ script:
   - make slambench -j4
   - make algorithms READ="echo skip ||"
   - make slambench APPS=efusion -j4
+  - make slambench APPS=infinitam -j4
+  - make slambench APPS=lsdslam -j4
+  - make slambench APPS=monoslam -j4
+  - make slambench APPS=okvis -j4
+  - make slambench APPS=orbslam2 -j4
+  - make slambench APPS=ptam -j4
+  - make slambench APPS=svo -j4
