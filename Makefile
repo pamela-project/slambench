@@ -1,9 +1,12 @@
 ECHO=/bin/echo
 READ:=read
-REMOVE_GIT=rm -rf benchmarks/$@/src/*/.git
+REMOVE_GIT:=rm -rf benchmarks/$@/src/*/.git
 
-#READ=echo skip ||
-#REMOVE_GIT=
+ifeq ("${SBQUIET}","1")
+READ:=echo skip ||
+REMOVE_GIT:=
+endif
+
 
 ####################################
 #### SLAMBENCH  INFOS (DEFAULT) ####
