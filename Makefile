@@ -1,5 +1,5 @@
 ECHO=/bin/echo
-READ:=read
+READ:=`which read`
 REMOVE_GIT:=rm -rf benchmarks/$@/src/*/.git
 
 ifeq ("${SBQUIET}","1")
