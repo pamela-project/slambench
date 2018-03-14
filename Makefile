@@ -1,9 +1,10 @@
 ECHO=/bin/echo
-READ:=`which read`
+
 REMOVE_GIT:=rm -rf benchmarks/$@/src/*/.git
+GET_REPLY:=read REPLY
 
 ifeq ("${SBQUIET}","1")
-READ:=echo skip ||
+GET_REPLY:=REPLY="y"
 REMOVE_GIT:=
 endif
 
@@ -271,7 +272,7 @@ efusion:
 	@echo    "    Used repository: https://github.com/bbodin/ElasticFusion"
 	@echo "================================================================================================================="
 	@echo ""
-	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/$@/src/ -p
 	rm benchmarks/$@/src/original -rf
 	git clone https://github.com/bbodin/ElasticFusion benchmarks/$@/src/original
@@ -287,7 +288,7 @@ infinitam:
 	@echo    "    Used repository: https://github.com/bbodin/InfiniTAM"
 	@echo "================================================================================================================="
 	@echo ""
-	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/infinitam/src/ -p
 	rm benchmarks/infinitam/src/original -rf
 	git clone https://github.com/bbodin/InfiniTAM.git benchmarks/infinitam/src/original
@@ -303,7 +304,7 @@ lsdslam:
 	@echo    "    Used repository : https://github.com/pamela-project/lsd_slam.git"  
 	@echo "================================================================================================================="
 	@echo ""
-	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/lsdslam/src/ -p
 	rm benchmarks/lsdslam/src/original -rf
 	rm benchmarks/lsdslam/src/cpp -rf
@@ -320,7 +321,7 @@ orbslam2:
 	@echo    "    Used repository: https://github.com/pamela-project/ORB_SLAM2"  
 	@echo "================================================================================================================="
 	@echo ""
-	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/orbslam2/src/ -p
 	rm benchmarks/orbslam2/src/original -rf
 	git clone --branch master  https://github.com/pamela-project/ORB_SLAM2.git benchmarks/orbslam2/src/original
@@ -336,7 +337,7 @@ monoslam:
 	@echo    "    Used repository: https://github.com/bbodin/SceneLib2"  
 	@echo "================================================================================================================="
 	@echo ""
-	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/monoslam/src/ -p
 	rm benchmarks/monoslam/src/original -rf
 	git clone  https://github.com/bbodin/SceneLib2  benchmarks/monoslam/src/original
@@ -351,7 +352,7 @@ ptam:
 	@echo    "    Used repository: https://github.com/bbodin/PTAM-GPL"  
 	@echo "================================================================================================================="
 	@echo ""
-	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/ptam/src/ -p
 	rm benchmarks/ptam/src/original -rf
 	git clone   https://github.com/bbodin/PTAM-GPL  benchmarks/ptam/src/original
@@ -366,7 +367,7 @@ okvis:
 	@echo    "    Used repository: https://github.com/bbodin/okvis"  
 	@echo "================================================================================================================="
 	@echo ""
-	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/okvis/src/ -p
 	rm benchmarks/okvis/src/original -rf
 	git clone  https://github.com/bbodin/okvis   benchmarks/okvis/src/original
@@ -381,7 +382,7 @@ svo:
 	@echo    "    Used repository: https://github.com/pamela-project/rpg_svo.git"  
 	@echo "================================================================================================================="
 	@echo ""
-	@${READ} -p "Are you sure you want to download this use-cases (Y/n) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/svo/src/ -p
 	rm benchmarks/svo/src/original -rf
 	git clone  https://github.com/pamela-project/rpg_svo.git   benchmarks/svo/src/original
@@ -396,7 +397,7 @@ kfusion:
 	@echo    "    Used repository: https://github.com/pamela-project/kfusion"  
 	@echo "================================================================================================================="
 	@echo ""
-	@${READ} -p "Are you sure you want to download this use-cases (y/N) ? " -n 1 -r && if [ ! $$REPLY == y ] ; then echo -e "\nExit."; exit 0; else echo -e "\nDownload starts."; fi
+	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/kfusion/src/ -p
 	rm benchmarks/kfusion/src/original -rf
 	git clone   https://github.com/pamela-project/kfusion   benchmarks/kfusion/src/original
