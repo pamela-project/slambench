@@ -16,9 +16,18 @@ ${DEPS_DIR}/pcl : ${REPOS_DIR}/pcl eigen3 flann
 		exit 1;\
 	fi;
 	mkdir ${DEPS_BUILD_DIR}/pcl/ -p
-	rm ${DEPS_BUILD_DIR}/pcl//* -rf
+	rm ${DEPS_BUILD_DIR}/pcl/* -rf
 	sed -i.bak "s/\(find_package.*\) mpi/\1/" ${REPOS_DIR}/pcl/cmake/pcl_find_boost.cmake # PCL should not need MPI !
 	cd ${DEPS_BUILD_DIR}/pcl/ && cmake ${REPOS_DIR}/pcl \
+	-DWITH_LIBUSB=FALSE \
+	-DWITH_OPENNI=FALSE \
+	-DWITH_OPENNI2=FALSE \
+	-DWITH_FZAPI=FALSE \
+	-DWITH_ENSENSO=FALSE \
+	-DWITH_DAVIDSDK=FALSE \
+	-DWITH_DSSDK=FALSE \
+	-DWITH_RSSDK=FALSE \
+	-DWITH_PCAP=FALSE \
 	-DBUILD_common=TRUE                \
 	-DBUILD_octree=TRUE               \
 	-DBUILD_io=TRUE                   \
