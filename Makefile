@@ -1,11 +1,9 @@
 ECHO=/bin/echo
 
-REMOVE_GIT:=rm -rf benchmarks/$@/src/*/.git
 GET_REPLY:=read REPLY
 
 ifeq ("${SBQUIET}","1")
 GET_REPLY:=REPLY="y"
-REMOVE_GIT:=
 endif
 
 
@@ -276,7 +274,6 @@ efusion:
 	mkdir benchmarks/$@/src/ -p
 	rm benchmarks/$@/src/original -rf
 	git clone https://github.com/bbodin/ElasticFusion benchmarks/$@/src/original
-	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/$@/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
@@ -292,7 +289,6 @@ infinitam:
 	mkdir benchmarks/infinitam/src/ -p
 	rm benchmarks/infinitam/src/original -rf
 	git clone https://github.com/bbodin/InfiniTAM.git benchmarks/infinitam/src/original
-	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/infinitam/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
@@ -310,7 +306,6 @@ lsdslam:
 	rm benchmarks/lsdslam/src/cpp -rf
 	git clone --branch master https://github.com/pamela-project/lsd_slam.git benchmarks/lsdslam/src/original
 	git clone --branch cpp    https://github.com/pamela-project/lsd_slam.git benchmarks/lsdslam/src/cpp
-	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/lsdslam/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
@@ -325,7 +320,6 @@ orbslam2:
 	mkdir benchmarks/orbslam2/src/ -p
 	rm benchmarks/orbslam2/src/original -rf
 	git clone --branch master  https://github.com/pamela-project/ORB_SLAM2.git benchmarks/orbslam2/src/original
-	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/orbslam2/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
@@ -341,7 +335,6 @@ monoslam:
 	mkdir benchmarks/monoslam/src/ -p
 	rm benchmarks/monoslam/src/original -rf
 	git clone  https://github.com/bbodin/SceneLib2  benchmarks/monoslam/src/original
-	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/monoslam/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
@@ -356,7 +349,6 @@ ptam:
 	mkdir benchmarks/ptam/src/ -p
 	rm benchmarks/ptam/src/original -rf
 	git clone   https://github.com/bbodin/PTAM-GPL  benchmarks/ptam/src/original
-	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/ptam/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
@@ -371,7 +363,6 @@ okvis:
 	mkdir benchmarks/okvis/src/ -p
 	rm benchmarks/okvis/src/original -rf
 	git clone  https://github.com/bbodin/okvis   benchmarks/okvis/src/original
-	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/okvis/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
@@ -386,7 +377,6 @@ svo:
 	mkdir benchmarks/svo/src/ -p
 	rm benchmarks/svo/src/original -rf
 	git clone  https://github.com/pamela-project/rpg_svo.git   benchmarks/svo/src/original
-	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/svo/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
@@ -401,11 +391,11 @@ kfusion:
 	mkdir benchmarks/kfusion/src/ -p
 	rm benchmarks/kfusion/src/original -rf
 	git clone   https://github.com/pamela-project/kfusion   benchmarks/kfusion/src/original
-	${REMOVE_GIT}
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/kfusion/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
 
+.PHONY: efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo
 algorithms : efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo
 
 
