@@ -35,9 +35,9 @@ SLAMBench has currently been used with the following SLAM algorithms :
  * MonoSLAM [Davison et al, TPAMI'07]: Original version as distributed by https://github.com/hanmekim/
  * OKVIS [Leutenegger et al, IJRR'15]: Original version as distributed by https://github.com/ethz-asl
  * PTAM [Klein et al, ISMAR'07 and ECCV'08]: Original version as distributed by https://github.com/Oxford-PTAM/
- * SVO [Forster et al, ICRA'14]: Original version as distributed by https://github.com/uzh-rpg/rpg_svo/
+ * SVO [Forster et al, ICRA'14]: Original version as distributed by https://github.com/uzh-rpg/rpg_svo/ (a more recent version available at http://rpg.ifi.uzh.ch/svo2.html)
 
-  ***IMPORTANT: If you use any of those algorithms in scientific publications, you should refer to the respective publications. ***
+  **IMPORTANT: If you use any of those algorithms in scientific publications, you should refer to the respective publications.**
 
 
 In addition, if you use SLAMBench in scientific publications, we would appreciate citations to the following paper [https://www.research.ed.ac.uk/](https://www.research.ed.ac.uk/portal/en/publications/slambench2-multiobjective-headtohead-benchmarking-for-visual-slam(c3d189db-68ae-4182-8e46-d812db2955c9).html):
