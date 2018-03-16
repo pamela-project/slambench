@@ -89,7 +89,7 @@ bool XU3Monitor::enableSensor(XU3Sensor sensor) {
 	char enableFile[256];
 	FILE *tmp;
 
-		for (int dn = 1; dn < 5; dn++) {
+		for (int dn = 0; dn < 5; dn++) {
 			sprintf(enableFile, "/sys/bus/i2c/drivers/INA231/%d-00%d/enable", dn,
 				sensor);
 
