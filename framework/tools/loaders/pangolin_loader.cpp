@@ -18,6 +18,10 @@
 #include <io/SLAMFrame.h>
 #include <io/sensor/Sensor.h>
 #include <SLAMBenchException.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 
 std::string alignment_technique = "original";
 std::string default_alignment_technique = "original";
