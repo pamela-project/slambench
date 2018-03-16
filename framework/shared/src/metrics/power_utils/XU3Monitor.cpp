@@ -18,7 +18,7 @@ bool XU3Monitor::odroid_init () {
 	powerGPU  = NULL;
 	powerDRAM = NULL;
 
-	if (enableSensor(SENSOR_A7) == 0) {
+	if (enableSensor(SENSOR_A7)) {
 		enableSensor(SENSOR_A15);
 		enableSensor(SENSOR_GPU);
 		enableSensor(SENSOR_DRAM);
