@@ -407,7 +407,7 @@ datasets :
 	@echo "The list of current dataset is:                                                                                 "
 	@for f in `find datasets/ | grep [.]slam` ; do echo "   - $$f" ; done
 	@echo ""
-	@echo "If you do not find datasets in this list, you can use make to download them (make datasetlist). "
+	@echo "If you do not find datasets in this list, you can use make to download them (make datasetslist). "
 	@echo "Here is a list of the datasets available."
 	@echo -e "If you are using one of those dataset, \033[1;31mplease refer to their respective publications\033[0m:"
 	@echo "   - TUM RGB-D SLAM dataset [Sturm et al, IROS'12]: https://vision.in.tum.de/data/datasets/rgbd-dataset"
