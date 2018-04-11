@@ -1,9 +1,10 @@
 ECHO=/bin/echo
-
+WGET:=wget
 GET_REPLY:=read REPLY
 
 ifeq ("${SBQUIET}","1")
 GET_REPLY:=REPLY="y"
+WGET:=wget -q
 endif
 
 
@@ -184,11 +185,11 @@ slambench: build/Makefile
 	@echo "The list of current binaries is: "
 	@echo ""
 	@echo "Loaders available: "
-	@echo -n "  - build/bin/benchmark_loader:    " ; if [ -f build/bin/benchmark_loader ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies? did you try make pangolin)\033[0m" ; fi
-	@echo -n "  - build/bin/pangolin_loader:     " ; if [ -f build/bin/pangolin_loader ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies? did you try make pcl)\033[0m" ; fi
+	@echo -n "  - build/bin/benchmark_loader:    " ; if [ -f build/bin/benchmark_loader ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
+	@echo -n "  - build/bin/pangolin_loader:     " ; if [ -f build/bin/pangolin_loader ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies? did you try make pangolin)\033[0m" ; fi
 	@echo ""
 	@echo "Tools/Debugger available: "
-	@echo -n "  - build/bin/pointcloud_aligner:  " ; if [ -f build/bin/pointcloud_aligner ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
+	@echo -n "  - build/bin/pointcloud_aligner:  " ; if [ -f build/bin/pointcloud_aligner ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies (i.e. pcl)?)\033[0m" ; fi
 	@echo -n "  - build/bin/dataset-generator:   " ; if [ -f build/bin/dataset-generator ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
 	@echo -n "  - build/bin/io-inspect-file:     " ; if [ -f build/bin/io-inspect-file ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
 	@echo -n "  - build/bin/io-readply:          " ; if [ -f build/bin/io-readply ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
@@ -507,7 +508,7 @@ datasetslist:
 
 ./datasets/EuRoCMAV/%.zip :  # Example : $* = machine_hall/MH_01_easy/MH_01_easy
 	mkdir -p $(@D)
-	cd $(@D)  &&  wget "http://robotics.ethz.ch/~asl-datasets/ijrr_euroc_mav_dataset/$*.zip"
+	cd $(@D)  &&  ${WGET} "http://robotics.ethz.ch/~asl-datasets/ijrr_euroc_mav_dataset/$*.zip"
 
 
 ./datasets/EuRoCMAV/%.dir : ./datasets/EuRoCMAV/%.zip
@@ -523,7 +524,7 @@ datasetslist:
 
 ./datasets/TUM/%.tgz :  # Example : $* = freiburg2/rgbd_dataset_freiburg2_desk 
 	mkdir -p $(@D)
-	cd $(@D)  &&  wget "http://vision.in.tum.de/rgbd/dataset/$*.tgz"
+	cd $(@D)  &&  ${WGET} "http://vision.in.tum.de/rgbd/dataset/$*.tgz"
 
 ./datasets/TUM/%.dir : ./datasets/TUM/%.tgz
 	mkdir $@
@@ -541,11 +542,11 @@ datasets/ICL_NUIM/living-room.ply :  datasets/ICL_NUIM/living-room.ply.tar.gz
 
 datasets/ICL_NUIM/living-room.ply.tar.gz : 
 	mkdir -p  datasets/ICL_NUIM
-	cd datasets/ICL_NUIM  && wget "http://www.doc.ic.ac.uk/~ahanda/living-room.ply.tar.gz"
+	cd datasets/ICL_NUIM  && ${WGET} "http://www.doc.ic.ac.uk/~ahanda/living-room.ply.tar.gz"
 
 datasets/ICL_NUIM/%_loop.tgz : 
 	mkdir -p  datasets/ICL_NUIM
-	cd datasets/ICL_NUIM  && wget "http://www.doc.ic.ac.uk/~ahanda/$*_loop.tgz"
+	cd datasets/ICL_NUIM  && ${WGET} "http://www.doc.ic.ac.uk/~ahanda/$*_loop.tgz"
 
 datasets/ICL_NUIM/%_loop.dir :  datasets/ICL_NUIM/%_loop.tgz
 	mkdir -p $@
@@ -563,17 +564,17 @@ datasets/ICL_NUIM/living_room_traj%_loop_neg.slam : datasets/ICL_NUIM/living_roo
 datasets/ICL_NUIM/%.gt.freiburg : 
 	${ECHO}  "Download ground truth trajectory..."
 	mkdir -p datasets/ICL_NUIM/
-	cd datasets/ICL_NUIM/  &&  if test -x livingRoom$*.gt.freiburg ; then ${ECHO} "Done" ; else wget "http://www.doc.ic.ac.uk/~ahanda/VaFRIC/$*.gt.freiburg" ; fi
+	cd datasets/ICL_NUIM/  &&  if test -x livingRoom$*.gt.freiburg ; then ${ECHO} "Done" ; else ${WGET} "http://www.doc.ic.ac.uk/~ahanda/VaFRIC/$*.gt.freiburg" ; fi
 
 datasets/ICL_KLG/dyson_lab.klg :
 	mkdir -p datasets/ICL_KLG/
-	cd datasets/ICL_KLG/  &&  wget http://www.doc.ic.ac.uk/%7Esleutene/datasets/elasticfusion/dyson_lab.klg
+	cd datasets/ICL_KLG/  &&  ${WGET} http://www.doc.ic.ac.uk/%7Esleutene/datasets/elasticfusion/dyson_lab.klg
 
 #### SVO-artificial
 ###############
 datasets/SVO/artificial.tar.gz:
 	mkdir -p datasets/SVO/
-	cd datasets/SVO && wget -O artificial.tar.gz "http://rpg.ifi.uzh.ch/datasets/sin2_tex2_h1_v8_d.tar.gz"
+	cd datasets/SVO && ${WGET} -O artificial.tar.gz "http://rpg.ifi.uzh.ch/datasets/sin2_tex2_h1_v8_d.tar.gz"
 
 datasets/SVO/artificial.dir: ./datasets/SVO/artificial.tar.gz
 	mkdir -p $@
