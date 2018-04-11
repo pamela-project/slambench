@@ -1,0 +1,31 @@
+FROM bbodin/slambench:travis-deps
+
+# Copy
+##################################################################
+
+COPY ./slambench2/ /slambench2/
+RUN ls /slambench2
+
+# Build slambench2
+##################################################################
+
+RUN make -C /slambench2 slambench
+RUN make -C /slambench2 slambench APPS=okvis
+RUN make -C /slambench2 slambench APPS=ptam
+RUN make -C /slambench2 slambench APPS=kfusion
+RUN make -C /slambench2 slambench APPS=monoslam
+RUN make -C /slambench2 slambench APPS=lsdslam
+RUN make -C /slambench2 slambench APPS=efusion
+RUN make -C /slambench2 slambench APPS=infinitam
+
+RUN make -C /slambench2 datasets/ICL_NUIM/living_room_traj2_loop.slam
+
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libkfusion-cpp-library.so -fl 30 -s 5 -d  1.71,2.4,1.152 -z 8
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libkfusion-openmp-library.so -fl 30 -s 5 -d  1.71,2.4,1.152 -z 8
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libkfusion-notoon-library.so -fl 30 -s 5 -d  1.71,2.4,1.152 -z 8
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/liblsdslam-cpp-library.so -fl 30
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libinfinitam-cuda-library.so -fl 30
+RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libmonoslam-sequential-library.so -fl 30
+#RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libptam-original_mp-library.so -fl 30 
+#RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libokvis-original-library.so -fl 30 
+
