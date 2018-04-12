@@ -1,0 +1,75 @@
+FROM ubuntu:16.04
+
+
+# Dependencies
+##################################################################
+
+RUN apt-get -y update && apt-get -y install libvtk6.2 libvtk6-dev unzip libflann-dev wget mercurial git gcc cmake python-numpy freeglut3 freeglut3-dev libglew1.5 libglew1.5-dev libglu1-mesa libglu1-mesa-dev libgl1-mesa-glx libgl1-mesa-dev libxmu-dev libxi-dev  libboost-all-dev cvs libgoogle-glog-dev libatlas-base-dev gfortran  gtk2.0 libgtk2.0-dev libyaml-cpp-dev libyaml-dev  libproj-dev
+
+
+
+# PCL Install
+##################################################################
+
+RUN apt-get -y update && apt-get -y install g++ cmake cmake-gui doxygen mpi-default-dev openmpi-bin openmpi-common libusb-1.0-0-dev libqhull* libusb-dev libgtest-dev  git-core freeglut3-dev pkg-config build-essential libxmu-dev libxi-dev libphonon-dev libphonon-dev phonon-backend-gstreamer phonon-backend-vlc graphviz mono-complete qt-sdk libflann-dev   libflann1.8 libboost1.58-all-dev   
+
+RUN apt-get -y update && apt-get -y install libopenni2-dev openni2-utils  libopenni-dev openni-utils
+
+RUN cd /tmp && wget http://launchpadlibrarian.net/209530212/libeigen3-dev_3.2.5-4_all.deb && dpkg -i libeigen3-dev_3.2.5-4_all.deb && apt-mark hold libeigen3-dev
+
+RUN cd /tmp && wget http://www.vtk.org/files/release/7.1/VTK-7.1.0.tar.gz &&  tar -xf VTK-7.1.0.tar.gz &&  cd VTK-7.1.0 && mkdir build && cd build &&  cmake .. &&  make  &&  make install
+
+RUN cd /tmp && wget https://github.com/PointCloudLibrary/pcl/archive/pcl-1.8.0.tar.gz && tar -xf pcl-1.8.0.tar.gz && cd pcl-pcl-1.8.0 && mkdir build && cd build &&  cmake .. &&  make  &&  make install
+
+RUN cd /tmp && rm libeigen3-dev_3.2.5-4_all.deb VTK-7.1.0.tar.gz pcl-1.8.0.tar.gz &&  rm -r VTK-7.1.0 pcl-pcl-1.8.0
+
+
+
+# Prepare
+##################################################################
+
+RUN git config --global user.email "you@example.com"
+RUN git config --global user.name "Your Name"
+
+
+# Copy deps building system only
+##################################################################
+
+RUN mkdir -p /slambench2/framework
+COPY ./slambench2/Makefile /slambench2/Makefile
+COPY ./slambench2/framework/makefiles /slambench2/framework/makefiles
+RUN ls -alp /slambench2/ /slambench2/framework/makefiles
+
+
+# Build deps
+##################################################################
+
+RUN make -C /slambench2 eigen3  -j3
+RUN make -C /slambench2 pangolin -j3
+
+# Copy entire slambench folder
+##################################################################
+
+COPY ./slambench2 /slambench2
+
+# Build slambench2
+##################################################################
+
+RUN make -C /slambench2 slambench
+
+
+# Test slambench2
+##################################################################
+
+
+#RUN make -C /slambench2 datasets/ICL_NUIM/living_room_traj2_loop.slam
+
+#RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libkfusion-cpp-library.so -fl 30 -s 5 -d  1.71,2.4,1.152 -z 8
+#RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libkfusion-openmp-library.so -fl 30 -s 5 -d  1.71,2.4,1.152 -z 8
+#RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libkfusion-notoon-library.so -fl 30 -s 5 -d  1.71,2.4,1.152 -z 8
+#RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/liblsdslam-cpp-library.so -fl 30
+#RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libinfinitam-cuda-library.so -fl 30
+#RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libmonoslam-sequential-library.so -fl 30
+#RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libptam-original_mp-library.so -fl 30
+#RUN cd /slambench2 && ./build/bin/benchmark_loader -i ./datasets/ICL_NUIM/living_room_traj2_loop.slam  -load ./build/lib/libokvis-original-library.so -fl 30
+
