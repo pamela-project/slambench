@@ -11,7 +11,7 @@ RUN ls /slambench2
 
 RUN make -C /slambench2 slambench   SBQUIET=1
 RUN make -C /slambench2 algorithms  SBQUIET=1
-RUN make -C /slambench2 slambench SBQUIET=1 APPS=all
+RUN make -C /slambench2 slambench -j4 SBQUIET=1 APPS=all
 
 RUN make -C /slambench2 datasets/ICL_NUIM/living_room_traj2_loop.slam  SBQUIET=1 
 
