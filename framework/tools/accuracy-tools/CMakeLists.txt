@@ -35,9 +35,11 @@ if (PCL_FOUND)
 	TARGET_INCLUDE_DIRECTORIES(pointcloud_aligner PUBLIC ${Pangolin_INCLUDE_DIR})
 	TARGET_INCLUDE_DIRECTORIES(pointcloud_aligner PUBLIC ${TOON_INCLUDE_PATHS})
 	
-	target_link_libraries(pointcloud_aligner PRIVATE ${gui_pangolin_libraries}  ${PCL_LIBRARIES})
-    SET_TARGET_PROPERTIES(pointcloud_aligner PROPERTIES COMPILE_FLAGS "-Wno-error=catch-value=  -Wno-error=comment")
- 
+	target_link_libraries(pointcloud_aligner  PRIVATE ${gui_pangolin_libraries}  ${PCL_LIBRARIES})
+	target_compile_options(pointcloud_aligner PRIVATE  "-Wno-error=comment")
+ 	if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
+	  target_compile_options(pointcloud_aligner     PRIVATE "-Wno-error=catch-value=")
+	endif()
     install(TARGETS pointcloud_aligner DESTINATION  bin/)
 
    

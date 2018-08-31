@@ -53,8 +53,10 @@ IF(GLUT_FOUND)
       include_directories(${TOON_INCLUDE_PATHS})
         add_library(slambench-ui-pangolin  src/SLAMBenchUI_Pangolin.cpp  include/SLAMBenchUI_Pangolin.h)
         target_link_libraries(slambench-ui-pangolin ${Pangolin_LIBRARIES})
-	
-	SET_TARGET_PROPERTIES(slambench-ui-pangolin  PROPERTIES COMPILE_FLAGS "-Wno-error=catch-value=") # Fix warning error from Pangolin with GCC8
+	if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)	  
+	  target_compile_options(slambench-ui-pangolin     PRIVATE "-Wno-error=catch-value=")	  
+	endif()
+
     ENDIF(Pangolin_FOUND)
 
 ENDIF(GLUT_FOUND)

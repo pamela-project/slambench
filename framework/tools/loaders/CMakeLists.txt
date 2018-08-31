@@ -31,7 +31,9 @@ IF(Pangolin_FOUND)
 	TARGET_INCLUDE_DIRECTORIES(pangolin_loader PUBLIC ${Pangolin_INCLUDE_DIR})
 	TARGET_INCLUDE_DIRECTORIES(pangolin_loader PUBLIC ${TOON_INCLUDE_PATHS})
 	target_link_libraries(pangolin_loader PRIVATE ${gui_pangolin_libraries})
-	SET_TARGET_PROPERTIES(pangolin_loader PROPERTIES COMPILE_FLAGS "-Wno-error=catch-value=")
+	if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)	  
+	  target_compile_options(pangolin_loader   PRIVATE "-Wno-error=catch-value=")	  
+	endif()	
 ENDIF(Pangolin_FOUND)
 
 
