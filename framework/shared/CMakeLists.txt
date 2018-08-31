@@ -52,7 +52,9 @@ IF(GLUT_FOUND)
       include_directories(${Pangolin_INCLUDE_DIRS})
       include_directories(${TOON_INCLUDE_PATHS})
         add_library(slambench-ui-pangolin  src/SLAMBenchUI_Pangolin.cpp  include/SLAMBenchUI_Pangolin.h)
-        target_link_libraries(slambench-ui-pangolin ${Pangolin_LIBRARIES})  
+        target_link_libraries(slambench-ui-pangolin ${Pangolin_LIBRARIES})
+	
+	SET_TARGET_PROPERTIES(slambench-ui-pangolin  PROPERTIES COMPILE_FLAGS "-Wno-error=catch-value=") # Fix warning error from Pangolin with GCC8
     ENDIF(Pangolin_FOUND)
 
 ENDIF(GLUT_FOUND)
