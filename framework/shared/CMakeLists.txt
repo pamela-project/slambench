@@ -58,7 +58,6 @@ IF(GLUT_FOUND)
 	  target_compile_options(slambench-ui-pangolin     PRIVATE "-Wno-error=catch-value=")	  
 	endif()
 
-
     ENDIF(Pangolin_FOUND)
 
 ENDIF(GLUT_FOUND)
