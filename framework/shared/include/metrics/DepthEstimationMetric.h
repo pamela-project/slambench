@@ -6,9 +6,9 @@
 namespace slambench {
     namespace metrics {
 
-        using slambench::values::PointCloudValue;
+        using slambench::values::FrameValue;
 
-        class PointCloudMetric : public Metric {
+        class DepthEstimationMetric : public Metric {
         private:
             const slambench::outputs::BaseOutput * const tested_;
             const slambench::outputs::BaseOutput * const gt_;
