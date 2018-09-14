@@ -187,12 +187,12 @@ if(OpenNI_FOUND)
     )
     target_link_libraries(slambench-io-oni15 ${OPENNI_LIBRARIES})
     target_link_libraries(slambench-utils slambench-io-oni15)
-	SET_TARGET_PROPERTIES(slambench-io-oni15  PROPERTIES COMPILE_FLAGS "-fPIC -Wno-error=return-type  -Wno-error=strict-aliasing")
+	SET_TARGET_PROPERTIES(slambench-io-oni15  PROPERTIES COMPILE_FLAGS "-fPIC -Wno-error=unused-but-set-variable -Wno-error=return-type  -Wno-error=strict-aliasing")
 ELSE (OpenNI_FOUND)
     add_library(slambench-io-oni15 
         src/io/openni15/ONI15InputInterface_dummy.cpp
     )
-	SET_TARGET_PROPERTIES(slambench-io-oni15  PROPERTIES COMPILE_FLAGS "-fPIC -Wno-error=return-type")
+	SET_TARGET_PROPERTIES(slambench-io-oni15  PROPERTIES COMPILE_FLAGS "-fPIC -Wno-error=unused-but-set-variable -Wno-error=return-type")
     target_link_libraries(slambench-utils slambench-io-oni15)
 ENDIF(OpenNI_FOUND)
 
@@ -205,13 +205,13 @@ if(OpenNI2_FOUND)
         src/io/openni/ONI2InputInterface.cpp
     )
     target_link_libraries(slambench-io-oni2 ${OPENNI2_LIBRARIES})
-	SET_TARGET_PROPERTIES(slambench-io-oni2  PROPERTIES COMPILE_FLAGS "-fPIC -Wno-error=return-type  -Wno-error=strict-aliasing")
+	SET_TARGET_PROPERTIES(slambench-io-oni2  PROPERTIES COMPILE_FLAGS "-fPIC -Wno-error=return-type -Wno-unused-variable -Wno-error=strict-aliasing")
     target_link_libraries(slambench-utils slambench-io-oni2)
 ELSE (OpenNI2_FOUND)
     add_library(slambench-io-oni2 
         src/io/openni/ONI2InputInterface_dummy.cpp
     )
-	SET_TARGET_PROPERTIES(slambench-io-oni2  PROPERTIES COMPILE_FLAGS "-fPIC -Wno-error=return-type  -Wno-error=strict-aliasing")
+	SET_TARGET_PROPERTIES(slambench-io-oni2  PROPERTIES COMPILE_FLAGS "-fPIC -Wno-unused-variable -Wno-error=return-type  -Wno-error=strict-aliasing")
     target_link_libraries(slambench-utils slambench-io-oni2)
 ENDIF(OpenNI2_FOUND)
 

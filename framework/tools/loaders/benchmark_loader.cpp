@@ -14,6 +14,7 @@
 #include <outputs/OutputManagerWriter.h>
 #include <metrics/DurationMetric.h>
 #include <metrics/PowerMetric.h>
+#include <metrics/DepthEstimationMetric.h>
 #include "../../shared/include/metrics/MemoryMetric.h"
 #include "ColumnWriter.h"
 #include <SLAMBenchException.h>
@@ -63,7 +64,7 @@ int main(int argc, char * argv[])
 		} else if(alignment_technique == "new") {
 			alignment_method = new slambench::outputs::NewTrajectoryAlignmentMethod();
 		} else {
-		std::cerr << "Unknown alignment method " << alignment_technique << std::endl;
+			std::cerr << "Unknown alignment method " << alignment_technique << std::endl;
 			return 1;
 		}
 
@@ -124,6 +125,7 @@ int main(int argc, char * argv[])
 				auto rpe_metric = new slambench::metrics::RPEMetric(new slambench::outputs::PoseOutputTrajectoryInterface(aligned), new slambench::outputs::PoseOutputTrajectoryInterface(gt_traj));
 				lib->GetMetricManager().AddFrameMetric(rpe_metric);
 				cw.AddColumn(new slambench::CollectionValueLibColumnInterface(lib, rpe_metric, lib->GetMetricManager().GetFramePhase()));
+
 			}
 			// Add a duration metric
 			lib->GetMetricManager().AddFrameMetric(duration_metric);
@@ -182,7 +184,12 @@ int main(int argc, char * argv[])
 		if(output_filename != "") {
 			slambench::TimeStamp timestamp = main_lib->GetOutputManager().GetMainOutput(slambench::values::VT_POSE)->GetMostRecentValue().first;
 			main_lib->GetOutputManager().GetMainOutput(slambench::values::VT_POINTCLOUD)->SetActive(true);
-			main_lib->c_sb_update_outputs(main_lib, &timestamp);
+
+            slambench::TimeStamp timestamp = main_lib->GetOutputManager().GetMainOutput(slambench::values::VT_FRAME)->GetMostRecentValue().first;
+            main_lib->GetOutputManager().GetMainOutput(slambench::values::VT_FRAME)->SetActive(true);
+
+
+            main_lib->c_sb_update_outputs(main_lib, &timestamp);
 
 			std::cout << "Writing outputs to " << output_filename << std::endl;
 			slambench::outputs::OutputManagerWriter omw;
@@ -191,7 +198,6 @@ int main(int argc, char * argv[])
 			omw.Write(lib->GetOutputManager(), output_filename);
 			std::cout << "Done writing outputs." << std::endl;
 		}
-
 
 		std::cout << "End of program." << std::endl;
 
