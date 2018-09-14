@@ -184,10 +184,7 @@ int main(int argc, char * argv[])
 		if(output_filename != "") {
 			slambench::TimeStamp timestamp = main_lib->GetOutputManager().GetMainOutput(slambench::values::VT_POSE)->GetMostRecentValue().first;
 			main_lib->GetOutputManager().GetMainOutput(slambench::values::VT_POINTCLOUD)->SetActive(true);
-
-            slambench::TimeStamp timestamp = main_lib->GetOutputManager().GetMainOutput(slambench::values::VT_FRAME)->GetMostRecentValue().first;
             main_lib->GetOutputManager().GetMainOutput(slambench::values::VT_FRAME)->SetActive(true);
-
 
             main_lib->c_sb_update_outputs(main_lib, &timestamp);
 
