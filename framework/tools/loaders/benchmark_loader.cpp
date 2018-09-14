@@ -93,7 +93,7 @@ int main(int argc, char * argv[])
 		bool have_timestamp = false;
 
 		for(SLAMBenchLibraryHelper *lib : config->GetLoadedLibs()) {
-
+			lib->gt_traj = config->GetGroundTruth().GetMainOutput(slambench::values::VT_POSE);
 			// retrieve the trajectory of the lib
 			auto lib_traj = lib->GetOutputManager().GetMainOutput(slambench::values::VT_POSE);
 			if (lib_traj == nullptr) {
