@@ -17,7 +17,7 @@
 #include <map>
 #include <ParameterComponent.h>
 
-
+typedef std::pair<ParameterComponent*,Parameter*> param_info_t;
 namespace slambench {
 	class ParameterManager : public ParameterComponent {
 	public :
@@ -30,11 +30,11 @@ namespace slambench {
 		
 
 		bool BuildArgumentsList(ParameterComponent *callback_data);
-		bool ReadArgumentsOrQuit(unsigned int argc, const char * const * const argv, ParameterComponent *callback_data);
-		bool ReadArguments(unsigned int argc, const char * const * const argv, ParameterComponent *callback_data);
+		bool ReadArgumentsOrQuit(unsigned int argc, const char * const * const argv);
+		bool ReadArguments(unsigned int argc, const char * const * const argv);
 
 	private :
-		std::map<std::string, Parameter*> params_long, params_short;
+		std::map<std::string, param_info_t> params_long, params_short;
 
 	};
 }

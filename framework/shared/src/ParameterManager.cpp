@@ -96,9 +96,9 @@ void ParameterManager::PrintArguments(std::ostream& str, const ParameterComponen
 	}
 }
 
-bool ParameterManager::ReadArgumentsOrQuit(unsigned int argc, const char* const* const argv, ParameterComponent* callback_data)
+bool ParameterManager::ReadArgumentsOrQuit(unsigned int argc, const char* const* const argv)
 {
-	if(!ReadArguments(argc, argv, callback_data)) {
+	if(!ReadArguments(argc, argv)) {
 		PrintArguments(std::cerr);
 		exit(1);
 	}
@@ -124,9 +124,9 @@ bool ParameterManager::BuildArgumentsList(ParameterComponent *component_ptr) {
 			if (params_long.count(long_opt)) {
 				std::cerr << "*** Duplicated long option replaced: '" << long_opt << "'"<< std::endl;
 				return false;
-				params_long[long_opt] = param_ptr;
+				params_long[long_opt] = param_info_t(component_ptr,param_ptr);
 			} else {
-				params_long[long_opt] = param_ptr;
+				params_long[long_opt] = param_info_t(component_ptr,param_ptr);
 			}
 		}
 		if (param_ptr->getShortOption(component_ptr) != "") {
@@ -136,9 +136,9 @@ bool ParameterManager::BuildArgumentsList(ParameterComponent *component_ptr) {
 			if (params_short.count(short_opt)) {
 				std::cerr << "*** Duplicated short option replaced: '" << short_opt << "'" << std::endl;
 				return false;
-				params_short[short_opt] = param_ptr;
+				params_short[short_opt] = param_info_t(component_ptr,param_ptr);
 			} else {
-				params_short[short_opt] = param_ptr;
+				params_short[short_opt] = param_info_t(component_ptr,param_ptr);
 			}
 		}
 
@@ -152,7 +152,7 @@ bool ParameterManager::BuildArgumentsList(ParameterComponent *component_ptr) {
 	return true;
 }
 
-bool ParameterManager::ReadArguments(unsigned int argc, const char* const* const argv, ParameterComponent *callback_data)
+bool ParameterManager::ReadArguments(unsigned int argc, const char* const* const argv)
 {
 
 
@@ -171,14 +171,14 @@ bool ParameterManager::ReadArguments(unsigned int argc, const char* const* const
 
 		const char *the_arg = argv[i];
 
-		Parameter *the_param = nullptr;
+		param_info_t* param_info = nullptr;
 
 		// figure out what kind of arg it is (long or short)
 		if(the_arg[0] == '-') {
 			if(the_arg[1] == '-') {
 				// long arg
 				if(params_long.count(&the_arg[2])) {
-					the_param = params_long.at(&the_arg[2]);
+					param_info = &params_long.at(&the_arg[2]);
 				} else {
 					// error - we've encountered a long param we don't support
 					std::cerr << "Unrecognized argument: " << the_arg << std::endl;
@@ -187,7 +187,7 @@ bool ParameterManager::ReadArguments(unsigned int argc, const char* const* const
 			} else {
 				// short arg
 				if(params_short.count(&the_arg[1])) {
-					the_param = params_short.at(&the_arg[1]);
+					param_info = &params_short.at(&the_arg[1]);
 				} else {
 					std::cerr << "Unrecognized argument: " << the_arg << std::endl;
 					return false;
@@ -199,6 +199,8 @@ bool ParameterManager::ReadArguments(unsigned int argc, const char* const* const
 			return false;
 		}
 
+		auto the_component = param_info->first;
+		auto the_param     = param_info->second;
 		if(the_param) {
 
 			if (the_param->requiresValue()) {
@@ -210,7 +212,7 @@ bool ParameterManager::ReadArguments(unsigned int argc, const char* const* const
 			}
 
 			if (the_param->getCallback()) {
-				(the_param->getCallback())(the_param, callback_data);
+				(the_param->getCallback())(the_param, the_component);
 			}
 		}
 

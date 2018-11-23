@@ -32,7 +32,6 @@ private :
 	std::string                        _library_name;
     std::ostream&				       _log_stream;
     slambench::io::InputInterface*     _input_interface;
-	slambench::outputs::OutputManager  output_manager_;
 
 public:
 	slambench::io::SLAMFrame *        (* c_sb_filter) (SLAMBenchFilterLibraryHelper *, slambench::io::SLAMFrame * ) ;

@@ -42,7 +42,7 @@ int main(int argc, char * argv[])
 		//***************************************************************************************
 
 		config->addParameter(TypedParameter<std::string> ("a",     "alignment-technique",      "Select an alignment technique by name, if not found, default used (default,new).", &alignment_technique, &default_alignment_technique));
-		config->GetParameterManager().ReadArgumentsOrQuit(argc, argv, config);
+		config->GetParameterManager().ReadArgumentsOrQuit(argc, argv);
 		//***************************************************************************************
 		// At this point the datasets/libraries/sensors are loaded with their arguments set.
 		//***************************************************************************************

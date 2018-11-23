@@ -15,31 +15,6 @@ SET(CMAKE_BUILD_FILES_DIRECTORY    ${PROJECT_BINARY_DIR}/bfd)
 SET(CMAKE_BINARY_DIR               ${PROJECT_BINARY_DIR}/bindir)
 SET(CMAKE_CACHEFILE_DIR            ${PROJECT_BINARY_DIR}/cache)
 SET(CMAKE_BUILD_DIRECTORY          ${PROJECT_BINARY_DIR}/builddir)
-
-
-# Most common compiler flags
-#######################################################
-
-
-if (CMAKE_COMPILER_IS_GNUCC)
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6.0)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}    -Wno-catch-value") # too noisy when using Pangolin
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}    -Wno-deprecated-declarations") # too noisy when using PCL
-    
-   
-  endif()
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}     -Wno-error=implicit-fallthrough= -Wno-int-in-bool-context ")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=implicit-fallthrough= -Wno-int-in-bool-context ")
-  endif()
-endif()
-
-set(OPTFLAGS "-O3")
-
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g ${OPTFLAGS}                 -Wall -Wno-unknown-pragmas -Wextra -Werror -Wno-error=deprecated-declarations -Wno-error=unused-result -Wno-error=reorder ")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g ${OPTFLAGS} --std=c++11 -Wall -Wno-unknown-pragmas -Wextra -Werror -Wno-error=deprecated-declarations -Wno-error=unused-result -Wno-error=reorder ")
-
-
   
 
 # Most common compiler flags

@@ -39,7 +39,7 @@ int main(int argc, char * argv[])
 		//***************************************************************************************
 
 		config->addParameter(file_output_parameter);
-		config->GetParameterManager().ReadArgumentsOrQuit(argc, argv, config);
+		config->GetParameterManager().ReadArgumentsOrQuit(argc, argv);
 
 		//***************************************************************************************
 		// At this point the datasets/libraries/sensors are loaded with their arguments set.
