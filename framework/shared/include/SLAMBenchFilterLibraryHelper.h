@@ -45,13 +45,14 @@ public:
 
     SLAMBenchFilterLibraryHelper (std::string id, std::string lib, std::ostream& l, slambench::io::InputInterface* i) :
     	ParameterComponent(id),
-		
     	_identifier(id),
 		_library_name(lib),
 		_log_stream (l),
 		_input_interface (i),
 		c_sb_filter(nullptr)
-	{}
+	{
+
+	}
 
 public :
 

@@ -43,7 +43,6 @@ static const std::string default_dump_volume_file              = "";
 static const std::string default_log_file                      = "";
 static const std::string default_save_map                      = "";
 static const std::vector<std::string> default_slam_libraries   = {};
-static const std::vector<std::string> default_filter_libraries = {};
 static const std::vector<std::string> default_input_files      = {};
 static const bool                     default_is_false         = false;
 
@@ -60,7 +59,6 @@ public:
 private :
 
     slam_lib_container_t slam_libs;
-    filter_lib_container_t filter_libs;
 
 
     std::ofstream log_filestream;
@@ -69,7 +67,6 @@ private :
     std::string   alignment_technique;
     std::vector<std::string> input_files;
     std::vector<std::string> slam_library_names;
-    std::vector<std::string> filter_library_names;
     unsigned int frame_limit;
 	
 	slambench::io::FrameStream *input_stream_;
@@ -114,7 +111,6 @@ public :
 	
     static void compute_loop_algorithm(SLAMBenchConfiguration * config, bool *stay_on, SLAMBenchUI *ui);
 
-    void add_filter_library  (std::string library_filename, std::string id = "");
     void add_slam_library    (std::string library_filename, std::string id = "");
     bool add_input (std::string library_filename);
 

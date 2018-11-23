@@ -25,6 +25,13 @@
 
 
 
+#include <dlfcn.h>
+#define LOAD_FUNC2HELPER(handle,lib,f)     *(void**)(& lib->f) = dlsym(handle,#f); const char *dlsym_error_##lib##f = dlerror(); if (dlsym_error_##lib##f) {std::cerr << "Cannot load symbol " << #f << dlsym_error_##lib##f << std::endl; dlclose(handle); exit(1);}
+
+
+static const std::vector<std::string> default_filter_libraries = {};
+void filter_library_callback(Parameter* param, ParameterComponent* caller) ;
+
 class SLAMBenchLibraryHelper : public ParameterComponent {
 
 private :
@@ -35,6 +42,9 @@ private :
     slambench::io::InputInterface*     _input_interface;
 	slambench::outputs::OutputManager  output_manager_;
 
+    std::vector<std::string>           filter_library_names;
+    filter_lib_container_t             filter_libs;
+public:
 
 public:
 	bool            (* c_sb_new_slam_configuration)(SLAMBenchLibraryHelper *) ;
@@ -64,6 +74,8 @@ public:
 		c_sb_clean_slam_system(nullptr) ,
 		c_sb_update_outputs(nullptr)
 	{
+        this->filter_library_names = {};
+        this->addParameter(TypedParameter<std::vector<std::string> >("filter",  "load-filter-library" , "Load a specific Filter library."     , &this->filter_library_names, &default_filter_libraries , filter_library_callback ));
   	}
 
 public :
@@ -74,25 +86,30 @@ public :
 
     inline std::ostream& get_log_stream() {return _log_stream;};
 
-	slambench::metrics::MetricManager &GetMetricManager() { return _metric_manager; }
-	slambench::outputs::OutputManager &GetOutputManager() { return output_manager_; }
+    inline slambench::metrics::MetricManager &GetMetricManager() { return _metric_manager; }
+    inline slambench::outputs::OutputManager &GetOutputManager() { return output_manager_; }
 	
-    slambench::io::InputInterface *get_input_interface() {
+    inline slambench::io::InputInterface *get_input_interface() {
 		if(_input_interface == nullptr) {
 			throw std::logic_error("Input interface have not been added to SLAM configuration");
 		}
 		return _input_interface;
 	}
 
-	const slambench::io::SensorCollection &get_sensors() {
+    inline const slambench::io::SensorCollection &get_sensors() {
 		return this->get_input_interface()->GetSensors();
 	}
 
+    void add_filter_library(std::string so_file , std::string identifier ) ;
 
+    filter_lib_container_t& get_filter_libraries() {
+    	return filter_libs;
+    }
 
 };
 
 typedef std::vector<SLAMBenchLibraryHelper*>       slam_lib_container_t;
+
 
 
 #endif /* FRAMEWORK_SHARED_INCLUDE_SLAMBENCHLIBRARYHELPER_H_ */

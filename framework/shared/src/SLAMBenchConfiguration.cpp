@@ -51,38 +51,6 @@ SLAMBenchConfiguration::~SLAMBenchConfiguration()
 	CleanAlgorithms();
 }
 
-void SLAMBenchConfiguration::add_filter_library(std::string so_file , std::string identifier ) {
-
-	 std::cerr << "new filter library name: " << so_file  << std::endl;
-
-	 void* handle = dlopen(so_file.c_str(),RTLD_LAZY); // TODO : memory leak here
-
-	 if (!handle) {
-	 	std::cerr << "Cannot open library: " << dlerror() << std::endl;
-	 	exit(1);
-	 }
-
-	 char *start=(char *)so_file.c_str();
-	 char *iter = start;
-	 while(*iter!=0){
-	 	if(*iter=='/')
-	 		start = iter+1;
-	 	iter++;
-	 }
-	 std::string libName=std::string(start);
-	 libName=libName.substr(3, libName.length()-14);
-	 SLAMBenchFilterLibraryHelper * lib_ptr = new SLAMBenchFilterLibraryHelper (identifier, libName, this->get_log_stream(),  this->GetInputInterface());
-
-	 LOAD_FUNC2HELPER(handle,lib_ptr,c_sb_filter);
-
-	 this->filter_libs.push_back(lib_ptr);
-
-	 GetParameterManager().AddComponent(lib_ptr);
-
-	 std::cerr << "Filter library loaded: " << so_file << std::endl;
-
-}
-
 void SLAMBenchConfiguration::add_slam_library(std::string so_file, std::string identifier) {
 
 	std::cerr << "new library name: " << so_file  << std::endl;
@@ -127,29 +95,6 @@ void SLAMBenchConfiguration::add_slam_library(std::string so_file, std::string i
 
 }
 
-void filter_library_callback(Parameter* param, ParameterComponent* caller) {
-
-	SLAMBenchConfiguration* config = dynamic_cast<SLAMBenchConfiguration*> (caller);
-
-	TypedParameter<std::vector<std::string>>* parameter =  dynamic_cast<TypedParameter<std::vector<std::string>>*>(param) ;
-
-	for (std::string library_name : parameter->getTypedValue()) {
-
-
-		std::string library_filename   = "";
-		std::string library_identifier = "";
-
-
-		auto pos = library_name.find("=");
-		if (pos != std::string::npos)  {
-				library_filename   = library_name.substr(0, pos);
-				library_identifier = library_name.substr(pos+1);
-		} else {
-			library_filename = library_name;
-		}
-		config->add_filter_library(library_filename,library_identifier);
-	}
-}
 void slam_library_callback(Parameter* param, ParameterComponent* caller) {
 
 	SLAMBenchConfiguration* config = dynamic_cast<SLAMBenchConfiguration*> (caller);
@@ -224,9 +169,7 @@ void help_callback(Parameter* , ParameterComponent* caller) {
 	SLAMBenchConfiguration* config = dynamic_cast<SLAMBenchConfiguration*> (caller);
 	
 	std::cerr << " == SLAMBench Configuration ==" << std::endl;
-	std::cerr << "  Available parameters :" << std::endl;
 	config->GetParameterManager().PrintArguments(std::cerr);
-	
 	exit(0);
 }
 
@@ -266,15 +209,12 @@ SLAMBenchConfiguration::SLAMBenchConfiguration () :
 	this->input_interface = NULL;
 	this->log_stream = NULL;
     this->slam_library_names = {};
-    this->filter_library_names = {};
-
 
 	// Run Related
 	this->addParameter(TypedParameter<unsigned int>("fl",     "frame-limit",      "last frame to compute",                   &this->frame_limit, &default_frame_limit));
 	this->addParameter(TypedParameter<std::string>("o",     "log-file",      "Output log file",                   &this->log_file, &default_log_file, log_callback));
 	this->addParameter(TypedParameter<std::vector<std::string>>("i",     "input" ,        "Specify the input file or mode." ,  &this->input_files, &default_input_files , input_callback ));
 	this->addParameter(TypedParameter<std::vector<std::string> >("load",  "load-slam-library" , "Load a specific SLAM library."     , &this->slam_library_names, &default_slam_libraries , slam_library_callback ));
-	this->addParameter(TypedParameter<std::vector<std::string> >("filter",  "load-filter-library" , "Load a specific Filter library."     , &this->filter_library_names, &default_filter_libraries , filter_library_callback ));
 	this->addParameter(TriggeredParameter("dse",   "dse",    "Output solution space of parameters.",    dse_callback));
 	this->addParameter(TriggeredParameter("h",     "help",   "Print the help.", help_callback));
     this->addParameter(TypedParameter<bool>("realtime",     "realtime-mode",      "realtime frame loading mode",                   &this->realtime_mode_, &default_is_false));
@@ -423,24 +363,24 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 			break;
 		}
 
-		// ********* [[ NEW FRAME PROCESSED BY FILTERS ]] *********
 
-		// TODO : FreeData online to avoid using too much memory but dangerous if filter return pointer.
-		// TODO : using filter will be memory consuming, need to think about it and see if we can do differently.
-		// TODO : Add a skip if current
-
-		std::vector<slambench::io::SLAMFrame*> filtered_frames;
-		slambench::io::SLAMFrame * filtered_frame = current_frame;
-		for (auto filter : config->filter_libs) {
-			filtered_frame  = filter->c_sb_filter(filter,filtered_frame);
-			filtered_frames.push_back(filtered_frame);
-		}
-
-		
 
 		// ********* [[ NEW FRAME PROCESSED BY ALGO ]] *********
 
 		for (auto lib : config->slam_libs) {
+
+			// ********* [[ FRAME PROCESSED BY FILTERS ]] *********
+			// TODO : memory leak here !!!
+			// TODO : FreeData online to avoid using too much memory but dangerous if filter return pointer.
+			// TODO : using filter will be memory consuming, need to think about it and see if we can do differently.
+			// TODO : Add a skip if current
+
+			std::vector<slambench::io::SLAMFrame*> filtered_frames;
+			slambench::io::SLAMFrame * filtered_frame = current_frame;
+			for (auto filter : lib->get_filter_libraries()) {
+				filtered_frame  = filter->c_sb_filter(filter,filtered_frame);
+				filtered_frames.push_back(filtered_frame);
+			}
 
 
 			// ********* [[ SEND THE FRAME ]] *********

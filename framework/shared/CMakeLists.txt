@@ -155,6 +155,7 @@ add_library(slambench-io
 
 add_library(slambench-utils  
 	src/SLAMBenchConfiguration  
+	src/SLAMBenchLibraryHelper  
 	src/sb_malloc 
 	src/ParameterComponent
     src/ParameterManager

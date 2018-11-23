@@ -153,12 +153,12 @@ struct Parameter {
     inline void (*getCallback())(Parameter*,ParameterComponent*) {return _callback;}
 
     inline  std::string           getName()                                                {return _name;}
-    inline  const std::string     getShortOption(ParameterComponent* pc)                   {return (pc->getName() != "")? pc->getName() + "-" +_short_option : _short_option;}
-    inline  std::string    		  getLongOption(ParameterComponent* pc)                    {return (pc->getName() != "")? pc->getName() + "-" +_name : _name;}
+    inline  const std::string     getShortOption(const ParameterComponent* pc)    const    {return (pc->getName() != "")? pc->getName() + "-" +_short_option : _short_option;}
+    inline  std::string    		  getLongOption(const ParameterComponent* pc)     const    {return (pc->getName() != "")? pc->getName() + "-" +_name : _name;}
 
 
     virtual bool  requiresValue() = 0;
-    virtual const  std::string   getStrValue() = 0;
+    virtual const  std::string   getStrValue() const = 0;
     virtual void          setValue(const char*) = 0;
     virtual void          resetValue()  = 0;
     virtual const std::string   getStrDefault()  = 0;
@@ -189,7 +189,7 @@ struct TriggeredParameter : Parameter {
 
     bool  requiresValue() {return false;};
 
-    const  std::string   getStrValue() {return _triggered?"true":"false";};
+    const  std::string   getStrValue() const {return _triggered?"true":"false";};
     void                 setValue(const char*)  {_triggered = true;};
     void                 resetValue() {_triggered = false;};
     const std::string    getStrDefault()  {return "false";};
@@ -219,7 +219,7 @@ struct TypedParameter : Parameter {
     	}
     }
 
-    const std::string     getValue(const void*)                 ;
+    const std::string     getValue(const void*)   const              ;
     void                  copyValue(T*,const T*)                ;
     void                  setValue(const char* otarg)                 ;
 
@@ -228,7 +228,7 @@ struct TypedParameter : Parameter {
 
     inline  const std::string     getStrDefault()                       {if (_default_value == nullptr) return "nullptr"; return getValue(_default_value);};
     inline  void                  resetValue()                          {if (_ptr == nullptr) return; if (_default_value == nullptr) return; copyValue((T*)_ptr,_default_value);};
-    inline  const  std::string    getStrValue()                         {if (_ptr == nullptr) return "nullptr"; return getValue((T*)_ptr);};
+    inline  const  std::string    getStrValue()                   const {if (_ptr == nullptr) return "nullptr"; return getValue((T*)_ptr);};
     inline  const T&              getTypedValue()                       {if (_ptr == nullptr) throw std::logic_error("Undefined Typed Parameter."); return *((T*)_ptr);};
     inline  const std::string     getStrType()                          {return  typeid(T).name();}
 
@@ -248,7 +248,7 @@ private :
 
 };
 
-template<> inline const std::string  TypedParameter<float [2]>::getValue(const void * ptr) {
+template<> inline const std::string  TypedParameter<float [2]>::getValue(const void * ptr) const {
 	return "" + precise_to_string(((const float*)ptr)[0]) + "," + precise_to_string(((const float*)ptr)[1]) + "";
 };
 
@@ -269,7 +269,7 @@ template<> inline void  TypedParameter<float [2]>::setValue(const char* optarg) 
 	}
 };
 
-template<> inline const std::string  TypedParameter<float [4]>::getValue(const void * ptr) {
+template<> inline const std::string  TypedParameter<float [4]>::getValue(const void * ptr) const {
 	return "" + precise_to_string(((const float*)ptr)[0]) + "," + precise_to_string(((const float*)ptr)[1]) + "," + precise_to_string(((const float*)ptr)[2]) + "," + precise_to_string(((const float*)ptr)[3]) + "";
 };
 
@@ -301,11 +301,11 @@ template<> inline void  TypedParameter<float [4]>::setValue(const char* optarg) 
 
 template<> inline void  TypedParameter<std::string>::copyValue(std::string* to,const std::string* from)    {*(std::string*)to = *(std::string*)from;;};
 template<> inline void  TypedParameter<std::string>::setValue(const char*otarg)     {if (_ptr) (*(std::string*)_ptr) = std::string(otarg);};
-template<> inline const std::string  TypedParameter<std::string>::getValue(const void * ptr) {return *((std::string*) ptr);};
+template<> inline const std::string  TypedParameter<std::string>::getValue(const void * ptr) const {return *((std::string*) ptr);};
 
 template<> inline void  TypedParameter<bool>::copyValue(bool* to,const bool* from)                {*(bool*)to = *(bool*)from;;};
 template<> inline void  TypedParameter<bool>::setValue(const char* otarg)                 {if (_ptr) (*(bool*)_ptr) = (std::string(otarg) == "true");};
-template<> inline const std::string  TypedParameter<bool>::getValue(const void * ptr)  {return (*(bool*)ptr)?"true":"false";};
+template<> inline const std::string  TypedParameter<bool>::getValue(const void * ptr) const {return (*(bool*)ptr)?"true":"false";};
 
 
 template<> inline void  TypedParameter<unsigned int>::copyValue(unsigned int* to,const unsigned int* from)              {*(unsigned int*)to = *(unsigned int*)from;;};
@@ -364,24 +364,24 @@ template<> inline void  TypedParameter< std::vector<std::string>  >::setValue(co
 };
 
 
-template<> inline const std::string  TypedParameter<unsigned int>::getValue(const void * ptr) {return precise_to_string(*(unsigned int*)ptr);};
-template<> inline const std::string  TypedParameter<int>::getValue(const void * ptr) {return precise_to_string(*(int*)ptr);};
-template<> inline const std::string  TypedParameter<long unsigned int>::getValue(const void * ptr) {return precise_to_string(*(long unsigned int*)ptr);};
-template<> inline const std::string  TypedParameter<float>::getValue(const void * ptr) {return precise_to_string(*(float*)ptr);};
-template<> inline const std::string  TypedParameter<double>::getValue(const void * ptr) {return precise_to_string(*(double*)ptr);};
-template<> inline const std::string  TypedParameter<sb_float3>::getValue(const void * ptr) {
+template<> inline const std::string  TypedParameter<unsigned int>::getValue(const void * ptr) const{return precise_to_string(*(unsigned int*)ptr);};
+template<> inline const std::string  TypedParameter<int>::getValue(const void * ptr) const{return precise_to_string(*(int*)ptr);};
+template<> inline const std::string  TypedParameter<long unsigned int>::getValue(const void * ptr) const{return precise_to_string(*(long unsigned int*)ptr);};
+template<> inline const std::string  TypedParameter<float>::getValue(const void * ptr) const{return precise_to_string(*(float*)ptr);};
+template<> inline const std::string  TypedParameter<double>::getValue(const void * ptr) const{return precise_to_string(*(double*)ptr);};
+template<> inline const std::string  TypedParameter<sb_float3>::getValue(const void * ptr) const{
     return "" + precise_to_string(((sb_float3*)ptr)->x) + ","  +  precise_to_string(((sb_float3*)ptr)->y)  +  "," + precise_to_string(((sb_float3*)ptr)->z) + "";
 };
 
-template<> inline const std::string  TypedParameter<sb_float4>::getValue(const void * ptr) {
+template<> inline const std::string  TypedParameter<sb_float4>::getValue(const void * ptr) const{
     return "" +  precise_to_string(((sb_float4*)ptr)->x) + ","  +  precise_to_string(((sb_float4*)ptr)->y)  +  "," + precise_to_string(((sb_float4*)ptr)->z)+  "," + precise_to_string(((sb_float4*)ptr)->w) + "";
 };
 
-template<> inline const std::string  TypedParameter<sb_uint3>::getValue(const void * ptr) {
+template<> inline const std::string  TypedParameter<sb_uint3>::getValue(const void * ptr) const{
     return "" + precise_to_string(((sb_uint3*)ptr)->x) + ","  +  precise_to_string(((sb_uint3*)ptr)->y)  +  "," + precise_to_string(((sb_uint3*)ptr)->z) + "";
 };
 
-template<> inline const std::string  TypedParameter< std::vector<int> >::getValue(const void * ptr) {
+template<> inline const std::string  TypedParameter< std::vector<int> >::getValue(const void * ptr) const{
     std::string res ;
     res = "" ;
     for (auto it = (*(std::vector<int>*)ptr).begin() ; it != (*(std::vector<int>*)ptr).end() ; it++ ) {
@@ -394,7 +394,7 @@ template<> inline const std::string  TypedParameter< std::vector<int> >::getValu
     res +="";
     return res;
 };
-template<> inline const std::string  TypedParameter< std::vector<std::string> >::getValue(const void * ptr) {
+template<> inline const std::string  TypedParameter< std::vector<std::string> >::getValue(const void * ptr) const{
     std::string res = "" ;
     for (auto it = (*(std::vector<std::string>*)ptr).begin() ; it != (*(std::vector<std::string>*)ptr).end() ; it++ ) {
         if (it != (*(std::vector<std::string>*)ptr).begin() ) {

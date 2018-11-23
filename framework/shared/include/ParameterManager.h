@@ -14,21 +14,28 @@
 
 #include <ostream>
 #include <vector>
+#include <map>
+#include <ParameterComponent.h>
 
-class ParameterComponent;
 
 namespace slambench {
-	class ParameterManager {
+	class ParameterManager : public ParameterComponent {
+	public :
+		ParameterManager() :
+    	ParameterComponent("") {}
 	public:
-		void AddComponent(ParameterComponent *component);
 		
-		void PrintValues(std::ostream &str) const;
-		void PrintArguments(std::ostream &str) const;
+		void PrintValues(std::ostream &str, const ParameterComponent* c = NULL) const;
+		void PrintArguments(std::ostream &str, const ParameterComponent* c = NULL) const;
 		
+
+		bool BuildArgumentsList(ParameterComponent *callback_data);
 		bool ReadArgumentsOrQuit(unsigned int argc, const char * const * const argv, ParameterComponent *callback_data);
 		bool ReadArguments(unsigned int argc, const char * const * const argv, ParameterComponent *callback_data);
-	private:
-		std::vector<ParameterComponent*> components_;
+
+	private :
+		std::map<std::string, Parameter*> params_long, params_short;
+
 	};
 }
 

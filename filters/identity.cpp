@@ -7,7 +7,7 @@
 
 #include <SLAMBenchAPI.h>
 
- slambench::io::SLAMFrame * sb_filter (SLAMBenchFilterLibraryHelper * slam_settings, slambench::io::SLAMFrame * frame) {
+ slambench::io::SLAMFrame * sb_filter (SLAMBenchFilterLibraryHelper * , slambench::io::SLAMFrame * frame) {
 	return frame;
 }
 
