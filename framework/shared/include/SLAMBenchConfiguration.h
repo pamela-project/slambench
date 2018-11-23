@@ -28,6 +28,7 @@
 #include <Parameters.h>
 
 #include <SLAMBenchLibraryHelper.h>
+#include <SLAMBenchFilterLibraryHelper.h>
 
 #include <io/SLAMFile.h>
 #include <io/sensor/SensorCollection.h>
@@ -36,14 +37,15 @@
 
 /* Default values */
 
-const unsigned int default_frame_limit               = 0;
-const double default_realtime_mult                   = 1;
-const std::string default_dump_volume_file           = "";
-const std::string default_log_file                   = "";
-const std::string default_save_map                   = "";
-const std::vector<std::string> default_libraries     = {};
-const std::vector<std::string> default_input_files   = {};
-const bool                     default_is_false      = false;
+static const unsigned int default_frame_limit                  = 0;
+static const double default_realtime_mult                      = 1;
+static const std::string default_dump_volume_file              = "";
+static const std::string default_log_file                      = "";
+static const std::string default_save_map                      = "";
+static const std::vector<std::string> default_slam_libraries   = {};
+static const std::vector<std::string> default_filter_libraries = {};
+static const std::vector<std::string> default_input_files      = {};
+static const bool                     default_is_false         = false;
 
 /* Classes */
 
@@ -55,10 +57,10 @@ public:
     SLAMBenchConfiguration ();
 	virtual ~SLAMBenchConfiguration();
 
-	typedef std::vector<SLAMBenchLibraryHelper*> lib_container_t;
 private :
 
-    lib_container_t libs;
+    slam_lib_container_t slam_libs;
+    filter_lib_container_t filter_libs;
 
 
     std::ofstream log_filestream;
@@ -66,7 +68,8 @@ private :
     std::string   log_file;
     std::string   alignment_technique;
     std::vector<std::string> input_files;
-    std::vector<std::string> library_names;
+    std::vector<std::string> slam_library_names;
+    std::vector<std::string> filter_library_names;
     unsigned int frame_limit;
 	
 	slambench::io::FrameStream *input_stream_;
@@ -88,7 +91,7 @@ public :
 
 	void AddFrameCallback(std::function<void()> callback) { frame_callbacks_.push_back(callback); }
 	
-	const lib_container_t &GetLoadedLibs() { return libs; }
+	const slam_lib_container_t &GetLoadedLibs() { return slam_libs; }
     const slambench::ParameterManager &GetParameterManager() const { return param_manager_; }
 	slambench::ParameterManager &GetParameterManager() { return param_manager_; }
 	
@@ -111,7 +114,8 @@ public :
 	
     static void compute_loop_algorithm(SLAMBenchConfiguration * config, bool *stay_on, SLAMBenchUI *ui);
 
-    void add_library (std::string library_filename, std::string id = "");
+    void add_filter_library  (std::string library_filename, std::string id = "");
+    void add_slam_library    (std::string library_filename, std::string id = "");
     bool add_input (std::string library_filename);
 
 

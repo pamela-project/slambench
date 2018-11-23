@@ -37,4 +37,9 @@ extern "C" {
 	bool c_sb_update_outputs(void *lib, void *timestamp) {
 		return sb_update_outputs((SLAMBenchLibraryHelper*)lib, (const slambench::TimeStamp *)timestamp);
 	}
+
+	void * c_sb_filter(void *lib, void *timestamp) {
+		return sb_filter((SLAMBenchFilterLibraryHelper*)lib, (slambench::io::SLAMFrame *)timestamp);
+	}
+
 }

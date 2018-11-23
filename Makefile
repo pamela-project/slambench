@@ -197,6 +197,10 @@ slambench: build/Makefile
 	@echo "The list of current use-case libraries available is:"
 	@echo ""                                                                      
 	@for f in `ls build/lib/lib*-library.so 2> /dev/null || echo Nothing` ; do echo $$f ; done
+	@echo ""            
+	@echo "The list of current filters available is:"
+	@echo ""                                                                      
+	@for f in `ls build/lib/lib*-filter.so 2> /dev/null || echo Nothing` ; do echo $$f ; done
 	@echo ""
 	@echo "As a next step we suggest you to run \"make usecases\" or \"make slambench APPS=all\"."
 	@echo ""

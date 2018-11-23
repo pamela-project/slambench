@@ -19,6 +19,7 @@ SET(CMAKE_BUILD_DIRECTORY ${PROJECT_BINARY_DIR}/builddir)
 
 
 
-add_subdirectory(framework)  # SLAMBench 
+add_subdirectory(framework)  # SLAMBench framework
+add_subdirectory(filters)    # SLAMBench filters
 
 add_subdirectory(benchmarks) # Benchmarks

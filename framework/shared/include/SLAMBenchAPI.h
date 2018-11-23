@@ -12,6 +12,7 @@
 #define FRAMEWORK_SHARED_INCLUDE_SLAMBENCHAPI_H_
 
 #include <SLAMBenchLibraryHelper.h>
+#include <SLAMBenchFilterLibraryHelper.h>
 
 #include <Eigen/Core>
 
@@ -53,6 +54,13 @@ bool sb_update_outputs(SLAMBenchLibraryHelper *lib, const slambench::TimeStamp *
  * */
 bool sb_clean_slam_system();
 
+
+
+
+slambench::io::SLAMFrame *  sb_filter (SLAMBenchFilterLibraryHelper * slam_settings, slambench::io::SLAMFrame * type) ;
+
+
+
 /*
  * C equivalent of each function (not used)
  * */
@@ -66,7 +74,7 @@ bool c_sb_update_frame (void * slam_settings, void * type) ;
 bool c_sb_process_once (void * slam_settings) ;
 bool c_sb_update_outputs(void *lib, void *timestamp);
 bool c_sb_clean_slam_system();
-
+void * c_sb_filter (void * slam_settings, void * frame) ;
 }
 
 #endif /* FRAMEWORK_SHARED_INCLUDE_SLAMBENCHAPI_H_ */

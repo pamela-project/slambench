@@ -164,6 +164,7 @@ int main(int argc, char * argv[])
 		// End of experiment, we output the map
 		//***************************************************************************************
 
+		// TODO: Only one output file does not do the job for more than one SLAM systems, output directory maybe ?
 
 		SLAMBenchLibraryHelper *main_lib = nullptr;
 
