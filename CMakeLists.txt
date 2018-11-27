@@ -130,5 +130,4 @@ endfunction()
 ######################################################
 
 add_subdirectory(framework)  # SLAMBench framework
-add_subdirectory(filters)    # SLAMBench filters
 add_subdirectory(benchmarks) # Benchmarks
