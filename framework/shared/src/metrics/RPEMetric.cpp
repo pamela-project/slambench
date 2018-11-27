@@ -146,7 +146,8 @@ Value *RPEMetric::GetValue(Phase* phase)
 
 	}
 
-	double RPE = std::sqrt(norms/ (double)count);
+
+	double RPE = (count == 0) ? 0 : std::sqrt(norms/ (double)count);
 
 
 	auto rpe_rmse = new slambench::values::TypeForVT<slambench::values::VT_DOUBLE>::type(RPE);
