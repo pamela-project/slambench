@@ -28,7 +28,7 @@
 
 using namespace slambench::io;
 
-SLAMFrame::~SLAMFrame() {}
+SLAMFrame::~SLAMFrame() { std::cout << "Frame is dead." << std::endl;}
 
 size_t SLAMFrame::GetSize() const {
 	if(FrameSensor->IsVariableSize()) {

@@ -7,6 +7,7 @@
 
 
 #include <SLAMBenchLibraryHelper.h>
+#include "sb_malloc.h"
 
 
 
@@ -34,7 +35,17 @@
 		 SLAMBenchFilterLibraryHelper * lib_ptr = new SLAMBenchFilterLibraryHelper (identifier, libName, this->get_log_stream(),  this->get_input_interface());
 
 
-		 LOAD_FUNC2HELPER(handle,lib_ptr,c_sb_filter);
+		 LOAD_FUNC2HELPER(handle,lib_ptr,c_sb_new_filter_configuration);
+		 LOAD_FUNC2HELPER(handle,lib_ptr,c_sb_init_filter);
+		 LOAD_FUNC2HELPER(handle,lib_ptr,c_sb_process_filter);
+
+		 size_t pre = slambench::memory::MemoryProfile::singleton.GetOverallData().BytesAllocatedAtEndOfFrame;
+		 if (!lib_ptr->c_sb_new_filter_configuration(lib_ptr)) {
+			 std::cerr << "Filter configuration construction failed." << std::endl;
+			 exit(1);
+		 }
+		 size_t post = slambench::memory::MemoryProfile::singleton.GetOverallData().BytesAllocatedAtEndOfFrame;
+		 std::cerr << "Filter configuration consumed " << post-pre  << " bytes" << std::endl;
 
 		 this->filter_libs.push_back(lib_ptr);
 		 this->AddComponent(lib_ptr);

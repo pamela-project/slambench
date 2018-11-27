@@ -34,7 +34,9 @@ private :
     slambench::io::InputInterface*     _input_interface;
 
 public:
-	slambench::io::SLAMFrame *        (* c_sb_filter) (SLAMBenchFilterLibraryHelper *, slambench::io::SLAMFrame * ) ;
+	bool                              (* c_sb_new_filter_configuration) (SLAMBenchFilterLibraryHelper * ) ;
+	bool                              (* c_sb_init_filter)    (SLAMBenchFilterLibraryHelper * ) ;
+	slambench::io::SLAMFrame *        (* c_sb_process_filter) (SLAMBenchFilterLibraryHelper *, slambench::io::SLAMFrame * ) ;
 
 private:
     SLAMBenchFilterLibraryHelper ();
@@ -48,7 +50,9 @@ public:
 		_library_name(lib),
 		_log_stream (l),
 		_input_interface (i),
-		c_sb_filter(nullptr)
+		c_sb_new_filter_configuration(nullptr),
+		c_sb_init_filter(nullptr),
+		c_sb_process_filter(nullptr)
 	{
 
 	}

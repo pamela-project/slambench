@@ -57,8 +57,9 @@ bool sb_clean_slam_system();
 
 
 
-slambench::io::SLAMFrame *  sb_filter (SLAMBenchFilterLibraryHelper * slam_settings, slambench::io::SLAMFrame * type) ;
-
+slambench::io::SLAMFrame *  sb_process_filter           (SLAMBenchFilterLibraryHelper * slam_settings, slambench::io::SLAMFrame * type) ;
+bool                        sb_new_filter_configuration (SLAMBenchFilterLibraryHelper * filter_settings);
+bool                        sb_init_filter (SLAMBenchFilterLibraryHelper * filter_settings);
 
 
 /*
@@ -74,7 +75,10 @@ bool c_sb_update_frame (void * slam_settings, void * type) ;
 bool c_sb_process_once (void * slam_settings) ;
 bool c_sb_update_outputs(void *lib, void *timestamp);
 bool c_sb_clean_slam_system();
-void * c_sb_filter (void * slam_settings, void * frame) ;
+
+bool  c_sb_new_filter_configuration (void * ) ;
+bool  c_sb_init_filter (void * ) ;
+void *c_sb_process_filter (void *, void * ) ;
 }
 
 #endif /* FRAMEWORK_SHARED_INCLUDE_SLAMBENCHAPI_H_ */

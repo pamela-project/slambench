@@ -300,6 +300,14 @@ void SLAMBenchConfiguration::InitAlgorithms()
 			std::cerr << "Algo does not provide a main pose output" << std::endl;
 			exit(1);
 		}
+
+		for (auto filter : lib->get_filter_libraries()) {
+			bool init_worked =   filter->c_sb_init_filter(filter);
+			if (!init_worked) {
+				std::cerr << "Filter initialization failed." << std::endl;
+				exit(1);
+			}
+		}
 	}
 
 }
@@ -378,10 +386,9 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 			std::vector<slambench::io::SLAMFrame*> filtered_frames;
 			slambench::io::SLAMFrame * filtered_frame = current_frame;
 			for (auto filter : lib->get_filter_libraries()) {
-				filtered_frame  = filter->c_sb_filter(filter,filtered_frame);
+				filtered_frame  = filter->c_sb_process_filter(filter,filtered_frame);
 				filtered_frames.push_back(filtered_frame);
 			}
-
 
 			// ********* [[ SEND THE FRAME ]] *********
 			if (filtered_frame) {
@@ -389,7 +396,14 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 			} else {
 				ongoing=true;
 			}
-			
+
+			for (auto temp_frame : filtered_frames) {
+				if (temp_frame) {
+					temp_frame->FreeData();
+					delete temp_frame;
+				}
+			}
+
 			// This algorithm hasn't received enough frames yet.
 			if(ongoing) {
 				continue;
