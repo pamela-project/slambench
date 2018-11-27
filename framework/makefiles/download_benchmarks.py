@@ -3,18 +3,18 @@ import sys
 fd = open(sys.argv[1])
 data =fd.read()
 
-targets = {}
+targets = []
 
 for l in data.split("\n") :
     item = l.split(";")
-    targets[item[0]] = {
+    targets.append({
         "name"          : item[0],
         "citation"      : item[1],
         "original_repo" : item[2],
         "new_branch"    : item[3],
         "new_repo"      : item[4],
         "target_dir"    : item[5],
-    }
+    })
 
 fd.close()
 
@@ -24,7 +24,7 @@ print("\t@echo \"===============================================================
 print("\t@echo -e \"Current list of compatible SLAM systems (alphabetical order). If you are using one of those SLAM algorithms, \\033[1;31mplease refer to their respective publications\\033[0m:\"")
 print("\t@echo \"\"")
 
-for item in targets.values() :
+for item in targets :
     name = item["name"]
     citation = item["citation"]
     original_repo = item["original_repo"]
@@ -47,8 +47,8 @@ print("\t@echo \"===============================================================
 
 
 
-
-for item in targets.values() :
+previous = None
+for item in targets :
 
     name = item["name"]
     citation = item["citation"]
@@ -57,21 +57,22 @@ for item in targets.values() :
     new_branch = item["new_branch"]
     new_repo = item["new_repo"]
     
-    print("%s:" % name)
-    print("\t@echo \"=================================================================================================================\"")
-    print("\t@echo    \"  - %s \"" % citation)
-    print("\t@echo    \"    Original repository: %s\"" % original_repo)
-    print("\t@echo    \"    Used repository: %s\"" % new_repo)
-    print("\t@echo \"=================================================================================================================\"")
-    print("\t@echo \"\"")
-    print("\t@echo \"Are you sure you want to download this use-case (y/n) ?\" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! \"$$REPLY\" == \"y\" ] ; then echo -e \"\\nExit.\"; false; else echo -e \"\\nDownload starts.\"; fi")
+    if previous != name :
+        print("%s:" % name)
+        print("\t@echo \"=================================================================================================================\"")
+        print("\t@echo    \"  - %s \"" % citation)
+        print("\t@echo    \"    Original repository: %s\"" % original_repo)
+        print("\t@echo    \"    Used repository: %s\"" % new_repo)
+        print("\t@echo \"=================================================================================================================\"")
+        print("\t@echo \"\"")
+        print("\t@echo \"Are you sure you want to download this use-case (y/n) ?\" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! \"$$REPLY\" == \"y\" ] ; then echo -e \"\\nExit.\"; false; else echo -e \"\\nDownload starts.\"; fi")
     print("\tmkdir %s -p" % target_dir)
     print("\trm %s -rf" % target_dir)
     print("\tgit clone --branch %s %s %s"% (new_branch, new_repo,target_dir))
     print("\t@echo \"cmake_minimum_required(VERSION 2.8)\"   > benchmarks/$@/CMakeLists.txt")
     print("\t@echo \"explore_implementations ( $@ src/* )\"     >> benchmarks/$@/CMakeLists.txt")
-
-list_str = " ".join(targets.keys())    
+    previous = name
+list_str = " ".join(set([x["name"] for x in targets]))    
 print(".PHONY: %s" % list_str )
 print("algorithms :  %s" % list_str)
 
@@ -79,7 +80,7 @@ print("algorithms :  %s" % list_str)
 
 print("benchmarks_status:")
 
-for item in targets.values() :
+for item in targets :
     name = item["name"]
     print("\t@echo \"************ Check-in %s in %s\"" % (name,item["target_dir"]))
     print("\t@if [ -d %s ] ; then git -C %s diff; fi" % (item["target_dir"],item["target_dir"]))
