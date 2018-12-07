@@ -28,7 +28,7 @@
 
 using namespace slambench::io;
 
-SLAMFrame::~SLAMFrame() { std::cout << "Frame is dead." << std::endl;}
+SLAMFrame::~SLAMFrame() {}
 
 size_t SLAMFrame::GetSize() const {
 	if(FrameSensor->IsVariableSize()) {
@@ -59,7 +59,7 @@ void SLAMInMemoryFrame::FreeData() {
 	// do nothing
 }
 
-SLAMFileFrame::SLAMFileFrame() : _data(nullptr) {}
+SLAMFileFrame::SLAMFileFrame() :  ProcessCallback(nullptr), _data(nullptr) {}
 
 void *SLAMFileFrame::GetData() {
 	if(_data != nullptr) return _data;
@@ -302,7 +302,7 @@ void *TxtFileFrame::LoadCameraFile() {
 	return data;
 }
 
-DeserialisedFrame::DeserialisedFrame(FrameBuffer &buffer, FILE *file) : _buffer(buffer), _file(file) {
+DeserialisedFrame::DeserialisedFrame(FrameBuffer &buffer, FILE *file) : _buffer(buffer), _file(file), _offset(0) {
 	
 }
 
@@ -311,10 +311,11 @@ void DeserialisedFrame::SetOffset(size_t new_offset) {
 }
 
 void *DeserialisedFrame::GetData() {
+	unsigned long size = GetSize();
 	_buffer.Acquire();
-	_buffer.Reserve(GetSize());
+	_buffer.Reserve(size);
 	fseek(_file, _offset, SEEK_SET);
-	fread(_buffer.Data(), GetSize(), 1, _file);
+	fread(_buffer.Data(),size, 1, _file);
 	
 	return _buffer.Data();
 }

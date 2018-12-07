@@ -151,7 +151,7 @@ int main(int argc, char * argv[])
 		}
 
 
-		config->AddFrameCallback([&cw]{cw.PrintRow();});
+		config->AddFrameCallback([&cw]{cw.PrintRow();}); // @suppress("Invalid arguments")
 		cw.PrintHeader();
 
 		//***************************************************************************************
