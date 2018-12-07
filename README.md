@@ -89,10 +89,10 @@ To ease the usage of SLAMbench we provide auto-installation of dependencies and 
 #### To install them ####
 
 With Fedora 29:
-```dnf install -y gtk2-devel mesa-libEGL-devel vtk-devel cmake make git mercurial wget unzip gcc gcc-c++ lapack blas lapack-devel blas-devel findutils  cvs  glut-devel glew-devel boost-devel glog-devel gflags-devel libXmu-devel```
+```dnf install -y yaml-cpp-devel gtk2-devel mesa-libEGL-devel vtk-devel cmake make git mercurial wget unzip gcc gcc-c++ lapack blas lapack-devel blas-devel findutils  cvs  glut-devel glew-devel boost-devel glog-devel gflags-devel libXmu-devel```
 
 With Fedora 24: 
-```dnf install -y gtk2-devel vtk-devel cmake make git mercurial wget unzip gcc gcc-c++ lapack blas lapack-devel blas-devel findutils  cvs  glut-devel glew-devel boost-devel glog-devel gflags-devel libXmu-devel```
+```dnf install -y yaml-cpp-devel gtk2-devel vtk-devel cmake make git mercurial wget unzip gcc gcc-c++ lapack blas lapack-devel blas-devel findutils  cvs  glut-devel glew-devel boost-devel glog-devel gflags-devel libXmu-devel```
 
 With Ubuntu 16.10: 
 ``` apt-get -y install libvtk6.3 libvtk6-dev unzip libflann-dev wget mercurial git gcc cmake python-numpy freeglut3 freeglut3-dev libglew1.5 libglew1.5-dev libglu1-mesa libglu1-mesa-dev libgl1-mesa-glx libgl1-mesa-dev libxmu-dev libxi-dev  libboost-all-dev cvs libgoogle-glog-dev libatlas-base-dev gfortran  gtk2.0 libgtk2.0-dev  libyaml-dev build-essential bison flex libyaml-cpp-dev ```
