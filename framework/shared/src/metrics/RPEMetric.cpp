@@ -66,6 +66,7 @@ Value *RPEMetric::GetValue(Phase* phase)
     // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 	// Previously there was i_delta in original implementation
 	// I drop the feature for now, will put it back later
+	// TODO: hHe solution here is to have ParameterComponent for Metrics, so this parameter is visible externally
 
 	// in RPE we compare shift from previous point, we need to store them
 	auto gt_previous_iterator = gt_traj.end() ;
