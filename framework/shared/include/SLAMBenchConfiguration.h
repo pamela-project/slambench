@@ -138,7 +138,7 @@ public :
     inline void update_log_stream() {
 
     if (this->log_file != "") {
-    	this->log_filestream.open(this->log_file.c_str()); // TODO: potential memory leak ?!
+    	this->log_filestream.open(this->log_file.c_str());
     	this->log_stream = &(this->log_filestream);
     } else {
     	this->log_stream = &std::cout;

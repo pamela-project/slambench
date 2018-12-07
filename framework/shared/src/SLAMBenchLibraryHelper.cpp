@@ -15,7 +15,7 @@
 
 		 std::cerr << "new filter library name: " << so_file  << std::endl;
 
-		 void* handle = dlopen(so_file.c_str(),RTLD_LAZY ); // TODO : memory leak here
+		 void* handle = dlopen(so_file.c_str(),RTLD_LAZY );
 
 		 if (!handle) {
 		 	std::cerr << "Cannot open filter library: " << dlerror() << std::endl;

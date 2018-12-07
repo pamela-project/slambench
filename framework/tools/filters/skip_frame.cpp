@@ -23,7 +23,7 @@ bool compare_depth_images (short * previous , short * current) {
 
 bool compare (slambench::io::SLAMFrame * previous , slambench::io::SLAMFrame * current) {
 
-	// This buffer is there to fix a design problem in SLAMBench, this will be addressed in the future
+	// TODO: This buffer is there to fix a design problem in SLAMBench, this will be addressed in the future
 	static slambench::io::FrameBuffer workaround_for_GetData;
 
 	assert(previous->FrameSensor == current->FrameSensor);

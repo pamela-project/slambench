@@ -88,6 +88,9 @@ To ease the usage of SLAMbench we provide auto-installation of dependencies and 
 
 #### To install them ####
 
+With Fedora 29:
+```dnf install -y gtk2-devel mesa-libEGL-devel vtk-devel cmake make git mercurial wget unzip gcc gcc-c++ lapack blas lapack-devel blas-devel findutils  cvs  glut-devel glew-devel boost-devel glog-devel gflags-devel libXmu-devel```
+
 With Fedora 24: 
 ```dnf install -y gtk2-devel vtk-devel cmake make git mercurial wget unzip gcc gcc-c++ lapack blas lapack-devel blas-devel findutils  cvs  glut-devel glew-devel boost-devel glog-devel gflags-devel libXmu-devel```
 
