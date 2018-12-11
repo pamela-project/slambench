@@ -55,7 +55,7 @@ void SLAMBenchConfiguration::add_slam_library(std::string so_file, std::string i
 
 	std::cerr << "new library name: " << so_file  << std::endl;
 
-	void* handle = dlopen(so_file.c_str(),RTLD_LAZY); // TODO : memory leak here
+	void* handle = dlopen(so_file.c_str(),RTLD_LAZY);
 
 	if (!handle) {
 		std::cerr << "Cannot open library: " << dlerror() << std::endl;
@@ -358,7 +358,6 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 			break;
 		}
 		
-		// TODO: There is only one frame queue
 		slambench::io::SLAMFrame * current_frame = config->input_stream_->GetNextFrame();
 
 		if (current_frame == nullptr) {
@@ -378,10 +377,6 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 		for (auto lib : config->slam_libs) {
 
 			// ********* [[ FRAME PROCESSED BY FILTERS ]] *********
-			// TODO : memory leak here !!!
-			// TODO : FreeData online to avoid using too much memory but dangerous if filter return pointer.
-			// TODO : using filter will be memory consuming, need to think about it and see if we can do differently.
-			// TODO : Add a skip if current
 
 			std::vector<slambench::io::SLAMFrame*> filtered_frames;
 			slambench::io::SLAMFrame * filtered_frame = current_frame;

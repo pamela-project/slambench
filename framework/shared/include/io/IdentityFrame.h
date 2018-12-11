@@ -10,12 +10,12 @@
 
 #include <io/SLAMFrame.h>
 
+// IdentityFrame is a copy of a different frame, so it will access Data from the other frame.
 class IdentityFrame : public slambench::io::SLAMFrame {
 private:
 	slambench::io::SLAMFrame * _from;
 public :
 
-	// TODO: I have some issues with this, we should have a way to copy SLAMFrame in a safer manner.
 	IdentityFrame(slambench::io::SLAMFrame * from) : _from (from) {
 		this->FrameSensor = from->FrameSensor;
 		this->Timestamp = from->Timestamp;
