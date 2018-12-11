@@ -62,8 +62,13 @@ endif
 ifneq ("$(wildcard ${CUDA_TOOLKIT_ROOT_DIR})","")
 DEPS_ARGS+= -DCUDA_TOOLKIT_ROOT_DIR=${CUDA_TOOLKIT_ROOT_DIR}
 endif
-ifneq ("$(wildcard ${CUDA_HOST_COMPILER})","")
-DEPS_ARGS+= -DCUDA_HOST_COMPILER=${CUDA_HOST_COMPILER}
+
+ifneq ("$(wildcard ${GCC7_COMPILER})","")
+DEPS_ARGS+= -DCUDA_HOST_COMPILER=${GCC7_COMPILER}
+endif
+
+ifneq ("$(wildcard ${GCC5_COMPILER})","")
+DEPS_ARGS+= -DCUDA_HOST_COMPILER=${GCC5_COMPILER}
 endif
 
 ifneq ("$(wildcard ${CERES_DIR})","")
