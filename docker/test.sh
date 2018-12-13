@@ -148,7 +148,7 @@ if [ "${RUN_TEST}" == "true" ]; then
     mkdir -p ${WORKSPACE}/log/
     rm -f ${WORKSPACE}/log/*
     cd ${WORKSPACE}
-    PYTHONPATH=${JENKINS_TOOLS} python ${JENKINS_TOOLS}/test_script.py  -o ${WORKSPACE}/${JOB_NAME}.xml -l ${WORKSPACE}/log/ -s ${WORKSPACE}/repository/
+    PYTHONPATH=${JENKINS_TOOLS} python ${JENKINS_TOOLS}/test_script.py  -o ${WORKSPACE}/${JOB_NAME}.xml -l ${WORKSPACE}/log/ -s ${WORKSPACE}/repository/ 
 else
     touch ${WORKSPACE}/${JOB_NAME}.xml
 fi

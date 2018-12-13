@@ -1,6 +1,6 @@
 How to run the build script:
 
-CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda CLEAN_BUILD=false CLEAN_DATA=false CLEAN_ALL=false GIT_BRANCH=bruno-dev GIT_REPOSITORY="https://github.com/pamela-project/slambench2.git" WORKSPACE=~/workspace ./docker/build.sh
+SMALL_DATASET=true CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda CLEAN_BUILD=false CLEAN_DATA=false CLEAN_ALL=false GIT_BRANCH=bruno-dev GIT_REPOSITORY="https://github.com/pamela-project/slambench2.git" WORKSPACE=~/workspace ./docker/build.sh
 
 How to run the test script:
 

@@ -65,27 +65,31 @@ def generate_latex_table (data , table_title, value_name, value_type , precision
         dataset_labels = list ( set (  dataset_labels + data[a].keys()  )  ) 
 
     algorithm_labels = data.keys()
-    
+
+    print 
         
     latex_str  = "" 
     latex_str +=  table_title + "\\\\\n"
     latex_str +=  "{\\rowcolors{3}{black!10}{black!2}\n"
     latex_str +=  "\\tiny\n"
-    latex_str +=  "\\begin{tabular}{%s}\n" % ( "|l|" + "|".join(["l" for x in dataset_labels]) + "|")
+
+    latex_str +=  "\\begin{tabular}{%s}\n" % ( "|l|" + "|".join(["l" for x in algorithm_labels]) + "|")
     latex_str +=  "\\hline\n"
-#    latex_str +=  "Dataset name & \\multicolumn{4}{c|}{ICLNUIM Dataset} & \\multicolumn{19}{c|}{TUM Dataset}  & \\multicolumn{11}{c|}{EuRoC MAV Dataset}  \\\\\n"
-#    latex_str +=  "\\hline\n"
-#    latex_str +=  "Scene name & \\multicolumn{4}{c|}{Living Room} & \\multicolumn{7}{c|}{Freiburg 1} & \\multicolumn{12}{c|}{Freiburg 2} & \\multicolumn{5}{c|}{Machine Hall} & \\multicolumn{3}{c|}{Vicon Room 1} & \\multicolumn{3}{c|}{Vicon Room 2}\\\\\n"
-    latex_str +=  "Algorithm & " + " & ".join([x.replace("_","\_") for x in dataset_labels]) + "\\\\\n"
+    latex_str +=  "Dataset & " + " & ".join([x.split("/")[-1].replace("_","\_").replace("-library.so","") for x in algorithm_labels]) + "\\\\\n"
     latex_str +=  "\\hline\n"
-    for algorithm in data :
-        latex_str +=  algorithm.replace("_","\_")
-        for dataset in dataset_labels :
+    
+
+    for dataset in dataset_labels:
+        dataset_label   = dataset.split("/")[-1].replace("_","\_").replace(".slam","")
+        
+        latex_str += dataset_label 
+        
+        for algorithm in algorithm_labels:
+            algorithm_label = algorithm.split("/")[-1]
+            
             accuracy = None
             
             if not dataset in  data[algorithm].keys() :
-                #printerr (" Cannot find the data %s in %s data.\n" % (dataset, algorithm))
-                #print "Only found %s" % (data[algorithm].keys() )
                 latex_str +=  "& - "
                 continue
 
@@ -120,12 +124,11 @@ def generate_latex_table (data , table_title, value_name, value_type , precision
                 latex_str +=  " & \\textbf{" + precision % accuracy + "} " 
             else :
                 latex_str +=  " & " + precision % accuracy
-            
-                
         latex_str +=   "\\\\\n" 
     latex_str +=  "\\hline\n"
     latex_str +=  "\\end{tabular}\n"
     latex_str +=  "\n"
+            
     return latex_str
     
 def generate_latex (data) :

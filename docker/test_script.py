@@ -123,12 +123,12 @@ def generate_test_units(OUTPUT_LOG_DIRECTORY, SKIP, SLAMBENCH2_DIRECTORY) :
 
         "RGBD" : {
 
-        #"kfusion-cpp"          : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libkfusion-cpp-library.so" , "dataset_arguments" : kfusion_arguments } ,
-        #"kfusion-notoon"       : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libkfusion-notoon-library.so" , "dataset_arguments" : kfusion_arguments } ,
-        #"kfusion-octree-cpp"   : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libkfusion-octree-cpp-library.so" , "dataset_arguments" : kfusion_arguments } ,
-        #"kfusion-openmp"       : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libkfusion-openmp-library.so", "dataset_arguments" : kfusion_arguments  },
-        #"kfusion-octree-openmp": { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libkfusion-octree-openmp-library.so", "dataset_arguments" : kfusion_arguments  },
-        #"kfusion-opencl"       : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libkfusion-opencl-library.so", "dataset_arguments" : kfusion_arguments  },
+        "kfusion-cpp"          : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libkfusion-cpp-library.so" , "dataset_arguments" : kfusion_arguments } ,
+        "kfusion-notoon"       : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libkfusion-notoon-library.so" , "dataset_arguments" : kfusion_arguments } ,
+        "kfusion-octree-cpp"   : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libkfusion-octree-cpp-library.so" , "dataset_arguments" : kfusion_arguments } ,
+        "kfusion-openmp"       : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libkfusion-openmp-library.so", "dataset_arguments" : kfusion_arguments  },
+        "kfusion-octree-openmp": { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libkfusion-octree-openmp-library.so", "dataset_arguments" : kfusion_arguments  },
+        "kfusion-opencl"       : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libkfusion-opencl-library.so", "dataset_arguments" : kfusion_arguments  },
         "kfusion-cuda"         : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libkfusion-cuda-library.so", "dataset_arguments" : kfusion_arguments  },
 
         "efusion-cuda-hightmem"         : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libefusion-cuda-library.so", "dataset_arguments" : efusion_lowmem_arguments  },
@@ -143,13 +143,13 @@ def generate_test_units(OUTPUT_LOG_DIRECTORY, SKIP, SLAMBENCH2_DIRECTORY) :
         "MONO" : {
             
         "lsdslam-cpp"         : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/liblsdslam-cpp-library.so", "dataset_arguments" : {}  },
-        #"lsdslam-original_mp" : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/liblsdslam-original_mp-library.so", "dataset_arguments" : {}  },
+        "lsdslam-original_mp" : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/liblsdslam-original_mp-library.so", "dataset_arguments" : {}  },
 
-        #"monoslam-sequential" : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libmonoslam-sequential-library.so", "dataset_arguments" : {}  },
+        "monoslam-sequential" : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libmonoslam-sequential-library.so", "dataset_arguments" : {}  },
 
         "orbslam2-original-mono" : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/liborbslam2-original-library.so", "dataset_arguments" : orbslam2_mono_arguments   },
 
-        #"ptam-original_mp" : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libptam-original_mp-library.so", "dataset_arguments" : {}  },
+        "ptam-original_mp" : { "library_name" : SLAMBENCH2_DIRECTORY + "/build/lib/libptam-original_mp-library.so", "dataset_arguments" : {}  },
         },
 
         "STEREO" : {
@@ -164,31 +164,58 @@ def generate_test_units(OUTPUT_LOG_DIRECTORY, SKIP, SLAMBENCH2_DIRECTORY) :
     for mode in SKIP :
         if mode in libraries.keys() :
             del libraries[mode]
+            
     for mode in libraries :
         for lib in SKIP :
             if lib in libraries[mode].keys() :
                 del libraries[mode][lib]
         
 
+    for implementation_categories in libraries.keys()  :
+        for implementation in libraries[implementation_categories].keys()  :
+            library = libraries[implementation_categories][implementation]
+            if not os.path.exists(library["library_name"]) :
+                print "Skip %s : file '%s' not found" % (implementation, library["library_name"])
+                del libraries[implementation_categories][implementation]
+
+
+    for dataset_categories in  datasets.keys() :
+        for dataset_identifier in  datasets[dataset_categories].keys() :
+                    
+            dataset_filename = datasets[dataset_categories][dataset_identifier]                                        
+            if not os.path.exists(dataset_filename) : 
+                print "Skip %s : file not found" % (dataset_filename)
+                del datasets[dataset_categories][dataset_identifier]
+
 
     testsuites = {}
+    loader = SLAMBENCH2_DIRECTORY + "/build/bin/benchmark_loader"
+    if not os.path.exists(loader) : 
+        print "Skip all test: loader '%s' not found" % (loader)
+        return testsuites
+    
 
     for implementation_categories in libraries.keys()  :
         for implementation in libraries[implementation_categories].keys()  :
             testsuites[implementation] = []
+
+            library = libraries[implementation_categories][implementation]
+ 
             for dataset_categories in  datasets.keys() :
                 for dataset_identifier in  datasets[dataset_categories].keys() :
-
-                    library = libraries[implementation_categories][implementation]
-                    dataset_filename = datasets[dataset_categories][dataset_identifier]
-
-                    overlap = set (implementation_categories.split(",")) &  set (dataset_categories.split(","))
                     
+                    dataset_filename = datasets[dataset_categories][dataset_identifier]                                        
+
+            
+                    overlap = set (implementation_categories.split(",")) &  set (dataset_categories.split(","))                    
                     if len(overlap) == 0 :
-                        print "Skip the couple %s - %s" % (implementation, dataset_identifier)
+                        print "Skip the couple %s - %s: overlap" % (implementation, dataset_identifier)
                         continue
+
+
                     
-                    command  = [SLAMBENCH2_DIRECTORY + "/build/bin/benchmark_loader" ]
+                    
+                    command  = [ loader ]
                     command += [ "-i",  dataset_filename ]
                     command += [ "-load", library["library_name"]]
                     command += [ "-o" , OUTPUT_LOG_DIRECTORY + "/benchmark-%s-test-%s.log" % (implementation,dataset_identifier)]
@@ -308,7 +335,7 @@ def main():
         test_count = 0
         for test_to_run in testsuite :
             test_count += 1
-            printerr( "Run test %s %d/%d." % (test_to_run["name"],test_count,len(testsuite)))
+            printerr( "Run test suite %s (%d/%d) - test %s (%d/%d)." % (testsuite_name,testsuite_count,len(x),test_to_run["name"],test_count,len(testsuite)))
             run_results +=  [jenkinstest.run_test (test_to_run , logdir = OUTPUT_LOG_DIRECTORY, print_only = CHECK_ONLY )]
 
            

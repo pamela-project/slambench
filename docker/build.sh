@@ -49,6 +49,7 @@ echo GIT_BRANCH=${GIT_BRANCH}
 echo CLEAN_ALL=${CLEAN_ALL}
 echo CLEAN_DATA=${CLEAN_DATA}
 echo CLEAN_BUILD=${CLEAN_BUILD}
+echo SMALL_DATASET=${SMALL_DATASET}
 
 echo ""
 echo ""
@@ -66,6 +67,12 @@ set -x -e
 #######################################################################################
 #############   CHECK PARAMETERS
 #######################################################################################
+
+if [ ! -n "${SMALL_DATASET+1}" ]; then
+    echo "SMAL_DATASET is not defined!!"
+    exit 1
+fi
+
 
 if [ ! -n "${SKIP+1}" ]; then
   echo "SKIP is not defined."
@@ -229,72 +236,73 @@ rm -f ${DATA_LOG_FILE}
 ### ORBSLAM Vocabulary Dataset
 make ./benchmarks/orbslam2/src/original/Vocabulary/ORBvoc.txt   >> ${DATA_LOG_FILE} 2>&1 
 
-### ICL-NUIM Living Room
      
-make ./datasets/ICL_NUIM/living_room_traj0_loop.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/ICL_NUIM/living_room_traj1_loop.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/ICL_NUIM/living_room_traj2_loop.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/ICL_NUIM/living_room_traj3_loop.slam   >> ${DATA_LOG_FILE} 2>&1 
+if [ "${SMALL_DATASET}" != "true" ]; then
+    ### ICL-NUIM Living Room
+    make ./datasets/ICL_NUIM/living_room_traj0_loop.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/ICL_NUIM/living_room_traj1_loop.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/ICL_NUIM/living_room_traj2_loop.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/ICL_NUIM/living_room_traj3_loop.slam   >> ${DATA_LOG_FILE} 2>&1 
 
 
-### TUM Testing and Debugging
+    ### TUM Testing and Debugging
+    make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_xyz.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_rpy.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_xyz.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_rpy.slam   >> ${DATA_LOG_FILE} 2>&1 
+    
 
-make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_xyz.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_rpy.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_xyz.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_rpy.slam   >> ${DATA_LOG_FILE} 2>&1 
+    ### TUM Handheld SLAM
+    make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_360.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_floor.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_desk.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_desk2.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_room.slam   >> ${DATA_LOG_FILE} 2>&1 
 
-
-### TUM Handheld SLAM
-
-make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_360.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_floor.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_desk.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_desk2.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_room.slam   >> ${DATA_LOG_FILE} 2>&1 
-
-make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_360_hemisphere.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_360_kidnap.slam   >> ${DATA_LOG_FILE} 2>&1 
-
-make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_desk.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_desk_with_person.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_large_no_loop.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_large_with_loop.slam   >> ${DATA_LOG_FILE} 2>&1 
-
-### TUM Robot SLAM
-
-make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_360.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam2.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam3.slam   >> ${DATA_LOG_FILE} 2>&1 
-
-##### TUM Extra dataset
-
-## https://vision.in.tum.de/rgbd/dataset/freiburg3/rgbd_dataset_freiburg3_long_office_household.tgz
-
-
-### EuRoC MAV Machine Hall
-
-make ./datasets/EuRoCMAV/machine_hall/MH_01_easy/MH_01_easy.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/EuRoCMAV/machine_hall/MH_02_easy/MH_02_easy.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/EuRoCMAV/machine_hall/MH_03_medium/MH_03_medium.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/EuRoCMAV/machine_hall/MH_04_difficult/MH_04_difficult.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/EuRoCMAV/machine_hall/MH_05_difficult/MH_05_difficult.slam   >> ${DATA_LOG_FILE} 2>&1 
-
-### EuRoC MAV Vicon Room
-
-make ./datasets/EuRoCMAV/vicon_room1/V1_01_easy/V1_01_easy.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/EuRoCMAV/vicon_room1/V1_02_medium/V1_02_medium.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/EuRoCMAV/vicon_room1/V1_03_difficult/V1_03_difficult.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/EuRoCMAV/vicon_room2/V2_01_easy/V2_01_easy.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/EuRoCMAV/vicon_room2/V2_02_medium/V2_02_medium.slam   >> ${DATA_LOG_FILE} 2>&1 
-make ./datasets/EuRoCMAV/vicon_room2/V2_03_difficult/V2_03_difficult.slam   >> ${DATA_LOG_FILE} 2>&1 
-
-
-### SVO test dataset
-
-make datasets/SVO/artificial.slam   >> ${DATA_LOG_FILE} 2>&1 
-
+    make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_360_hemisphere.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_360_kidnap.slam   >> ${DATA_LOG_FILE} 2>&1 
+    
+    make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_desk.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_desk_with_person.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_large_no_loop.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_large_with_loop.slam   >> ${DATA_LOG_FILE} 2>&1 
+    
+    ### TUM Robot SLAM    
+    make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_360.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam.slam   >> ${DATA_LOG_FILE} 2>&1 
+    #make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam2.slam   >> ${DATA_LOG_FILE} 2>&1 
+    #make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam3.slam   >> ${DATA_LOG_FILE} 2>&1 
+    
+    ##### TUM Extra dataset    
+    ## https://vision.in.tum.de/rgbd/dataset/freiburg3/rgbd_dataset_freiburg3_long_office_household.tgz
+    
+    
+    ### EuRoC MAV Machine Hall    
+    make ./datasets/EuRoCMAV/machine_hall/MH_01_easy/MH_01_easy.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/EuRoCMAV/machine_hall/MH_02_easy/MH_02_easy.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/EuRoCMAV/machine_hall/MH_03_medium/MH_03_medium.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/EuRoCMAV/machine_hall/MH_04_difficult/MH_04_difficult.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/EuRoCMAV/machine_hall/MH_05_difficult/MH_05_difficult.slam   >> ${DATA_LOG_FILE} 2>&1 
+    
+    ### EuRoC MAV Vicon Room    
+    make ./datasets/EuRoCMAV/vicon_room1/V1_01_easy/V1_01_easy.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/EuRoCMAV/vicon_room1/V1_02_medium/V1_02_medium.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/EuRoCMAV/vicon_room1/V1_03_difficult/V1_03_difficult.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/EuRoCMAV/vicon_room2/V2_01_easy/V2_01_easy.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/EuRoCMAV/vicon_room2/V2_02_medium/V2_02_medium.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/EuRoCMAV/vicon_room2/V2_03_difficult/V2_03_difficult.slam   >> ${DATA_LOG_FILE} 2>&1 
+    
+    
+    ### SVO test dataset    
+    make datasets/SVO/artificial.slam   >> ${DATA_LOG_FILE} 2>&1 
+else
+    make ./datasets/ICL_NUIM/living_room_traj2_loop.slam   >> ${DATA_LOG_FILE} 2>&1  
+    make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_xyz.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_xyz.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make ./datasets/EuRoCMAV/machine_hall/MH_01_easy/MH_01_easy.slam   >> ${DATA_LOG_FILE} 2>&1    
+    make ./datasets/EuRoCMAV/vicon_room1/V1_01_easy/V1_01_easy.slam   >> ${DATA_LOG_FILE} 2>&1 
+    make datasets/SVO/artificial.slam   >> ${DATA_LOG_FILE} 2>&1 
+fi
 echo "End build."
 
 exit 0

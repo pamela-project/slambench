@@ -39,6 +39,7 @@ def run_it(parameters, newenv = None, print_only = False, logfile = None, timeou
     :param newenv: list of envirnement variable to add to the execution context
     :param PrintOnly: if True, the execution don't happend, verbosity only happends.
     '''
+    sys.stderr.write( "                   ");
     sys.stderr.write("Run new command at " + str(dt.datetime.now()) + "\n")
     res = {}
     res["stdout"] = ""
@@ -55,8 +56,8 @@ def run_it(parameters, newenv = None, print_only = False, logfile = None, timeou
             strcmd += ("\"" + p + "\"")
         else :
             strcmd += (p)
-        strcmd += (" ")
-    sys.stderr.write("  " + strcmd + "\n")
+        strcmd += (" " + "\n                   ")
+    sys.stderr.write(strcmd + "\n")
     
     my_env = os.environ.copy()
     
