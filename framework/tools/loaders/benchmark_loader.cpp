@@ -73,7 +73,8 @@ int main(int argc, char * argv[])
 
 		config->start_statistics();
 		slambench::ColumnWriter cw (config->get_log_stream(), "\t");
-		cw.AddColumn(new slambench::RowNumberColumn());
+		slambench::RowNumberColumn row_number;
+		cw.AddColumn(&row_number);
 
 
 
