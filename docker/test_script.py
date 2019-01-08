@@ -336,7 +336,7 @@ def main():
         for test_to_run in testsuite :
             test_count += 1
             printerr( "Run test suite %s (%d/%d) - test %s (%d/%d)." % (testsuite_name,testsuite_count,len(x),test_to_run["name"],test_count,len(testsuite)))
-            run_results +=  [jenkinstest.run_test (test_to_run , logdir = OUTPUT_LOG_DIRECTORY, print_only = CHECK_ONLY )]
+            run_results +=  [jenkinstest.run_test (test_to_run , logdir = OUTPUT_LOG_DIRECTORY, print_only = CHECK_ONLY, timeout = 3600 )]
 
            
 
