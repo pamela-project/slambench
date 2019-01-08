@@ -56,7 +56,7 @@ def run_it(parameters, newenv = None, print_only = False, logfile = None, timeou
             strcmd += ("\"" + p + "\"")
         else :
             strcmd += (p)
-        strcmd += (" " + "\n                   ")
+        strcmd += (" ")
     sys.stderr.write(strcmd + "\n")
     
     my_env = os.environ.copy()
