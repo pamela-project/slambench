@@ -20,6 +20,19 @@ using namespace slambench::io;
 
 slambench::io::SingleFrameBufferSource single_fb_source;
 
+
+void printFrame (SLAMFrame *frame , unsigned int index ) {
+	std::cout << "Frame " << index << std::endl;
+	std::cout << " -> Timestamp " << std::fixed << std::setprecision(9) << (double)frame->Timestamp.S + (frame->Timestamp.Ns / 1000000000.0) << std::endl;
+
+	if (frame->FrameSensor->GetType() == CameraSensor::kCameraType) {
+		slambench::io::CameraSensor * rgb_sensor = dynamic_cast<slambench::io::CameraSensor *> (frame->FrameSensor) ;
+	}
+	std::cout << " -> Sensor " << frame->FrameSensor->GetType() << " " <<  (uint32_t)frame->FrameSensor->Index <<  "  (" <<  frame->FrameSensor->Description.c_str() <<  ")" << std::endl;
+
+
+}
+
 void Deserialise(const std::string &filename, SLAMFile &file) {
 	FILE *input_file = fopen(filename.c_str(), "r");
 	SLAMFileDeserialiser deserialiser(input_file, &single_fb_source);
@@ -43,15 +56,25 @@ void Check(SLAMFile &file) {
 			SLAMFrame *frame = file.GetFrame(index);
 			if (frame->FrameSensor->Index == sensor->Index) count++;
 		}
-		std::cout << "Sensor " <<  (uint32_t)sensor->Index << ": " <<  sensor->GetType() << ": " <<  sensor->Description.c_str() << " (" << count << " frames)" << std::endl;
+		if (sensor->GetType() == CameraSensor::kCameraType) {
+			slambench::io::CameraSensor * rgb_sensor = dynamic_cast<slambench::io::CameraSensor *> (sensor) ;
+			std::cout << "Sensor " <<  (uint32_t)sensor->Index << ": " << " (" << count << " frames)"  << std::endl
+					 << "    Type: " <<  sensor->GetType() << std::endl
+					 << "    FrameFormat: " <<  rgb_sensor->FrameFormat << std::endl
+					 << "    PixelFormat: " <<  slambench::io::pixelformat::TypeOf(rgb_sensor->PixelFormat) << std::endl
+				 << "    Desc: " <<  sensor->Description.c_str()  << std::endl;
+
+		} else {
+			std::cout << "Sensor " <<  (uint32_t)sensor->Index << ": " << " (" << count << " frames)" << std::endl
+				 << "    Type: " <<  sensor->GetType() << std::endl
+				 << "    Desc: " <<  sensor->Description.c_str()  << std::endl;
+		}
 	}
 
 
 	for(unsigned int index = 0; index < file.GetFrameCount(); ++index) {
 		SLAMFrame *frame = file.GetFrame(index);
-		std::cout << "Frame " << index << std::endl;
-		std::cout << " -> Timestamp " << std::fixed << std::setprecision(9) << (double)frame->Timestamp.S + (frame->Timestamp.Ns / 1000000000.0) << std::endl;
-		std::cout << " -> Sensor " <<  (uint32_t)frame->FrameSensor->Index <<  "  (" <<  frame->FrameSensor->Description.c_str() <<  ")" << std::endl;
+		printFrame(frame,index);
 	}
 }
 
