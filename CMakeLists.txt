@@ -16,6 +16,7 @@ SET(CMAKE_BINARY_DIR               ${PROJECT_BINARY_DIR}/bindir)
 SET(CMAKE_CACHEFILE_DIR            ${PROJECT_BINARY_DIR}/cache)
 SET(CMAKE_BUILD_DIRECTORY          ${PROJECT_BINARY_DIR}/builddir)
   
+  
 
 # Most common compiler flags
 #######################################################
@@ -24,6 +25,7 @@ set(GENERAL_COMPILATION_FLAGS "-g -O3  -Wall  -Wextra")
 
 
 if (CMAKE_COMPILER_IS_GNUCC)
+  add_definitions (-D_FILE_OFFSET_BITS=64) ## Workaround for 32 bit boards with fwrite 2G limit
 
   set(GENERAL_COMPILATION_FLAGS "${GENERAL_COMPILATION_FLAGS} -Wno-error=deprecated-declarations ") # Eigen raises deprecated declarations warnings and int-in-bool-context warnings.
   set(GENERAL_COMPILATION_FLAGS "${GENERAL_COMPILATION_FLAGS}  -Wno-unknown-pragmas  -Wno-error=deprecated-declarations -Wno-error=unused-result -Wno-error=reorder ")
