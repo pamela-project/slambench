@@ -1,6 +1,7 @@
 # Docker files
 /docker/tmp
 /docker/nvidia-driver.run
+docker/workspace/
 
 # Build files
 /build/
@@ -12,6 +13,7 @@
 .project
 .settings/
 .idea
+.pydevproject
 *~
 
 # Python
