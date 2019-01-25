@@ -50,18 +50,19 @@ def main():
     #parser.add_argument('-i','--input', action='append', help='<Required> Set flag', required=True)
     parser.add_argument('files', metavar='N', type=str, nargs='+',  help='Files to process')
     parser.add_argument('-v','--verbose', action='store_true', help="turn verbose on")
+    parser.add_argument('-a','--accuracy', action='store_true', help="print accuracy record")
     
     args = parser.parse_args()
     #print "Input files: %s" % (str(args.input))
-    
-    sys.stdout.write(generate_accuracy_record (args.files))
-     
     if args.verbose :
         setverbose(True)
     else :
         setverbose(False)
     
     
+    if args.accuracy :
+        sys.stdout.write(generate_accuracy_record (args.files))
+     
 
         
     
