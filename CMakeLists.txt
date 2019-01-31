@@ -22,7 +22,7 @@ SET(CMAKE_BUILD_DIRECTORY          ${PROJECT_BINARY_DIR}/builddir)
 
 set(GENERAL_COMPILATION_FLAGS "-g -O3  -Wall  -Wextra")
 
-
+add_definitions(-D_FILE_OFFSET_BITS=64)
 if (CMAKE_COMPILER_IS_GNUCC)
 
   set(GENERAL_COMPILATION_FLAGS "${GENERAL_COMPILATION_FLAGS} -Wno-error=deprecated-declarations ") # Eigen raises deprecated declarations warnings and int-in-bool-context warnings.

@@ -28,8 +28,6 @@ namespace slambench {
 		private:
 			FrameBuffer _fb;
 		};
-
-
 	}
 }
 

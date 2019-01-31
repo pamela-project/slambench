@@ -12,6 +12,10 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}     -Wno-error=unused-parameter -Wno-error=u
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=unused-parameter -Wno-error=unused-variable -Wno-error=unused-but-set-variable")
 
 
+if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=catch-value=")
+endif()
+	
 ######################################################################################
 ################# DYNAMIC LIBRARY SYSTEM
 ######################################################################################
@@ -33,9 +37,6 @@ IF(Pangolin_FOUND)
 	target_link_libraries(pangolin_loader PRIVATE ${gui_pangolin_libraries})
 
 
-	if (CMAKE_COMPILER_IS_GNUCC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)	  
-	  target_compile_options(pangolin_loader   PRIVATE "-Wno-error=catch-value=")	  
-	endif()	
 
 ENDIF(Pangolin_FOUND)
 
