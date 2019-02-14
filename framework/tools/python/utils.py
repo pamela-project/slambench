@@ -27,14 +27,14 @@ def setverbose(v) :
     verbose_level = v
 
 def printwarning(msg) :
-    sys.stderr.write(WARNING_CODE + " " + msg)
+    sys.stderr.write(WARNING_CODE + " " + msg + "\n")
 
     
 def printerr(err) :
-    sys.stderr.write(ERROR_CODE + " " + err)
+    sys.stderr.write(ERROR_CODE + " " + err + "\n")
+    exit(1)
     
 def printinfo(err) :
     global verbose_level
     if verbose_level :
-        sys.stderr.write(shellcolors.GREEN + "[INFO]" +  shellcolors.ENDC + " " + err)
-
+        sys.stderr.write(shellcolors.GREEN + "[INFO]" +  shellcolors.ENDC + " " + err + "\n")

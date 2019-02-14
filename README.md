@@ -424,6 +424,14 @@ Example :
 
 should always return ``true`` or an exception will be raised.
 
+## About python scripts ##
+
+When running DSE, we generate lots of log files, generally inside a output directory.
+There is a script to preprocess and compress these logs :
+
+./framework/tools/python/readlog.py ./output/lv3_efcuda/ -s lv3_efcuda.gkl
+
+
 
 # Know issues #
 
