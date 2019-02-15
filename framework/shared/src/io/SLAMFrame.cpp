@@ -317,7 +317,7 @@ void *DeserialisedFrame::GetData() {
 
 	fseeko(_file, _offset, SEEK_SET);
 	fread(_buffer.Data(),size, 1, _file);
-	
+	// TODO : Check return value of fread
 	return _buffer.Data();
 }
 

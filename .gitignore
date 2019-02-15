@@ -60,3 +60,5 @@ paper/*.tex
 # Datasets
 
 /datasets
+
+*.gkl

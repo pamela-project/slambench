@@ -1,18 +1,20 @@
-#!/usr/bin/python2
-
 import os
 import time
 import re
 import math
 import numpy as np
-
+import pickle
+import deepdish
 from utils import *
+import gzip
+from progress.bar import Bar
+
 
 LIBRARY_NAME_PROPERTY = "load-slam-library"
 
 PROPERTIES_SECTION     = "Properties"
 STATISTICS_SECTION     = "Statistics"
-
+SUMMARY_SECTION        = "Summary"
 FRAME_NUMBER_COLUMN    = "Frame Number"
 
 ATE_COLUMN             = "AbsoluteError"
@@ -38,6 +40,78 @@ MEDIAN_SUFFIX            = "_MEDIAN"
 ########     PARSERS
 #############################################################################################
 
+
+def load_inputs (inputs) : 
+    printinfo ("Load inputs (%s)" % len(inputs))
+    log_files = []
+    summary_files = []
+    data = {}
+    
+    for pathname in inputs :
+        if os.path.isdir(pathname) :
+            dirname = pathname
+            try : # Log directory
+                log_files += [os.path.join(dirname, f) for f in os.listdir(dirname) if f[-4:] == ".log" and os.path.isfile(os.path.join(dirname, f))]
+            except OSError :
+                printerr("Working directory %s not found.\n" % dirname )
+                return None
+        elif pathname[-4:] == ".log" : # Log file        
+            log_files += [pathname]
+        else : # potential Summary file
+            summary_files += [pathname]
+
+    bar = Bar('Log files...',  max=len(log_files))
+    for filename in log_files :
+        bar.next()
+        filedata = load_log_file(filename)
+        if filedata :
+            data[filename] = load_log_file(filename)
+        else :
+            printwarning("File is corrupt or incomplete : %s" % filename)
+
+    bar.finish()
+
+    bar = Bar('Summary files...', max=len(summary_files))
+    for filename in summary_files :
+        bar.next()
+        temp = load_summary_file(filename)
+        for key,value in temp.items() :
+            if key in data :
+                printerr("File name appear twice : %s" % key)
+            data[key] = value
+
+    bar.finish()
+    return data
+
+
+def save_summary_file (data, filename ):
+    printinfo("Saving data in %s ...\n" % filename)
+    if filename[-4:] == ".pkl" :
+        with open(filename, 'wb') as f:
+            pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
+    elif filename[-4:] == ".gkl" :
+        with gzip.open(filename, 'wb') as f:
+            pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
+    elif filename[-3:] == ".h5" :            
+        deepdish.io.save(filename, data, compression=('blosc', 9))
+    else :
+        printerr ("Unsupported file format: %s" % filename)
+        
+def load_summary_file ( filename ):
+    if filename[-4:] == ".pkl" :
+        with open(filename, 'rb') as f:
+            return pickle.load(f)
+    elif filename[-4:] == ".gkl" :
+        with gzip.open(filename, 'rb') as f:
+            return pickle.load(f)
+    elif filename[-3:] == ".h5" :
+        return deepdish.io.load(filename)
+    else :
+        printerr ("Unsupported file format: %s" % filename)
+            
+            
+
+
 def load_data_from_input_dirs ( input_dirs ) :
 
     filelist = []
@@ -51,7 +125,8 @@ def load_data_from_input_dirs ( input_dirs ) :
     data = load_data_from_files (filelist)
     return data
 
-def load_data_from_file(filename) :
+
+def load_log_file(filename) :
 
     
     start_time = time.time()
@@ -105,7 +180,7 @@ def load_data_from_file(filename) :
             matching_fields = line.split("\t")
             if matching_fields :
                 if headers and len(headers) == len(matching_fields):
-                    for i in xrange (len(matching_fields)) :
+                    for i in range (len(matching_fields)) :
                         current_value = float("NaN")
                         try :
                             current_value = float(matching_fields[i])
@@ -133,9 +208,18 @@ def load_data_from_file(filename) :
 
     if headers == None :
         return None
-    #print "load = %f" % (1000 * (load_time - start_time) )
-    #print "loop = %f" % (1000 * (loop_time - load_time) )
+
+    stats = turn_data_to_stats(data)
+    if stats == None :
+        printerr (" %s : stats == None.\n" % filename )
+        return None
     
+    if len(stats.keys()) != 1 :
+        printerr("This file has more than one algorithm or no algorithm\n")
+        return None
+    
+    data[SUMMARY_SECTION] = stats
+
     return data
 
 def turn_data_to_stats(data) :
@@ -198,7 +282,7 @@ def load_data_from_files (filelist) :
     for filename in filelist :
         
         start_time = time.time()
-        temp = load_data_from_file(filename)
+        temp = load_log_file(filename)
         load_time = (time.time() - start_time) * 1000
         
         if temp and STATISTICS_SECTION in temp.keys()and PROPERTIES_SECTION in temp.keys() :

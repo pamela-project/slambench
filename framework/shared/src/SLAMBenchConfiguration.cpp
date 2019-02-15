@@ -208,7 +208,7 @@ SLAMBenchConfiguration::SLAMBenchConfiguration () :
 	initialised_ = false;
 	this->input_interface = NULL;
 	this->log_stream = NULL;
-    this->slam_library_names = {};
+        this->slam_library_names = {};
 
 	// Run Related
 	this->addParameter(TypedParameter<unsigned int>("fl",     "frame-limit",      "last frame to compute",                   &this->frame_limit, &default_frame_limit));
@@ -430,10 +430,6 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 
 		current_frame->FreeData();
 
-		// for (auto f : filtered_frames) {
-		// 	// How to free the data given that they could be just pointer to existing data?
-		// 	// delete f;
-		// }
 		
 		if(!ongoing) {
 			config->FireEndOfFrame();
