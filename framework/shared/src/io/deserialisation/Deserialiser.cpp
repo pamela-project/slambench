@@ -29,7 +29,7 @@ bool Deserialiser::Skip(size_t bytes) {
 }
 
 size_t Deserialiser::Offset() {
-	return ftell(File());
+	return ftello(File());
 }
 
 bool Deserialiser::Good() {
