@@ -314,7 +314,8 @@ void *DeserialisedFrame::GetData() {
 	unsigned long size = GetSize();
 	_buffer.Acquire();
 	_buffer.Reserve(size);
-	fseek(_file, _offset, SEEK_SET);
+
+	fseeko(_file, _offset, SEEK_SET);
 	fread(_buffer.Data(),size, 1, _file);
 	
 	return _buffer.Data();
