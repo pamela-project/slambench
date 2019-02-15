@@ -24,16 +24,21 @@ typedef  std::vector<ParameterComponent*> components_vector ;
 class ParameterComponent
 {
 private:
-	std::string      _name;
-	arguments_vector _arguments;
+	std::string        _name;
+	arguments_vector   _arguments;
+	components_vector  _components;
 
 public:
 	ParameterComponent(std::string name) : _name(name) {}
 
 	virtual ~ParameterComponent();
 
-	arguments_vector &getParameters() {
+	const arguments_vector &getParameters() const {
 		return _arguments;
+	}
+
+	const components_vector &getComponents() const {
+		return _components;
 	}
 
 	std::string getName() const {
@@ -47,6 +52,10 @@ public:
 		param_ptr->resetValue();
 
 
+	}
+
+	void AddComponent(ParameterComponent *component) {
+		_components.push_back(component);
 	}
 
 
