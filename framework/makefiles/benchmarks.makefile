@@ -83,7 +83,7 @@ infinitam:
 	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/infinitam/src/original -p
 	rm benchmarks/infinitam/src/original -rf
-	git clone --branch master https://github.com/bbodin/InfiniTAM.git benchmarks/infinitam/src/original
+	git clone --branch update-master https://github.com/bbodin/InfiniTAM.git benchmarks/infinitam/src/original
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/$@/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 lsdslam:
@@ -114,7 +114,7 @@ orbslam2:
 	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/orbslam2/src/original -p
 	rm benchmarks/orbslam2/src/original -rf
-	git clone --branch master https://github.com/pamela-project/ORB_SLAM2.git benchmarks/orbslam2/src/original
+	git clone --branch update-master https://github.com/pamela-project/ORB_SLAM2.git benchmarks/orbslam2/src/original
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/$@/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 monoslam:
@@ -179,7 +179,7 @@ kfusion:
 	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
 	mkdir benchmarks/kfusion/src/original -p
 	rm benchmarks/kfusion/src/original -rf
-	git clone --branch master https://github.com/pamela-project/kfusion benchmarks/kfusion/src/original
+	git clone --branch update-master https://github.com/pamela-project/kfusion benchmarks/kfusion/src/original
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/$@/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 .PHONY: svo orbslam2 ptam efusion kfusion lsdslam monoslam infinitam okvis
