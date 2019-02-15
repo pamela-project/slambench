@@ -20,6 +20,6 @@ FILE *Serialiser::File() {
 }
 
 bool Serialiser::Write(const void *data, size_t size) {
-	return fwrite(data, 1, size, File()) == 1;
+  return fwrite(data, size, 1, File()) == 1;
 }
 

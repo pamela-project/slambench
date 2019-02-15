@@ -88,6 +88,7 @@ bool GTBufferingFrameStream::HasNextFrame()
 
 FrameCollection* GTBufferingFrameStream::GetGTFrames()
 {
+	// TODO : memory leak here
 	return new GTFrameCollection(*this);
 }
 

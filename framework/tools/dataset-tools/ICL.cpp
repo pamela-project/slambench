@@ -140,7 +140,7 @@ bool analyseIclFolder(const std::string &dirname) {
 				return false;
 			}
 		}
-	} catch (boost::filesystem::filesystem_error e)  {
+	} catch (boost::filesystem::filesystem_error& e)  {
 		std::cerr << "I/O Error with directory " << dirname << std::endl;
 		std::cerr << e.what() << std::endl;
 		return false;

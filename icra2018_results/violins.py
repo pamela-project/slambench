@@ -84,8 +84,6 @@ def generate_latex_table (data , table_title, value_name, value_type , precision
             accuracy = None
             
             if not dataset in  data[algorithm].keys() :
-                #printerr (" Cannot find the data %s in %s data.\n" % (dataset, algorithm))
-                #print "Only found %s" % (data[algorithm].keys() )
                 latex_str +=  "& - "
                 continue
 
@@ -120,12 +118,11 @@ def generate_latex_table (data , table_title, value_name, value_type , precision
                 latex_str +=  " & \\textbf{" + precision % accuracy + "} " 
             else :
                 latex_str +=  " & " + precision % accuracy
-            
-                
         latex_str +=   "\\\\\n" 
     latex_str +=  "\\hline\n"
     latex_str +=  "\\end{tabular}\n"
     latex_str +=  "\n"
+            
     return latex_str
     
 def generate_latex (data) :

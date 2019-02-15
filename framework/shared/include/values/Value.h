@@ -159,7 +159,7 @@ namespace slambench {
 			}
 			
 			const PoseValue &at(const TimeStamp &ts) const { 
-				//todo: search more intelligently
+				//TODO: search more intelligently
 				for(auto &i : values_) {
 					if(i.first == ts) {
 						return i.second;

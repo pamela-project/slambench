@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <Eigen/Core>
 
 using namespace slambench::io ;
 

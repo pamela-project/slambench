@@ -16,6 +16,8 @@
 #include "io/sensor/PointCloudSensor.h"
 #include "io/format/PointCloud.h"
 
+#include <Eigen/Core>
+
 using namespace slambench::outputs;
 
 OutputManager::~OutputManager()
