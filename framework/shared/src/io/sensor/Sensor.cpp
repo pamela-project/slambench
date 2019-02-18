@@ -16,8 +16,10 @@ using namespace slambench::io;
 
 Sensor::Sensor(const sensor_name_t &name, const sensor_type_t &type) :
 		ParameterComponent(name),
-		sensor_type_(type),
-		sensor_name_(name), Rate(0) {
+		Index(0),
+		Rate(0),
+		sensor_name_(name),
+		sensor_type_(type){
 }
 
 const Sensor::sensor_type_t &Sensor::GetType() const {

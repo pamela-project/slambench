@@ -134,7 +134,7 @@ public :
 		this->addParameter(TriggeredParameter         ("h",     "help",          "Print the help.",             this->help_callback));
 
 		this->param_manager.AddComponent(this);
-		this->param_manager.ReadArguments(argc, argv, this);
+		this->param_manager.ReadArguments(argc, argv);
 
 	}
 

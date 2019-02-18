@@ -15,7 +15,6 @@
 using namespace slambench::io;
 
 FrameBuffer::FrameBuffer() : _lock(false), _size(0), _data(nullptr) {
-	
 }
 
 FrameBuffer::~FrameBuffer() {

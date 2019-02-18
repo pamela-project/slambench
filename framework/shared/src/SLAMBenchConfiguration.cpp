@@ -44,19 +44,18 @@
 
 
 #include <dlfcn.h>
-#define LOAD_FUNC(lib,f)     *(void**)(& lib->f) = dlsym(handle,#f); const char *dlsym_error_##lib##f = dlerror(); if (dlsym_error_##lib##f) {        std::cerr << "Cannot load symbol " << #f << dlsym_error_##lib##f << std::endl; dlclose(handle); exit(1);}
+#define LOAD_FUNC2HELPER(handle,lib,f)     *(void**)(& lib->f) = dlsym(handle,#f); const char *dlsym_error_##lib##f = dlerror(); if (dlsym_error_##lib##f) {std::cerr << "Cannot load symbol " << #f << dlsym_error_##lib##f << std::endl; dlclose(handle); exit(1);}
 
 SLAMBenchConfiguration::~SLAMBenchConfiguration()
 {
 	CleanAlgorithms();
 }
 
-
-void SLAMBenchConfiguration::add_library(std::string so_file, std::string identifier) {
+void SLAMBenchConfiguration::add_slam_library(std::string so_file, std::string identifier) {
 
 	std::cerr << "new library name: " << so_file  << std::endl;
 
-	void* handle = dlopen(so_file.c_str(),RTLD_LAZY); // TODO : memory leak here
+	void* handle = dlopen(so_file.c_str(),RTLD_LAZY);
 
 	if (!handle) {
 		std::cerr << "Cannot open library: " << dlerror() << std::endl;
@@ -73,13 +72,13 @@ void SLAMBenchConfiguration::add_library(std::string so_file, std::string identi
 	std::string libName=std::string(start);
 	libName=libName.substr(3, libName.length()-14);
 	SLAMBenchLibraryHelper * lib_ptr = new SLAMBenchLibraryHelper (identifier, libName, this->get_log_stream(),  this->GetInputInterface());
-	LOAD_FUNC(lib_ptr,c_sb_init_slam_system);
-	LOAD_FUNC(lib_ptr,c_sb_new_slam_configuration);
-	LOAD_FUNC(lib_ptr,c_sb_update_frame);
-	LOAD_FUNC(lib_ptr,c_sb_process_once);
-	LOAD_FUNC(lib_ptr,c_sb_clean_slam_system);
-	LOAD_FUNC(lib_ptr,c_sb_update_outputs);
-	this->libs.push_back(lib_ptr);
+	LOAD_FUNC2HELPER(handle,lib_ptr,c_sb_init_slam_system);
+	LOAD_FUNC2HELPER(handle,lib_ptr,c_sb_new_slam_configuration);
+	LOAD_FUNC2HELPER(handle,lib_ptr,c_sb_update_frame);
+	LOAD_FUNC2HELPER(handle,lib_ptr,c_sb_process_once);
+	LOAD_FUNC2HELPER(handle,lib_ptr,c_sb_clean_slam_system);
+	LOAD_FUNC2HELPER(handle,lib_ptr,c_sb_update_outputs);
+	this->slam_libs.push_back(lib_ptr);
 
 
 	size_t pre = slambench::memory::MemoryProfile::singleton.GetOverallData().BytesAllocatedAtEndOfFrame;
@@ -92,11 +91,11 @@ void SLAMBenchConfiguration::add_library(std::string so_file, std::string identi
 
 	GetParameterManager().AddComponent(lib_ptr);
 
-	std::cerr << "library loaded: " << so_file << std::endl;
+	std::cerr << "SLAM library loaded: " << so_file << std::endl;
 
 }
 
-void Library_callback(Parameter* param, ParameterComponent* caller) {
+void slam_library_callback(Parameter* param, ParameterComponent* caller) {
 
 	SLAMBenchConfiguration* config = dynamic_cast<SLAMBenchConfiguration*> (caller);
 
@@ -116,7 +115,7 @@ void Library_callback(Parameter* param, ParameterComponent* caller) {
 		} else {
 			library_filename = library_name;
 		}
-		config->add_library(library_filename,library_identifier);
+		config->add_slam_library(library_filename,library_identifier);
 	}
 }
 
@@ -170,9 +169,7 @@ void help_callback(Parameter* , ParameterComponent* caller) {
 	SLAMBenchConfiguration* config = dynamic_cast<SLAMBenchConfiguration*> (caller);
 	
 	std::cerr << " == SLAMBench Configuration ==" << std::endl;
-	std::cerr << "  Available parameters :" << std::endl;
 	config->GetParameterManager().PrintArguments(std::cerr);
-	
 	exit(0);
 }
 
@@ -190,7 +187,7 @@ void log_callback(Parameter* , ParameterComponent* caller) {
 
 void SLAMBenchConfiguration::print_dse () {
 
-    for (SLAMBenchLibraryHelper* lib : this->libs) {
+    for (SLAMBenchLibraryHelper* lib : this->slam_libs) {
 
     	std::cout << "libs:"  <<  lib->get_identifier() << "\n" ;
 
@@ -211,14 +208,13 @@ SLAMBenchConfiguration::SLAMBenchConfiguration () :
 	initialised_ = false;
 	this->input_interface = NULL;
 	this->log_stream = NULL;
-    this->library_names = {};
-
+        this->slam_library_names = {};
 
 	// Run Related
 	this->addParameter(TypedParameter<unsigned int>("fl",     "frame-limit",      "last frame to compute",                   &this->frame_limit, &default_frame_limit));
 	this->addParameter(TypedParameter<std::string>("o",     "log-file",      "Output log file",                   &this->log_file, &default_log_file, log_callback));
 	this->addParameter(TypedParameter<std::vector<std::string>>("i",     "input" ,        "Specify the input file or mode." ,  &this->input_files, &default_input_files , input_callback ));
-	this->addParameter(TypedParameter<std::vector<std::string> >("load",  "load-library" , "Load a specific SLAM library."     , &this->library_names, &default_libraries , Library_callback ));
+	this->addParameter(TypedParameter<std::vector<std::string> >("load",  "load-slam-library" , "Load a specific SLAM library."     , &this->slam_library_names, &default_slam_libraries , slam_library_callback ));
 	this->addParameter(TriggeredParameter("dse",   "dse",    "Output solution space of parameters.",    dse_callback));
 	this->addParameter(TriggeredParameter("h",     "help",   "Print the help.", help_callback));
     this->addParameter(TypedParameter<bool>("realtime",     "realtime-mode",      "realtime frame loading mode",                   &this->realtime_mode_, &default_is_false));
@@ -288,7 +284,7 @@ void SLAMBenchConfiguration::InitAlgorithms()
 
 	assert(this->initialised_);
 
-	for (auto lib : this->libs) {
+	for (auto lib : this->slam_libs) {
 
 		//lib->GetMetricManager().BeginInit();
 				bool init_worked =  lib->c_sb_init_slam_system(lib) ;
@@ -314,7 +310,7 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 
 	assert(config->initialised_);
 
-	for (auto lib : config->libs) {
+	for (auto lib : config->slam_libs) {
 
 		auto trajectory = lib->GetOutputManager().GetMainOutput(slambench::values::VT_POSE);
 		if(trajectory == nullptr) {
@@ -354,10 +350,9 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 			break;
 		}
 		
-		// TODO: There is only one frame queue
-		slambench::io::SLAMFrame * next_frame = config->input_stream_->GetNextFrame();
+		slambench::io::SLAMFrame * current_frame = config->input_stream_->GetNextFrame();
 
-		if (next_frame == nullptr) {
+		if (current_frame == nullptr) {
 			std::cerr << "Last frame processed." << std::endl;
 			break;
 		}
@@ -366,15 +361,16 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 			std::cerr << "!*stay_on ==> break;" << std::endl;
 			break;
 		}
-		
+
+
 
 		// ********* [[ NEW FRAME PROCESSED BY ALGO ]] *********
 
-		for (auto lib : config->libs) {
+		for (auto lib : config->slam_libs) {
 
 
 			// ********* [[ SEND THE FRAME ]] *********
-			ongoing=not lib->c_sb_update_frame(lib,next_frame);
+			ongoing=not lib->c_sb_update_frame(lib,current_frame);
 			
 			// This algorithm hasn't received enough frames yet.
 			if(ongoing) {
@@ -391,7 +387,7 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 				exit(1);
 			}
 			
-			slambench::TimeStamp ts = next_frame->Timestamp;
+			slambench::TimeStamp ts = current_frame->Timestamp;
 			if(!lib->c_sb_update_outputs(lib, &ts)) {
 				std::cerr << "Failed to get outputs" << std::endl;
 				exit(1);
@@ -405,9 +401,8 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 
 		// ********* [[ FINALIZE ]] *********
 
-		next_frame->FreeData();
+		current_frame->FreeData();
 
-		
 		
 		if(!ongoing) {
 			config->FireEndOfFrame();
@@ -432,7 +427,7 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 
 void SLAMBenchConfiguration::CleanAlgorithms()
 {
-	for (auto lib : libs) {
+	for (auto lib : slam_libs) {
 
 		std::cerr << "Clean SLAM system ..." << std::endl;
 		bool clean_worked = lib->c_sb_clean_slam_system ();

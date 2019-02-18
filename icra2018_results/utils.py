@@ -5,6 +5,8 @@
 
 import sys
 
+
+
 class shellcolors:
     GREEN = '\033[92m'
     YELLOW = '\033[93m'
@@ -18,11 +20,11 @@ ERROR_CODE = shellcolors.RED + "[ERROR]" +  shellcolors.ENDC
 INVALID = shellcolors.RED + "[INVALID]" +  shellcolors.ENDC
 VALID   = shellcolors.GREEN + "[VALID]" +  shellcolors.ENDC
 
-verbose = False
+verbose_level = False
 
 def setverbose(v) :
-    global verbose
-    verbose = v
+    global verbose_level
+    verbose_level = v
 
 def printwarning(msg) :
     sys.stderr.write(WARNING_CODE + " " + msg)
@@ -32,6 +34,7 @@ def printerr(err) :
     sys.stderr.write(ERROR_CODE + " " + err)
     
 def printinfo(err) :
-    if verbose :
+    global verbose_level
+    if verbose_level :
         sys.stderr.write(shellcolors.GREEN + "[INFO]" +  shellcolors.ENDC + " " + err)
 

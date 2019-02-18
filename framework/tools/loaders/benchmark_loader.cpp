@@ -39,7 +39,7 @@ int main(int argc, char * argv[])
 		//***************************************************************************************
 
 		config->addParameter(file_output_parameter);
-		config->GetParameterManager().ReadArgumentsOrQuit(argc, argv, config);
+		config->GetParameterManager().ReadArgumentsOrQuit(argc, argv);
 
 		//***************************************************************************************
 		// At this point the datasets/libraries/sensors are loaded with their arguments set.
@@ -73,7 +73,8 @@ int main(int argc, char * argv[])
 
 		config->start_statistics();
 		slambench::ColumnWriter cw (config->get_log_stream(), "\t");
-		cw.AddColumn(new slambench::RowNumberColumn());
+		slambench::RowNumberColumn row_number;
+		cw.AddColumn(&row_number);
 
 
 
@@ -151,7 +152,7 @@ int main(int argc, char * argv[])
 		}
 
 
-		config->AddFrameCallback([&cw]{cw.PrintRow();});
+		config->AddFrameCallback([&cw]{cw.PrintRow();}); // @suppress("Invalid arguments")
 		cw.PrintHeader();
 
 		//***************************************************************************************
@@ -164,6 +165,7 @@ int main(int argc, char * argv[])
 		// End of experiment, we output the map
 		//***************************************************************************************
 
+		// TODO: Only one output file does not do the job for more than one SLAM systems, output directory maybe ?
 
 		SLAMBenchLibraryHelper *main_lib = nullptr;
 

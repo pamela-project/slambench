@@ -30,11 +30,27 @@ SLAMFrame* SLAMFrameDeserialiser::GetNextFrame() {
 	}
 	
 	uint8_t sensor_index = 0;
-	Read(&sensor_index, sizeof(sensor_index));
+	if (!Read(&sensor_index, sizeof(sensor_index))) {
+		printf("Could not read sensor data");	        
+	        delete dsf;
+	  	return nullptr;
+	}
+
+	if (sensor_index >= _sensors.size()) {
+	  printf("Invalid sensor index (%d), max value is (%d).",
+		 sensor_index, _sensors.size() - 1 );	        
+	        delete dsf;
+	  	return nullptr;
+	}
+	
 	dsf->FrameSensor = &_sensors.at(sensor_index);
 	if(dsf->FrameSensor->IsVariableSize()) {
 		uint32_t framesize;
-		Read(&framesize, sizeof(framesize));
+		if (!Read(&framesize, sizeof(framesize))) {
+		printf("Could not read frame size");	       
+	        delete dsf;
+	  	return nullptr;
+		}
 		dsf->SetVariableSize(framesize);
 	}
 	

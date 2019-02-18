@@ -21,11 +21,11 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <pangolin/pangolin.h>
 
 
 std::string alignment_technique = "original";
 std::string default_alignment_technique = "original";
-TypedParameter<std::string> alignment_type_parameter("a",     "alignment-technique",      "Select an alignment technique by name, if not found, default used (default,new).", &alignment_technique, &default_alignment_technique);
 
 void run_pangolin(bool *stay_on, SLAMBenchConfiguration *config);
 static SLAMBenchUI * volatile ui = nullptr;
@@ -41,9 +41,8 @@ int main(int argc, char * argv[])
 		// Start the argument processing
 		//***************************************************************************************
 
-
-		config->getParameters().push_back(&alignment_type_parameter);
-		config->GetParameterManager().ReadArgumentsOrQuit(argc, argv, config);
+		config->addParameter(TypedParameter<std::string> ("a",     "alignment-technique",      "Select an alignment technique by name, if not found, default used (default,new).", &alignment_technique, &default_alignment_technique));
+		config->GetParameterManager().ReadArgumentsOrQuit(argc, argv);
 		//***************************************************************************************
 		// At this point the datasets/libraries/sensors are loaded with their arguments set.
 		//***************************************************************************************

@@ -1,0 +1,10 @@
+efusion;ElasticFusion [Whelan et al, IJRR'16];https://github.com/mp3guy/ElasticFusion;master;https://github.com/bbodin/ElasticFusion;benchmarks/efusion/src/original
+infinitam;InfiniTAMv2 [Kahler et al, ISMAR'15];https://github.com/ethz-asl/infinitam;update-master;https://github.com/bbodin/InfiniTAM.git;benchmarks/infinitam/src/original
+lsdslam;LSDSLAM [Engel et al, ECCV'14];https://github.com/tum-vision/lsd_slam;master;https://github.com/pamela-project/lsd_slam.git;benchmarks/lsdslam/src/original
+lsdslam;LSDSLAM [Engel et al, ECCV'14];https://github.com/tum-vision/lsd_slam;cpp;https://github.com/pamela-project/lsd_slam.git;benchmarks/lsdslam/src/cpp
+orbslam2;ORBSLAM2 [Mur-Artal et al, TOR'15 and TOR'17];https://github.com/raulmur/ORB_SLAM2;update-master;https://github.com/pamela-project/ORB_SLAM2.git;benchmarks/orbslam2/src/original
+monoslam; MonoSLAM [Davison et al, TPAMI'07];https://github.com/hanmekim/SceneLib2;master;https://github.com/bbodin/SceneLib2;benchmarks/monoslam/src/original
+ptam;PTAM [Klein et al, ISMAR'07 and ECCV'08];https://github.com/Oxford-PTAM/PTAM-GPL;master;https://github.com/bbodin/PTAM-GPL;benchmarks/ptam/src/original
+okvis;OKVIS [Leutenegger et al, IJRR'15];https://github.com/ethz-asl/okvis;master;https://github.com/bbodin/okvis;benchmarks/okvis/src/original
+svo;SVO [Forster et al, ICRA'14];https://github.com/uzh-rpg/rpg_svo;master;https://github.com/pamela-project/rpg_svo.git;benchmarks/svo/src/original
+kfusion;KFusion [Newcombe et al. ISMAR'11];https://github.com/GerhardR/kfusion;update-master;https://github.com/pamela-project/kfusion;benchmarks/kfusion/src/original
