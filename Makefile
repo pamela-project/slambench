@@ -176,7 +176,7 @@ deps :
 
 build/Makefile : framework/CMakeLists.txt
 	mkdir -p build/
-	${DEPS_ENV} cmake -U -Bbuild -H.  -DAPPS="${APPS}"  ${DEPS_ARGS} -D"CMAKE_MODULE_PATH:PATH=${ROOT_DIR}/cmake_modules"
+	${DEPS_ENV} cmake -Bbuild -H.  -DAPPS="${APPS}"  ${DEPS_ARGS} -D"CMAKE_MODULE_PATH:PATH=${ROOT_DIR}/cmake_modules"
 
 
 .PHONY: build/Makefile 
