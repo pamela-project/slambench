@@ -168,22 +168,26 @@ target_include_directories(slambench-io  PRIVATE ${Boost_INCLUDE_DIRS})
 target_include_directories(slambench-metrics PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(slambench-io PRIVATE slambench-utils pthread  ${Boost_LIBRARIES})
 
-SET(EXTRA_LIBS_FOR_MEMORY "")
+if(UNIX AND NOT APPLE)
 
-find_package(OpenCL)
-if (OPENCL_FOUND) 
+  ## TODO ADD ENABLE_MEM_PROFILING
+
+  SET(EXTRA_LIBS_FOR_MEMORY "")
+
+  find_package(OpenCL)
+  if (OPENCL_FOUND) 
     	SET(EXTRA_LIBS_FOR_MEMORY "${EXTRA_LIBS_FOR_MEMORY};${OPENCL_LIBRARIES}")
-ENDIF(OPENCL_FOUND)
+      ENDIF(OPENCL_FOUND)
 
-find_package(CUDA)
+  find_package(CUDA)
 
-if (CUDA_FOUND) 
-  STRING(REPLACE "_static.a" ".so" CUDA_LIBRARIES "${CUDA_LIBRARIES}")
-  SET(EXTRA_LIBS_FOR_MEMORY "${EXTRA_LIBS_FOR_MEMORY};${CUDA_LIBRARIES}")
-ENDIF(CUDA_FOUND)
+  if (CUDA_FOUND) 
+    STRING(REPLACE "_static.a" ".so" CUDA_LIBRARIES "${CUDA_LIBRARIES}")
+    SET(EXTRA_LIBS_FOR_MEMORY "${EXTRA_LIBS_FOR_MEMORY};${CUDA_LIBRARIES}")
+  ENDIF(CUDA_FOUND)
 
   target_link_libraries(slambench-utils  "-Wl,--no-as-needed;${EXTRA_LIBS_FOR_MEMORY};-Wl,--as-needed")
-
+endif()
 
 
 if(OpenNI_FOUND)
