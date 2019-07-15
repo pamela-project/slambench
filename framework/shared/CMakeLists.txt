@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 2.8)
  
 
  include_directories(./include)
+ include_directories(${EIGEN3_INCLUDE_DIR})
 
 ########## Boost (required) ####################
  
