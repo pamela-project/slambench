@@ -11,8 +11,8 @@ ${REPOS_DIR}/flann :
 	sed -e "/add_library(flann_cpp SHARED/ s/\"\"/empty.cpp/" -e "/add_library(flann SHARED/ s/\"\"/empty.cpp/" -i ${REPOS_DIR}/flann/src/cpp/CMakeLists.txt
 
 ${DEPS_DIR}/flann : ${REPOS_DIR}/flann
-	mkdir ${REPOS_DIR}/flann/build -p
-	rm ${REPOS_DIR}/flann/buid/* -rf
+	mkdir -p ${REPOS_DIR}/flann/build 
+	rm -rf ${REPOS_DIR}/flann/buid/* 
 	cd ${REPOS_DIR}/flann/build && cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=$@" -DBUILD_MATLAB_BINDINGS=FALSE -DBUILD_PYTHON_BINDINGS=FALSE -DBUILD_EXAMPLES=FALSE -DBUILD_TESTS=FALSE -DBUILD_DOC=FALSE
 	+cd ${REPOS_DIR}/flann/build && make 
 	mkdir -p $@

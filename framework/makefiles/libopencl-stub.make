@@ -14,7 +14,7 @@ ${REPOS_DIR}/libopencl-stub :
 	cd $@  && git checkout b4f84459e3a3a14d6a18b5dabe0a6ae9cbef709e
 	cd $@  && git apply ${PATCH_DIR}/libopencl-stub_SLAMBench.patch
 
-	
+
 ${ANDROID_DEPS_DIR}/libopencl-stub: ${REPOS_DIR}/libopencl-stub
 	mkdir -p ${ANDROID_DEPS_DIR}/libopencl-stub
 	rm -rf ${ANDROID_DEPS_DIR}/libopencl-stub/*
@@ -26,6 +26,6 @@ android-libopencl-stub: ${ANDROID_DEPS_DIR}/libopencl-stub
 
 
 .PHONY: android-libopencl-stub
-	
-	
-	
+
+
+

@@ -2,8 +2,8 @@ SUITE_SPARSE_ROOT=${DEPS_DIR}/suitesparse
 
 
 ${REPOS_DIR}/suitesparse :
-	mkdir ${REPOS_DIR}/ -p
-	rm ${REPOS_DIR}/suitesparse -rf
+	mkdir -p ${REPOS_DIR}/
+	rm -rf ${REPOS_DIR}/suitesparse
 	cd ${REPOS_DIR}/ && git clone "https://github.com/jluttine/suitesparse.git" 
 	cd ${REPOS_DIR}/suitesparse && git checkout v4.3.1
 
@@ -16,9 +16,9 @@ ${REPOS_DIR}/suitesparse/CMakeLists.txt : ${REPOS_DIR}/suitesparse
 ## Harry: Suitesparse is not safe to parallel build :-(
 ${DEPS_DIR}/suitesparse : ${REPOS_DIR}/suitesparse ${REPOS_DIR}/suitesparse/CMakeLists.txt 
 	cd ${REPOS_DIR}/suitesparse/ && make
-	rm $@ -rf
-	mkdir $@/include -p
-	mkdir $@/lib -p
+	rm -rf $@
+	mkdir -p $@/include
+	mkdir -p $@/lib
 	+cd ${REPOS_DIR}/suitesparse/ && make install INSTALL_LIB=$@/lib INSTALL_INCLUDE=$@/include 
 
 

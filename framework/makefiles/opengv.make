@@ -10,8 +10,8 @@ ${REPOS_DIR}/opengv :
 	cd $@ ; git checkout cc32b16281aa6eab67cb28a61cf87a2a5c2b0961
 
 ${DEPS_DIR}/opengv : ${REPOS_DIR}/opengv eigen3
-	mkdir ${REPOS_DIR}/opengv/build -p
-	rm ${REPOS_DIR}/opengv/buid/* -rf
+	mkdir -p ${REPOS_DIR}/opengv/build 
+	rm -rf ${REPOS_DIR}/opengv/buid/* 
 	cd ${REPOS_DIR}/opengv/build && cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=$@"  -DCMAKE_CXX_FLAGS="-w -O3 -std=c++11" -DEIGEN_VERSION_OK=3 -DEIGEN_INCLUDE_DIR=${EIGEN3_INCLUDE_DIR}
 	+cd ${REPOS_DIR}/opengv/build && make
 	mkdir -p $@

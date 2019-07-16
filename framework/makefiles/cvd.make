@@ -5,8 +5,8 @@ CVD_LIBRARY=${DEPS_DIR}/cvd/lib/libcvd.so
 
 
 ${REPOS_DIR}/cvd :
-	mkdir ${REPOS_DIR} -p
-	rm ${REPOS_DIR}/cvd -rf
+	mkdir -p ${REPOS_DIR}
+	rm -rf ${REPOS_DIR}/cvd
 	git clone "https://github.com/edrosten/libcvd" ${REPOS_DIR}/cvd
 	cd ${REPOS_DIR}/cvd && git checkout d190474150d4695e4c957863c5121c7eb79615d9
 

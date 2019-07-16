@@ -130,7 +130,7 @@ ${DEPS_DIR}/openni2 : ${REPOS_DIR}/openni2 ${REPOS_DIR}/freenect # Needs: libusb
 	cd ${REPOS_DIR}/openni2/Packaging && ./ReleaseVersion.py x64
 	mkdir -p $@
 	cd ${REPOS_DIR}/openni2/Packaging/Final && tar xf OpenNI-Linux-x64-2.2.tar.bz2 -C  $@
-	cd ${REPOS_DIR}/freenect && mkdir -p build && rm build/* -rf
+	cd ${REPOS_DIR}/freenect && mkdir -p build && rm -rf build/*
 	cd ${REPOS_DIR}/freenect/build && cmake .. -DBUILD_OPENNI2_DRIVER=ON && make
 	cp -L ${REPOS_DIR}/freenect/build/lib/OpenNI2-FreenectDriver/libFreenectDriver.so ${OPENNI2_REDIST}/OpenNI2/Drivers/
 

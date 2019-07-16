@@ -5,8 +5,8 @@ GVARS_LIBRARY=${DEPS_DIR}/gvars/lib/libGVars3.so
 
 
 ${REPOS_DIR}/gvars :
-	mkdir ${REPOS_DIR} -p
-	rm ${REPOS_DIR}/gvars -rf
+	mkdir -p ${REPOS_DIR} 
+	rm -rf ${REPOS_DIR}/gvars 
 	git clone "https://github.com/edrosten/gvars" ${REPOS_DIR}/gvars
 	cd ${REPOS_DIR}/gvars && git checkout fc58c500c9d8f8713fb87a98cf7fb6be1db3295f
 

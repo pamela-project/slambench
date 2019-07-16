@@ -5,8 +5,8 @@ CURRENT_PANGOLIN_COMMIT=c2a6ef524401945b493f14f8b5b8aa76cc7d71a9 # (Mar 18)
 ## INFO: Previously we used 8b8b7b96adcf58ac2755dedd3f681fc512385af0 (Jan 17)
 
 ${REPOS_DIR}/pangolin :
-	mkdir ${REPOS_DIR} -p
-	rm ${REPOS_DIR}/pangolin -rf
+	mkdir -p ${REPOS_DIR}
+	rm -rf ${REPOS_DIR}/pangolin
 	git clone "https://github.com/stevenlovegrove/Pangolin.git" ${REPOS_DIR}/pangolin
 	cd ${REPOS_DIR}/pangolin && git checkout ${CURRENT_PANGOLIN_COMMIT}
 

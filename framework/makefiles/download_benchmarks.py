@@ -67,7 +67,7 @@ for item in targets :
         print("\t@echo \"\"")
         print("\t@echo \"Are you sure you want to download this use-case (y/n) ?\" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! \"$$REPLY\" == \"y\" ] ; then echo -e \"\\nExit.\"; false; else echo -e \"\\nDownload starts.\"; fi")
     print("\tmkdir -p %s" % target_dir)
-    print("\trm %s -rf" % target_dir)
+    print("\trm -rf %s" % target_dir)
     print("\tgit clone --branch %s %s %s"% (new_branch, new_repo,target_dir))
     print("\t@echo \"cmake_minimum_required(VERSION 2.8)\"   > benchmarks/$@/CMakeLists.txt")
     print("\t@echo \"explore_implementations ( $@ src/* )\"     >> benchmarks/$@/CMakeLists.txt")

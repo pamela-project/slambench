@@ -4,8 +4,8 @@ ANDROID_TOON_INCLUDE_DIR=${ANDROID_DEPS_DIR}/toon/include
 
 
 ${REPOS_DIR}/TooN :
-	mkdir ${REPOS_DIR} -p
-	rm ${REPOS_DIR}/TooN -rf
+	mkdir -p ${REPOS_DIR} 
+	rm -rf ${REPOS_DIR}/TooN
 	git clone "https://github.com/edrosten/TooN.git" ${REPOS_DIR}/TooN
 	cd ${REPOS_DIR}/TooN && git checkout 92241416d2a4874fd2334e08a5d417dfea6a1a3f
 

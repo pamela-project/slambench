@@ -68,8 +68,8 @@ efusion:
 	@echo "================================================================================================================="
 	@echo ""
 	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
-	mkdir benchmarks/efusion/src/original -p
-	rm benchmarks/efusion/src/original -rf
+	mkdir -p benchmarks/efusion/src/original
+	rm -rf benchmarks/efusion/src/original
 	git clone --branch bruno-dev https://github.com/bbodin/ElasticFusion benchmarks/efusion/src/original
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/$@/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
@@ -81,8 +81,8 @@ infinitam:
 	@echo "================================================================================================================="
 	@echo ""
 	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
-	mkdir benchmarks/infinitam/src/original -p
-	rm benchmarks/infinitam/src/original -rf
+	mkdir -p benchmarks/infinitam/src/original
+	rm -rf benchmarks/infinitam/src/original
 	git clone --branch bruno-dev https://github.com/bbodin/InfiniTAM.git benchmarks/infinitam/src/original
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/$@/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
@@ -94,13 +94,13 @@ lsdslam:
 	@echo "================================================================================================================="
 	@echo ""
 	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
-	mkdir benchmarks/lsdslam/src/original -p
-	rm benchmarks/lsdslam/src/original -rf
+	mkdir -p benchmarks/lsdslam/src/original
+	rm -rf benchmarks/lsdslam/src/original
 	git clone --branch bruno-dev https://github.com/pamela-project/lsd_slam.git benchmarks/lsdslam/src/original
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/$@/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
-	mkdir benchmarks/lsdslam/src/cpp -p
-	rm benchmarks/lsdslam/src/cpp -rf
+	mkdir -p benchmarks/lsdslam/src/cpp
+	rm -rf benchmarks/lsdslam/src/cpp
 	git clone --branch bruno-dev-cpp https://github.com/pamela-project/lsd_slam.git benchmarks/lsdslam/src/cpp
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/$@/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
@@ -112,8 +112,8 @@ orbslam2:
 	@echo "================================================================================================================="
 	@echo ""
 	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
-	mkdir benchmarks/orbslam2/src/original -p
-	rm benchmarks/orbslam2/src/original -rf
+	mkdir -p benchmarks/orbslam2/src/original
+	rm -rf benchmarks/orbslam2/src/original
 	git clone --branch bruno-dev https://github.com/pamela-project/ORB_SLAM2.git benchmarks/orbslam2/src/original
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/$@/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
@@ -125,8 +125,8 @@ monoslam:
 	@echo "================================================================================================================="
 	@echo ""
 	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
-	mkdir benchmarks/monoslam/src/original -p
-	rm benchmarks/monoslam/src/original -rf
+	mkdir -p benchmarks/monoslam/src/original
+	rm -rf benchmarks/monoslam/src/original
 	git clone --branch bruno-dev https://github.com/bbodin/SceneLib2 benchmarks/monoslam/src/original
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/$@/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
@@ -138,8 +138,8 @@ ptam:
 	@echo "================================================================================================================="
 	@echo ""
 	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
-	mkdir benchmarks/ptam/src/original -p
-	rm benchmarks/ptam/src/original -rf
+	mkdir -p benchmarks/ptam/src/original
+	rm -rf benchmarks/ptam/src/original
 	git clone --branch bruno-dev https://github.com/bbodin/PTAM-GPL benchmarks/ptam/src/original
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/$@/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
@@ -151,8 +151,8 @@ okvis:
 	@echo "================================================================================================================="
 	@echo ""
 	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
-	mkdir benchmarks/okvis/src/original -p
-	rm benchmarks/okvis/src/original -rf
+	mkdir -p benchmarks/okvis/src/original
+	rm -rf benchmarks/okvis/src/original
 	git clone --branch bruno-dev https://github.com/bbodin/okvis benchmarks/okvis/src/original
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/$@/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
@@ -164,8 +164,8 @@ svo:
 	@echo "================================================================================================================="
 	@echo ""
 	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
-	mkdir benchmarks/svo/src/original -p
-	rm benchmarks/svo/src/original -rf
+	mkdir -p benchmarks/svo/src/original
+	rm -rf benchmarks/svo/src/original
 	git clone --branch bruno-dev https://github.com/pamela-project/rpg_svo.git benchmarks/svo/src/original
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/$@/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
@@ -177,8 +177,8 @@ kfusion:
 	@echo "================================================================================================================="
 	@echo ""
 	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
-	mkdir benchmarks/kfusion/src/original -p
-	rm benchmarks/kfusion/src/original -rf
+	mkdir -p benchmarks/kfusion/src/original
+	rm -rf benchmarks/kfusion/src/original
 	git clone --branch bruno-dev https://github.com/pamela-project/kfusion benchmarks/kfusion/src/original
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/$@/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt

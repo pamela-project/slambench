@@ -1,7 +1,7 @@
 
 ${REPOS_DIR}/opentuner :
-	mkdir ${REPOS_DIR} -p
-	rm $@ -rf
+	mkdir -p ${REPOS_DIR}
+	rm -rf $@ 
 	git clone https://github.com/jansel/opentuner.git  $@ 
 
 ${DEPS_DIR}/opentuner : ${REPOS_DIR}/opentuner 
