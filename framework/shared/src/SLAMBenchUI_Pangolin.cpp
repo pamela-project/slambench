@@ -1097,36 +1097,15 @@ void SLAMBenchUI_Pangolin::drawFrustum(Eigen::Matrix4f currPose, float R , float
 void SLAMBenchUI_Pangolin::postCall() {
 
 
-	struct sysinfo memInfo;
-
-
-	sysinfo (&memInfo);
-	long long totalVirtualMem = memInfo.totalram;
-	//Add other values in next statement to avoid int overflow on right hand side...
-	totalVirtualMem += memInfo.totalswap;
-	totalVirtualMem *= memInfo.mem_unit;
-
-	long long virtualMemUsed = memInfo.totalram - memInfo.freeram;
-	//Add other values in next statement to avoid int overflow on right hand side...
-	virtualMemUsed += memInfo.totalswap - memInfo.freeswap;
-	virtualMemUsed *= memInfo.mem_unit;
-
-	long long totalPhysMem = memInfo.totalram;
-	//Multiply in next statement to avoid int overflow on right hand side...
-	totalPhysMem *= memInfo.mem_unit;
-
-	long long physMemUsed = memInfo.totalram - memInfo.freeram;
-	//Multiply in next statement to avoid int overflow on right hand side...
-	physMemUsed *= memInfo.mem_unit;
-
-
+	MemInfos meminf =  getMemInfos() ;
+	
 	VRSS->operator=(getValueVmRSS()/ 1000);
 	VSIZE->operator=(getValueVmSize()/ 1000);
 
-	TVM->operator=(totalVirtualMem / 1000000);
-	CVM->operator=(virtualMemUsed / 1000000 );
-	TPM->operator=(totalPhysMem / 1000000 );
-	CPM->operator=(physMemUsed / 1000000 );
+	TVM->operator=(meminf.totalVirtualMem / 1000000);
+	CVM->operator=(meminf.virtualMemUsed / 1000000 );
+	TPM->operator=(meminf.totalPhysMem / 1000000 );
+	CPM->operator=(meminf.physMemUsed / 1000000 );
 	frameCount->operator=(this->frame);
 
 	pangolin::FinishFrame();

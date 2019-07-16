@@ -89,17 +89,17 @@ bool associate(const TrajectoryAlignmentMethod::trajectory_t & gt,
           std::vector<Eigen::Matrix4f>& vEstimate)
 {
 
-    for(uint index = 0; index < t.size(); index++)  {
+    for(unsigned int index = 0; index < t.size(); index++)  {
 
         vEstimate.push_back(t.at(index).second.GetValue());
 
         double time = t.at(index).first.S + (t.at(index).first.Ns)*std::pow(10,-9);
         //std::cout << t[index].second.S + (t[index].second.Ns)*std::pow(10,-9)  << std::endl;
 
-        uint    closest_gt_Index = index;
+        unsigned int    closest_gt_Index = index;
 
         double bestTimeDiff = 100000000000.0;
-        for(uint index2 = index; index2 < gt.size(); index2++)
+        for(unsigned int index2 = index; index2 < gt.size(); index2++)
         {
             double gt_time = gt.at(index2).first.ToS();
             double timeDiff =  gt_time - time;

@@ -10,10 +10,58 @@
 #ifndef SYSUTILS_H_
 #define SYSUTILS_H_
 
-
+struct MemInfos {
+	long long totalVirtualMem;
+	long long virtualMemUsed;
+	long long totalPhysMem;
+	long long physMemUsed;
+};
 
 #include "sys/types.h"
+#ifdef __APPLE__
+inline MemInfos getMemInfos() {
+  MemInfos res = {0,0,0,0};
+  return res;
+}
+#else
+
 #include "sys/sysinfo.h"
+
+
+inline MemInfos getMemInfos() {
+  
+  MemInfos res;
+
+  struct sysinfo memInfo;
+  sysinfo (&memInfo);
+  
+ 
+  long long totalVirtualMem = memInfo.totalram;
+  //Add other values in next statement to avoid int overflow on right hand side...
+  totalVirtualMem += memInfo.totalswap;
+  totalVirtualMem *= memInfo.mem_unit;
+  res.totalVirtualMem = totalVirtualMem;
+
+  long long virtualMemUsed = memInfo.totalram - memInfo.freeram;
+  //Add other values in next statement to avoid int overflow on right hand side...
+  virtualMemUsed += memInfo.totalswap - memInfo.freeswap;
+  virtualMemUsed *= memInfo.mem_unit;
+  res.virtualMemUsed = virtualMemUsed;
+
+  long long totalPhysMem = memInfo.totalram;
+  //Multiply in next statement to avoid int overflow on right hand side...
+  totalPhysMem *= memInfo.mem_unit;
+  res.totalPhysMem = totalPhysMem;
+  
+  long long physMemUsed = memInfo.totalram - memInfo.freeram;
+  //Multiply in next statement to avoid int overflow on right hand side...
+  physMemUsed *= memInfo.mem_unit;
+  res.physMemUsed = res.physMemUsed;
+    
+  return res;
+}
+
+#endif
 
 inline int parseLine(char* line){
       int i = strlen(line);

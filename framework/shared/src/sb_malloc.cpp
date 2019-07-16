@@ -143,7 +143,7 @@ MemoryProfiler *MemoryProfiler::singleton_ptr_ = &singleton_;
 }
 }
 
-//#define ENABLE_MEM_PROFILING
+
 #ifdef ENABLE_MEM_PROFILING
 
 extern "C" {

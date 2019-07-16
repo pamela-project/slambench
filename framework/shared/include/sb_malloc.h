@@ -26,7 +26,7 @@
 #define MEM_DEBUG(...)
 #endif
 
-
+#ifdef ENABLE_MEM_PROFILING
 #ifdef ANDROID
 extern "C" {
 void *malloc(size_t size) ;
@@ -37,6 +37,7 @@ extern "C" {
 void *malloc(size_t size) throw();
 void free(void* ptr) throw();
 }
+#endif
 #endif
 
 namespace slambench {

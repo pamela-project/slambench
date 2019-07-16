@@ -169,9 +169,7 @@ target_include_directories(slambench-metrics PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(slambench-io PRIVATE slambench-utils pthread  ${Boost_LIBRARIES})
 
 if(UNIX AND NOT APPLE)
-
-  ## TODO ADD ENABLE_MEM_PROFILING
-
+  
   SET(EXTRA_LIBS_FOR_MEMORY "")
 
   find_package(OpenCL)
@@ -187,6 +185,7 @@ if(UNIX AND NOT APPLE)
   ENDIF(CUDA_FOUND)
 
   target_link_libraries(slambench-utils  "-Wl,--no-as-needed;${EXTRA_LIBS_FOR_MEMORY};-Wl,--as-needed")
+  SET_TARGET_PROPERTIES(slambench-utils  PROPERTIES COMPILE_FLAGS "-DENABLE_MEM_PROFILING")
 endif()
 
 

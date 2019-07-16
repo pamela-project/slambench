@@ -32,8 +32,10 @@
 
 #include <unistd.h>
 
-
+#ifdef ENABLE_EUROCMAV
 #include "./include/EUROCMAV.h"
+#endif
+
 #include "./include/ICL.h"
 #include "./include/ICLNUIM.h"
 #include "./include/TUM.h"
@@ -88,8 +90,10 @@ public :
 			config->reader = new ICLNUIMReader("");
 		} else if (dataset_name == "tum") {
 			config->reader = new TUMReader("");
+#ifdef ENABLE_EUROCMAV			
 		} else if (dataset_name == "eurocmav") {
 			config->reader = new EUROCMAVReader("");
+#endif
 		} else if (dataset_name == "icl") {
 			config->reader = new ICLReader("");
 		} else if (dataset_name == "svo") {
