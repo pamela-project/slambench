@@ -79,7 +79,7 @@ namespace slambench {
 			void AddPoint(timestamp_t time, const values::Value *value);
 
 			const value_map_t &GetValues() const override;
-			const value_map_t::value_type &GetMostRecentValue() const;
+			const value_map_t::value_type &GetMostRecentValue() const override;
 		private:
 			value_map_t  values_;
 		};

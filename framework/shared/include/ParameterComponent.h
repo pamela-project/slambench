@@ -14,7 +14,7 @@
 #include <vector>
 
 
-class Parameter;
+struct Parameter;
 class ParameterComponent;
 
 typedef  std::vector<Parameter*>          arguments_vector ;
