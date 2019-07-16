@@ -164,7 +164,7 @@ rm -f ${GIT_LOG_FILE}
 #### CLEAN ALL ####
 
 if [ "${CLEAN_ALL}" == "true" ]; then
-    rm  -Rf ${WORKSPACE}/repository
+    rm  -rf ${WORKSPACE}/repository
 fi
 
 
