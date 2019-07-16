@@ -1,5 +1,21 @@
 cmake_minimum_required(VERSION 2.8)
 
+# SPECIFY COMPILER FIRST 
+#######################################################
+if ("${USE_LLVM}" STREQUAL "1")
+  MESSAGE(STATUS "USING LLVM")
+  SET (CMAKE_C_COMPILER    "/usr/bin/clang")
+  SET (CMAKE_CXX_COMPILER  "/usr/bin/clang++")
+  SET (CMAKE_AR            "/usr/bin/llvm-ar")
+  SET (CMAKE_LINKER        "/usr/bin/llvm-ld")
+  SET (CMAKE_NM            "/usr/bin/llvm-nm")
+  SET (CMAKE_OBJDUMP       "/usr/bin/llvm-objdump")
+  SET (CMAKE_RANLIB        "/usr/bin/llvm-ranlib")
+endif()
+
+
+# START PROJECT
+#######################################################
 project(slambench2_repository)
 
 
@@ -21,15 +37,7 @@ SET(CMAKE_BUILD_DIRECTORY          ${PROJECT_BINARY_DIR}/builddir)
 # Most common compiler flags
 #######################################################
 
-if (USE_LLVM)
-SET (CMAKE_C_COMPILER             "/usr/bin/clang")
-SET (CMAKE_CXX_COMPILER             "/usr/bin/clang++")
-SET (CMAKE_AR      "/usr/bin/llvm-ar")
-SET (CMAKE_LINKER  "/usr/bin/llvm-ld")
-SET (CMAKE_NM      "/usr/bin/llvm-nm")
-SET (CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
-SET (CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
-endif(USE_LLVM)
+
 
 set(GENERAL_COMPILATION_FLAGS "-g -O3  -Wall  -Wextra")
 

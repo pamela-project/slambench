@@ -49,6 +49,9 @@ DEPS_ENV=
 
 include framework/makefiles/*.make
 
+ifneq ("$(USE_LLVM)","")
+DEPS_ARGS+= -DUSE_LLVM=1
+endif
 
 ifneq ("$(wildcard ${OPENNI2_LIBRARY})","")
 DEPS_ARGS+= -DOPENNI2_LIBRARY=${OPENNI2_LIBRARY}
