@@ -11,8 +11,7 @@ if ("${USE_LLVM}" STREQUAL "1")
   SET (CMAKE_NM            "/usr/bin/llvm-nm")
   SET (CMAKE_OBJDUMP       "/usr/bin/llvm-objdump")
   SET (CMAKE_RANLIB        "/usr/bin/llvm-ranlib")
-  SET (CMAKE_CXX_FLAGS     "-fuse-ld=lld ")
-  SET (CMAKE_C_FLAGS       "-fuse-ld=lld ")
+  SET (CMAKE_EXE_LINKER_FLAGS     "-fuse-ld=lld ")
 endif()
 
 
