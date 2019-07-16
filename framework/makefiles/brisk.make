@@ -6,7 +6,7 @@ ${REPOS_DIR}/brisk :
 	rm -rf $@
 	mkdir -p $@
 	cd $@ ; wget --no-check-certificate https://www.doc.ic.ac.uk/~sleutene/software/brisk-2.0.3.zip 
-	cd $@ ; unzip *.zip ; cp brisk/* . -rf
+	cd $@ ; unzip *.zip ; cp -rf brisk/* . 
 	sed -i.bak "s/[#]include [<]algo/#include<functional>\\n#include<algo/" ${REPOS_DIR}/brisk/src/brisk-feature-detector.cc
 
 ${DEPS_DIR}/brisk : ${REPOS_DIR}/brisk opencv

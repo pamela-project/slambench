@@ -23,8 +23,8 @@ ${DEPS_DIR}/suitesparse : ${REPOS_DIR}/suitesparse ${REPOS_DIR}/suitesparse/CMak
 
 
 ${ANDROID_DEPS_DIR}/suitesparse : ${REPOS_DIR}/suitesparse ${REPOS_DIR}/suitesparse/CMakeLists.txt   ${REPOS_DIR}/android-cmake
-	cd ${REPOS_DIR}/suitesparse && mkdir build_dir -p
-	cd ${REPOS_DIR}/suitesparse && rm build_dir/* -rf
+	cd ${REPOS_DIR}/suitesparse && mkdir -p build_dir
+	cd ${REPOS_DIR}/suitesparse && rm -rf build_dir/*
 	cd ${REPOS_DIR}/suitesparse/build_dir && cmake  -DBUILD_SHARED_LIBS=OFF  -DCMAKE_TOOLCHAIN_FILE=${REPOS_DIR}/android-cmake/android.toolchain.cmake -DANDROID_NDK=${ANDROID_NDK} -DCMAKE_BUILD_TYPE=Release -DANDROID_ABI="armeabi-v7a with NEON"  -D CMAKE_INSTALL_PREFIX=$(ANDROID_DEPS_DIR)    ..
 	+cd ${REPOS_DIR}/suitesparse/build_dir && make
 	cd ${REPOS_DIR}/suitesparse/build_dir && make install

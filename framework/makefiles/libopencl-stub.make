@@ -19,8 +19,8 @@ ${ANDROID_DEPS_DIR}/libopencl-stub: ${REPOS_DIR}/libopencl-stub
 	mkdir -p ${ANDROID_DEPS_DIR}/libopencl-stub
 	rm -rf ${ANDROID_DEPS_DIR}/libopencl-stub/*
 	cd ${REPOS_DIR}/libopencl-stub && ${ANDROID_NDK}/ndk-build NDK_PROJECT_PATH=. APP_BUILD_SCRIPT=Android.mk NDK_APPLICATION_MK=Application.mk 
-	cp ${REPOS_DIR}/libopencl-stub/include ${ANDROID_DEPS_DIR}/libopencl-stub -rf
-	cp ${REPOS_DIR}/libopencl-stub/obj ${ANDROID_DEPS_DIR}/libopencl-stub  -rf
+	cp -rf ${REPOS_DIR}/libopencl-stub/include ${ANDROID_DEPS_DIR}/libopencl-stub
+	cp -rf ${REPOS_DIR}/libopencl-stub/obj ${ANDROID_DEPS_DIR}/libopencl-stub 
 
 android-libopencl-stub: ${ANDROID_DEPS_DIR}/libopencl-stub
 
