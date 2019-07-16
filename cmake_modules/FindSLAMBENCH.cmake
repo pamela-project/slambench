@@ -1,14 +1,11 @@
 
-  
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+if(APPLE)
   set(WHOLE_ARCHIVE_ON    "-all_load")
   set(WHOLE_ARCHIVE_OFF   "-noall_load")
-elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+else()
   set(WHOLE_ARCHIVE_ON    "--whole-archive")
   set(WHOLE_ARCHIVE_OFF   "--no-whole-archive")
-else()
-  message(SEND_ERROR "UNSUPPORTED COMPILER")
-endif()
+endif(APPLE)
 
 
 find_path(SLAMBENCH_INCLUDE_PATH SLAMBenchAPI.h)

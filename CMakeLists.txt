@@ -7,17 +7,18 @@ if ("${USE_LLVM}" STREQUAL "1")
   SET (CMAKE_C_COMPILER    "/usr/bin/clang")
   SET (CMAKE_CXX_COMPILER  "/usr/bin/clang++")
   SET (CMAKE_AR            "/usr/bin/llvm-ar")
-  SET (CMAKE_LINKER        "/usr/bin/llvm-ld")
+  SET (CMAKE_LINKER        "/usr/bin/lld")
   SET (CMAKE_NM            "/usr/bin/llvm-nm")
   SET (CMAKE_OBJDUMP       "/usr/bin/llvm-objdump")
   SET (CMAKE_RANLIB        "/usr/bin/llvm-ranlib")
+  SET (CMAKE_CXX_FLAGS     "-fuse-ld=lld ")
+  SET (CMAKE_C_FLAGS       "-fuse-ld=lld ")
 endif()
 
 
 # START PROJECT
 #######################################################
 project(slambench2_repository)
-
 
 # CMake variables
 #######################################################
@@ -59,25 +60,26 @@ endif()
 
 if(APPLE)
   set(GENERAL_COMPILATION_FLAGS "${GENERAL_COMPILATION_FLAGS} -D__APPLE__")
+  set(WHOLE_ARCHIVE_ON    "-all_load")
+  set(WHOLE_ARCHIVE_OFF   "-noall_load")
+else()
+  set(WHOLE_ARCHIVE_ON    "--whole-archive")
+  set(WHOLE_ARCHIVE_OFF   "--no-whole-archive")
 endif(APPLE)
 
   
 if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
   message(STATUS "USE CLANG SETTINGS")
-  set(CMAKE_CXX_FLAGS " --std=c++17 ${GENERAL_COMPILATION_FLAGS}")
-  set(CMAKE_C_FLAGS   "             ${GENERAL_COMPILATION_FLAGS}")
-  set(WHOLE_ARCHIVE_ON    "-all_load")
-  set(WHOLE_ARCHIVE_OFF   "-noall_load")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  --std=c++17 ${GENERAL_COMPILATION_FLAGS}")
+  set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS}               ${GENERAL_COMPILATION_FLAGS}")
 elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   message(STATUS "USE GNUCC SETTINGS")
-  set(CMAKE_CXX_FLAGS " --std=c++11 ${GENERAL_COMPILATION_FLAGS}")
-  set(CMAKE_C_FLAGS   "             ${GENERAL_COMPILATION_FLAGS}")
-  set(WHOLE_ARCHIVE_ON    "--whole-archive")
-  set(WHOLE_ARCHIVE_OFF   "--no-whole-archive")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  --std=c++11 ${GENERAL_COMPILATION_FLAGS}")
+  set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS}               ${GENERAL_COMPILATION_FLAGS}")
 else()
   message(SEND_ERROR "UNSUPPORTED COMPILER")
-  set(CMAKE_CXX_FLAGS "")
-  set(CMAKE_C_FLAGS   "")
+  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "")
+  set(CMAKE_C_FLAGS   ${CMAKE_C_FLAGS} "")
 endif()
   
   
@@ -154,7 +156,11 @@ function(generate_slam_library library_name )
   message(STATUS "${Green}Generation of ${library_name}-library : Activated${ColorReset}")            
   add_library(${library_name}-library SHARED ${NULL_FILE_PATH})
   target_link_libraries(${library_name}-library PRIVATE ${SLAMBENCH_C_WRAPPER} ${library_name})
-  SET_TARGET_PROPERTIES(${library_name}-library PROPERTIES LINK_FLAGS "${ARGN}")
+  IF (APPLE)
+    SET_TARGET_PROPERTIES(${library_name}-library PROPERTIES LINK_FLAGS "-undefined dynamic_lookup ${ARGN}")
+  ELSE ()
+    SET_TARGET_PROPERTIES(${library_name}-library PROPERTIES LINK_FLAGS "${ARGN}")    
+  ENDIF ()
   install(TARGETS ${library_name}-library  DESTINATION  lib/)
      
      
