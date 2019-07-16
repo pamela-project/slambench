@@ -97,7 +97,7 @@ namespace slambench {
 		// template is instantiated, rather than where it is declared
 		template <ValueType T> struct TypeForVT { 
 #ifndef __clang__
-				static_assert(sizeof(T) == -1, "Unknown VT type" + sizeof(T)); 
+				static_assert(sizeof(T) == -1, "Unknown VT type"); 
 #endif
 				typedef void* type; 
 		};
