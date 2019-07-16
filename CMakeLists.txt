@@ -1,3 +1,7 @@
+
+
+  
+
 cmake_minimum_required(VERSION 2.8)
 
 # SPECIFY COMPILER FIRST 
@@ -42,7 +46,7 @@ SET(CMAKE_BUILD_DIRECTORY          ${PROJECT_BINARY_DIR}/builddir)
 set(GENERAL_COMPILATION_FLAGS "-g -O3  -Wall  -Wextra")
 
 
-if (CMAKE_COMPILER_IS_GNUCC)
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   add_definitions (-D_FILE_OFFSET_BITS=64) ## Workaround for 32 bit boards with fwrite 2G limit
 
   set(GENERAL_COMPILATION_FLAGS "${GENERAL_COMPILATION_FLAGS} -Wno-error=deprecated-declarations ") # Eigen raises deprecated declarations warnings and int-in-bool-context warnings.
@@ -53,7 +57,7 @@ if (CMAKE_COMPILER_IS_GNUCC)
   endif()
   if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
     set(GENERAL_COMPILATION_FLAGS "${GENERAL_COMPILATION_FLAGS}     -Wno-error=implicit-fallthrough= -Wno-int-in-bool-context ")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}    -Wno-catch-value")   # too noisy when using Pangolin
+    set(GENERAL_COMPILATION_FLAGS "${GENERAL_COMPILATION_FLAGS}     -Wno-catch-value")   # too noisy when using Pangolin
   endif()
 endif()
 
@@ -62,8 +66,19 @@ if(APPLE)
 endif(APPLE)
 
   
-set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}                ${GENERAL_COMPILATION_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  --std=c++11 ${GENERAL_COMPILATION_FLAGS}")
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+  message(STATUS "USE CLANG SETTINGS")
+  set(CMAKE_CXX_FLAGS " --std=c++17 ${GENERAL_COMPILATION_FLAGS}")
+  set(CMAKE_C_FLAGS   "             ${GENERAL_COMPILATION_FLAGS}")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+  message(STATUS "USE GNUCC SETTINGS")
+  set(CMAKE_CXX_FLAGS " --std=c++11 ${GENERAL_COMPILATION_FLAGS}")
+  set(CMAKE_C_FLAGS   "             ${GENERAL_COMPILATION_FLAGS}")
+else()
+  message(SEND_ERROR "UNSUPPORTED COMPILER")
+  set(CMAKE_CXX_FLAGS "")
+  set(CMAKE_C_FLAGS   "")
+endif()
   
   
     
