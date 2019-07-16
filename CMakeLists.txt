@@ -21,6 +21,16 @@ SET(CMAKE_BUILD_DIRECTORY          ${PROJECT_BINARY_DIR}/builddir)
 # Most common compiler flags
 #######################################################
 
+if (USE_LLVM)
+SET (CMAKE_C_COMPILER             "/usr/bin/clang")
+SET (CMAKE_CXX_COMPILER             "/usr/bin/clang++")
+SET (CMAKE_AR      "/usr/bin/llvm-ar")
+SET (CMAKE_LINKER  "/usr/bin/llvm-ld")
+SET (CMAKE_NM      "/usr/bin/llvm-nm")
+SET (CMAKE_OBJDUMP "/usr/bin/llvm-objdump")
+SET (CMAKE_RANLIB  "/usr/bin/llvm-ranlib")
+endif(USE_LLVM)
+
 set(GENERAL_COMPILATION_FLAGS "-g -O3  -Wall  -Wextra")
 
 
@@ -32,7 +42,6 @@ if (CMAKE_COMPILER_IS_GNUCC)
 
   if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6.0)
     set(GENERAL_COMPILATION_FLAGS "${GENERAL_COMPILATION_FLAGS}      -Wno-error=ignored-attributes -Wno-misleading-indentation")
-    
   endif()
   if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
     set(GENERAL_COMPILATION_FLAGS "${GENERAL_COMPILATION_FLAGS}     -Wno-error=implicit-fallthrough= -Wno-int-in-bool-context ")
