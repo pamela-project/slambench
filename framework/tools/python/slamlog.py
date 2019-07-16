@@ -12,6 +12,8 @@ from progress.bar import Bar
 
 LIBRARY_NAME_PROPERTY = "load-slam-library"
 
+LIBRARY_NAME_PROPERTY = "load-slam-library"
+
 PROPERTIES_SECTION     = "Properties"
 STATISTICS_SECTION     = "Statistics"
 SUMMARY_SECTION        = "Summary"
