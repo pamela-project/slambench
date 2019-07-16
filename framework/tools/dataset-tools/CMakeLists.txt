@@ -13,7 +13,7 @@ add_executable(io-readply io-readply.cpp)
 target_link_libraries(io-readply slambench-io)
 
 add_executable(io-inspect-file io-inspect.cpp)
-target_link_libraries(io-inspect-file PRIVATE -Wl,--whole-archive slambench-io -Wl,--no-whole-archive)
+target_link_libraries(io-inspect-file PRIVATE -Wl,${WHOLE_ARCHIVE_ON} slambench-io -Wl,${WHOLE_ARCHIVE_OFF})
 	
 if (Boost_FOUND)
 

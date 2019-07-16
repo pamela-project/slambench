@@ -1,4 +1,15 @@
 
+  
+if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+  set(WHOLE_ARCHIVE_ON    "-all_load")
+  set(WHOLE_ARCHIVE_OFF   "-noall_load")
+elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+  set(WHOLE_ARCHIVE_ON    "--whole-archive")
+  set(WHOLE_ARCHIVE_OFF   "--no-whole-archive")
+else()
+  message(SEND_ERROR "UNSUPPORTED COMPILER")
+endif()
+
 
 find_path(SLAMBENCH_INCLUDE_PATH SLAMBenchAPI.h)
 
@@ -11,8 +22,8 @@ if(SLAMBENCH_INCLUDE_PATH)
   if(SLAMBENCH_UTILS_LIBRARY)
     set(SLAMBENCH_FOUND TRUE)
     SET(SLAMBENCH_INCLUDE_DIR  ${EIGEN3_INCLUDE_DIR} ${SLAMBENCH_INCLUDE_PATH} CACHE STRING "The include paths needed to use SLAMBENCH")
-    SET(SLAMBENCH_LIBRARIES    ${SLAMBENCH_UTILS_LIBRARY} -Wl,--whole-archive ${SLAMBENCH_IO_LIBRARY}        ${SLAMBENCH_METRICS_LIBRARY}  -Wl,--no-whole-archive)
-    SET(SLAMBENCH_C_WRAPPER                               -Wl,--whole-archive ${SLAMBENCH_C_WRAPPER_LIBRARY}                               -Wl,--no-whole-archive)
+    SET(SLAMBENCH_LIBRARIES    ${SLAMBENCH_UTILS_LIBRARY} -Wl,${WHOLE_ARCHIVE_ON} ${SLAMBENCH_IO_LIBRARY}        ${SLAMBENCH_METRICS_LIBRARY}  -Wl,${WHOLE_ARCHIVE_OFF})
+    SET(SLAMBENCH_C_WRAPPER                               -Wl,${WHOLE_ARCHIVE_ON} ${SLAMBENCH_C_WRAPPER_LIBRARY}                               -Wl,${WHOLE_ARCHIVE_OFF})
   else()
     MESSAGE(STATUS "SLAMBENCH libraries are missing.")
   endif()
