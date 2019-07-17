@@ -35,6 +35,19 @@ infos :
 ####################################
 
 ROOT_DIR=$(shell pwd)
+
+#### Experience shows that space in paths can be problematic, we refuse this case.            
+####################################################################################
+
+SPACE=$(shell echo ' ')
+
+ifneq (,$(findstring ${SPACE},$(ROOT_DIR)))
+$(error SLAMBench should not be stored in a directory which path contains spaces, GNU Make does not like this kind of thing.)
+endif
+
+#### Various variables to fill       
+###################################
+
 DEPS_DIR=$(ROOT_DIR)/deps
 REPOS_DIR=$(DEPS_DIR)/repos
 DEPS_BUILD_DIR=$(DEPS_DIR)/build
