@@ -91,8 +91,12 @@ find_package(Eigen3    REQUIRED)
 
 SET(SLAMBENCH_INCLUDE_DIR  ${EIGEN3_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/framework/shared/include CACHE STRING "The include paths needed to use SLAMBENCH")
 SET(SLAMBENCH_LIBRARIES    slambench-utils         -Wl,${WHOLE_ARCHIVE_ON} slambench-io                slambench-metrics  -Wl,${WHOLE_ARCHIVE_OFF})
-SET(SLAMBENCH_C_WRAPPER                            -Wl,${WHOLE_ARCHIVE_ON} slambench-c-wrapper                            -Wl,${WHOLE_ARCHIVE_OFF})
 
+IF (APPLE)
+    SET(SLAMBENCH_C_WRAPPER  -undefined dynamic_lookup -Wl,${WHOLE_ARCHIVE_ON} slambench-c-wrapper                            -Wl,${WHOLE_ARCHIVE_OFF})
+ ELSE ()
+    SET(SLAMBENCH_C_WRAPPER                            -Wl,${WHOLE_ARCHIVE_ON} slambench-c-wrapper                            -Wl,${WHOLE_ARCHIVE_OFF})
+ENDIF ()
 
 # SLAMBENCH FUNCTIONS 
 #######################################################
@@ -164,6 +168,9 @@ function(generate_slam_library library_name )
      
      
 endfunction()
+
+
+
 
 #### SUB FOLDERS
 ######################################################
