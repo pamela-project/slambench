@@ -1,4 +1,4 @@
-ECHO=/bin/echo
+PRINTF=printf
 WGET:=wget
 GET_REPLY:=read REPLY
 
@@ -13,8 +13,8 @@ endif
 ####################################
 
 infos :
-	@${ECHO} -e "\n*** SLAMBench is an evaluation framework for SLAM algorithms. *** "
-	@${ECHO} -e "\n\
+	@${PRINTF} "\n*** SLAMBench is an evaluation framework for SLAM algorithms. *** "
+	@${PRINTF} "\n\
 	  (1) First, several dependencies are needed to compile SLAMBench and its use-cases.\n\
 	      If you may have already them installed on your system,\n\
 	      we propose you to download and install them automatically using the following command :\n\
@@ -199,34 +199,34 @@ build/Makefile : framework/CMakeLists.txt
 
 slambench: build/Makefile 
 	$(MAKE) -C build $(MFLAGS)
-	@${ECHO} ""
-	@${ECHO} "================================================================================================================="
-	@${ECHO} "The SLAMBench library should have been compiled, you will find binaries in build/bin, and libraries in build/lib."
-	@${ECHO} ""
-	@${ECHO} "The list of current binaries is: "
-	@${ECHO} ""
-	@${ECHO} "Loaders available: "
-	@${ECHO} -n "  - build/bin/benchmark_loader:    " ; if [ -f build/bin/benchmark_loader ] ; then ${ECHO} -e "\033[1;32mFound\033[0m" ; else ${ECHO} -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
-	@${ECHO} -n "  - build/bin/pangolin_loader:     " ; if [ -f build/bin/pangolin_loader ] ; then ${ECHO} -e "\033[1;32mFound\033[0m" ; else ${ECHO} -e "\033[1;31mNot found (Missing dependencies? did you try make pangolin)\033[0m" ; fi
-	@${ECHO} ""
-	@${ECHO} "Tools/Debugger available: "
-	@${ECHO} -n "  - build/bin/pointcloud_aligner:  " ; if [ -f build/bin/pointcloud_aligner ] ; then ${ECHO} -e "\033[1;32mFound\033[0m" ; else ${ECHO} -e "\033[1;31mNot found (Missing dependencies (i.e. pcl)?)\033[0m" ; fi
-	@${ECHO} -n "  - build/bin/dataset-generator:   " ; if [ -f build/bin/dataset-generator ] ; then ${ECHO} -e "\033[1;32mFound\033[0m" ; else ${ECHO} -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
-	@${ECHO} -n "  - build/bin/io-inspect-file:     " ; if [ -f build/bin/io-inspect-file ] ; then ${ECHO} -e "\033[1;32mFound\033[0m" ; else ${ECHO} -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
-	@${ECHO} -n "  - build/bin/io-readply:          " ; if [ -f build/bin/io-readply ] ; then ${ECHO} -e "\033[1;32mFound\033[0m" ; else ${ECHO} -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
-	@${ECHO} ""
-	@${ECHO} "The list of current use-case libraries available is:"
-	@${ECHO} ""                                                                      
-	@for f in `ls build/lib/lib*-library.so 2> /dev/null || ${ECHO} Nothing` ; do ${ECHO} $$f ; done
-	@${ECHO} ""            
-	@${ECHO} "The list of current filters available is:"
-	@${ECHO} ""                                                                      
-	@for f in `ls build/lib/lib*-filter.so 2> /dev/null || ${ECHO} Nothing` ; do ${ECHO} $$f ; done
-	@${ECHO} ""
-	@${ECHO} "As a next step we suggest you to run \"make usecases\" or \"make slambench APPS=all\"."
-	@${ECHO} ""
-	@${ECHO} "================================================================================================================="
-	@${ECHO} ""
+	@${PRINTF} "\n"
+	@${PRINTF} "=================================================================================================================\n"
+	@${PRINTF} "The SLAMBench library should have been compiled, you will find binaries in build/bin, and libraries in build/lib.\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "The list of current binaries is: \n"
+	@${PRINTF} "\n"
+	@${PRINTF} "Loaders available: \n"
+	@${PRINTF}  "  - build/bin/benchmark_loader:    " ; if [ -f build/bin/benchmark_loader ] ; then ${PRINTF} "\033[1;32mFound\033[0m\n" ; else ${PRINTF} "\033[1;31mNot found (Missing dependencies?)\033[0m\n" ; fi
+	@${PRINTF}  "  - build/bin/pangolin_loader:     " ; if [ -f build/bin/pangolin_loader ] ; then ${PRINTF} "\033[1;32mFound\033[0m\n" ; else ${PRINTF} "\033[1;31mNot found (Missing dependencies? did you try make pangolin)\033[0m\n" ; fi
+	@${PRINTF} "\n\n"
+	@${PRINTF} "Tools/Debugger available: \n"
+	@${PRINTF}  "  - build/bin/pointcloud_aligner:  " ; if [ -f build/bin/pointcloud_aligner ] ; then ${PRINTF} "\033[1;32mFound\033[0m\n" ; else ${PRINTF} "\033[1;31mNot found (Missing dependencies (i.e. pcl)?)\033[0m\n" ; fi
+	@${PRINTF}  "  - build/bin/dataset-generator:   " ; if [ -f build/bin/dataset-generator ] ; then ${PRINTF} "\033[1;32mFound\033[0m\n" ; else ${PRINTF} "\033[1;31mNot found (Missing dependencies?)\033[0m\n" ; fi
+	@${PRINTF}  "  - build/bin/io-inspect-file:     " ; if [ -f build/bin/io-inspect-file ] ; then ${PRINTF} "\033[1;32mFound\033[0m\n" ; else ${PRINTF} "\033[1;31mNot found (Missing dependencies?)\033[0m\n" ; fi
+	@${PRINTF}  "  - build/bin/io-readply:          " ; if [ -f build/bin/io-readply ] ; then ${PRINTF} "\033[1;32mFound\033[0m\n" ; else ${PRINTF} "\033[1;31mNot found (Missing dependencies?)\033[0m\n" ; fi
+	@${PRINTF} "\n"
+	@${PRINTF} "The list of current use-case libraries available is:\n"
+	@${PRINTF} "\n"                                                                      
+	@for f in `ls build/lib/lib*-library.so 2> /dev/null || ${PRINTF} Nothing` ; do ${PRINTF} $$f ; done
+	@${PRINTF} "\n"            
+	@${PRINTF} "The list of current filters available is:\n"
+	@${PRINTF} "\n"                                                                      
+	@for f in `ls build/lib/lib*-filter.so 2> /dev/null || ${PRINTF} Nothing` ; do ${PRINTF} $$f ; done
+	@${PRINTF} "\n"
+	@${PRINTF} "As a next step we suggest you to run \"make usecases\" or \"make slambench APPS=all\".\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "=================================================================================================================\n"
+	@${PRINTF} "\n"
 
 framework/makefiles/benchmarks.makefile : framework/makefiles/download_benchmarks.py benchmarks/benchmarks.repos
 	python $^ > $@
@@ -234,98 +234,98 @@ framework/makefiles/benchmarks.makefile : framework/makefiles/download_benchmark
 include framework/makefiles/benchmarks.makefile
 
 datasets :
-	@${ECHO} ""
-	@${ECHO} "================================================================================================================="
-	@${ECHO} "SLAMBench integrates tools to automatically generate files compatible with SLAMBench from existing datasets."
-	@${ECHO} ""
-	@${ECHO} "The list of current dataset is:                                                                                 "
-	@for f in `find datasets/ | grep [.]slam` ; do ${ECHO} "   - $$f" ; done
-	@${ECHO} ""
-	@${ECHO} "If you do not find datasets in this list, you can use make to download them (make datasetslist). "
-	@${ECHO} "Here is a list of the datasets available."
-	@${ECHO} -e "If you are using one of those dataset, \033[1;31mplease refer to their respective publications\033[0m:"
-	@${ECHO} "   - TUM RGB-D SLAM dataset [Sturm et al, IROS'12]: https://vision.in.tum.de/data/datasets/rgbd-dataset"
-	@${ECHO} "   - ICL-NUIM dataset [Handa et al, ICRA'14]: https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html"
-	@${ECHO} "   - EuRoC MAV Dataset [Burri et al, IJJR'16]: https://projects.asl.ethz.ch/datasets/doku.php"
-	@${ECHO} "   - SVO sample dataset [Forster et al, ICRA 2014]: https://github.com/uzh-rpg/rpg_svo"
-	@${ECHO} "================================================================================================================="
+	@${PRINTF} "\n"
+	@${PRINTF} "=================================================================================================================\n"
+	@${PRINTF} "SLAMBench integrates tools to automatically generate files compatible with SLAMBench from existing datasets.\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "The list of current dataset is:                                                                                 \n"
+	@for f in `find datasets/ | grep [.]slam` ; do ${PRINTF} "   - $$f\n" ; done
+	@${PRINTF} "\n"
+	@${PRINTF} "If you do not find datasets in this list, you can use make to download them (make datasetslist). \n"
+	@${PRINTF} "Here is a list of the datasets available.\n"
+	@${PRINTF} "If you are using one of those dataset, \033[1;31mplease refer to their respective publications\033[0m:\n"
+	@${PRINTF} "   - TUM RGB-D SLAM dataset [Sturm et al, IROS'12]: https://vision.in.tum.de/data/datasets/rgbd-dataset\n"
+	@${PRINTF} "   - ICL-NUIM dataset [Handa et al, ICRA'14]: https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html\n"
+	@${PRINTF} "   - EuRoC MAV Dataset [Burri et al, IJJR'16]: https://projects.asl.ethz.ch/datasets/doku.php\n"
+	@${PRINTF} "   - SVO sample dataset [Forster et al, ICRA 2014]: https://github.com/uzh-rpg/rpg_svo\n"
+	@${PRINTF} "=================================================================================================================\n"
 
 datasetslist:
-	@${ECHO} ""
-	@${ECHO} "### ICL-NUIM Living Room"
-	@${ECHO} ""
-	@${ECHO} "make ./datasets/ICL_NUIM/living_room_traj0_loop.slam"
-	@${ECHO} "make ./datasets/ICL_NUIM/living_room_traj1_loop.slam"
-	@${ECHO} "make ./datasets/ICL_NUIM/living_room_traj2_loop.slam"
-	@${ECHO} "make ./datasets/ICL_NUIM/living_room_traj3_loop.slam"
-	@${ECHO} ""
-	@${ECHO} ""
-	@${ECHO} "### TUM Testing and Debugging"
-	@${ECHO} ""
-	@${ECHO} "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_xyz.slam"
-	@${ECHO} "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_rpy.slam"
-	@${ECHO} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_xyz.slam"
-	@${ECHO} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_rpy.slam"
-	@${ECHO} ""
-	@${ECHO} ""
-	@${ECHO} "### TUM Handheld SLAM"
-	@${ECHO} ""
-	@${ECHO} "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_360.slam"
-	@${ECHO} "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_floor.slam"
-	@${ECHO} "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_desk.slam"
-	@${ECHO} "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_desk2.slam"
-	@${ECHO} "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_room.slam"
-	@${ECHO} ""
-	@${ECHO} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_360_hemisphere.slam"
-	@${ECHO} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_360_kidnap.slam"
-	@${ECHO} ""
-	@${ECHO} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_desk.slam"
-	@${ECHO} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_desk_with_person.slam"
-	@${ECHO} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_large_no_loop.slam"
-	@${ECHO} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_large_with_loop.slam"
-	@${ECHO} ""
-	@${ECHO} "### TUM Robot SLAM"
-	@${ECHO} ""
-	@${ECHO} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_360.slam"
-	@${ECHO} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam.slam"
-	@${ECHO} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam2.slam"
-	@${ECHO} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam3.slam"
-	@${ECHO} ""
-	@${ECHO} "##### TUM Extra dataset"
-	@${ECHO} ""
-	@${ECHO} "## https://vision.in.tum.de/rgbd/dataset/freiburg3/rgbd_dataset_freiburg3_long_office_household.tgz"
-	@${ECHO} ""
-	@${ECHO} ""
-	@${ECHO} "### EuRoC MAV Machine Hall"
-	@${ECHO} ""
-	@${ECHO} "make ./datasets/EuRoCMAV/machine_hall/MH_01_easy/MH_01_easy.slam"
-	@${ECHO} "make ./datasets/EuRoCMAV/machine_hall/MH_02_easy/MH_02_easy.slam"
-	@${ECHO} "make ./datasets/EuRoCMAV/machine_hall/MH_03_medium/MH_03_medium.slam"
-	@${ECHO} "make ./datasets/EuRoCMAV/machine_hall/MH_04_difficult/MH_04_difficult.slam"
-	@${ECHO} "make ./datasets/EuRoCMAV/machine_hall/MH_05_difficult/MH_05_difficult.slam"
-	@${ECHO} ""
-	@${ECHO} "### EuRoC MAV Vicon Room"
-	@${ECHO} ""
-	@${ECHO} "make ./datasets/EuRoCMAV/vicon_room1/V1_01_easy/V1_01_easy.slam"
-	@${ECHO} "make ./datasets/EuRoCMAV/vicon_room1/V1_02_medium/V1_02_medium.slam"
-	@${ECHO} "make ./datasets/EuRoCMAV/vicon_room1/V1_03_difficult/V1_03_difficult.slam"
-	@${ECHO} "make ./datasets/EuRoCMAV/vicon_room2/V2_01_easy/V2_01_easy.slam"
-	@${ECHO} "make ./datasets/EuRoCMAV/vicon_room2/V2_02_medium/V2_02_medium.slam"
-	@${ECHO} "make ./datasets/EuRoCMAV/vicon_room2/V2_03_difficult/V2_03_difficult.slam"
-	@${ECHO} ""
-	@${ECHO} ""
-	@${ECHO} "### SVO test dataset"
-	@${ECHO} ""
-	@${ECHO} "make datasets/SVO/artificial.slam"
-	@${ECHO} ""
-	@${ECHO} ""
-	@${ECHO} "================================================================================================================="
-	@${ECHO} -e "If you are using one of those dataset, \033[1;31mplease refer to their respective publications\033[0m:"
-	@${ECHO} "   - TUM RGB-D SLAM dataset [Sturm et al, IROS'12]: https://vision.in.tum.de/data/datasets/rgbd-dataset"
-	@${ECHO} "   - ICL-NUIM dataset [Handa et al, ICRA'14]: https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html"
-	@${ECHO} "   - EuRoC MAV Dataset [Burri et al, IJJR'16]: https://projects.asl.ethz.ch/datasets/doku.php"
-	@${ECHO} "   - SVO sample dataset [Forster et al, ICRA 2014]: https://github.com/uzh-rpg/rpg_svo"
-	@${ECHO} "================================================================================================================="
+	@${PRINTF} "\n"
+	@${PRINTF} "### ICL-NUIM Living Room\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "make ./datasets/ICL_NUIM/living_room_traj0_loop.slam\n"
+	@${PRINTF} "make ./datasets/ICL_NUIM/living_room_traj1_loop.slam\n"
+	@${PRINTF} "make ./datasets/ICL_NUIM/living_room_traj2_loop.slam\n"
+	@${PRINTF} "make ./datasets/ICL_NUIM/living_room_traj3_loop.slam\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "### TUM Testing and Debugging\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_xyz.slam\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_rpy.slam\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_xyz.slam\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_rpy.slam\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "### TUM Handheld SLAM\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_360.slam\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_floor.slam\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_desk.slam\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_desk2.slam\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_room.slam\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_360_hemisphere.slam\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_360_kidnap.slam\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_desk.slam\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_desk_with_person.slam\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_large_no_loop.slam\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_large_with_loop.slam\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "### TUM Robot SLAM\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_360.slam\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam.slam\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam2.slam\n"
+	@${PRINTF} "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam3.slam\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "##### TUM Extra dataset\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "## https://vision.in.tum.de/rgbd/dataset/freiburg3/rgbd_dataset_freiburg3_long_office_household.tgz\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "### EuRoC MAV Machine Hall\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "make ./datasets/EuRoCMAV/machine_hall/MH_01_easy/MH_01_easy.slam\n"
+	@${PRINTF} "make ./datasets/EuRoCMAV/machine_hall/MH_02_easy/MH_02_easy.slam\n"
+	@${PRINTF} "make ./datasets/EuRoCMAV/machine_hall/MH_03_medium/MH_03_medium.slam\n"
+	@${PRINTF} "make ./datasets/EuRoCMAV/machine_hall/MH_04_difficult/MH_04_difficult.slam\n"
+	@${PRINTF} "make ./datasets/EuRoCMAV/machine_hall/MH_05_difficult/MH_05_difficult.slam\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "### EuRoC MAV Vicon Room\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "make ./datasets/EuRoCMAV/vicon_room1/V1_01_easy/V1_01_easy.slam\n"
+	@${PRINTF} "make ./datasets/EuRoCMAV/vicon_room1/V1_02_medium/V1_02_medium.slam\n"
+	@${PRINTF} "make ./datasets/EuRoCMAV/vicon_room1/V1_03_difficult/V1_03_difficult.slam\n"
+	@${PRINTF} "make ./datasets/EuRoCMAV/vicon_room2/V2_01_easy/V2_01_easy.slam\n"
+	@${PRINTF} "make ./datasets/EuRoCMAV/vicon_room2/V2_02_medium/V2_02_medium.slam\n"
+	@${PRINTF} "make ./datasets/EuRoCMAV/vicon_room2/V2_03_difficult/V2_03_difficult.slam\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "### SVO test dataset\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "make datasets/SVO/artificial.slam\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "\n"
+	@${PRINTF} "=================================================================================================================\n"
+	@${PRINTF} "If you are using one of those dataset, \033[1;31mplease refer to their respective publications\033[0m:\n"
+	@${PRINTF} "   - TUM RGB-D SLAM dataset [Sturm et al, IROS'12]: https://vision.in.tum.de/data/datasets/rgbd-dataset\n"
+	@${PRINTF} "   - ICL-NUIM dataset [Handa et al, ICRA'14]: https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html\n"
+	@${PRINTF} "   - EuRoC MAV Dataset [Burri et al, IJJR'16]: https://projects.asl.ethz.ch/datasets/doku.php\n"
+	@${PRINTF} "   - SVO sample dataset [Forster et al, ICRA 2014]: https://github.com/uzh-rpg/rpg_svo\n"
+	@${PRINTF} "=================================================================================================================\n"
 
 .PHONY: slambench benchmarks benchmarkslist datasets datasetslist
 
@@ -395,9 +395,9 @@ datasets/ICL_NUIM/living_room_traj%_loop_neg.slam : datasets/ICL_NUIM/living_roo
 
 
 datasets/ICL_NUIM/%.gt.freiburg : 
-	${ECHO}  "Download ground truth trajectory..."
+	${PRINTF}  "Download ground truth trajectory...\n"
 	mkdir -p datasets/ICL_NUIM/
-	cd datasets/ICL_NUIM/  &&  if test -x livingRoom$*.gt.freiburg ; then ${ECHO} "Done" ; else ${WGET} "http://www.doc.ic.ac.uk/~ahanda/VaFRIC/$*.gt.freiburg" ; fi
+	cd datasets/ICL_NUIM/  &&  if test -x livingRoom$*.gt.freiburg ; then ${PRINTF} "Done\n" ; else ${WGET} "http://www.doc.ic.ac.uk/~ahanda/VaFRIC/$*.gt.freiburg" ; fi
 
 datasets/ICL_KLG/dyson_lab.klg :
 	mkdir -p datasets/ICL_KLG/
@@ -436,7 +436,7 @@ clean :
 
 cleandatasets :
 	find datasets/ | grep [.]slam | xargs rm 2> /dev/null || true
-	@${ECHO} "Datasets Cleaned"
+	@${PRINTF} "Datasets Cleaned\n"
 
 cleandeps :
 	rm -rf deps
@@ -458,31 +458,31 @@ demo-prepare :
 
 demo-lib :
 	clear
-	@${ECHO} -e "                        "
-	@${ECHO} -e " ======================="
-	@${ECHO} -e " Pick UI                "
-	@${ECHO} -e "   *  depends on the purpose     "
-	@${ECHO} -e " ======================="
-	@${ECHO} -e "                        "
-	@for d in `find ./build/bin/ -name *_loader ` ; do ${ECHO} " $$d" ; done
-	@${ECHO} -e "                        "
-	@${ECHO} -e " ======================="
-	@${ECHO} -e " Pick dataset           "
-	@${ECHO} -e "   *  the slam format includes camera parameters "
-	@${ECHO} -e " ======================="
-	@${ECHO} -e "                        "
-	@for d in `find datasets/ | grep [.]slam` ; do ${ECHO} " -i $$d" ; done
-	@${ECHO} -e "                        "
-	@${ECHO} -e " ======================="
-	@${ECHO} -e " Pick libraries          "
-	@${ECHO} -e "   *  may requires parameters"
-	@${ECHO} -e "   *  do not need to be open source"
-	@${ECHO} -e " ======================="
-	@${ECHO} -e "                        "
-	@for d in `find  build/lib/| grep [-]library[.]so` ; do ${ECHO} " -load $$d" ; done
-	@${ECHO} -e "                        "
-	@${ECHO} -e "                        "
-	@${ECHO} -e " ======================="
+	@${PRINTF} "                        \n"
+	@${PRINTF} " =======================\n"
+	@${PRINTF} " Pick UI                \n"
+	@${PRINTF} "   *  depends on the purpose     \n"
+	@${PRINTF} " =======================\n"
+	@${PRINTF} "                        \n"
+	@for d in `find ./build/bin/ -name *_loader ` ; do ${PRINTF} " $$d\n" ; done
+	@${PRINTF} "                        \n"
+	@${PRINTF} " =======================\n"
+	@${PRINTF} " Pick dataset           \n"
+	@${PRINTF} "   *  the slam format includes camera parameters \n"
+	@${PRINTF} " =======================\n"
+	@${PRINTF} "                        \n"
+	@for d in `find datasets/ | grep [.]slam` ; do ${PRINTF} " -i $$d\n" ; done
+	@${PRINTF} "                        \n"
+	@${PRINTF} " =======================\n"
+	@${PRINTF} " Pick libraries          \n"
+	@${PRINTF} "   *  may requires parameters\n"
+	@${PRINTF} "   *  do not need to be open source\n"
+	@${PRINTF} " =======================\n"
+	@${PRINTF} "                        \n"
+	@for d in `find  build/lib/| grep [-]library[.]so` ; do ${PRINTF} " -load $$d\n" ; done
+	@${PRINTF} "                        \n"
+	@${PRINTF} "                        \n"
+	@${PRINTF} " =======================\n"
 
 
 ####################################
