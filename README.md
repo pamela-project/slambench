@@ -450,6 +450,10 @@ To fix one of them, in the compilation process, when compiling CUDA application 
 
 # Release history #
 
+Version 2.1 (Jul 2019)
+
+ * Add OSX support for benchmark_loader with kfusion (no memory profiling yet).
+
 Version 2.0 (Feb 2018)
 
  * This release is a complete new version
