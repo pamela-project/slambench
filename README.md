@@ -7,13 +7,13 @@
 
 # Contents #
 
-* [What is SLAMBench?](#what-is-slambench?)
-* [How to set up SLAMBench?](#how-to-set-up-slambench?)
-* [How to run an existing algorithm with SLAMBench?](#how-to-run-an-existing-algorithm-with-slambench?)
-* [How to add a new benchmark in SLAMBench?](how-to-add-a-new-benchmark-in-slambench?)
+* [What is SLAMBench?](#what-is-slambench)
+* [How to set up SLAMBench?](#how-to-set-up-slambench)
+* [How to run an existing algorithm with SLAMBench?](#how-to-run-an-existing-algorithm-with-slambench)
+* [How to add a new benchmark in SLAMBench?](how-to-add-a-new-benchmark-in-slambench)
 * [Frequently asked questions](#frequently-asked-questions)
-* [Known Issues](known-issues)
-* [Release History](release-history)
+* [Known Issues](#known-issues)
+* [Release History](#release-history)
 
 ## What is SLAMBench? ##
 
