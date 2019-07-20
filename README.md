@@ -10,7 +10,7 @@ Developed in the PAMELA project, EPSRC Programme Grant EP/K008730/1
 * [What is SLAMBench?](#what-is-slambench)
 * [How to set up SLAMBench?](#how-to-set-up-slambench)
 * [How to run an existing algorithm with SLAMBench?](#how-to-run-an-existing-algorithm-with-slambench)
-* [How to add a new benchmark in SLAMBench?](how-to-add-a-new-benchmark-in-slambench)
+* [How to add a new benchmark in SLAMBench?](#how-to-add-a-new-benchmark-in-slambench)
 * [Frequently asked questions](#frequently-asked-questions)
 * [Known Issues](#known-issues)
 * [Release History](#release-history)
@@ -73,44 +73,27 @@ To ease the usage of SLAMBench we provide auto-installation of dependencies and 
 
 #### To install them
 
-With Fedora 29:
-```dnf install -y yaml-cpp-devel gtk2-devel mesa-libEGL-devel vtk-devel cmake make git mercurial wget unzip gcc gcc-c++ lapack blas lapack-devel blas-devel findutils  cvs  glut-devel glew-devel boost-devel glog-devel gflags-devel libXmu-devel```
+With Fedora 29: `dnf install -y yaml-cpp-devel gtk2-devel mesa-libEGL-devel vtk-devel cmake make git mercurial wget unzip gcc gcc-c++ lapack blas lapack-devel blas-devel findutils  cvs  glut-devel glew-devel boost-devel glog-devel gflags-devel libXmu-devel`
 
-With Fedora 24: 
-`dnf install -y yaml-cpp-devel gtk2-devel vtk-devel cmake make git mercurial wget unzip gcc gcc-c++ lapack blas lapack-devel blas-devel findutils  cvs  glut-devel glew-devel boost-devel glog-devel gflags-devel libXmu-devel`
+With Fedora 24: `dnf install -y yaml-cpp-devel gtk2-devel vtk-devel cmake make git mercurial wget unzip gcc gcc-c++ lapack blas lapack-devel blas-devel findutils  cvs  glut-devel glew-devel boost-devel glog-devel gflags-devel libXmu-devel`
 
-With Ubuntu 16.10: 
-```bash
-apt-get -y install libvtk6.3 libvtk6-dev unzip libflann-dev wget mercurial git gcc cmake python-numpy freeglut3 freeglut3-dev libglew1.5 libglew1.5-dev libglu1-mesa libglu1-mesa-dev libgl1-mesa-glx libgl1-mesa-dev libxmu-dev libxi-dev  libboost-all-dev cvs libgoogle-glog-dev libatlas-base-dev gfortran  gtk2.0 libgtk2.0-dev  libyaml-dev build-essential bison flex libyaml-cpp-dev
-```
+With Ubuntu 16.10: `apt-get -y install libvtk6.3 libvtk6-dev unzip libflann-dev wget mercurial git gcc cmake python-numpy freeglut3 freeglut3-dev libglew1.5 libglew1.5-dev libglu1-mesa libglu1-mesa-dev libgl1-mesa-glx libgl1-mesa-dev libxmu-dev libxi-dev  libboost-all-dev cvs libgoogle-glog-dev libatlas-base-dev gfortran  gtk2.0 libgtk2.0-dev  libyaml-dev build-essential bison flex libyaml-cpp-dev`
 
-With Ubuntu 16.04: 
-```bash
-apt-get -y install libvtk6.2 libvtk6-dev unzip libflann-dev wget mercurial git gcc cmake python-numpy freeglut3 freeglut3-dev libglew1.5 libglew1.5-dev libglu1-mesa libglu1-mesa-dev libgl1-mesa-glx libgl1-mesa-dev libxmu-dev libxi-dev  libboost-all-dev cvs libgoogle-glog-dev libatlas-base-dev gfortran  gtk2.0 libgtk2.0-dev libproj9 libproj-dev libyaml-0-2 libyaml-dev libyaml-cpp-dev libhdf5-dev libhdf5-dev
-```
+With Ubuntu 16.04: `apt-get -y install libvtk6.2 libvtk6-dev unzip libflann-dev wget mercurial git gcc cmake python-numpy freeglut3 freeglut3-dev libglew1.5 libglew1.5-dev libglu1-mesa libglu1-mesa-dev libgl1-mesa-glx libgl1-mesa-dev libxmu-dev libxi-dev  libboost-all-dev cvs libgoogle-glog-dev libatlas-base-dev gfortran  gtk2.0 libgtk2.0-dev libproj9 libproj-dev libyaml-0-2 libyaml-dev libyaml-cpp-dev libhdf5-dev libhdf5-dev`
 
-With Ubuntu 14.04: 
-```bash
-apt-get -y install libvtk6-dev unzip libflann-dev wget mercurial git gcc cmake python-numpy freeglut3 freeglut3-dev libglew1.5 libglew1.5-dev libglu1-mesa libglu1-mesa-dev libgl1-mesa-glx libgl1-mesa-dev libxmu-dev libxi-dev  libboost-all-dev cvs libgoogle-glog-dev libatlas-base-dev gfortran  gtk2.0 libgtk2.0-dev
-```
+With Ubuntu 14.04: `apt-get -y install libvtk6-dev unzip libflann-dev wget mercurial git gcc cmake python-numpy freeglut3 freeglut3-dev libglew1.5 libglew1.5-dev libglu1-mesa libglu1-mesa-dev libgl1-mesa-glx libgl1-mesa-dev libxmu-dev libxi-dev  libboost-all-dev cvs libgoogle-glog-dev libatlas-base-dev gfortran  gtk2.0 libgtk2.0-dev`
 
 #### Special requirements for CUDA
 
 Tu run the CUDA implementation of some of the algorithms, you will need extra dependencies.
 
-With Ubuntu: 
-```bash
-apt-get -y install  nvidia-cuda-toolkit clinfo
-``` 
+With Ubuntu: `apt-get -y install nvidia-cuda-toolkit clinfo`
 
-With Fedora: 
-```bash
-yum install cuda
-``` 
+With Fedora: `yum install cuda`
 
 ### Compilation of SLAMBench and its benchmarks
 
-#### 1. dependencies
+#### 1. Dependencies
 
 Install dependencies first [NOTE can be installed by the user on its system as well]:
 
@@ -124,7 +107,7 @@ You can also install each ofthese individually, using the commands such as: `eig
 
 more information is available in the `framework/makefiles/README.md` file.
 
-#### 2. SLAMBench framework
+#### 2. SLAMBench Framework
 
 SLAMBench is a framework that can be compiled by simply running:
 
@@ -174,6 +157,7 @@ build/lib/libkfusion-notoon-library.so
 build/lib/libkfusion-openmp-library.so
 build/lib/libkfusion-cuda-library.so  
 build/lib/libkfusion-opencl-library.so
+
 ```
 
 We can see five different implementations (cpp, notoon, and openmp, cuda and opencl). The list of available binaries depends of the dependencies you installed beforehand. For example, you need CUDA to compile the kfusion-cuda. A complete list of the dependencies is available at the end of this README.
@@ -202,6 +186,7 @@ Available parameters :
 -realtime      --realtime-mode         : realtime frame loading mode (Default=false)
 -realtime-mult --realtime-multiplier   : realtime frame loading mode (Default=1)
 -fo            --file-output           : File to write slamfile containing outputs (Default=)
+
 ```
 
 
@@ -217,6 +202,7 @@ Available parameters :
 -Depth-intrisics  --Depth-intrisics        : (Default=nullptr  Current=0.751875,1,0.4992185,0.4989583)
 -Depth-dip        --Depth-disparity-params : (Default=nullptr  Current=0.001,0)
 -Camera-intrisics --Camera-intrisics       : (Default=nullptr  Current=0.751875,1,0.4992185,0.4989583)
+
 ```
 
 Finally is you add a library name `-load libname`, more parameter can be seen : 
@@ -323,7 +309,7 @@ bool sb_update_outputs(SLAMBenchUI *);
 In this section we will present those functions one by one.
 
 
-### `bool sb_new_slam_configuration(SLAMBenchLibraryHelper * slam_settings)`
+### bool sb\_new\_slam\_configuration(SLAMBenchLibraryHelper * slam\_settings)
 
 This function is called first, and only once, SLAM systems is expected to provide its parameters.
 
@@ -331,22 +317,22 @@ Example :
 
 ```cpp
 bool sb_new_slam_configuration(SLAMBenchLibraryHelper * slam_settings)  {
-slam_settings->addParameter(TypedParameter<float>("c", "confidence",     "Confidence",      &confidence, &default_confidence));
-slam_settings->addParameter(TypedParameter<float>("d", "depth",          "Depth",           &depth,      &default_depth));
-slam_settings->addParameter(TypedParameter<int>  ("td", "textureDim",      "textureDim",       &textureDim,      &default_textureDim));
-return true;
+	slam_settings->addParameter(TypedParameter<float>("c", "confidence",    "Confidence",   &confidence,    &default_confidence));
+	slam_settings->addParameter(TypedParameter<float>("d", "depth",         "Depth",        &depth,         &default_depth));
+	slam_settings->addParameter(TypedParameter<int>  ("td", "textureDim",   "textureDim",   &textureDim,    &default_textureDim));
+	return true;
 }
 ```
 
 should always return `true` or an exception will be raised.
 
 
-### `bool sb_init_slam_system(SLAMBenchLibraryHelper * slam_settings)`
+### bool sb\_init\_slam\_system(SLAMBenchLibraryHelper * slam\_settings)
 
 This function is called second, and only once, SLAM systems is expected to allocate memory, retrieve sensor informations.
 
 
-To retrieve sensor there is `SensorFinder` :
+To retrieve sensor there is `SensorFinder`:
 ```cpp
 slambench::io::CameraSensorFinder sensor_finder;
 auto rgb_sensor = sensor_finder.FindOne(slam_settings->get_sensors(), {{"camera_type", "rgb"}});
@@ -357,29 +343,29 @@ SLAM systems are also expected to define there output, there is one mandatory ou
 ```cpp
 pose_output = new slambench::outputs::Output("Pose", slambench::values::VT_POSE, true);
 slam_settings->GetOutputManager().RegisterOutput(pose_output);
-should always return ``true`` or an exception will be raised.
 ```
+should always return `true` or an exception will be raised.
 
-### `bool sb_update_frame (SLAMBenchLibraryHelper *  slam_settings, slambench::io::SLAMFrame* s)`
+### bool sb_update_frame (SLAMBenchLibraryHelper *  slam_settings, slambench::io::SLAMFrame* s)
 
 The frame `s` is the next frame to process in the dataset (ordered by timestamps).
 
 When `sb_update_frame` returns `false`, then `sb_update_frame` will be directly call again with the next frame, if it return `true`, then `sb_process_once` will be called once.
 
-### `bool sb_process_once (SLAMBenchLibraryHelper * slam_settings)`
+### bool sb_process_once (SLAMBenchLibraryHelper * slam_settings)
 
 should always return `true` or an exception will be raised.
 
-### `bool sb_clean_slam_system()`
+### bool sb_clean_slam_system()
 
 This function is called last, and only once, SLAM systems is expected to clean everything (free memory).
 
 ```cpp
 bool sb_clean_slam_system() {
-delete eFusion;
-delete inputRGB;
-delete inputDepth;
-return true;
+	delete eFusion;
+	delete inputRGB;
+	delete inputDepth;
+	return true;
 }
 ```
 
@@ -396,11 +382,11 @@ bool sb_update_outputs(SLAMBenchLibraryHelper *lib, const slambench::TimeStamp *
 slambench::TimeStamp ts = *ts_p;
 
 if(pose_output->IsActive()) {
-// Get the current pose as an eigen matrix
-Eigen::Matrix4f mat = eFusion->getCurrPose();
+	// Get the current pose as an eigen matrix
+	Eigen::Matrix4f mat = eFusion->getCurrPose();
 
-std::lock_guard<FastLock> lock (lib->GetOutputManager().GetLock());
-pose_output->AddPoint(ts, new slambench::values::PoseValue(mat));
+	std::lock_guard<FastLock> lock (lib->GetOutputManager().GetLock());
+	pose_output->AddPoint(ts, new slambench::values::PoseValue(mat));
 }
 ```
 
@@ -419,9 +405,9 @@ make usecases
 
 This command will explain in details how to integrate algorithms that are already compatible with SLAMBench.
 
-## Know Issues
+## Known Issues
 
-### Know issue with CUDA
+### Known issue with CUDA
 
 Applications using CUDA require GCC 4.9 to work. To specify a new gcc compiler for CUDA only, you can use the `CUDA_HOST_COMPILER` flag as follows :
 
