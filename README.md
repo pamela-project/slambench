@@ -1,26 +1,21 @@
-# README #
+# SLAMBench 2.0 #
 
-SLAMBench 2.0
-
-  Copyright (c) 2014-2018 University of Edinburgh, Imperial College, University of Manchester.
+  Copyright (c) 2014-2019 University of Edinburgh, Imperial College, University of Manchester.
   Developed in the PAMELA project, EPSRC Programme Grant EP/K008730/1
 
 [![Build Status](https://travis-ci.org/pamela-project/slambench2.svg?branch=master)](https://travis-ci.org/pamela-project/slambench2)
 
-## Most frequent questions ##
+# Contents #
 
-### Where are the algorithms ? ###
+* [What is SLAMBench?](#what-is-slambench?)
+* [How to set up SLAMBench?](#how-to-set-up-slambench?)
+* [How to run an existing algorithm with SLAMBench?](#how-to-run-an-existing-algorithm-with-slambench?)
+* [How to add a new benchmark in SLAMBench?](how-to-add-a-new-benchmark-in-slambench?)
+* [Frequently asked questions](#frequently-asked-questions)
+* [Known Issues](known-issues)
+* [Release History](release-history)
 
-If SLAMBench is already compatible with a wide range of algorithms they are not included in this repository. 
-However you can easily integrate those algorithms using the command :
-
-```
-make usecases
-```
-
-This command will explain in details how to integrate algorithms that are already compatible with slambench.
-
-## What is slambench ##
+## What is SLAMBench? ##
 
 SLAMBench is a SLAM performance benchmark that combines a framework for quantifying quality-of-result with instrumentation of accuracy, execution time, memory usage and energy consumption. It also include a graphical interface to visualize these information.
 
@@ -39,7 +34,6 @@ SLAMBench has currently been used with the following SLAM algorithms :
 
   **IMPORTANT: If you use any of those algorithms in scientific publications, you should refer to the respective publications.**
 
-
 In addition, if you use SLAMBench in scientific publications, we would appreciate citations to the following paper [https://www.research.ed.ac.uk/](https://www.research.ed.ac.uk/portal/en/publications/slambench2-multiobjective-headtohead-benchmarking-for-visual-slam(c3d189db-68ae-4182-8e46-d812db2955c9).html):
 ```
 @inproceedings{Bodin2018,
@@ -51,19 +45,10 @@ In addition, if you use SLAMBench in scientific publications, we would appreciat
     }
 ```
 
-# Table of content #
-
-This README includes the following sections:
-
- * How to set up SLAMBench ?
- * How to run a benchmark with SLAMBench ?
- * How to add a new benchmark in SLAMBench ?
-
-
-## How to set up SLAMBench ? ##
+## How to set up SLAMBench? ##
 
 As SLAMBench deals with multiple SLAM algorithms, dependencies might be difficult to install on any systems.
-To ease the usage of SLAMbench we provide auto-installation of dependencies and we recommend to use fresh installation of the operating systems Ubuntu 14/16 or Fedora 24/25/26/27 that are known to work fine.
+To ease the usage of SLAMBench we provide auto-installation of dependencies and we recommend to use fresh installation of the operating systems Ubuntu 14/16 or Fedora 24/25/26/27 that are known to work fine.
 
 ### Dependencies installations ###
 
@@ -123,7 +108,7 @@ Install dependencies first [NOTE can be installed by the user on its system as w
 make deps
 ```
 The idea is to maximise the chance of a good build, by selection the best cocktail of libraries.
-This will downdload and compile the following applications : Brisk, Ceres, CVD, Eigen3, Flann, FreeImage, G2O, Gvars, OpenCV, OpenGV, OpenTuner, Pangolin, PCL, Suitesparse, TooN.
+This will download and compile the following applications : Brisk, Ceres, CVD, Eigen3, Flann, FreeImage, G2O, Gvars, OpenCV, OpenGV, OpenTuner, Pangolin, PCL, Suitesparse, TooN.
 
 You can also install each ofthese individually, using the commands such as: ```eigen3```, ```flann```, ```g2o```, ```opencv```, ```opengv```, ```pcl```, ```toon```, ```suitesparse```, ...
 
@@ -139,7 +124,7 @@ make slambench
 
 Although, by doing this, you only compile the libraries of SLAMBench.
 
-#### 3. Usescases ####
+#### 3. Usecases ####
 
 To compile a specific use-case, you will need to specify identifiers :
 
@@ -148,7 +133,7 @@ make slambench APPS=kfusion,lsdslam
 ```
 
 The current benchmarks identifiers are efusion, infinitam, kfusion, lsdslam, monoslam, okvis, ptam, orbslam2, svo.
-You will find more information to downdload and compile use-cases with the ``make usecases`` command.
+You will find more information to download and compile use-cases with the ``make usecases`` command.
 
 #### 4. Datasets ####
 
@@ -165,7 +150,7 @@ As an example to download and generate the Living Room Trajectory 2 from the ICL
 A complete list of the datasets available is provided by the command ``make datasetslist``.
 
 
-## How to run an existing algorithm with SLAMBench ? ##
+## How to run an existing algorithm with SLAMBench? ##
 
 Once you have compile a benchmark, there are several ways to run it.
 For each implementation of this benchmark, you will find a specific library. 
@@ -263,11 +248,11 @@ In the next section we will explain how to use SLAMBench to evaluate the perform
 
 SLAMBench works with Metrics and Outputs elements. 
 When you run the ```benchmark_loader``` or the ```pangolin_loader``` these are those elements that you can visualize.
-Metrics are components generated by SLAMbench framework really, while Outputs are generated by the algorithm or may be elements post-processed by SLAMbench (such as the aligned trajectory with the ground truth).
+Metrics are components generated by SLAMBench framework really, while Outputs are generated by the algorithm or may be elements post-processed by SLAMBench (such as the aligned trajectory with the ground truth).
 
 Let us run the benchmark loader. Its output is composed of two main parts, the ```Properties``` section, and the ```Statistics``` section. 
 the properties section details all the parameters used for the experiment (could been changed or not via the command line). 
-the statistics section repart all the outputs and metrics selection for output in the benchmark loader.
+the statistics section report all the outputs and metrics selection for output in the benchmark loader.
 
 ```
 > ./build/bin/benchmark_loader -i datasets/ICL_NUIM/living_room_traj2_loop.slam -load ./build/lib/libkfusion-cpp-library.so 
@@ -315,10 +300,7 @@ Frame Number	Timestamp	Duration_Frame	GPU_Memory	CPU_Memory		Duration_Preprocess
 ...
 ```
 
-
-
-
-## How to add a new benchmark in SLAMBench ? ##
+## How to add a new benchmark in SLAMBench? ##
 
 The main reason to provide a new version of SLAMBench is not only because of the introduction of new benchmarks but also because we provide now 
 a clear and specific API for SLAM algorithms to be implemented in order to add a new algorithm.
@@ -426,8 +408,20 @@ Example :
 
 should always return ``true`` or an exception will be raised.
 
+## Frequently asked questions ##
 
-# Know issues #
+### Where are the algorithms? ###
+
+If SLAMBench is already compatible with a wide range of algorithms they are not included in this repository. 
+However you can easily integrate those algorithms using the command :
+
+```
+make usecases
+```
+
+This command will explain in details how to integrate algorithms that are already compatible with SLAMBench.
+
+## Know Issues ##
 
 ### Know issue with CUDA ###
 
@@ -438,11 +432,8 @@ make slambench APPS=kfusion CUDA_HOST_COMPILER=/usr/local/gcc-4.9/bin/c++
 
 Modern O.S. are now using more recent version of this compiler, this introduce several compatibility issues.
 To fix one of them, in the compilation process, when compiling CUDA application we use the ``` -D_GLIBCXX_USE_CXX11_ABI=0 ``` flag.
-# TODO List #
 
-* Add office room dataset
-
-# Release history #
+## Release History ##
 
 Version 2.0 (Feb 2018)
 
