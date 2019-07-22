@@ -125,6 +125,8 @@ make deps
 The idea is to maximise the chance of a good build, by selection the best cocktail of libraries.
 This will downdload and compile the following applications : Brisk, Ceres, CVD, Eigen3, Flann, FreeImage, G2O, Gvars, OpenCV, OpenGV, OpenTuner, Pangolin, PCL, Suitesparse, TooN.
 
+You can also install each ofthese individually, using the commands such as: ```eigen3```, ```flann```, ```g2o```, ```opencv```, ```opengv```, ```pcl```, ```toon```, ```suitesparse```, ...
+
 more informations are available in the ``framework/makefiles/README.md`` file.
 
 #### 2. SLAMBench framework ####
