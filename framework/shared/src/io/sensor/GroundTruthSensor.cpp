@@ -51,4 +51,4 @@ class GTDeserialiser : public SensorDeserialiser {
 	}
 };
 
-static slambench::io::SensorDatabaseRegistration gt_reg(GroundTruthSensor::kGroundTruthTrajectoryType, slambench::io::SensorDatabaseEntry(new GTSerialiser(), new GTDeserialiser(), false, false));
+static slambench::io::SensorDatabaseRegistration gt_reg(GroundTruthSensor::kGroundTruthTrajectoryType, slambench::io::SensorDatabaseEntry(new GTSerialiser(), new GTDeserialiser(), true, false));
