@@ -10,7 +10,7 @@ ${REPOS_DIR}/ceres :
 
 ${DEPS_DIR}/ceres : ${REPOS_DIR}/ceres eigen3 suitesparse
 	mkdir ${REPOS_DIR}/ceres/build -p
-	rm ${REPOS_DIR}/ceres/buid/* -rf
+	rm ${REPOS_DIR}/ceres/build/* -rf
 	cd ${REPOS_DIR}/ceres/build && cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=$@" "-DBUILD_EXAMPLES:BOOL=OFF" "-DBUILD_TESTING:BOOL=OFF" \
 	                                         -DCMAKE_CXX_FLAGS="-w -O3 -std=c++11" -DEIGEN_INCLUDE_DIR=${EIGEN3_INCLUDE_DIR} \
 	                                         -DSUITESPARSE_INCLUDE_DIR_HINTS=${SUITE_SPARSE_ROOT}/include\

@@ -15,8 +15,8 @@
 #include <metrics/DurationMetric.h>
 #include <metrics/PowerMetric.h>
 #include <metrics/DepthEstimationMetric.h>
-#include "../../shared/include/metrics/MemoryMetric.h"
-#include "ColumnWriter.h"
+#include <metrics/MemoryMetric.h>
+#include <ColumnWriter.h>
 #include <SLAMBenchException.h>
 
 

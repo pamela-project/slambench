@@ -70,6 +70,12 @@ ifneq ("$(wildcard ${CERES_DIR})","")
 DEPS_ARGS+= -DCERES_DIR=${CERES_DIR}
 endif
 
+ifneq ("$(wildcard ${Sophus_DIR})","")
+DEPS_ARGS+= -DSophus_INCLUDE_DIR=${Sophus_INCLUDE_DIR}
+DEPS_ARGS+= -DSophus_INCLUDE_DIRS=${Sophus_INCLUDE_DIRS}
+DEPS_ARGS+= -DSophus_DIR=${Sophus_DIR}
+endif
+
 ifneq ("$(wildcard ${GVARS_INCLUDE_DIR})","")
 DEPS_ARGS+= -DGVARS_INCLUDE_DIR=${GVARS_INCLUDE_DIR}
 endif
@@ -164,6 +170,7 @@ deps :
 	+make pcl
 	+make suitesparse
 	+make toon
+	+make sophus
 
 
 .PHONY: deps

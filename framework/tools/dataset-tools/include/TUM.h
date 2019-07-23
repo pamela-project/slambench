@@ -21,7 +21,7 @@
 #include <io/sensor/CameraSensor.h>
 #include <io/sensor/DepthSensor.h>
 #include <io/sensor/GroundTruthSensor.h>
-#include "../../dataset-tools/include/DatasetReader.h"
+#include "DatasetReader.h"
 
 namespace slambench {
 
@@ -31,11 +31,11 @@ namespace slambench {
 
         private :
 
-	// I took those numbers from the TUM dataset paper
-	static constexpr CameraSensor::intrinsics_t fr1_intrinsics_rgb   = { 0.80828125, 1.076041667, 0.4978125, 0.531875 };
-	static constexpr DepthSensor::intrinsics_t  fr1_intrinsics_depth = { 0.92359375, 1.229375,    0.5171875, 0.4875   };
-	static constexpr CameraSensor::intrinsics_t fr2_intrinsics_rgb   = { 0.81390624, 1.085416667, 0.5079687, 0.52020  };
-	static constexpr DepthSensor::intrinsics_t  fr2_intrinsics_depth = { 0.9075,     1.212083333, 0.4825,    0.52708  };
+            // I took those numbers from the TUM dataset paper
+            static constexpr CameraSensor::intrinsics_t fr1_intrinsics_rgb   = { 0.80828125, 1.076041667, 0.4978125, 0.531875 };
+            static constexpr DepthSensor::intrinsics_t  fr1_intrinsics_depth = { 0.92359375, 1.229375,    0.5171875, 0.4875   };
+            static constexpr CameraSensor::intrinsics_t fr2_intrinsics_rgb   = { 0.81390624, 1.085416667, 0.5079687, 0.52020  };
+            static constexpr DepthSensor::intrinsics_t  fr2_intrinsics_depth = { 0.9075,     1.212083333, 0.4825,    0.52708  };
 
             //// Taken from https://vision.in.tum.de/data/datasets/rgbd-dataset/file_formats
             //static constexpr CameraSensor::intrinsics_t fr1_intrinsics_rgb   = { 517.3, 516.5, 318.6, 255.3 };

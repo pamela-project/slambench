@@ -356,12 +356,12 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 
         // TODO: There is only one frame queue
         slambench::io::SLAMFrame * next_frame = config->input_stream_->GetNextFrame();
-		auto gt_frame = dynamic_cast<slambench::io::GTBufferingFrameStream*>(config->input_stream_)->GetGTFrames()->GetFrame(frame_count);
 
         if (next_frame == nullptr) {
             std::cerr << "Last frame processed." << std::endl;
             break;
         }
+        auto gt_frame = dynamic_cast<slambench::io::GTBufferingFrameStream*>(config->input_stream_)->GetGTFrames()->GetFrame(frame_count);
 
 		if(!*stay_on) {
 			std::cerr << "!*stay_on ==> break;" << std::endl;
