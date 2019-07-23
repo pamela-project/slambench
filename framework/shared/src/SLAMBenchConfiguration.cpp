@@ -326,7 +326,7 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 	// ********* [[ MAIN LOOP ]] *********
 
 	unsigned int frame_count = 0;
-
+    bool sent_gt = false;
 	bool default_true = true;
 	bool * stay_on = &default_true;
 	bool ongoing = false;
@@ -335,27 +335,28 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 	while(*stay_on) {
 
 
-		if (ui){
-			if(frame_count!=0 &&  !ui->IsFreeRunning() ) {
-				if(!ongoing) {
-					if(!ui->WaitForFrame() ) {
-						std::cerr << "!ui->WaitForFrame() ==> break" << std::endl;
-						break;
-					}
-				}
-			}
-		}
+        if (ui){
+            if(frame_count!=0 &&  !ui->IsFreeRunning() ) {
+                if(!ongoing) {
+                    if(!ui->WaitForFrame() ) {
+                        std::cerr << "!ui->WaitForFrame() ==> break" << std::endl;
+                        break;
+                    }
+                }
+            }
+        }
 
 
-		// ********* [[ LOAD A NEW FRAME ]] *********
+        // ********* [[ LOAD A NEW FRAME ]] *********
 
-		if(config->input_stream_ == nullptr) {
-			std::cerr << "No input loaded." << std::endl;
-			break;
-		}
-		
-		// TODO: There is only one frame queue
-		slambench::io::SLAMFrame * next_frame = config->input_stream_->GetNextFrame();
+        if(config->input_stream_ == nullptr) {
+            std::cerr << "No input loaded." << std::endl;
+            break;
+        }
+
+        // TODO: There is only one frame queue
+        slambench::io::SLAMFrame * next_frame = config->input_stream_->GetNextFrame();
+		auto gt_frame = dynamic_cast<slambench::io::GTBufferingFrameStream*>(config->input_stream_)->GetGTFrames()->GetFrame(frame_count);
 
 		if (next_frame == nullptr) {
 			std::cerr << "Last frame processed." << std::endl;
@@ -374,8 +375,13 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 
 
 			// ********* [[ SEND THE FRAME ]] *********
+            if(!sent_gt)
+            {
+                lib->c_sb_update_frame(lib,gt_frame);
+                sent_gt = true;
+            }
 			ongoing=not lib->c_sb_update_frame(lib,next_frame);
-			
+
 			// This algorithm hasn't received enough frames yet.
 			if(ongoing) {
 				continue;
@@ -419,6 +425,7 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 					break;
 				}
 			}
+            sent_gt = false;
 		}
 		
 		
