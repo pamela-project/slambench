@@ -254,6 +254,11 @@ usecases:
 	@echo    "    available targets are : svo"
 	@echo ""
 
+	@echo -n "  - FLAME [Greene et al, ICCV '17]: "; if [ -f benchmarks/flame ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make flame)\033[0m" ; fi
+	@echo    "    repository: https://github.com/mihaibujanca/flame"
+	@echo    "    available targets are : flame"
+	@echo ""
+
 	@echo "If you want to test SLAMBench with existing SLAM algorithms, once you have download it please run \"make slambench APPS=slam1,slam2,...\""
 	@echo "   e.g. make slambench APPS=kfusion,orbslam2"
 	@echo "   You can also use \"make slambench APPS=all\" to compile them all."
@@ -395,9 +400,23 @@ kfusion:
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/kfusion/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
+flame:
+	@echo "================================================================================================================="
+	@echo    "  - FLAME [Greene et al. ICCV'17]: "
+	@echo    "    repository: https://github.com/robustrobotics/flame"
+	@echo    "    Used repository: https://github.com/mihaibujanca/flame"
+	@echo "================================================================================================================="
+	@echo ""
+	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
+	mkdir benchmarks/flame/src/original -p
+	rm benchmarks/flame/src/original -rf
+	git clone   https://github.com/mihaibujanca/flame   benchmarks/flame/src/original
+	@echo "cmake_minimum_required(VERSION 2.8)"      > benchmarks/flame/src/CMakeLists.txt
+	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
-.PHONY: efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo
-algorithms : efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo
+
+.PHONY: efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame
+algorithms : efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame
 
 
 datasets :

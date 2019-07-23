@@ -33,7 +33,7 @@ benchmarks/ptam/
 benchmarks/svo/
 benchmarks/monoslam/
 benchmarks/kfusion/
-
+benchmarks/flame/
 
 
 # Exotic builds
