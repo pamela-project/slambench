@@ -146,15 +146,12 @@ void MetricManager::EndPhase(Phase* phase)
 		i->MeasureEnd(phase);
 	}
 }
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wreturn-type"
-Phase* MetricManager::GetPhase(const std::string& phasename)
-{
-	for(auto i : phases_) {
-		if(i->GetName() == phasename) { 
-			return i;
-		}
-	}
-	assert(false);
+
+Phase* MetricManager::GetPhase(const std::string& phasename) {
+    for (auto i : phases_) {
+        if (i->GetName() == phasename) {
+            return i;
+        }
+    }
+    assert(false);
 }
-#pragma GCC diagnostic pop
