@@ -66,7 +66,7 @@ bool analyseTUMFolder(const std::string &dirname) {
 				return false;
 			}
 		}
-	} catch (boost::filesystem::filesystem_error e)  {
+	} catch (boost::filesystem::filesystem_error &e)  {
 		std::cerr << "I/O Error with directory " << dirname << std::endl;
 		std::cerr << e.what() << std::endl;
 		return false;
@@ -439,8 +439,10 @@ SLAMFile* TUMReader::GenerateSLAMFile () {
 			distortion_rgb[i]   = fr1_distortion_rgb[i];
 			distortion_depth[i] = fr1_distortion_depth[i];
 		}
+        distortion_rgb[4]   = fr1_distortion_rgb[4];
+        distortion_depth[4] = fr1_distortion_depth[4];
 
-	} else if (dirname.find("freiburg2") != std::string::npos) {
+    } else if (dirname.find("freiburg2") != std::string::npos) {
 		std::cout << "This dataset is assumed to be using freiburg2." << std::endl;
 		for (int i = 0; i < 4; i++) {
 			intrinsics_rgb[i]   = fr2_intrinsics_rgb[i];
@@ -448,8 +450,21 @@ SLAMFile* TUMReader::GenerateSLAMFile () {
 			distortion_rgb[i]   = fr2_distortion_rgb[i];
 			distortion_depth[i] = fr2_distortion_depth[i];
 		}
+        distortion_rgb[4]   = fr2_distortion_rgb[4];
+        distortion_depth[4] = fr2_distortion_depth[4];
 
-	} else  {
+
+    }
+	else if (dirname.find("freiburg3") != std::string::npos) {
+		std::cout << "This dataset is assumed to be using freiburg3." << std::endl;
+		for (int i = 0; i < 4; i++) {
+			intrinsics_rgb[i]   = fr3_intrinsics_rgb[i];
+			intrinsics_depth[i] = fr3_intrinsics_depth[i];
+			distortion_rgb[i]   = fr3_distortion_rgb[i];
+			distortion_depth[i] = fr3_distortion_depth[i];
+		}
+
+    } else  {
 		std::cout << "Camera calibration might be wrong !." << std::endl;
 	}
 
