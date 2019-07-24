@@ -56,8 +56,8 @@ const slambench::values::ValueDescription &DepthEstimationMetric::GetValueDescri
         const outputs::Output::value_map_t::value_type tested_frame = tested_->GetMostRecentValue();
         const outputs::Output::value_map_t::value_type gt_frame = gt_->GetMostRecentValue();
 
-        const FrameValue *tested_frame_sb = reinterpret_cast<const FrameValue*>(tested_frame.second);
-        const FrameValue *gt_frame_sb = reinterpret_cast<const FrameValue*>(gt_frame.second);
+        auto tested_frame_sb = reinterpret_cast<const FrameValue*>(tested_frame.second);
+        auto gt_frame_sb = reinterpret_cast<const FrameValue*>(gt_frame.second);
 
         assert(tested_frame_sb->GetWidth() == gt_frame_sb->GetWidth());
         assert(tested_frame_sb->GetHeight() == gt_frame_sb->GetHeight());
