@@ -580,6 +580,7 @@ bool SLAMBenchUI_Pangolin::DrawQueuedFrames() {
 		GLint format, type;
 		switch(frame.GetFormat()) {
 		case slambench::io::pixelformat::G_I_8:
+		case slambench::io::pixelformat::D_I_8:
 			format = GL_LUMINANCE;
 			type   = GL_UNSIGNED_BYTE;
 			break;

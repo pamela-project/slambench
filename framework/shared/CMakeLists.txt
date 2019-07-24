@@ -81,6 +81,7 @@ SET(MetricFiles
     src/metrics/memory_utils/CUDAMonitor.cpp
     src/metrics/Metric.cpp
     src/metrics/MetricManager.cpp
+    src/metrics/DepthEstimationMetric.cpp
 
     src/outputs/Output.cpp
     src/outputs/OutputManager.cpp
