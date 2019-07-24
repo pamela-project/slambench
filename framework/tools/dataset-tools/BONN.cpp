@@ -27,6 +27,11 @@
 
 using namespace slambench::io;
 
+constexpr CameraSensor::intrinsics_t BONNReader::intrinsics_rgb;
+constexpr DepthSensor::intrinsics_t BONNReader::intrinsics_depth;
+constexpr CameraSensor::distortion_coefficients_t BONNReader::distortion_rgb;
+constexpr DepthSensor::distortion_coefficients_t BONNReader::distortion_depth;
+
 /*
  *
  * The dataset folder contains :
@@ -360,26 +365,12 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
 
     Sensor::pose_t pose = Eigen::Matrix4f::Identity();
 
-    CameraSensor::intrinsics_t intrinsics_rgb;
-    DepthSensor::intrinsics_t intrinsics_depth;
-
-    CameraSensor::distortion_coefficients_t distortion_rgb;
-    DepthSensor::distortion_coefficients_t distortion_depth;
-
-    // TODO: This doesn't copy all values, distortion has 5 values
-    for (int i = 0; i < 4; i++) {
-        intrinsics_rgb[i] = BONNReader::intrinsics_rgb[i];
-        intrinsics_depth[i] = BONNReader::intrinsics_depth[i];
-        distortion_rgb[i] = BONNReader::distortion_rgb[i];
-        distortion_depth[i] = BONNReader::distortion_depth[i];
-    }
-
     DepthSensor::disparity_params_t disparity_params = {0.001, 0.0};
     DepthSensor::disparity_type_t disparity_type = DepthSensor::affine_disparity;
 
     // load Depth
     if (depth && !loadBONNDepthData(dirname, slamfile, pose,
-                                    intrinsics_depth, distortion_depth,
+                                    BONNReader::intrinsics_depth, BONNReader::distortion_depth,
                                     disparity_params, disparity_type)) {
         std::cerr << "Error while loading depth information." << std::endl;
         delete slamfilep;
@@ -387,14 +378,16 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
     }
 
     // load Grey
-    if (grey && !loadBONNGreyData(dirname, slamfile, pose, intrinsics_rgb, distortion_rgb)) {
+    if (grey && !loadBONNGreyData(dirname, slamfile, pose,
+                                  BONNReader::intrinsics_rgb, BONNReader::distortion_rgb)) {
         std::cerr << "Error while loading Grey information." << std::endl;
         delete slamfilep;
         return nullptr;
     }
 
     // load RGB
-    if (rgb && !loadBONNRGBData(dirname, slamfile, pose, intrinsics_rgb, distortion_rgb)) {
+    if (rgb && !loadBONNRGBData(dirname, slamfile, pose,
+                                BONNReader::intrinsics_rgb, BONNReader::distortion_rgb)) {
         std::cerr << "Error while loading RGB information." << std::endl;
         delete slamfilep;
         return nullptr;
