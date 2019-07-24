@@ -20,7 +20,7 @@ using namespace slambench::outputs;
 
 OutputManager::~OutputManager()
 {
-	for(auto i : output_map_) {
+	for(auto &i : output_map_) {
 		delete i.second;
 	}
 }
