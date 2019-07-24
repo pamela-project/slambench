@@ -35,7 +35,7 @@ int main(int argc, char * argv[])
 
 	try {
 
-		SLAMBenchConfiguration * config = new SLAMBenchConfiguration();
+		auto config = new SLAMBenchConfiguration();
 
 		//***************************************************************************************
 		// Start the argument processing
@@ -143,7 +143,7 @@ int main(int argc, char * argv[])
 
 void run_pangolin(bool *stay_on, SLAMBenchConfiguration *config) {
 	std::cerr << "Creation of GUI interface." << std::endl;
-	SLAMBenchUI_Pangolin * ui_pangolin = new SLAMBenchUI_Pangolin();
+	auto ui_pangolin = new SLAMBenchUI_Pangolin();
 	ui_pangolin->AddOutputManager("Ground Truth", &config->GetGroundTruth());
 	for(auto lib : config->GetLoadedLibs()) {
 		ui_pangolin->AddOutputManager(lib->getName(), &lib->GetOutputManager());

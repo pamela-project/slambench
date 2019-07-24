@@ -268,10 +268,10 @@ void SLAMBenchConfiguration::InitGroundtruth(bool with_point_cloud) {
 			std::cerr << "Process every frame mode enabled" << std::endl;
 		}
 
-		GetGroundTruth().LoadGTOutputsFromSLAMFile(input_interface->GetSensors(), gt_buffering_stream->GetGTFrames(), with_point_cloud);
+        ground_truth_.LoadGTOutputsFromSLAMFile(input_interface->GetSensors(), gt_buffering_stream->GetGTFrames(), with_point_cloud);
 	}
 	
-	auto gt_trajectory = GetGroundTruth().GetMainOutput(slambench::values::VT_POSE);
+	auto gt_trajectory = ground_truth_.GetMainOutput(slambench::values::VT_POSE);
 	if(gt_trajectory == nullptr) {
 		// Warn if there is no ground truth
 		std::cerr << "Dataset does not provide a GT trajectory" << std::endl;

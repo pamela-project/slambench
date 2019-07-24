@@ -33,7 +33,7 @@ int main(int argc, char * argv[])
 
 	try {
 
-		SLAMBenchConfiguration * config = new SLAMBenchConfiguration();
+		auto config = new SLAMBenchConfiguration();
 
 		//***************************************************************************************
 		// Start the argument processing
@@ -102,6 +102,7 @@ int main(int argc, char * argv[])
 			}
 //			FIXME: find a better way than hardcoded identifier
             auto depth_est_output = lib->GetOutputManager().GetOutput("depth_est");
+            auto depth_est_gt = lib->GetOutputManager().GetOutput("depth_est");
             if(depth_est_output ==nullptr)
             {
                 std::cerr<<"This algorithm does not provide depth estimation"<<std::endl;
@@ -128,7 +129,7 @@ int main(int argc, char * argv[])
 
 				// Add ATE metric
 				auto ate_metric = new slambench::metrics::ATEMetric(new slambench::outputs::PoseOutputTrajectoryInterface(aligned), new slambench::outputs::PoseOutputTrajectoryInterface(gt_traj));
-				if (ate_metric->GetValueDescription().GetStructureDescription().size() > 0) {
+				if (!ate_metric->GetValueDescription().GetStructureDescription().empty()) {
 					lib->GetMetricManager().AddFrameMetric(ate_metric);
 					cw.AddColumn(new slambench::CollectionValueLibColumnInterface(lib, ate_metric, lib->GetMetricManager().GetFramePhase()));
 				}
@@ -152,7 +153,7 @@ int main(int argc, char * argv[])
 			cw.AddColumn(new slambench::CollectionValueLibColumnInterface(lib, memory_metric, lib->GetMetricManager().GetFramePhase()));
 
 			// Add a power metric if it makes sense
-			if (power_metric->GetValueDescription().GetStructureDescription().size() > 0) {
+			if (!power_metric->GetValueDescription().GetStructureDescription().empty()) {
 				lib->GetMetricManager().AddFrameMetric(power_metric);
 				cw.AddColumn(new slambench::CollectionValueLibColumnInterface(lib, power_metric, lib->GetMetricManager().GetFramePhase()));
 			}
@@ -172,39 +173,32 @@ int main(int argc, char * argv[])
 		// We run the experiment
 		//***************************************************************************************
 
-		SLAMBenchConfiguration::compute_loop_algorithm (config,NULL,NULL);
+		SLAMBenchConfiguration::compute_loop_algorithm (config,nullptr,nullptr);
 
 		//***************************************************************************************
 		// End of experiment, we output the map
 		//***************************************************************************************
 
 
-		SLAMBenchLibraryHelper *main_lib = nullptr;
 
-		if(output_filename != "" && config->GetLoadedLibs().size() > 1) {
-			std::cerr << "Can only write outputs to file when there is only one lib loaded" << std::endl;
-			return 1;
-		} else if(output_filename != "") {
+		if(!output_filename.empty()) {
+		    if(config->GetLoadedLibs().size() > 1) {
+                std::cerr << "Can only write outputs to file when there is only one lib loaded" << std::endl;
+                return 1;
+            }
 			// enable all writeable outputs
-			SLAMBenchLibraryHelper *lib = config->GetLoadedLibs().front();
-			main_lib = lib;
+			auto main_lib = config->GetLoadedLibs().front();
 
-			lib->GetOutputManager().GetMainOutput(slambench::values::VT_POSE)->SetActive(true);
-		}
-
-
-		if(output_filename != "") {
-			slambench::TimeStamp timestamp = main_lib->GetOutputManager().GetMainOutput(slambench::values::VT_POSE)->GetMostRecentValue().first;
-			main_lib->GetOutputManager().GetMainOutput(slambench::values::VT_POINTCLOUD)->SetActive(true);
+            main_lib->GetOutputManager().GetMainOutput(slambench::values::VT_POSE)->SetActive(true);
+            main_lib->GetOutputManager().GetMainOutput(slambench::values::VT_POINTCLOUD)->SetActive(true);
             main_lib->GetOutputManager().GetMainOutput(slambench::values::VT_FRAME)->SetActive(true);
+			slambench::TimeStamp timestamp = main_lib->GetOutputManager().GetMainOutput(slambench::values::VT_POSE)->GetMostRecentValue().first;
 
             main_lib->c_sb_update_outputs(main_lib, &timestamp);
 
 			std::cout << "Writing outputs to " << output_filename << std::endl;
 			slambench::outputs::OutputManagerWriter omw;
-			SLAMBenchLibraryHelper *lib = *config->GetLoadedLibs().begin();
-
-			omw.Write(lib->GetOutputManager(), output_filename);
+			omw.Write(main_lib->GetOutputManager(), output_filename);
 			std::cout << "Done writing outputs." << std::endl;
 		}
 
