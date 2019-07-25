@@ -170,7 +170,7 @@ deps :
 	+make pcl
 	+make suitesparse
 	+make toon
-	+make sophus
+	+make Sophus
 
 
 .PHONY: deps
