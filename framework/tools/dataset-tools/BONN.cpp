@@ -8,6 +8,7 @@
  */
 
 #include "../dataset-tools/include/BONN.h"
+#include "../dataset-tools/include/RegexPattern.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
@@ -292,17 +293,26 @@ bool loadBONNGroundTruthData(const std::string &dirname, SLAMFile &file) {
     std::string line;
     boost::smatch match;
 
-    const std::string t = "([0-9]+)[.]([0-9]+)";  // timestamp
-    const std::string w = "\\s+";                 // whitespace
-    const std::string n = "([+\\-]?(?:0|[1-9]\\d*)(?:\\.\\d*)?(?:[eE][+\\-]?\\d+)?|[-0-9.]+)";  // number: sci or dec
-    const std::string start = "^";
-    const std::string end = "$";
+    const std::string& ts = RegexPattern::timestamp;
+    const std::string& ws = RegexPattern::whitespace;
+    const std::string& num = RegexPattern::number;
+    const std::string& start = RegexPattern::start;
+    const std::string& end = RegexPattern::end;
 
-    std::vector<std::string> expression{start, t, w, n, w, n, w, n, w, n, w, n, w, n, w, n, end};
-    std::string expr = std::accumulate(expression.begin(), expression.end(), std::string());
+    // format: timestamp tx ty tz qx qy qz qw
+    std::string expr = start
+                       + ts  + ws       // timestamp
+                       + num + ws       // tx
+                       + num + ws       // ty
+                       + num + ws       // tz
+                       + num + ws       // qx
+                       + num + ws       // qy
+                       + num + ws       // qz
+                       + num + end;     // qw
 
-    boost::regex comment = boost::regex("^\\s*#.*$");
     boost::regex groundtruth = boost::regex(expr);
+
+    boost::regex comment = boost::regex(RegexPattern::comment);
 
     while (std::getline(infile, line)) {
         if (line.size() == 0) {
