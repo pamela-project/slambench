@@ -13,14 +13,10 @@
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
 #include <io/format/PointCloud.h>
-#include <io/sensor/AccelerometerSensor.h>
 #include <io/sensor/GroundTruthSensor.h>
-#include <io/sensor/PointCloudSensor.h>
 #include <Eigen/Eigen>
 
-#include <fstream>
 #include <iostream>
-#include <numeric>
 
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
@@ -76,7 +72,8 @@ bool analyseBONNFolder(const std::string &dirname) {
     return true;
 }
 
-bool loadBONNDepthData(const std::string &dirname, SLAMFile &file,
+bool loadBONNDepthData(const std::string &dirname,
+                       SLAMFile &file,
                        const Sensor::pose_t &pose,
                        const DepthSensor::intrinsics_t &intrinsics,
                        const CameraSensor::distortion_coefficients_t &distortion,
@@ -108,6 +105,21 @@ bool loadBONNDepthData(const std::string &dirname, SLAMFile &file,
 
     boost::smatch match;
 
+    boost::regex comment = boost::regex(RegexPattern::comment);
+
+    const std::string& start = RegexPattern::start;
+    const std::string& end = RegexPattern::end;
+    const std::string& ts = RegexPattern::timestamp;
+    const std::string& ws = RegexPattern::whitespace;
+    const std::string& fn = RegexPattern::filename;
+
+    // format: timestamp filename
+    std::string expr = start
+                       + ts  + ws       // timestamp
+                       + fn + end;      // filename
+
+    boost::regex depth_line = boost::regex(expr);
+
     int lineCount = 0;
 
     while (std::getline(infile, line)) {
@@ -116,14 +128,14 @@ bool loadBONNDepthData(const std::string &dirname, SLAMFile &file,
 
         if (line.size() == 0) {
             continue;
-        } else if (boost::regex_match(line, match, boost::regex("^\\s*#.*$"))) {
+        } else if (boost::regex_match(line, match, comment)) {
             continue;
-        } else if (boost::regex_match(line, match, boost::regex("^([0-9]+)[.]([0-9]+)\\s+(.*)$"))) {
+        } else if (boost::regex_match(line, match, depth_line)) {
 
             int timestampS = std::stoi(match[1]);
             int timestampNS = std::stoi(match[2]) * std::pow(10, 9 - match[2].length());
 
-            std::string depthfilename = match[3];
+            std::string depth_filename = match[3];
 
             ImageFileFrame *depth_frame = new ImageFileFrame();
             depth_frame->FrameSensor = depth_sensor;
@@ -131,7 +143,7 @@ bool loadBONNDepthData(const std::string &dirname, SLAMFile &file,
             depth_frame->Timestamp.Ns = timestampNS;
 
             std::stringstream frame_name;
-            frame_name << dirname << "/" << depthfilename;
+            frame_name << dirname << "/" << depth_filename;
             depth_frame->Filename = frame_name.str();
 
             if (access(depth_frame->Filename.c_str(), F_OK) < 0) {
@@ -178,17 +190,32 @@ bool loadBONNRGBData(const std::string &dirname,
 
     boost::smatch match;
 
+    boost::regex comment = boost::regex(RegexPattern::comment);
+
+    const std::string& start = RegexPattern::start;
+    const std::string& end = RegexPattern::end;
+    const std::string& ts = RegexPattern::timestamp;
+    const std::string& ws = RegexPattern::whitespace;
+    const std::string& fn = RegexPattern::filename;
+
+    // format: timestamp filename
+    std::string expr = start
+                       + ts  + ws       // timestamp
+                       + fn + end;      // filename
+
+    boost::regex rgb_line = boost::regex(expr);
+
     while (std::getline(infile, line)) {
         if (line.size() == 0) {
             continue;
-        } else if (boost::regex_match(line, match, boost::regex("^\\s*#.*$"))) {
+        } else if (boost::regex_match(line, match, comment)) {
             continue;
-        } else if (boost::regex_match(line, match, boost::regex("^([0-9]+)[.]([0-9]+)\\s+(.*)$"))) {
+        } else if (boost::regex_match(line, match, rgb_line)) {
 
             int timestampS = std::stoi(match[1]);
             int timestampNS = std::stoi(match[2]) * std::pow(10, 9 - match[2].length());
 
-            std::string rgbfilename = match[3];
+            std::string rgb_filename = match[3];
 
             ImageFileFrame *rgb_frame = new ImageFileFrame();
             rgb_frame->FrameSensor = rgb_sensor;
@@ -196,7 +223,7 @@ bool loadBONNRGBData(const std::string &dirname,
             rgb_frame->Timestamp.Ns = timestampNS;
 
             std::stringstream frame_name;
-            frame_name << dirname << "/" << rgbfilename;
+            frame_name << dirname << "/" << rgb_filename;
             rgb_frame->Filename = frame_name.str();
 
             if (access(rgb_frame->Filename.c_str(), F_OK) < 0) {
@@ -244,17 +271,32 @@ bool loadBONNGreyData(const std::string &dirname,
 
     boost::smatch match;
 
+    boost::regex comment = boost::regex(RegexPattern::comment);
+
+    const std::string& start = RegexPattern::start;
+    const std::string& end = RegexPattern::end;
+    const std::string& ts = RegexPattern::timestamp;
+    const std::string& ws = RegexPattern::whitespace;
+    const std::string& fn = RegexPattern::filename;
+
+    // format: timestamp filename
+    std::string expr = start
+                       + ts  + ws       // timestamp
+                       + fn + end;      // filename
+
+    boost::regex rgb_line = boost::regex(expr);
+
     while (std::getline(infile, line)) {
         if (line.size() == 0) {
             continue;
-        } else if (boost::regex_match(line, match, boost::regex("^\\s*#.*$"))) {
+        } else if (boost::regex_match(line, match, comment)) {
             continue;
-        } else if (boost::regex_match(line, match, boost::regex("^([0-9]+)[.]([0-9]+)\\s+(.*)$"))) {
+        } else if (boost::regex_match(line, match, rgb_line)) {
 
             int timestampS = std::stoi(match[1]);
             int timestampNS = std::stoi(match[2]) * std::pow(10, 9 - match[2].length());
 
-            std::string rgbfilename = match[3];
+            std::string rgb_filename = match[3];
 
             ImageFileFrame *grey_frame = new ImageFileFrame();
             grey_frame->FrameSensor = grey_sensor;
@@ -262,7 +304,7 @@ bool loadBONNGreyData(const std::string &dirname,
             grey_frame->Timestamp.Ns = timestampNS;
 
             std::stringstream frame_name;
-            frame_name << dirname << "/" << rgbfilename;
+            frame_name << dirname << "/" << rgb_filename;
             grey_frame->Filename = frame_name.str();
 
             if (access(grey_frame->Filename.c_str(), F_OK) < 0) {
@@ -310,8 +352,7 @@ bool loadBONNGroundTruthData(const std::string &dirname, SLAMFile &file) {
                        + num + ws       // qz
                        + num + end;     // qw
 
-    boost::regex groundtruth = boost::regex(expr);
-
+    boost::regex groundtruth_line = boost::regex(expr);
     boost::regex comment = boost::regex(RegexPattern::comment);
 
     while (std::getline(infile, line)) {
@@ -319,7 +360,7 @@ bool loadBONNGroundTruthData(const std::string &dirname, SLAMFile &file) {
             continue;
         } else if (boost::regex_match(line, match, comment)) {
             continue;
-        } else if (boost::regex_match(line, match, groundtruth)) {
+        } else if (boost::regex_match(line, match, groundtruth_line)) {
 
             int timestampS = std::stoi(match[1]);
             int timestampNS = std::stoi(match[2]) * std::pow(10, 9 - match[2].length());
@@ -349,7 +390,7 @@ bool loadBONNGroundTruthData(const std::string &dirname, SLAMFile &file) {
 
             file.AddFrame(gt_frame);
         } else {
-            std::cerr << "Unknown line:" << line << std::endl;
+            std::cerr << "Unknown line: " << line << std::endl;
             return false;
         }
     }
@@ -370,8 +411,8 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
         return nullptr;
     }
 
-    SLAMFile *slamfilep = new SLAMFile();
-    SLAMFile &slamfile = *slamfilep;
+    SLAMFile *slamfile_ptr = new SLAMFile();
+    SLAMFile &slamfile = *slamfile_ptr;
 
     Sensor::pose_t pose = Eigen::Matrix4f::Identity();
 
@@ -383,7 +424,7 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
                                     BONNReader::intrinsics_depth, BONNReader::distortion_depth,
                                     disparity_params, disparity_type)) {
         std::cerr << "Error while loading depth information." << std::endl;
-        delete slamfilep;
+        delete slamfile_ptr;
         return nullptr;
     }
 
@@ -391,7 +432,7 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
     if (grey && !loadBONNGreyData(dirname, slamfile, pose,
                                   BONNReader::intrinsics_rgb, BONNReader::distortion_rgb)) {
         std::cerr << "Error while loading Grey information." << std::endl;
-        delete slamfilep;
+        delete slamfile_ptr;
         return nullptr;
     }
 
@@ -399,16 +440,16 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
     if (rgb && !loadBONNRGBData(dirname, slamfile, pose,
                                 BONNReader::intrinsics_rgb, BONNReader::distortion_rgb)) {
         std::cerr << "Error while loading RGB information." << std::endl;
-        delete slamfilep;
+        delete slamfile_ptr;
         return nullptr;
     }
 
     // load GT
     if (gt && !loadBONNGroundTruthData(dirname, slamfile)) {
         std::cerr << "Error while loading gt information." << std::endl;
-        delete slamfilep;
+        delete slamfile_ptr;
         return nullptr;
     }
 
-    return slamfilep;
+    return slamfile_ptr;
 }
