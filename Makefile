@@ -444,6 +444,7 @@ datasets :
 	@echo "   - ICL-NUIM dataset [Handa et al, ICRA'14]: https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html"
 	@echo "   - EuRoC MAV Dataset [Burri et al, IJJR'16]: https://projects.asl.ethz.ch/datasets/doku.php"
 	@echo "   - SVO sample dataset [Forster et al, ICRA 2014]: https://github.com/uzh-rpg/rpg_svo"
+	@echo "   - Bonn RGB-D Dynamic Dataset [Palazzolo et al, IROS'19]: http://www.ipb.uni-bonn.de/data/rgbd-dynamic-dataset/"
 	@echo "================================================================================================================="
 
 datasetslist:
@@ -510,6 +511,48 @@ datasetslist:
 	@echo "make ./datasets/EuRoCMAV/vicon_room2/V2_03_difficult/V2_03_difficult.slam"
 	@echo ""
 	@echo ""
+	@echo "### Bonn Balloon"
+	@echo ""
+	@echo "make ./datasets/BONN/rgbd_bonn_balloon.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_balloon2.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_balloon_tracking.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_balloon_tracking2.slam"
+	@echo ""
+	@echo ""
+	@echo "### Bonn People"
+	@echo ""
+	@echo "make ./datasets/BONN/rgbd_bonn_crowd.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_crowd2.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_crowd3.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_person_tracking.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_person_tracking2.slam"
+	@echo ""
+	@echo ""
+	@echo "### Bonn Boxes"
+	@echo ""
+	@echo "make ./datasets/BONN/rgbd_bonn_kidnapping_box.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_kidnapping_box2.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_moving_nonobstructing_box.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_moving_nonobstructing_box2.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_moving_obstructing_box.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_moving_obstructing_box2.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_placing_nonobstructing_box.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_placing_nonobstructing_box2.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_placing_nonobstructing_box3.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_placing_obstructing_box.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_removing_nonobstructing_box.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_removing_nonobstructing_box2.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_removing_obstructing_box.slam"
+	@echo ""
+	@echo ""
+	@echo "### Bonn Synchronous and Static"
+	@echo ""
+	@echo "make ./datasets/BONN/rgbd_bonn_synchronous.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_synchronous2.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_static.slam"
+	@echo "make ./datasets/BONN/rgbd_bonn_static_close_far.slam"
+	@echo ""
+	@echo ""
 	@echo "### SVO test dataset"
 	@echo ""
 	@echo "make datasets/SVO/artificial.slam"
@@ -521,6 +564,7 @@ datasetslist:
 	@echo "   - ICL-NUIM dataset [Handa et al, ICRA'14]: https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html"
 	@echo "   - EuRoC MAV Dataset [Burri et al, IJJR'16]: https://projects.asl.ethz.ch/datasets/doku.php"
 	@echo "   - SVO sample dataset [Forster et al, ICRA 2014]: https://github.com/uzh-rpg/rpg_svo"
+	@echo "   - Bonn RGB-D Dynamic Dataset [Palazzolo et al, IROS'19]: http://www.ipb.uni-bonn.de/data/rgbd-dynamic-dataset/"
 	@echo "================================================================================================================="
 
 .PHONY: slambench benchmarks benchmarkslist datasets datasetslist
@@ -612,6 +656,22 @@ datasets/SVO/artificial.dir: ./datasets/SVO/artificial.tar.gz
 datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
 	./build/bin/dataset-generator -d svo -i $</sin2_tex2_h1_v8_d -o $@  
+
+
+#### BONN
+#################
+
+./datasets/BONN/%.zip :  # Example : $* = rgbd_bonn_balloon
+	mkdir -p $(@D)
+	cd $(@D)  &&  ${WGET} "http://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/$*.zip"
+
+./datasets/BONN/%.dir : ./datasets/BONN/%.zip
+	mkdir $@
+	unzip $< -d $@
+
+./datasets/BONN/%.slam :  ./datasets/BONN/%.dir
+	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	./build/bin/dataset-generator -d bonn -i $</* -o $@ -grey true -rgb true -gt true -depth true
 
 
 #### ORBSLAM Voc

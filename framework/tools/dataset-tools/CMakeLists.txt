@@ -37,13 +37,17 @@ if (Boost_FOUND)
     add_library(TUM TUM.cpp)
 	target_link_libraries(TUM slambench-io ${Boost_LIBRARIES})
 	target_include_directories(TUM PRIVATE ${Boost_INCLUDE_DIRS})
+
+    add_library(BONN BONN.cpp)
+	target_link_libraries(BONN slambench-io ${Boost_LIBRARIES})
+	target_include_directories(BONN PRIVATE ${Boost_INCLUDE_DIRS})
 	
     add_library(ICLNUIM ICLNUIM.cpp)
 	target_link_libraries(ICLNUIM slambench-io)
 	target_include_directories(ICLNUIM PRIVATE ${Boost_INCLUDE_DIRS})
     
 	add_executable(dataset-generator dataset-generator.cpp)
-	target_link_libraries(dataset-generator TUM ICLNUIM ICL EUROCMAV SVO)
+	target_link_libraries(dataset-generator TUM ICLNUIM ICL EUROCMAV SVO BONN)
 		
 	
 else (Boost_FOUND)

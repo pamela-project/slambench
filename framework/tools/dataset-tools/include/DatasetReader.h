@@ -14,20 +14,15 @@
 #include <ParameterComponent.h>
 
 namespace slambench {
-	namespace io {
-		class SLAMFile;
-	}
+    namespace io {
+        class SLAMFile;
+    }
 }
 
-class DatasetReader :  public ParameterComponent {
+class DatasetReader : public ParameterComponent {
 public :
-	DatasetReader (std::string name ) : ParameterComponent(name) {
-	}
-	virtual slambench::io::SLAMFile* GenerateSLAMFile() = 0;
-
+    DatasetReader(const std::string& name) : ParameterComponent(name) {}
+    virtual slambench::io::SLAMFile* GenerateSLAMFile() = 0;
 };
-
-
-
 
 #endif /* FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_DATASETREADER_H_ */
