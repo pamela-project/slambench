@@ -42,8 +42,8 @@ namespace slambench {
             //static constexpr DepthSensor::intrinsics_t  fr1_intrinsics_depth = { 591.1, 590.1, 331.0, 234.0 };
             //static constexpr CameraSensor::intrinsics_t fr2_intrinsics_rgb   = { 520.9, 521.0, 325.1, 249.7 };
             //static constexpr DepthSensor::intrinsics_t  fr2_intrinsics_depth = { 580.8, 581.8, 308.8, 253.0 };
-            static constexpr CameraSensor::intrinsics_t fr3_intrinsics_rgb   = { 535.4, 539.2, 320.1, 247.6 };
-            static constexpr DepthSensor::intrinsics_t  fr3_intrinsics_depth = { 567.6,	570.2, 324.7, 250.1 };
+            static constexpr CameraSensor::intrinsics_t fr3_intrinsics_rgb   = { 0.8365625, 1.123333, 0.50015625, 0.5158333 };
+            static constexpr DepthSensor::intrinsics_t  fr3_intrinsics_depth = { 0.886875,	1.1879166, 0.50734375, 0.521041 };
 
             // I took those numbers from ORBSLAM2 examples
 
