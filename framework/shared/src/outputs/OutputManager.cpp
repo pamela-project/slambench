@@ -20,7 +20,7 @@ using namespace slambench::outputs;
 
 OutputManager::~OutputManager()
 {
-	for(auto i : output_map_) {
+	for(auto &i : output_map_) {
 		delete i.second;
 	}
 }
@@ -32,7 +32,7 @@ BaseOutput* OutputManager::GetOutput(const std::string& outputname)
 
 BaseOutput* OutputManager::GetMainOutput(slambench::values::ValueType type)
 {
-	for(auto i : output_map_) {
+	for(auto &i : output_map_) {
 		if(i.second->IsMainOutput() && i.second->GetType() == type) {
 			return i.second;
 		}
@@ -119,7 +119,7 @@ void OutputManager::LoadGTOutputsFromSLAMFile(io::SensorCollection& sensors, io:
 			slambench::io::PointCloud *pc = slambench::io::PointCloud::FromRaw((char*)i->GetData());
 			i->FreeData();
 			
-			slambench::values::PointCloudValue *pcv = new slambench::values::PointCloudValue();
+			auto pcv = new slambench::values::PointCloudValue();
 			for(auto p : pc->Get()) {
 				pcv->AddPoint({p.x,p.y,p.z});
 			}

@@ -48,6 +48,8 @@ class DepthSensorSerialiser : public SensorSerialiser {
 		serialiser->Write(&sensor->Intrinsics, sizeof(sensor->Intrinsics));
 		serialiser->Write(&sensor->DisparityParams, sizeof(sensor->DisparityParams));
 		serialiser->Write(&sensor->DisparityType, sizeof(sensor->DisparityType));
+        serialiser->Write(&sensor->DistortionType, sizeof(sensor->DistortionType));
+        serialiser->Write(&sensor->RadialTangentialDistortion, sizeof(sensor->RadialTangentialDistortion));
 
 		return true;
 	}
@@ -76,6 +78,8 @@ class DepthSensorDeserialiser : public SensorDeserialiser {
 		deserialiser->Read(&sensor->Intrinsics, sizeof(sensor->Intrinsics));
 		deserialiser->Read(&sensor->DisparityParams, sizeof(sensor->DisparityParams));
 		deserialiser->Read(&sensor->DisparityType, sizeof(sensor->DisparityType));
+        deserialiser->Read(&sensor->DistortionType, sizeof(sensor->DistortionType));
+        deserialiser->Read(&sensor->RadialTangentialDistortion, sizeof(sensor->RadialTangentialDistortion));
 		
 		return true;
 	}
