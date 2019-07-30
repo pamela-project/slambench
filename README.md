@@ -9,9 +9,9 @@ Developed in the PAMELA project, EPSRC Programme Grant EP/K008730/1
 
 * [What is SLAMBench?](#what-is-slambench)
 * [How to set up SLAMBench?](#how-to-set-up-slambench)
+* [What algorithms does SLAMBench support?](#what-algorithms-does-slambench-support)
 * [How to run an existing algorithm with SLAMBench?](#how-to-run-an-existing-algorithm-with-slambench)
 * [How to add a new benchmark in SLAMBench?](#how-to-add-a-new-benchmark-in-slambench)
-* [Frequently asked questions](#frequently-asked-questions)
 * [Known Issues](#known-issues)
 * [Release History](#release-history)
 
@@ -101,7 +101,7 @@ Install dependencies first [NOTE can be installed by the user on its system as w
 make deps
 ```
 The idea is to maximise the chance of a good build, by selection the best cocktail of libraries.
-This will download and compile the following applications : Brisk, Ceres, CVD, Eigen3, Flann, FreeImage, G2O, Gvars, OpenCV, OpenGV, OpenTuner, Pangolin, PCL, Suitesparse, TooN.
+This will download and compile the following applications: Brisk, Ceres, CVD, Eigen3, Flann, FreeImage, G2O, Gvars, OpenCV, OpenGV, OpenTuner, Pangolin, PCL, Suitesparse, TooN.
 
 You can also install each ofthese individually, using the commands such as: `eigen3`, `flann`, `g2o`, `opencv`, `opengv`, `pcl`, `toon`, `suitesparse`, ...
 
@@ -119,7 +119,7 @@ Although, by doing this, you only compile the libraries of SLAMBench.
 
 #### 3. Usecases
 
-To compile a specific use-case, you will need to specify identifiers :
+To compile a specific use-case, you will need to specify identifiers:
 
 ```bash
 make slambench APPS=kfusion,lsdslam
@@ -142,6 +142,17 @@ As an example to download and generate the Living Room Trajectory 2 from the ICL
 
 A complete list of the datasets available is provided by the command `make datasetslist`.
 
+## What algorithms does SLAMBench support?
+
+SLAMBench is already compatible with a wide range of algorithms which are not included in this repository (see [above](#what-is-slambench) for list of algorithms).
+
+However you can easily integrate those algorithms using the command:
+
+```bash
+make usecases
+```
+
+This command will explain in details how to integrate algorithms that are already compatible with SLAMBench.
 
 ## How to run an existing algorithm with SLAMBench?
 
@@ -190,7 +201,7 @@ Available parameters :
 ```
 
 
-Then if you run the loader again, while providing a dataset file `-i dataset.slam`, you will see new parameters dedicated to the dataset : 
+Then if you run the loader again, while providing a dataset file `-i dataset.slam`, you will see new parameters dedicated to the dataset: 
 
 
 ```bash
@@ -205,7 +216,7 @@ Available parameters :
 
 ```
 
-Finally is you add a library name `-load libname`, more parameter can be seen : 
+Finally is you add a library name `-load libname`, more parameter can be seen: 
 
 ```bash
 > ./build/bin/benchmark_loader -i datasets/ICL_NUIM/living_room_traj2_loop.slam -load ./build/lib/libkfusion-cpp-library.so  --help
@@ -391,19 +402,6 @@ if(pose_output->IsActive()) {
 ```
 
 should always return `true` or an exception will be raised.
-
-## Frequently asked questions
-
-### Where are the algorithms?
-
-If SLAMBench is already compatible with a wide range of algorithms they are not included in this repository. 
-However you can easily integrate those algorithms using the command :
-
-```bash
-make usecases
-```
-
-This command will explain in details how to integrate algorithms that are already compatible with SLAMBench.
 
 ## Known Issues
 
