@@ -1,54 +1,54 @@
 usecases:
 	@echo ""
 	@echo "================================================================================================================="
-	@echo -e "Current list of compatible SLAM systems (alphabetical order). If you are using one of those SLAM algorithms, \033[1;31mplease refer to their respective publications\033[0m:"
+	@echo -e "Current list of compatible SLAM systems (alphabetical order). If you are using one of those SLAM algorithms, ${BoldRed}please refer to their respective publications${ColorOff}:"
 	@echo ""
-	@echo -n "  - ElasticFusion [Whelan et al, IJRR'16] : " ; if [ -d benchmarks/efusion/src/original ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make efusion)\033[0m" ; fi
+	@echo -n "  - ElasticFusion [Whelan et al, IJRR'16] : " ; if [ -d benchmarks/efusion/src/original ] ; then echo -e "${BoldGreen}Found${ColorOff}" ; else echo -e "${BoldRed}Not found (make efusion)${ColorOff}" ; fi
 	@echo    "    repository: https://github.com/mp3guy/ElasticFusion"
 	@echo    "    available targets are : efusion"
 	@echo    ""
 
-	@echo -n "  - InfiniTAMv2 [Kahler et al, ISMAR'15] : " ; if [ -d benchmarks/infinitam/src/original ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make infinitam)\033[0m" ; fi
+	@echo -n "  - InfiniTAMv2 [Kahler et al, ISMAR'15] : " ; if [ -d benchmarks/infinitam/src/original ] ; then echo -e "${BoldGreen}Found${ColorOff}" ; else echo -e "${BoldRed}Not found (make infinitam)${ColorOff}" ; fi
 	@echo    "    repository: https://github.com/ethz-asl/infinitam"
 	@echo    "    available targets are : infinitam"
 	@echo    ""
 
-	@echo -n "  - LSDSLAM [Engel et al, ECCV'14] : " ; if [ -d benchmarks/lsdslam/src/original ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make lsdslam)\033[0m" ; fi
+	@echo -n "  - LSDSLAM [Engel et al, ECCV'14] : " ; if [ -d benchmarks/lsdslam/src/original ] ; then echo -e "${BoldGreen}Found${ColorOff}" ; else echo -e "${BoldRed}Not found (make lsdslam)${ColorOff}" ; fi
 	@echo    "    repository: https://github.com/tum-vision/lsd_slam"
 	@echo    "    available targets are : lsdslam"
 	@echo    ""
 
-	@echo -n "  - LSDSLAM [Engel et al, ECCV'14] : " ; if [ -d benchmarks/lsdslam/src/cpp ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make lsdslam)\033[0m" ; fi
+	@echo -n "  - LSDSLAM [Engel et al, ECCV'14] : " ; if [ -d benchmarks/lsdslam/src/cpp ] ; then echo -e "${BoldGreen}Found${ColorOff}" ; else echo -e "${BoldRed}Not found (make lsdslam)${ColorOff}" ; fi
 	@echo    "    repository: https://github.com/tum-vision/lsd_slam"
 	@echo    "    available targets are : lsdslam"
 	@echo    ""
 
-	@echo -n "  - ORBSLAM2 [Mur-Artal et al, TOR'15 and TOR'17] : " ; if [ -d benchmarks/orbslam2/src/original ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make orbslam2)\033[0m" ; fi
+	@echo -n "  - ORBSLAM2 [Mur-Artal et al, TOR'15 and TOR'17] : " ; if [ -d benchmarks/orbslam2/src/original ] ; then echo -e "${BoldGreen}Found${ColorOff}" ; else echo -e "${BoldRed}Not found (make orbslam2)${ColorOff}" ; fi
 	@echo    "    repository: https://github.com/raulmur/ORB_SLAM2"
 	@echo    "    available targets are : orbslam2"
 	@echo    ""
 
-	@echo -n "  -  MonoSLAM [Davison et al, TPAMI'07] : " ; if [ -d benchmarks/monoslam/src/original ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make monoslam)\033[0m" ; fi
+	@echo -n "  -  MonoSLAM [Davison et al, TPAMI'07] : " ; if [ -d benchmarks/monoslam/src/original ] ; then echo -e "${BoldGreen}Found${ColorOff}" ; else echo -e "${BoldRed}Not found (make monoslam)${ColorOff}" ; fi
 	@echo    "    repository: https://github.com/hanmekim/SceneLib2"
 	@echo    "    available targets are : monoslam"
 	@echo    ""
 
-	@echo -n "  - PTAM [Klein et al, ISMAR'07 and ECCV'08] : " ; if [ -d benchmarks/ptam/src/original ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make ptam)\033[0m" ; fi
+	@echo -n "  - PTAM [Klein et al, ISMAR'07 and ECCV'08] : " ; if [ -d benchmarks/ptam/src/original ] ; then echo -e "${BoldGreen}Found${ColorOff}" ; else echo -e "${BoldRed}Not found (make ptam)${ColorOff}" ; fi
 	@echo    "    repository: https://github.com/Oxford-PTAM/PTAM-GPL"
 	@echo    "    available targets are : ptam"
 	@echo    ""
 
-	@echo -n "  - OKVIS [Leutenegger et al, IJRR'15] : " ; if [ -d benchmarks/okvis/src/original ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make okvis)\033[0m" ; fi
+	@echo -n "  - OKVIS [Leutenegger et al, IJRR'15] : " ; if [ -d benchmarks/okvis/src/original ] ; then echo -e "${BoldGreen}Found${ColorOff}" ; else echo -e "${BoldRed}Not found (make okvis)${ColorOff}" ; fi
 	@echo    "    repository: https://github.com/ethz-asl/okvis"
 	@echo    "    available targets are : okvis"
 	@echo    ""
 
-	@echo -n "  - SVO [Forster et al, ICRA'14] : " ; if [ -d benchmarks/svo/src/original ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make svo)\033[0m" ; fi
+	@echo -n "  - SVO [Forster et al, ICRA'14] : " ; if [ -d benchmarks/svo/src/original ] ; then echo -e "${BoldGreen}Found${ColorOff}" ; else echo -e "${BoldRed}Not found (make svo)${ColorOff}" ; fi
 	@echo    "    repository: https://github.com/uzh-rpg/rpg_svo"
 	@echo    "    available targets are : svo"
 	@echo    ""
 
-	@echo -n "  - KFusion [Newcombe et al. ISMAR'11] : " ; if [ -d benchmarks/kfusion/src/original ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make kfusion)\033[0m" ; fi
+	@echo -n "  - KFusion [Newcombe et al. ISMAR'11] : " ; if [ -d benchmarks/kfusion/src/original ] ; then echo -e "${BoldGreen}Found${ColorOff}" ; else echo -e "${BoldRed}Not found (make kfusion)${ColorOff}" ; fi
 	@echo    "    repository: https://github.com/GerhardR/kfusion"
 	@echo    "    available targets are : kfusion"
 	@echo    ""
