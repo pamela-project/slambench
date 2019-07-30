@@ -317,8 +317,7 @@ datasetslist:
 ####################################
 #### DATA SET GENERATION        ####
 ####################################
-
-
+check_generator:=if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
 
 #### EuRoCMAV
 ###############
@@ -333,7 +332,7 @@ datasetslist:
 	unzip $< -d $@
 
 ./datasets/EuRoCMAV/%.slam :  ./datasets/EuRoCMAV/%.dir 
-	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	${check_generator}
 	./build/bin/dataset-generator -d eurocmav -i $</mav0 -o $@ -imu true -stereo true -gt true  
 
 #### TUM      
@@ -348,7 +347,7 @@ datasetslist:
 	tar xzf $< -C $@
 
 ./datasets/TUM/%.slam :  ./datasets/TUM/%.dir 
-	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	${check_generator}
 	./build/bin/dataset-generator -d tum -i $</* -o $@ -grey true -rgb true -gt true -depth true -accelerometer true 
 
 #### ICL-NUIM      
@@ -370,11 +369,11 @@ datasets/ICL_NUIM/%_loop.dir :  datasets/ICL_NUIM/%_loop.tgz
 	tar xzf $< -C $@ 
 
 datasets/ICL_NUIM/living_room_traj%_loop.slam : datasets/ICL_NUIM/living_room_traj%_loop.dir datasets/ICL_NUIM/living-room.ply
-	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	${check_generator}
 	./build/bin/dataset-generator -d iclnuim -i $< -o $@ -ply  datasets/ICL_NUIM/living-room.ply -grey true -rgb true -gt true -depth true -pf true 
 
 datasets/ICL_NUIM/living_room_traj%_loop_neg.slam : datasets/ICL_NUIM/living_room_traj%_loop.dir datasets/ICL_NUIM/living-room.ply
-	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	${check_generator}
 	./build/bin/dataset-generator -d iclnuim -i $< -o $@ -ply  datasets/ICL_NUIM/living-room.ply -grey true -rgb true -gt true -depth true -pf false 
 
 
@@ -398,7 +397,7 @@ datasets/SVO/artificial.dir: ./datasets/SVO/artificial.tar.gz
 	tar -xzf $< -C $@
 
 datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
-	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	${check_generator}
 	./build/bin/dataset-generator -d svo -i $</sin2_tex2_h1_v8_d -o $@  
 
 
