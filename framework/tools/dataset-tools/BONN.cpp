@@ -9,6 +9,7 @@
 
 #include "../dataset-tools/include/BONN.h"
 #include "../dataset-tools/include/utils/RegexPattern.h"
+#include "../dataset-tools/include/utils/dataset_utils.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
@@ -18,7 +19,6 @@
 
 #include <iostream>
 
-#include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
@@ -28,49 +28,6 @@ constexpr CameraSensor::intrinsics_t BONNReader::intrinsics_rgb;
 constexpr DepthSensor::intrinsics_t BONNReader::intrinsics_depth;
 constexpr CameraSensor::distortion_coefficients_t BONNReader::distortion_rgb;
 constexpr DepthSensor::distortion_coefficients_t BONNReader::distortion_depth;
-
-/*
- *
- * The dataset folder contains :
- * > depth  depth.txt  groundtruth.txt  rgb  rgb.txt
- *
- */
-
-bool analyseBONNFolder(const std::string &dirname) {
-
-  static const std::vector<std::string> requirements = {"rgb.txt",
-                                                        "rgb",
-                                                        "depth.txt",
-                                                        "depth",
-                                                        "groundtruth.txt"};
-
-  try {
-    if (!boost::filesystem::exists(dirname)) return false;
-
-    boost::filesystem::directory_iterator end_itr;  // default construction yields past-the-end
-
-    for (auto const &requirement : requirements) {
-      bool seen = false;
-
-      for (boost::filesystem::directory_iterator itr(dirname); itr != end_itr; ++itr) {
-        if (requirement == itr->path().filename()) {
-          seen = true;
-        }
-      }
-
-      if (!seen) {
-        std::cout << "File not found: <dataset_dir>/" << requirement << std::endl;
-        return false;
-      }
-    }
-  } catch (boost::filesystem::filesystem_error &e) {
-    std::cerr << "I/O Error with directory " << dirname << std::endl;
-    std::cerr << e.what() << std::endl;
-    return false;
-  }
-
-  return true;
-}
 
 bool loadBONNDepthData(const std::string &dirname,
                        SLAMFile &file,
@@ -406,7 +363,13 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
 
   std::string dirname = input;
 
-  if (!analyseBONNFolder(dirname)) {
+  const std::vector<std::string> requirements = {"rgb.txt",
+                                                 "rgb",
+                                                 "depth.txt",
+                                                 "depth",
+                                                 "groundtruth.txt"};
+
+  if (!checkRequirements(dirname, requirements)) {
     std::cerr << "Invalid folder." << std::endl;
     return nullptr;
   }
