@@ -21,7 +21,7 @@ fd.close()
 print("usecases:")
 print("\t@echo \"\"")
 print("\t@echo \"=================================================================================================================\"")
-print("\t@echo -e \"Current list of compatible SLAM systems (alphabetical order). If you are using one of those SLAM algorithms, \\033[1;31mplease refer to their respective publications\\033[0m:\"")
+print("\t@echo -e \"Current list of compatible SLAM systems (alphabetical order). If you are using any of the following SLAM algorithms, \\033[1;31mplease refer to their respective publications\\033[0m:\"")
 print("\t@echo \"\"")
 
 for item in targets :
