@@ -21,13 +21,16 @@ infos :
 	      We suggest that you to download and install them automatically using the following command:\n\
      ${BoldGreen} - make deps ${ColorOff}\n\
 	  (2) Then, to compile the SLAMBench framework you just need to type:\n\
-	 ${BoldGreen} - make slambench ${ColorOff}\n\
-	  (3) To compile the use-cases as well:\n\
-	 ${BoldGreen} - make slambench APPS=\"kfusion;lsdslam\"${ColorOff}\n\
-	      However these use-cases are not distributed with SLAMBench, you will have to download them using the command:\n\
-	 ${BoldGreen} - make usecases ${ColorOff}\n\
-	  (4) Finally to run SLAM system with a particular dataset we recommend to run:\n\
-	 ${BoldGreen} - make datasets ${ColorOff}\n\
+	     ${BoldGreen} - make slambench ${ColorOff}\n\
+	  (3) SLAMBench integrates a number of algorithms, however they are not directly distribute with the framework\n\
+	      To download and build all the available algorithms, use:\n\
+	     ${BoldGreen} - make algorithms${ColorOff}\n\
+	      Alternatively, to see the list of available algorithms, use:\n\
+	     ${BoldGreen} - make usecases ${ColorOff}\n\
+	  (4) For information about downloading and building one of the available datasets, use:\n\
+	     ${BoldGreen} - make datasetslist ${ColorOff}\n\
+	  (5) Once the desired datasets and algorithms were built, you can run the benchmark using:\n\
+	     ${BoldGreen} - ./build/bin/benchmark_loader -i path/to/dataset.slam -load path/to/algorithm-library.so ${ColorOff}\n\
 	"
 
 ####################################
@@ -311,7 +314,7 @@ datasetslist:
 	@echo "   - SVO sample dataset [Forster et al, ICRA 2014]: https://github.com/uzh-rpg/rpg_svo"
 	@echo "================================================================================================================="
 
-.PHONY: slambench benchmarks benchmarkslist datasets datasetslist
+.PHONY: slambench benchmarks datasets datasetslist
 
 
 ####################################
