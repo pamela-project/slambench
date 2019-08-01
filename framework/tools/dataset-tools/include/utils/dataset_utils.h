@@ -18,7 +18,7 @@
  * @param directory_name directory to check for requirements
  * @param required vector of names of required files / folders
  */
-bool checkRequirements(const std::string& directory_name, const std::vector<std::string>& requirements) {
+inline bool checkRequirements(const std::string& directory_name, const std::vector<std::string>& requirements) {
 
   try {
     if (!boost::filesystem::exists(directory_name)) return false;

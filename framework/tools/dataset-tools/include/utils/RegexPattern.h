@@ -11,19 +11,20 @@
 #define FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_REGEXPATTERN_H_
 
 class RegexPattern {
-public:
-    // characters
-    static constexpr auto start = "^";
-    static constexpr auto end = "$";
+ public:
+  // characters
+  static constexpr auto start = "^";
+  static constexpr auto end = "$";
 
-    // components
-    static constexpr auto whitespace = "\\s+";
-    static constexpr auto number = R"(([+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?|[-0-9.]+))";
-    static constexpr auto timestamp = "([0-9]+)[.]([0-9]+)";
-    static constexpr auto filename = "(.*)";
+  // components
+  static constexpr auto whitespace = "\\s+";
+  static constexpr auto decimal = "([-0-9.]+)";
+  static constexpr auto number = R"(([+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?|[-0-9.]+))";
+  static constexpr auto timestamp = "([0-9]+)[.]([0-9]+)";
+  static constexpr auto filename = "(.*)";
 
-    // full patterns
-    static constexpr auto comment = "^\\s*#.*$";
+  // full patterns
+  static constexpr auto comment = "^\\s*#.*$";
 };
 
 #endif

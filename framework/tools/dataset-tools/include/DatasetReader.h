@@ -13,9 +13,9 @@
 #include <ParameterComponent.h>
 
 namespace slambench {
-namespace io {
-class SLAMFile;
-}
+  namespace io {
+    class SLAMFile;
+  }
 }
 
 class DatasetReader : public ParameterComponent {
