@@ -9,6 +9,7 @@
 
 #include "../dataset-tools/include/BONN.h"
 #include "../dataset-tools/include/utils/RegexPattern.h"
+#include "utils/PlyASCIIReader.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
@@ -18,6 +19,7 @@
 
 #include <iostream>
 
+#include <io/sensor/PointCloudSensor.h>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
@@ -397,6 +399,30 @@ bool loadBONNGroundTruthData(const std::string &dirname, SLAMFile &file) {
     return true;
 }
 
+
+bool loadBONNPointCloudData(slambench::io::SLAMFile &slamfile, const std::string& plyname) {
+  auto pcd = new slambench::io::PointCloudSensor("PointCloud");
+  pcd->Description = "Ground truth point cloud";
+  pcd->Index = slamfile.Sensors.size();
+  slamfile.Sensors.AddSensor(pcd);
+
+  auto pointcloud = PlyASCIIReader::read(plyname);
+  if(pointcloud == nullptr) {
+    fprintf(stderr, "Could not build point cloud\n");
+    return false;
+  }
+
+  auto rawpointcloud = pointcloud->ToRaw();
+
+  auto pcloudframe = new SLAMInMemoryFrame();
+  pcloudframe->FrameSensor = slamfile.GetSensor(PointCloudSensor::kPointCloudType);
+  pcloudframe->Data = malloc(rawpointcloud.size());
+  pcloudframe->SetVariableSize(rawpointcloud.size());
+  memcpy(pcloudframe->Data, rawpointcloud.data(), rawpointcloud.size());
+  slamfile.AddFrame(pcloudframe);
+  return true;
+}
+
 SLAMFile *BONNReader::GenerateSLAMFile() {
 
     if (!(grey || rgb || depth)) {
@@ -451,5 +477,12 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
         return nullptr;
     }
 
-    return slamfile_ptr;
+    // load PointCloud
+    if (gt && !loadBONNPointCloudData(slamfile, plyfile)) {
+        std::cerr << "Error while loading point cloud information." << std::endl;
+        delete slamfile_ptr;
+        return nullptr;
+    }
+
+  return slamfile_ptr;
 }
