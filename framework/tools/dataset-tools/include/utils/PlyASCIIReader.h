@@ -23,7 +23,7 @@
 #include "./tinyply.h"
 #pragma GCC diagnostic pop
 
-#include "./Timer.h"
+#include "timings.h"
 #include <io/format/PointCloud.h>
 
 class PlyASCIIReader {
@@ -65,13 +65,11 @@ class PlyASCIIReader {
       std::cerr << "tinyply exception: " << e.what() << std::endl;
     }
 
-    Timer read_timer;
-
-    read_timer.start();
+    double start = tock();
     file.read(ss);
-    read_timer.stop();
+    double end = tock();
 
-    std::cout << "Reading took " << read_timer.get() / 1000.f << " seconds." << std::endl;
+    std::cout << "Reading took " << (end-start) << " seconds." << std::endl;
     std::cout << "Read " << points_data->count << " total points "<< std::endl;
 
     // move from untyped bytes buffers to point objects
