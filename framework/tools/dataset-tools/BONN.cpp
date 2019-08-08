@@ -7,8 +7,8 @@
 
  */
 
-#include "../dataset-tools/include/BONN.h"
-#include "../dataset-tools/include/utils/RegexPattern.h"
+#include "include/BONN.h"
+#include "include/utils/RegexPattern.h"
 #include "utils/PlyASCIIReader.h"
 
 #include <io/SLAMFile.h>
@@ -478,7 +478,7 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
     }
 
     // load PointCloud
-    if (gt && !loadBONNPointCloudData(slamfile, plyfile)) {
+    if (!plyfile.empty() && !loadBONNPointCloudData(slamfile, plyfile)) {
         std::cerr << "Error while loading point cloud information." << std::endl;
         delete slamfile_ptr;
         return nullptr;
