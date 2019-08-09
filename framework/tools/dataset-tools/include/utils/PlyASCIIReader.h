@@ -14,6 +14,11 @@
 #include <string>
 #include <memory>
 #include <vector>
+#include <algorithm>
+
+#include <io/format/PointCloud.h>
+
+#include "timings.h"
 
 // Due to -Werror flag the implementation of tinyply fails, these directive allow it to build
 #pragma GCC diagnostic push
@@ -23,10 +28,6 @@
 #include "./tinyply.h"
 #pragma GCC diagnostic pop
 
-#include "timings.h"
-
-#include <algorithm>
-#include <io/format/PointCloud.h>
 
 class PlyASCIIReader {
  public:

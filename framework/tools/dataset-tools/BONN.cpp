@@ -408,7 +408,7 @@ bool loadBONNPointCloudData(slambench::io::SLAMFile &slamfile, const std::string
 
   auto pointcloud = PlyASCIIReader::read(plyname);
   if(pointcloud == nullptr) {
-    fprintf(stderr, "Could not build point cloud\n");
+    fprintf(stderr, "Could not read point cloud\n");
     return false;
   }
 
