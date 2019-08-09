@@ -416,10 +416,16 @@ bool loadBONNPointCloudData(slambench::io::SLAMFile &slamfile, const std::string
 
   auto pcloudframe = new SLAMInMemoryFrame();
   pcloudframe->FrameSensor = slamfile.GetSensor(PointCloudSensor::kPointCloudType);
-  pcloudframe->Data = malloc(rawpointcloud.size());
+
+  int numBytes = rawpointcloud.size();
+  pcloudframe->Data = malloc(numBytes);
   pcloudframe->SetVariableSize(rawpointcloud.size());
-  memcpy(pcloudframe->Data, rawpointcloud.data(), rawpointcloud.size());
+  std::copy(rawpointcloud.data(),
+            rawpointcloud.data() + numBytes,
+            reinterpret_cast<char*>(pcloudframe->Data));
+
   slamfile.AddFrame(pcloudframe);
+
   return true;
 }
 

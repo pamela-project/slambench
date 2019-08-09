@@ -24,6 +24,8 @@
 #pragma GCC diagnostic pop
 
 #include "timings.h"
+
+#include <algorithm>
 #include <io/format/PointCloud.h>
 
 class PlyASCIIReader {
@@ -73,9 +75,12 @@ class PlyASCIIReader {
     std::cout << "Read " << points_data->count << " total points "<< std::endl;
 
     // move from untyped bytes buffers to point objects
-    const size_t numVerticesBytes = points_data->buffer.size_bytes();
+    const size_t numBytes = points_data->buffer.size_bytes();
     std::vector<Point> points(points_data->count);
-    std::memcpy(points.data(), points_data->buffer.get(), numVerticesBytes);
+
+    std::copy(points_data->buffer.get(),
+              points_data->buffer.get() + numBytes,
+              reinterpret_cast<uint8_t*>(points.data()));
 
     // create pointcloud and assign points
     auto pc = new PointCloud();
