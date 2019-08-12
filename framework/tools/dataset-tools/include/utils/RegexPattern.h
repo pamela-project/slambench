@@ -23,6 +23,7 @@ class RegexPattern {
   static constexpr auto number = R"(([+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?|[-0-9.]+))";
   static constexpr auto timestamp = "([0-9]+)[.]([0-9]+)";
   static constexpr auto filename = "(.*)";
+  static constexpr auto lowercase_key = "([a-z_]+)";
 
   // full patterns
   static constexpr auto comment = "^\\s*#.*$";
