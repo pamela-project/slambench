@@ -188,28 +188,7 @@ bool loadTUMRGBData(const std::string &dirname,
   return true;
 }
 
-bool loadTUMGreyData(const std::string &dirname,
-                     SLAMFile &file,
-                     const Sensor::pose_t &pose,
-                     const CameraSensor::intrinsics_t &intrinsics,
-                     const CameraSensor::distortion_coefficients_t &distortion) {
-
-  auto grey_sensor = new CameraSensor("Grey", CameraSensor::kCameraType);
-  grey_sensor->Index = 0;
-  grey_sensor->Width = 640;
-  grey_sensor->Height = 480;
-  grey_sensor->FrameFormat = frameformat::Raster;
-  grey_sensor->PixelFormat = pixelformat::G_I_8;
-  grey_sensor->Description = "Grey";
-
-  grey_sensor->CopyPose(pose);
-  grey_sensor->CopyIntrinsics(intrinsics);
-  grey_sensor->CopyRadialTangentialDistortion(distortion);
-  grey_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
-  grey_sensor->Index = file.Sensors.size();
-  grey_sensor->Rate = 30.0;
-
-  file.Sensors.AddSensor(grey_sensor);
+bool loadTUMGreyData(const std::string &dirname, SLAMFile &file, CameraSensor* grey_sensor) {
 
   std::string line;
 
@@ -487,11 +466,16 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
   }
 
   // load Grey
-  if (grey && !loadTUMGreyData(dirname, slamfile, pose,
-                               intrinsics_rgb, distortion_rgb)) {
-    std::cout << "Error while loading Grey information." << std::endl;
-    delete slamfile_ptr;
-    return nullptr;
+  if (grey) {
+    auto grey_sensor = makeGreySensor(pose, intrinsics_rgb, distortion_rgb);
+    grey_sensor->Index = slamfile.Sensors.size();
+    slamfile.Sensors.AddSensor(grey_sensor);
+
+    if (!loadTUMGreyData(dirname, slamfile, grey_sensor)) {
+      std::cerr << "Error while loading Grey information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
+    }
   }
 
 // load RGB

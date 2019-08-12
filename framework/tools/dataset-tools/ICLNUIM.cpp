@@ -8,6 +8,7 @@
  */
 
 #include "include/ICLNUIM.h"
+#include "include/utils/dataset_utils.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
@@ -62,21 +63,6 @@ CameraSensor *GetRGBSensor(const Sensor::pose_t &pose, const CameraSensor::intri
   return sensor;
 }
 
-CameraSensor *GetGreySensor(const Sensor::pose_t &pose, const CameraSensor::intrinsics_t &intrinsics) {
-  auto sensor = new CameraSensor("Grey", CameraSensor::kCameraType);
-  sensor->Index = 0;
-  sensor->Rate = 1;
-  sensor->Width = 640;
-  sensor->Height = 480;
-  sensor->FrameFormat = frameformat::Raster;
-  sensor->PixelFormat = pixelformat::G_I_8;
-
-  sensor->CopyPose(pose);
-  sensor->CopyIntrinsics(intrinsics);
-
-  return sensor;
-}
-
 GroundTruthSensor *GetGTSensor(const Sensor::pose_t &pose) {
   auto sensor = new GroundTruthSensor("GroundTruth");
   sensor->Index = 0;
@@ -124,7 +110,9 @@ void ICLNUIMReader::AddSensors(SLAMFile &file) {
   }
 
   if (this->grey) {
-    this->grey_sensor = GetGreySensor(pose, intrinsics);
+    this->grey_sensor = makeGreySensor(pose, intrinsics, {});
+    this->grey_sensor->Rate = 1;
+    this->grey_sensor->DistortionType = CameraSensor::NoDistortion;
     this->grey_sensor->Index = idx++;
     file.Sensors.AddSensor(this->grey_sensor);
   }

@@ -8,6 +8,7 @@
  */
 
 #include "include/SVO.h"
+#include "include/utils/dataset_utils.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
@@ -32,21 +33,7 @@ constexpr CameraSensor::intrinsics_t SVOReader::svo_grey;
 
 bool loadSVOGreyData(const std::string &dirname,
                      SLAMFile &file,
-                     const Sensor::pose_t &pose,
-                     const CameraSensor::intrinsics_t &intrinsics) {
-  auto grey_sensor = new CameraSensor("Grey", CameraSensor::kCameraType);
-
-  grey_sensor->Index = 0;
-  grey_sensor->Width = 752;
-  grey_sensor->Height = 480;
-  grey_sensor->FrameFormat = frameformat::Raster;
-  grey_sensor->PixelFormat = pixelformat::G_I_8;
-  grey_sensor->Description = "Grey";
-
-  grey_sensor->CopyPose(pose);
-  grey_sensor->CopyIntrinsics(intrinsics);
-  grey_sensor->Index = file.Sensors.size();
-  file.Sensors.AddSensor(grey_sensor);
+                     CameraSensor* grey_sensor) {
 
   for (int frame_no = 2; frame_no < 188; frame_no++) {
     auto grey_frame = new ImageFileFrame();
@@ -142,7 +129,17 @@ SLAMFile *SVOReader::GenerateSLAMFile() {
   pose.block(0, 3, 3, 1) << translation[0], translation[1], translation[2];
 
   // load Grey
-  if (!loadSVOGreyData(dirname, slamfile, pose, svo_grey)) {
+
+  auto grey_sensor = makeGreySensor(pose, svo_grey, {});
+
+  grey_sensor->Width = 752;
+  grey_sensor->Height = 480;
+  grey_sensor->DistortionType = CameraSensor::NoDistortion;
+
+  grey_sensor->Index = slamfile.Sensors.size();
+  slamfile.Sensors.AddSensor(grey_sensor);
+
+  if (!loadSVOGreyData(dirname, slamfile, grey_sensor)) {
     std::cout << "Error while loading Grey information." << std::endl;
     delete slamfile_ptr;
     return nullptr;

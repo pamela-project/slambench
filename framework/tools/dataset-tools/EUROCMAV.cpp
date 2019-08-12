@@ -9,6 +9,7 @@
 
 #include "include/EUROCMAV.h"
 #include "include/utils/RegexPattern.h"
+#include "include/utils/dataset_utils.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
@@ -220,6 +221,7 @@ SLAMFile *EUROCMAVReader::GenerateSLAMFile() {
   auto slamfile = new SLAMFile();
 
   for (auto &dirname : sensor_directories) {
+
     // try and get sensor.yaml file
     std::string cam_dirname = input_dir + "/" + dirname;
     std::string filename = cam_dirname + "/sensor.yaml";
@@ -227,42 +229,11 @@ SLAMFile *EUROCMAVReader::GenerateSLAMFile() {
 
     // check sensor type
     std::string sensor_type = sensor["sensor_type"].as<std::string>();
+
     if (sensor_type == "camera" and this->stereo) {
       std::cerr << "Found sensor type " << sensor_type << " from directory " << dirname << std::endl;
 
-      // Create a Grey sensor
-
-      auto cam_sensor = new CameraSensor(dirname);
-      cam_sensor->Index = slamfile->Sensors.size();
-      cam_sensor->Rate = sensor["rate_hz"].as<float>();
-      cam_sensor->Description = sensor["comment"].as<std::string>();
-      cam_sensor->FrameFormat = frameformat::Raster;
-      cam_sensor->PixelFormat = pixelformat::G_I_8;
-
-      cam_sensor->Width = sensor["resolution"][0].as<int>();
-      cam_sensor->Height = sensor["resolution"][1].as<int>();
-
-      cam_sensor->Intrinsics[0] = sensor["intrinsics"][0].as<float>() / cam_sensor->Width;
-      cam_sensor->Intrinsics[1] = sensor["intrinsics"][1].as<float>() / cam_sensor->Height;
-      cam_sensor->Intrinsics[2] = sensor["intrinsics"][2].as<float>() / cam_sensor->Width;
-      cam_sensor->Intrinsics[3] = sensor["intrinsics"][3].as<float>() / cam_sensor->Height;
-
-      if (sensor["distortion_model"].as<std::string>() == "radial-tangential") {
-        cam_sensor->DistortionType = CameraSensor::distortion_type_t::RadialTangential;
-
-        cam_sensor->RadialTangentialDistortion[0] = sensor["distortion_coefficients"][0].as<float>();
-        cam_sensor->RadialTangentialDistortion[1] = sensor["distortion_coefficients"][1].as<float>();
-        cam_sensor->RadialTangentialDistortion[2] = sensor["distortion_coefficients"][2].as<float>();
-        cam_sensor->RadialTangentialDistortion[3] = sensor["distortion_coefficients"][3].as<float>();
-        cam_sensor->RadialTangentialDistortion[4] = 0;
-
-      } else {
-        std::cerr << "Unsupported distortion type for Eurocmav." << std::endl;
-        exit(1);
-      }
-
-      std::cout << "pose is ... " << std::endl;
-
+      // get pose
       Eigen::Matrix4f pose;
 
       for (int i = 0; i < 16; ++i) {
@@ -273,39 +244,54 @@ SLAMFile *EUROCMAVReader::GenerateSLAMFile() {
         if ((i + 1) % 4 == 0) std::cout << std::endl;
       }
 
-      cam_sensor->CopyPose(pose);
-      std::cout << std::endl;
+      // get resolution
+      int width = sensor["resolution"][0].as<int>();
+      int height = sensor["resolution"][1].as<int>();
+      float rate = sensor["rate_hz"].as<float>();
 
-      slamfile->Sensors.AddSensor(cam_sensor);
+      // get intrinsics
+      CameraSensor::intrinsics_t intrinsics = {
+          sensor["intrinsics"][0].as<float>() / width,
+          sensor["intrinsics"][1].as<float>() / height,
+          sensor["intrinsics"][2].as<float>() / width,
+          sensor["intrinsics"][3].as<float>() / height
+      };
 
-      // Create a RGB equivalent sensor
-
-      auto rgb_sensor = new CameraSensor(dirname + "clone");
-      rgb_sensor->Index = slamfile->Sensors.size();
-      rgb_sensor->Description = "RGB clone from " + sensor["comment"].as<std::string>();
-      rgb_sensor->Rate = sensor["rate_hz"].as<float>();
-      rgb_sensor->FrameFormat = frameformat::Raster;
-      rgb_sensor->PixelFormat = pixelformat::RGB_III_888;
-      rgb_sensor->Width = sensor["resolution"][0].as<int>();
-      rgb_sensor->Height = sensor["resolution"][1].as<int>();
-      rgb_sensor->Intrinsics[0] = sensor["intrinsics"][0].as<float>() / rgb_sensor->Width;
-      rgb_sensor->Intrinsics[1] = sensor["intrinsics"][1].as<float>() / rgb_sensor->Height;
-      rgb_sensor->Intrinsics[2] = sensor["intrinsics"][2].as<float>() / rgb_sensor->Width;
-      rgb_sensor->Intrinsics[3] = sensor["intrinsics"][3].as<float>() / rgb_sensor->Height;
-      rgb_sensor->CopyPose(pose);
-      if (sensor["distortion_model"].as<std::string>() == "radial-tangential") {
-        rgb_sensor->DistortionType = CameraSensor::distortion_type_t::RadialTangential;
-
-        rgb_sensor->RadialTangentialDistortion[0] = sensor["distortion_coefficients"][0].as<float>();
-        rgb_sensor->RadialTangentialDistortion[1] = sensor["distortion_coefficients"][1].as<float>();
-        rgb_sensor->RadialTangentialDistortion[2] = sensor["distortion_coefficients"][2].as<float>();
-        rgb_sensor->RadialTangentialDistortion[3] = sensor["distortion_coefficients"][3].as<float>();
-        rgb_sensor->RadialTangentialDistortion[4] = 0;
-
-      } else {
+      // check expected distortion type
+      if (sensor["distortion_model"].as<std::string>() != "radial-tangential") {
         std::cerr << "Unsupported distortion type for Eurocmav." << std::endl;
         exit(1);
       }
+
+      // get distortion coefficients
+      CameraSensor::distortion_coefficients_t distortion = {
+          sensor["distortion_coefficients"][0].as<float>(),
+          sensor["distortion_coefficients"][1].as<float>(),
+          sensor["distortion_coefficients"][2].as<float>(),
+          sensor["distortion_coefficients"][3].as<float>(),
+          0
+      };
+
+      // Create a Grey sensor
+
+      auto grey_sensor = makeGreySensor(pose, intrinsics, distortion);
+      //      grey_sensor-> = dirname;
+      grey_sensor->Rate = rate;
+      grey_sensor->Width = width;
+      grey_sensor->Height = height;
+      grey_sensor->Description = sensor["comment"].as<std::string>();
+      grey_sensor->Index = slamfile->Sensors.size();
+      slamfile->Sensors.AddSensor(grey_sensor);
+
+      // Create a RGB equivalent sensor
+
+      auto rgb_sensor = makeGreySensor(pose, intrinsics, distortion);
+//      auto rgb_sensor = new CameraSensor(dirname + "clone");
+      rgb_sensor->Rate = rate;
+      rgb_sensor->Width = width;
+      rgb_sensor->Height = height;
+      rgb_sensor->Description = "RGB clone from " + sensor["comment"].as<std::string>();
+      rgb_sensor->Index = slamfile->Sensors.size();
 
       if (this->rgb) {
         slamfile->Sensors.AddSensor(rgb_sensor);
@@ -318,7 +304,7 @@ SLAMFile *EUROCMAVReader::GenerateSLAMFile() {
           // Add the original Grey Image
 
           auto frame = new ImageFileFrame();
-          frame->FrameSensor = cam_sensor;
+          frame->FrameSensor = grey_sensor;
           frame->Filename = cam_dirname + "/data/" + pdir->d_name;
 
           uint64_t timestamp = strtol(pdir->d_name, nullptr, 10);

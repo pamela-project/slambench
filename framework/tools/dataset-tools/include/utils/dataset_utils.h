@@ -46,4 +46,31 @@ inline bool checkRequirements(const std::string& directory_name, const std::vect
   return true;
 }
 
+/// Load a generalised grey sensor
+inline slambench::io::CameraSensor* makeGreySensor(const slambench::io::Sensor::pose_t &pose,
+                                                   const slambench::io::CameraSensor::intrinsics_t &intrinsics,
+                                                   const slambench::io::CameraSensor::distortion_coefficients_t &distortion) {
+
+  using namespace slambench::io;
+
+  auto grey_sensor = new CameraSensor("Grey", CameraSensor::kCameraType);
+
+  grey_sensor->Index = 0;
+
+  grey_sensor->Rate = 30.0;
+  grey_sensor->Width = 640;
+  grey_sensor->Height = 480;
+
+  grey_sensor->FrameFormat = frameformat::Raster;
+  grey_sensor->PixelFormat = pixelformat::G_I_8;
+  grey_sensor->Description = "Grey";
+
+  grey_sensor->CopyPose(pose);
+  grey_sensor->CopyIntrinsics(intrinsics);
+  grey_sensor->CopyRadialTangentialDistortion(distortion);
+  grey_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
+
+  return grey_sensor;
+}
+
 #endif  // FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_DATASET_UTILS_H_
