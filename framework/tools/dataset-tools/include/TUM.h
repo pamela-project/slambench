@@ -18,7 +18,7 @@
 #include <io/sensor/DepthSensor.h>
 #include <io/sensor/GroundTruthSensor.h>
 #include <io/sensor/Sensor.h>
-#include "../../dataset-tools/include/DatasetReader.h"
+#include "DatasetReader.h"
 
 namespace slambench {
 

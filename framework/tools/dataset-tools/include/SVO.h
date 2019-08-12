@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "../../dataset-tools/include/DatasetReader.h"
+#include "DatasetReader.h"
 
 #include <ParameterComponent.h>
 #include <ParameterManager.h>

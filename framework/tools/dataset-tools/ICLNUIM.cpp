@@ -8,7 +8,7 @@
  */
 
 
-#include "./include/ICLNUIM.h"
+#include "include/ICLNUIM.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>

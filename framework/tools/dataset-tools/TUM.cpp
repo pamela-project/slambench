@@ -7,9 +7,9 @@
 
  */
 
-#include "../dataset-tools/include/TUM.h"
-#include "../dataset-tools/include/utils/RegexPattern.h"
-#include "../dataset-tools/include/utils/dataset_utils.h"
+#include "include/TUM.h"
+#include "include/utils/RegexPattern.h"
+#include "include/utils/dataset_utils.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>

@@ -20,12 +20,12 @@
 #include <sstream>
 #include <string>
 
-#include "./include/BONN.h"
-#include "./include/EUROCMAV.h"
-#include "./include/ICL.h"
-#include "./include/ICLNUIM.h"
-#include "./include/SVO.h"
-#include "./include/TUM.h"
+#include "include/BONN.h"
+#include "include/EUROCMAV.h"
+#include "include/ICL.h"
+#include "include/ICLNUIM.h"
+#include "include/SVO.h"
+#include "include/TUM.h"
 
 using namespace slambench::io;
 

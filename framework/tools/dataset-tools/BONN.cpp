@@ -7,9 +7,9 @@
 
  */
 
-#include "../dataset-tools/include/BONN.h"
-#include "../dataset-tools/include/utils/RegexPattern.h"
-#include "../dataset-tools/include/utils/dataset_utils.h"
+#include "include/BONN.h"
+#include "include/utils/RegexPattern.h"
+#include "include/utils/dataset_utils.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>

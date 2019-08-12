@@ -7,7 +7,7 @@
 
  */
 
-#include "../dataset-tools/include/SVO.h"
+#include "include/SVO.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
