@@ -39,6 +39,9 @@ namespace slambench {
       static constexpr DepthSensor::distortion_coefficients_t distortion_depth =
           {0.039903, -0.099343, -0.000730, -0.000144, 0.000000};
 
+      static constexpr DepthSensor::disparity_params_t disparity_params = {0.001, 0.0};
+      static constexpr DepthSensor::disparity_type_t disparity_type = DepthSensor::affine_disparity;
+
      public:
       std::string input;
       bool grey = true, rgb = true, depth = true, gt = true;

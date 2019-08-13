@@ -32,6 +32,9 @@ namespace slambench {
       static constexpr CameraSensor::intrinsics_t fr2_intrinsics_rgb = {0.81390624, 1.085416667, 0.5079687, 0.52020};
       static constexpr DepthSensor::intrinsics_t fr2_intrinsics_depth = {0.9075, 1.212083333, 0.4825, 0.52708};
 
+      static constexpr DepthSensor::disparity_params_t disparity_params = {0.001, 0.0};
+      static constexpr DepthSensor::disparity_type_t disparity_type = DepthSensor::affine_disparity;
+
       // I took those numbers from ORBSLAM2 examples
 
       static constexpr float fr1_fps = 30.0;

@@ -12,102 +12,133 @@
 
 #include <boost/filesystem.hpp>
 
-/**
- * Check for files and folders in a given directory and return true iff all exist
- *
- * @param directory_name directory to check for requirements
- * @param required vector of names of required files / folders
- */
-inline bool checkRequirements(const std::string& directory_name, const std::vector<std::string>& requirements) {
+namespace slambench {
+  namespace io {
 
-  try {
-    if (!boost::filesystem::exists(directory_name)) return false;
+    /**
+    * Check for files and folders in a given directory and return true iff all exist
+    *
+    * @param directory_name directory to check for requirements
+    * @param required vector of names of required files / folders
+    */
+    inline bool checkRequirements(const std::string& directory_name,
+                                  const std::vector<std::string>& requirements) {
 
-    boost::filesystem::directory_iterator end_itr;  // default construction yields past-the-end
+      try {
+        if (!boost::filesystem::exists(directory_name)) return false;
 
-    for (auto const &requirement : requirements) {
-      bool seen = false;
+        boost::filesystem::directory_iterator end_itr;  // default construction yields past-the-end
 
-      for (boost::filesystem::directory_iterator itr(directory_name); itr != end_itr; ++itr) {
-        if (requirement == itr->path().filename()) seen = true;
-      }
+        for (auto const &requirement : requirements) {
+          bool seen = false;
 
-      if (!seen) {
-        std::cout << "File not found: <dataset_dir>/" << requirement << std::endl;
+          for (boost::filesystem::directory_iterator itr(directory_name); itr != end_itr; ++itr) {
+            if (requirement == itr->path().filename()) seen = true;
+          }
+
+          if (!seen) {
+            std::cout << "File not found: <dataset_dir>/" << requirement << std::endl;
+            return false;
+          }
+        }
+      } catch (boost::filesystem::filesystem_error &e) {
+        std::cerr << "I/O Error with directory " << directory_name << std::endl;
+        std::cerr << e.what() << std::endl;
         return false;
       }
+
+      return true;
     }
-  } catch (boost::filesystem::filesystem_error &e) {
-    std::cerr << "I/O Error with directory " << directory_name << std::endl;
-    std::cerr << e.what() << std::endl;
-    return false;
-  }
 
-  return true;
-}
+    /// Load a generalised grey sensor
+    inline CameraSensor* makeGreySensor(const Sensor::pose_t &pose,
+                                        const CameraSensor::intrinsics_t &intrinsics,
+                                        const CameraSensor::distortion_coefficients_t &distortion) {
 
-/// Load a generalised grey sensor
-inline slambench::io::CameraSensor* makeGreySensor(const slambench::io::Sensor::pose_t &pose,
-                                                   const slambench::io::CameraSensor::intrinsics_t &intrinsics,
-                                                   const slambench::io::CameraSensor::distortion_coefficients_t &distortion) {
+      auto grey_sensor = new CameraSensor("Grey", CameraSensor::kCameraType);
 
-  using namespace slambench::io;
+      grey_sensor->Index = 0;
 
-  auto grey_sensor = new CameraSensor("Grey", CameraSensor::kCameraType);
+      grey_sensor->Rate = 30.0;
+      grey_sensor->Width = 640;
+      grey_sensor->Height = 480;
 
-  grey_sensor->Index = 0;
+      grey_sensor->FrameFormat = frameformat::Raster;
+      grey_sensor->PixelFormat = pixelformat::G_I_8;
+      grey_sensor->Description = "Grey";
 
-  grey_sensor->Rate = 30.0;
-  grey_sensor->Width = 640;
-  grey_sensor->Height = 480;
+      grey_sensor->CopyPose(pose);
+      grey_sensor->CopyIntrinsics(intrinsics);
+      grey_sensor->CopyRadialTangentialDistortion(distortion);
+      grey_sensor->DistortionType = CameraSensor::RadialTangential;
 
-  grey_sensor->FrameFormat = frameformat::Raster;
-  grey_sensor->PixelFormat = pixelformat::G_I_8;
-  grey_sensor->Description = "Grey";
+      return grey_sensor;
+    }
 
-  grey_sensor->CopyPose(pose);
-  grey_sensor->CopyIntrinsics(intrinsics);
-  grey_sensor->CopyRadialTangentialDistortion(distortion);
-  grey_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
+    /// Load a generalised gt sensor
+    inline GroundTruthSensor* makeGTSensor() {
 
-  return grey_sensor;
-}
+      auto gt_sensor = new GroundTruthSensor("GroundTruth");
+      gt_sensor->Index = 0;
+      gt_sensor->Description = "GroundTruthSensor";
 
-/// Load a generalised gt sensor
-inline slambench::io::GroundTruthSensor* makeGTSensor() {
+      return gt_sensor;
+    }
 
-  using namespace slambench::io;
+    /// Load a generalised rgb sensor
+    inline CameraSensor* makeRGBSensor(const Sensor::pose_t &pose,
+                                       const CameraSensor::intrinsics_t &intrinsics,
+                                       const CameraSensor::distortion_coefficients_t &distortion) {
 
-  auto gt_sensor = new GroundTruthSensor("GroundTruth");
-  gt_sensor->Index = 0;
-  gt_sensor->Description = "GroundTruthSensor";
+      auto rgb_sensor = new CameraSensor("RGB", CameraSensor::kCameraType);
 
-  return gt_sensor;
-}
+      rgb_sensor->Index = 0;
 
-/// Load a generalised rgb sensor
-inline slambench::io::CameraSensor* makeRGBSensor(const slambench::io::Sensor::pose_t &pose,
-                                                  const slambench::io::CameraSensor::intrinsics_t &intrinsics,
-                                                  const slambench::io::CameraSensor::distortion_coefficients_t &distortion) {
+      rgb_sensor->Rate = 30.0;
+      rgb_sensor->Width = 640;
+      rgb_sensor->Height = 480;
+      rgb_sensor->FrameFormat = frameformat::Raster;
+      rgb_sensor->PixelFormat = pixelformat::RGB_III_888;
+      rgb_sensor->Description = "RGB";
+      rgb_sensor->CopyPose(pose);
+      rgb_sensor->CopyIntrinsics(intrinsics);
+      rgb_sensor->DistortionType = CameraSensor::RadialTangential;
+      rgb_sensor->CopyRadialTangentialDistortion(distortion);
 
-  using namespace slambench::io;
+      return rgb_sensor;
+    }
 
-  auto rgb_sensor = new CameraSensor("RGB", CameraSensor::kCameraType);
+    /// Load a generalised depth sensor
+    inline DepthSensor* makeDepthSensor(const Sensor::pose_t &pose,
+                                        const DepthSensor::intrinsics_t &intrinsics,
+                                        const DepthSensor::distortion_coefficients_t &distortion,
+                                        const DepthSensor::disparity_params_t &disparity_params,
+                                        const DepthSensor::disparity_type_t &disparity_type) {
 
-  rgb_sensor->Index = 0;
+      auto depth_sensor = new DepthSensor("Depth");
 
-  rgb_sensor->Rate = 30.0;
-  rgb_sensor->Width = 640;
-  rgb_sensor->Height = 480;
-  rgb_sensor->FrameFormat = frameformat::Raster;
-  rgb_sensor->PixelFormat = pixelformat::RGB_III_888;
-  rgb_sensor->Description = "RGB";
-  rgb_sensor->CopyPose(pose);
-  rgb_sensor->CopyIntrinsics(intrinsics);
-  rgb_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
-  rgb_sensor->CopyRadialTangentialDistortion(distortion);
+      depth_sensor->Index = 0;
 
-  return rgb_sensor;
-}
+      depth_sensor->Rate = 30.0;
+      depth_sensor->Width = 640;
+      depth_sensor->Height = 480;
+
+      depth_sensor->FrameFormat = frameformat::Raster;
+      depth_sensor->PixelFormat = pixelformat::D_I_16;
+
+      depth_sensor->DisparityType = disparity_type;
+      depth_sensor->Description = "Depth";
+
+      depth_sensor->CopyPose(pose);
+      depth_sensor->CopyIntrinsics(intrinsics);
+      depth_sensor->CopyDisparityParams(disparity_params);
+      depth_sensor->DistortionType = CameraSensor::RadialTangential;
+      depth_sensor->CopyRadialTangentialDistortion(distortion);
+
+      return depth_sensor;
+    }
+
+  }  // namespace io
+}  // namespace slambench
 
 #endif  // FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_DATASET_UTILS_H_

@@ -28,32 +28,12 @@ constexpr CameraSensor::intrinsics_t BONNReader::intrinsics_rgb;
 constexpr DepthSensor::intrinsics_t BONNReader::intrinsics_depth;
 constexpr CameraSensor::distortion_coefficients_t BONNReader::distortion_rgb;
 constexpr DepthSensor::distortion_coefficients_t BONNReader::distortion_depth;
+constexpr DepthSensor::disparity_params_t BONNReader::disparity_params;
+constexpr DepthSensor::disparity_type_t BONNReader::disparity_type;
 
 bool loadBONNDepthData(const std::string &dirname,
-                       SLAMFile &file,
-                       const Sensor::pose_t &pose,
-                       const DepthSensor::intrinsics_t &intrinsics,
-                       const CameraSensor::distortion_coefficients_t &distortion,
-                       const DepthSensor::disparity_params_t &disparity_params,
-                       const DepthSensor::disparity_type_t &disparity_type) {
-
-  auto depth_sensor = new DepthSensor("Depth");
-  depth_sensor->Index = 0;
-  depth_sensor->Width = 640;
-  depth_sensor->Height = 480;
-  depth_sensor->FrameFormat = frameformat::Raster;
-  depth_sensor->PixelFormat = pixelformat::D_I_16;
-  depth_sensor->DisparityType = disparity_type;
-  depth_sensor->Description = "Depth";
-  depth_sensor->CopyPose(pose);
-  depth_sensor->CopyIntrinsics(intrinsics);
-  depth_sensor->CopyDisparityParams(disparity_params);
-  depth_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
-  depth_sensor->CopyRadialTangentialDistortion(distortion);
-  depth_sensor->Index = file.Sensors.size();
-  depth_sensor->Rate = 30.0;
-
-  file.Sensors.AddSensor(depth_sensor);
+                      SLAMFile &file,
+                      DepthSensor* depth_sensor) {
 
   std::string line;
 
@@ -335,16 +315,17 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
 
   Sensor::pose_t pose = Eigen::Matrix4f::Identity();
 
-  DepthSensor::disparity_params_t disparity_params = {0.001, 0.0};
-  DepthSensor::disparity_type_t disparity_type = DepthSensor::affine_disparity;
-
   // load Depth
-  if (depth && !loadBONNDepthData(dirname, slamfile, pose,
-                                  BONNReader::intrinsics_depth, BONNReader::distortion_depth,
-                                  disparity_params, disparity_type)) {
-    std::cerr << "Error while loading depth information." << std::endl;
-    delete slamfile_ptr;
-    return nullptr;
+  if (depth) {
+    auto depth_sensor = makeDepthSensor(pose, intrinsics_depth, distortion_depth, disparity_params, disparity_type);
+    depth_sensor->Index = slamfile.Sensors.size();
+    slamfile.Sensors.AddSensor(depth_sensor);
+
+    if (!loadBONNDepthData(dirname, slamfile, depth_sensor)) {
+      std::cout << "Error while loading depth information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
+    }
   }
 
   // load Grey

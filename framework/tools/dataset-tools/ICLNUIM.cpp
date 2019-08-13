@@ -25,28 +25,12 @@
 
 using namespace slambench::io;
 
+constexpr DepthSensor::disparity_params_t ICLNUIMReader::disparity_params;
+constexpr DepthSensor::disparity_type_t ICLNUIMReader::disparity_type;
+
 struct float3 {
   float x, y, z;
 };
-
-DepthSensor *GetDepthSensor(const Sensor::pose_t &pose,
-                            const DepthSensor::intrinsics_t &intrinsics,
-                            const DepthSensor::disparity_params_t &dparams,
-                            const DepthSensor::disparity_type_t &dtype) {
-  auto sensor = new DepthSensor("Depth");
-  sensor->Index = 0;
-  sensor->Rate = 1;
-  sensor->Width = 640;
-  sensor->Height = 480;
-  sensor->FrameFormat = frameformat::Raster;
-  sensor->PixelFormat = pixelformat::D_I_16;
-  sensor->DisparityType = dtype;
-  sensor->CopyPose(pose);
-  sensor->CopyIntrinsics(intrinsics);
-  sensor->CopyDisparityParams(dparams);
-
-  return sensor;
-}
 
 void ICLNUIMReader::AddSensors(SLAMFile &file) {
   // TODO This information should come from the dataset !!
@@ -54,22 +38,11 @@ void ICLNUIMReader::AddSensors(SLAMFile &file) {
   Sensor::pose_t pose_depth = Eigen::Matrix4f::Identity();
   Sensor::pose_t pose = Eigen::Matrix4f::Identity();
 
-  CameraSensor::intrinsics_t intrinsics;
-  intrinsics[0] = 0.751875;
-  intrinsics[1] = -1.0;
+  CameraSensor::intrinsics_t intrinsics{0.751875, -1.0, 0.4992185, 0.4989583};
   if (this->positive_focal) intrinsics[1] = 1.0;  // TODO : This is actually -1, bug .. no.
-  intrinsics[2] = 0.4992185;
-  intrinsics[3] = 0.4989583;
 
-  DepthSensor::intrinsics_t intrinsics_depth;
-  intrinsics_depth[0] = 0.751875;
-  intrinsics_depth[1] = -1.0;
+  CameraSensor::intrinsics_t intrinsics_depth{0.751875, -1.0, 0.4992185, 0.4989583};
   if (this->positive_focal) intrinsics_depth[1] = 1.0;  // TODO : This is actually -1, bug .. no.
-  intrinsics_depth[2] = 0.4992185;
-  intrinsics_depth[3] = 0.4989583;
-
-  DepthSensor::disparity_params_t disparity_params = {0.001, 0.0};
-  DepthSensor::disparity_type_t disparity_type = DepthSensor::affine_disparity;
 
   int idx = 0;
 
@@ -82,7 +55,9 @@ void ICLNUIMReader::AddSensors(SLAMFile &file) {
   }
 
   if (this->depth) {
-    this->depth_sensor = GetDepthSensor(pose_depth, intrinsics_depth, disparity_params, disparity_type);
+    this->depth_sensor = makeDepthSensor(pose_depth, intrinsics_depth, {}, disparity_params, disparity_type);
+    this->depth_sensor->Rate = 1;
+    this->depth_sensor->DistortionType = CameraSensor::NoDistortion;
     this->depth_sensor->Index = idx++;
     file.Sensors.AddSensor(this->depth_sensor);
   }

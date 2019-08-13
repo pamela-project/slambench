@@ -30,6 +30,9 @@ namespace slambench {
       CameraSensor *grey_sensor = nullptr;
       GroundTruthSensor *gt_sensor = nullptr;
 
+      static constexpr DepthSensor::disparity_params_t disparity_params = {0.001, 0.0};
+      static constexpr DepthSensor::disparity_type_t disparity_type = DepthSensor::affine_disparity;
+
       void AddSensors(SLAMFile &file);
       bool GetFrame(const std::string &dirname, SLAMFile &file, int frame_no);
       bool AddFrames(const std::string &dirname, SLAMFile &file);
