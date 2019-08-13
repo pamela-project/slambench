@@ -73,4 +73,15 @@ inline slambench::io::CameraSensor* makeGreySensor(const slambench::io::Sensor::
   return grey_sensor;
 }
 
+inline slambench::io::GroundTruthSensor* makeGTSensor() {
+
+  using namespace slambench::io;
+
+  auto gt_sensor = new GroundTruthSensor("GroundTruth");
+  gt_sensor->Index = 0;
+  gt_sensor->Description = "GroundTruthSensor";
+
+  return gt_sensor;
+}
+
 #endif  // FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_DATASET_UTILS_H_

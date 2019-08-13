@@ -247,19 +247,7 @@ bool loadTUMGreyData(const std::string &dirname, SLAMFile &file, CameraSensor* g
   return true;
 }
 
-bool loadTUMGroundTruthData(const std::string &dirname, SLAMFile &file) {
-
-  auto gt_sensor = new GroundTruthSensor("GroundTruth");
-  gt_sensor->Index = file.Sensors.size();
-  gt_sensor->Description = "GroundTruthSensor";
-  file.Sensors.AddSensor(gt_sensor);
-
-  if (!gt_sensor) {
-    std::cout << "gt sensor not found..." << std::endl;
-    return false;
-  } else {
-    std::cout << "gt sensor created..." << std::endl;
-  }
+bool loadTUMGroundTruthData(const std::string &dirname, SLAMFile &file, GroundTruthSensor* gt_sensor) {
 
   std::ifstream infile(dirname + "/" + "groundtruth.txt");
 
@@ -486,11 +474,18 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
     return nullptr;
   }
 
-// load GT
-  if (gt && !loadTUMGroundTruthData(dirname, slamfile)) {
-    std::cout << "Error while loading gt information." << std::endl;
-    delete slamfile_ptr;
-    return nullptr;
+  // load GT
+  if (gt) {
+    auto gt_sensor = makeGTSensor();
+    gt_sensor->Index = slamfile.Sensors.size();
+    gt_sensor->Description = "GroundTruthSensor";
+    slamfile.Sensors.AddSensor(gt_sensor);
+
+    if(!loadTUMGroundTruthData(dirname, slamfile, gt_sensor)) {
+      std::cerr << "Error while loading gt information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
+    }
   }
 
   // load Accelerometer: This one failed

@@ -259,12 +259,7 @@ bool loadBONNGreyData(const std::string &dirname, SLAMFile &file, CameraSensor* 
   return true;
 }
 
-bool loadBONNGroundTruthData(const std::string &dirname, SLAMFile &file) {
-
-  auto gt_sensor = new GroundTruthSensor("GroundTruth");
-  gt_sensor->Index = file.Sensors.size();
-  gt_sensor->Description = "GroundTruthSensor";
-  file.Sensors.AddSensor(gt_sensor);
+bool loadBONNGroundTruthData(const std::string &dirname, SLAMFile &file, GroundTruthSensor* gt_sensor) {
 
   std::ifstream infile(dirname + "/" + "groundtruth.txt");
 
@@ -392,10 +387,17 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
   }
 
   // load GT
-  if (gt && !loadBONNGroundTruthData(dirname, slamfile)) {
-    std::cerr << "Error while loading gt information." << std::endl;
-    delete slamfile_ptr;
-    return nullptr;
+  if (gt) {
+    auto gt_sensor = makeGTSensor();
+    gt_sensor->Index = slamfile.Sensors.size();
+    gt_sensor->Description = "GroundTruthSensor";
+    slamfile.Sensors.AddSensor(gt_sensor);
+
+    if(!loadBONNGroundTruthData(dirname, slamfile, gt_sensor)) {
+      std::cerr << "Error while loading gt information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
+    }
   }
 
   return slamfile_ptr;

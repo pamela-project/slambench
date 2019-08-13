@@ -367,9 +367,8 @@ SLAMFile *EUROCMAVReader::GenerateSLAMFile() {
     } else if (sensor_type == "visual-inertial" and this->gt) {
       std::cerr << "Found sensor type " << sensor_type << " from directory " << dirname << std::endl;
 
-      auto gt_sensor = new GroundTruthSensor(dirname);
+      auto gt_sensor = makeGTSensor();
       gt_sensor->Index = slamfile->Sensors.size();
-      gt_sensor->Description = "Ground Truth";
       slamfile->Sensors.AddSensor(gt_sensor);
 
       if (not loadGTData(cam_dirname, gt_sensor, slamfile)) {

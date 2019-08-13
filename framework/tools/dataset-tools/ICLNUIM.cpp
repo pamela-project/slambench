@@ -63,15 +63,6 @@ CameraSensor *GetRGBSensor(const Sensor::pose_t &pose, const CameraSensor::intri
   return sensor;
 }
 
-GroundTruthSensor *GetGTSensor(const Sensor::pose_t &pose) {
-  auto sensor = new GroundTruthSensor("GroundTruth");
-  sensor->Index = 0;
-  sensor->Rate = 1;
-  sensor->Description = "Ground Truth";
-  sensor->CopyPose(pose);
-  return sensor;
-}
-
 void ICLNUIMReader::AddSensors(SLAMFile &file) {
   // TODO This information should come from the dataset !!
 
@@ -118,7 +109,9 @@ void ICLNUIMReader::AddSensors(SLAMFile &file) {
   }
 
   if (this->gt) {
-    this->gt_sensor = GetGTSensor(pose);
+    this->gt_sensor = makeGTSensor();
+    this->gt_sensor->Rate = 1;
+    this->gt_sensor->CopyPose(pose);
     this->gt_sensor->Index = idx++;
     file.Sensors.AddSensor(this->gt_sensor);
   }

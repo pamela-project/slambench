@@ -54,18 +54,7 @@ bool loadSVOGreyData(const std::string &dirname,
   return true;
 }
 
-bool loadSVOGroundTruthData(const std::string &dirname, SLAMFile &file) {
-  auto gt_sensor = new GroundTruthSensor("GT");
-  gt_sensor->Index = file.Sensors.size();
-  gt_sensor->Description = "GroundTruthSensor";
-  file.Sensors.AddSensor(gt_sensor);
-
-  if (!gt_sensor) {
-    std::cout << "gt sensor not found..." << std::endl;
-    return false;
-  } else {
-    std::cout << "gt sensor created..." << std::endl;
-  }
+bool loadSVOGroundTruthData(const std::string &dirname, SLAMFile &file, GroundTruthSensor* gt_sensor) {
 
   std::string line;
   std::vector<std::string> results;
@@ -146,7 +135,11 @@ SLAMFile *SVOReader::GenerateSLAMFile() {
   }
 
   // load GT
-  if (!loadSVOGroundTruthData(dirname, slamfile)) {
+  auto gt_sensor = makeGTSensor();
+  gt_sensor->Index = slamfile.Sensors.size();
+  slamfile.Sensors.AddSensor(gt_sensor);
+
+  if (!loadSVOGroundTruthData(dirname, slamfile, gt_sensor)) {
     std::cout << "Error while loading gt information." << std::endl;
     delete slamfile_ptr;
     return nullptr;
