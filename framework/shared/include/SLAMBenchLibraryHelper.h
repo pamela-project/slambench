@@ -40,6 +40,7 @@ public:
     bool            (* c_sb_process_once) (SLAMBenchLibraryHelper *) ;
     bool            (* c_sb_clean_slam_system)();
     bool            (* c_sb_update_outputs)(SLAMBenchLibraryHelper *, const slambench::TimeStamp *ts);
+	slambench::outputs::BaseOutput* gt_traj;    
 
 private:
     SLAMBenchLibraryHelper ();
@@ -72,7 +73,7 @@ public :
 
 	slambench::metrics::MetricManager &GetMetricManager() { return _metric_manager; }
 	slambench::outputs::OutputManager &GetOutputManager() { return output_manager_; }
-	
+
     slambench::io::InputInterface *get_input_interface() {
 		if(_input_interface == nullptr) {
 			throw std::logic_error("Input interface have not been added to SLAM configuration");

@@ -272,9 +272,11 @@ namespace slambench {
 			FrameValue(uint32_t width, uint32_t height, slambench::io::pixelformat::EPixelFormat pxl_format);
 			
 			void *GetData() { return data_.data(); }
-			uint32_t GetWidth() { return width_; }
-			uint32_t GetHeight() { return height_; }
-			slambench::io::pixelformat::EPixelFormat GetFormat() { return pxl_format_; }
+            const void *GetData() const { return data_.data(); }
+            unsigned char at(int row, int col) const { return data_.at(row*height_+col); } //NOTE: assumes row-major
+			uint32_t GetWidth() const { return width_; }
+			uint32_t GetHeight() const { return height_; }
+			slambench::io::pixelformat::EPixelFormat GetFormat() const { return pxl_format_; }
 			
 		private:
 			uint32_t width_, height_;

@@ -26,6 +26,9 @@
 
 using namespace slambench::io;
 
+constexpr CameraSensor::intrinsics_t ICLReader::fr1_intrinsics_rgb;
+constexpr DepthSensor::intrinsics_t  ICLReader::fr1_intrinsics_depth;
+
 static DepthSensor *GetDepthSensor(const Sensor::pose_t &pose,
                                    const DepthSensor::intrinsics_t &intrinsics,
                                    const DepthSensor::disparity_params_t &dparams,

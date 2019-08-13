@@ -27,9 +27,9 @@ namespace slambench {
 		public:
 			PixelData(const void *data) { 
 				const char *cdata = (const char*)data;
-				_r = cdata[0];
-				_g = cdata[1];
-				_b = cdata[2];
+				_r = (uint8_t) cdata[0];
+				_g = (uint8_t) cdata[1];
+				_b = (uint8_t) cdata[2];
 			}
 			
 			static const size_t Size = 3;
@@ -72,7 +72,6 @@ namespace slambench {
 			}
 			
 			CameraSensor *GetCamera() { return (CameraSensor*)DataFormatter::GetSensor(); }
-			const CameraSensor *GetCamera() const { return (CameraSensor*)DataFormatter::GetSensor(); }
 			size_t Line() const { return GetCamera()->Width * pixel_t::Size; }
 			size_t Stride() const { return pixel_t::Size; }
 			

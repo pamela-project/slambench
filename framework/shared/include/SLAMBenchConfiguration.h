@@ -88,7 +88,7 @@ public :
 
 	void AddFrameCallback(std::function<void()> callback) { frame_callbacks_.push_back(callback); }
 	
-	const lib_container_t &GetLoadedLibs() { return libs; }
+	const lib_container_t &GetLoadedLibs() const { return libs; }
     const slambench::ParameterManager &GetParameterManager() const { return param_manager_; }
 	slambench::ParameterManager &GetParameterManager() { return param_manager_; }
 	

@@ -35,26 +35,33 @@ namespace slambench {
       static constexpr DepthSensor::disparity_params_t disparity_params = {0.001, 0.0};
       static constexpr DepthSensor::disparity_type_t disparity_type = DepthSensor::affine_disparity;
 
+      //// Taken from https://vision.in.tum.de/data/datasets/rgbd-dataset/file_formats
+      //static constexpr CameraSensor::intrinsics_t fr1_intrinsics_rgb   = { 517.3, 516.5, 318.6, 255.3 };
+      //static constexpr DepthSensor::intrinsics_t  fr1_intrinsics_depth = { 591.1, 590.1, 331.0, 234.0 };
+      //static constexpr CameraSensor::intrinsics_t fr2_intrinsics_rgb   = { 520.9, 521.0, 325.1, 249.7 };
+      //static constexpr DepthSensor::intrinsics_t  fr2_intrinsics_depth = { 580.8, 581.8, 308.8, 253.0 };
+      static constexpr CameraSensor::intrinsics_t fr3_intrinsics_rgb   = { 0.8365625, 1.123333, 0.50015625, 0.5158333 };
+      static constexpr DepthSensor::intrinsics_t  fr3_intrinsics_depth = { 0.886875,	1.1879166, 0.50734375, 0.521041 };
+
       // I took those numbers from ORBSLAM2 examples
 
-      static constexpr float fr1_fps = 30.0;
-      static constexpr float fr1_bf = 40.0;
-      static constexpr float fr1_ThDepth = 40.0;
-      static constexpr float fr1_DepthMapFactor = 5000.0;
+      static constexpr float fr1_fps =  30.0 ;
+      static constexpr float fr1_bf =  40.0 ;
+      static constexpr float fr1_ThDepth =  40.0 ;
+      static constexpr float fr1_DepthMapFactor =  5000.0 ;
 
-      static constexpr float fr2_fps = 30.0;
-      static constexpr float fr2_bf = 40.0;
-      static constexpr float fr2_ThDepth = 40.0;
-      static constexpr float fr2_DepthMapFactor = 5208.0;
+      static constexpr float fr2_fps =  30.0 ;
+      static constexpr float fr2_bf =  40.0 ;
+      static constexpr float fr2_ThDepth =  40.0 ;
+      static constexpr float fr2_DepthMapFactor =  5208.0 ;
 
-      static constexpr CameraSensor::distortion_coefficients_t fr1_distortion_rgb =
-          {0.262383, -0.953104, -0.005358, 0.002628, 1.163314};
-      static constexpr CameraSensor::distortion_coefficients_t fr2_distortion_rgb =
-          {0.231222, -0.784899, -0.003257, -0.000105, 0.917205};
-      static constexpr DepthSensor::distortion_coefficients_t fr1_distortion_depth =
-          {0.262383, -0.953104, -0.005358, 0.002628, 1.163314};
-      static constexpr DepthSensor::distortion_coefficients_t fr2_distortion_depth =
-          {0.231222, -0.784899, -0.003257, -0.000105, 0.917205};
+      static constexpr CameraSensor::distortion_coefficients_t fr1_distortion_rgb   = { 0.262383, -0.953104, -0.005358, 0.002628, 1.163314 };
+      static constexpr CameraSensor::distortion_coefficients_t fr2_distortion_rgb   = { 0.231222, -0.784899, -0.003257, -0.000105, 0.917205 };
+      static constexpr CameraSensor::distortion_coefficients_t fr3_distortion_rgb   = { 0,0,0,0,0 };
+
+      static constexpr DepthSensor::distortion_coefficients_t  fr1_distortion_depth = { -0.0410, 0.3286, 0.0087, 0.0051, -0.5643 };
+      static constexpr DepthSensor::distortion_coefficients_t  fr2_distortion_depth = { -0.2297, 1.4766, 0.0005, -0.0075, -3.4194 };
+      static constexpr DepthSensor::distortion_coefficients_t  fr3_distortion_depth = { 0,0,0,0,0 };
 
      public:
       std::string input;

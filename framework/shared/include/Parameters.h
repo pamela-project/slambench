@@ -299,23 +299,23 @@ template<> inline void  TypedParameter<float [4]>::setValue(const char* optarg) 
 	}
 };
 
-template<> inline void  TypedParameter<std::string>::copyValue(std::string* to,const std::string* from)    {*(std::string*)to = *(std::string*)from;;};
+template<> inline void  TypedParameter<std::string>::copyValue(std::string* to,const std::string* from)    {*to = *(std::string*)from;;};
 template<> inline void  TypedParameter<std::string>::setValue(const char*otarg)     {if (_ptr) (*(std::string*)_ptr) = std::string(otarg);};
 template<> inline const std::string  TypedParameter<std::string>::getValue(const void * ptr) {return *((std::string*) ptr);};
 
-template<> inline void  TypedParameter<bool>::copyValue(bool* to,const bool* from)                {*(bool*)to = *(bool*)from;;};
+template<> inline void  TypedParameter<bool>::copyValue(bool* to,const bool* from)                {*to = *(bool*)from;;};
 template<> inline void  TypedParameter<bool>::setValue(const char* otarg)                 {if (_ptr) (*(bool*)_ptr) = (std::string(otarg) == "true");};
 template<> inline const std::string  TypedParameter<bool>::getValue(const void * ptr)  {return (*(bool*)ptr)?"true":"false";};
 
 
-template<> inline void  TypedParameter<unsigned int>::copyValue(unsigned int* to,const unsigned int* from)              {*(unsigned int*)to = *(unsigned int*)from;;};
-template<> inline void  TypedParameter<int>::copyValue(int* to,const int* from)              {*(int*)to = *(int*)from;;};
-template<> inline void  TypedParameter<long unsigned int>::copyValue(long unsigned int* to,const long unsigned int* from)              {*(long unsigned int*)to = *(long unsigned int*)from;;};
-template<> inline void  TypedParameter<float>::copyValue(float* to,const float* from)            {*(float*)to = *(float*)from;;};
-template<> inline void  TypedParameter<double>::copyValue(double* to,const double* from)           {*(double*)to = *(double*)from;;};
-template<> inline void  TypedParameter<sb_float3>::copyValue(sb_float3* to,const sb_float3* from)        {*(sb_float3*)to = *(sb_float3*)from;;};
-template<> inline void  TypedParameter<sb_float4>::copyValue(sb_float4* to,const sb_float4* from)        {*(sb_float4*)to = *(sb_float4*)from;;};
-template<> inline void  TypedParameter<sb_uint3>::copyValue(sb_uint3* to,const sb_uint3* from)         {*(sb_uint3*)to = *(sb_uint3*)from;;};
+template<> inline void  TypedParameter<unsigned int>::copyValue(unsigned int* to,const unsigned int* from)              {*to = *(unsigned int*)from;;};
+template<> inline void  TypedParameter<int>::copyValue(int* to,const int* from)              {*to = *(int*)from;;};
+template<> inline void  TypedParameter<long unsigned int>::copyValue(long unsigned int* to,const long unsigned int* from)              {*to = *(long unsigned int*)from;;};
+template<> inline void  TypedParameter<float>::copyValue(float* to,const float* from)            {*to = *(float*)from;;};
+template<> inline void  TypedParameter<double>::copyValue(double* to,const double* from)           {*to = *(double*)from;;};
+template<> inline void  TypedParameter<sb_float3>::copyValue(sb_float3* to,const sb_float3* from)        {*to = *(sb_float3*)from;;};
+template<> inline void  TypedParameter<sb_float4>::copyValue(sb_float4* to,const sb_float4* from)        {*to = *(sb_float4*)from;;};
+template<> inline void  TypedParameter<sb_uint3>::copyValue(sb_uint3* to,const sb_uint3* from)         {*to = *(sb_uint3*)from;;};
 template<> inline void  TypedParameter< std::vector<int>  >::copyValue(std::vector<int> * to,const std::vector<int> * from)            {
     to->clear();
     for (int v : *from) {

@@ -28,6 +28,20 @@ using namespace slambench::io;
 constexpr DepthSensor::disparity_params_t TUMReader::disparity_params;
 constexpr DepthSensor::disparity_type_t TUMReader::disparity_type;
 
+constexpr CameraSensor::intrinsics_t TUMReader::fr1_intrinsics_rgb;
+constexpr DepthSensor::intrinsics_t  TUMReader::fr1_intrinsics_depth;
+constexpr CameraSensor::intrinsics_t TUMReader::fr2_intrinsics_rgb;
+constexpr DepthSensor::intrinsics_t  TUMReader::fr2_intrinsics_depth;
+constexpr CameraSensor::intrinsics_t TUMReader::fr3_intrinsics_rgb;
+constexpr DepthSensor::intrinsics_t  TUMReader::fr3_intrinsics_depth;
+
+constexpr CameraSensor::distortion_coefficients_t TUMReader::fr1_distortion_rgb;
+constexpr CameraSensor::distortion_coefficients_t TUMReader::fr2_distortion_rgb;
+constexpr CameraSensor::distortion_coefficients_t TUMReader::fr3_distortion_rgb;
+constexpr DepthSensor::distortion_coefficients_t  TUMReader::fr1_distortion_depth;
+constexpr DepthSensor::distortion_coefficients_t  TUMReader::fr2_distortion_depth;
+constexpr DepthSensor::distortion_coefficients_t  TUMReader::fr3_distortion_depth;
+
 bool loadTUMDepthData(const std::string &dirname,
                       SLAMFile &file,
                       DepthSensor* depth_sensor) {
@@ -371,22 +385,37 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
     std::cout << "This dataset is assumed to be using freiburg1." << std::endl;
 
     for (int i = 0; i < 4; i++) {
-      intrinsics_rgb[i] = fr1_intrinsics_rgb[i];
+      intrinsics_rgb[i]   = fr1_intrinsics_rgb[i];
       intrinsics_depth[i] = fr1_intrinsics_depth[i];
-      distortion_rgb[i] = fr1_distortion_rgb[i];
+      distortion_rgb[i]   = fr1_distortion_rgb[i];
       distortion_depth[i] = fr1_distortion_depth[i];
     }
+    distortion_rgb[4]   = fr1_distortion_rgb[4];
+    distortion_depth[4] = fr1_distortion_depth[4];
 
   } else if (dirname.find("freiburg2") != std::string::npos) {
     std::cout << "This dataset is assumed to be using freiburg2." << std::endl;
     for (int i = 0; i < 4; i++) {
-      intrinsics_rgb[i] = fr2_intrinsics_rgb[i];
+      intrinsics_rgb[i]   = fr2_intrinsics_rgb[i];
       intrinsics_depth[i] = fr2_intrinsics_depth[i];
-      distortion_rgb[i] = fr2_distortion_rgb[i];
+      distortion_rgb[i]   = fr2_distortion_rgb[i];
       distortion_depth[i] = fr2_distortion_depth[i];
     }
+    distortion_rgb[4]   = fr2_distortion_rgb[4];
+    distortion_depth[4] = fr2_distortion_depth[4];
 
-  } else {
+
+  }
+  else if (dirname.find("freiburg3") != std::string::npos) {
+    std::cout << "This dataset is assumed to be using freiburg3." << std::endl;
+    for (int i = 0; i < 4; i++) {
+      intrinsics_rgb[i]   = fr3_intrinsics_rgb[i];
+      intrinsics_depth[i] = fr3_intrinsics_depth[i];
+      distortion_rgb[i]   = fr3_distortion_rgb[i];
+      distortion_depth[i] = fr3_distortion_depth[i];
+    }
+
+  } else  {
     std::cout << "Camera calibration might be wrong !." << std::endl;
   }
 

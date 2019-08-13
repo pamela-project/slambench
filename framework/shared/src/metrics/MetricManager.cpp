@@ -149,10 +149,10 @@ void MetricManager::EndPhase(Phase* phase)
 
 Phase* MetricManager::GetPhase(const std::string& phasename)
 {
-	for(auto i : phases_) {
-		if(i->GetName() == phasename) { 
-			return i;
-		}
-	}
-	assert(false);
+    for (auto i : phases_) {
+        if (i->GetName() == phasename) {
+            return i;
+        }
+    }
+    assert(false);
 }
