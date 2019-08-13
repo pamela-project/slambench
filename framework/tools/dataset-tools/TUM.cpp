@@ -278,19 +278,7 @@ bool loadTUMGroundTruthData(const std::string &dirname, SLAMFile &file, GroundTr
   return true;
 }
 
-bool loadTUMAccelerometerData(const std::string &dirname, SLAMFile &file) {
-
-  auto accelerometer_sensor = new AccelerometerSensor("Accelerometer");
-  accelerometer_sensor->Index = file.Sensors.size();
-  accelerometer_sensor->Description = "AccelerometerSensor";
-  file.Sensors.AddSensor(accelerometer_sensor);
-
-  if (!accelerometer_sensor) {
-    std::cout << "accelerometer_sensor not found..." << std::endl;
-    return false;
-  } else {
-    std::cout << "accelerometer_sensor created..." << std::endl;
-  }
+bool loadTUMAccelerometerData(const std::string &dirname, SLAMFile &file, AccelerometerSensor* accelerometer_sensor) {
 
   std::ifstream infile(dirname + "/" + "accelerometer.txt");
 
@@ -456,10 +444,16 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
   }
 
   // load Accelerometer: This one failed
-  if (accelerometer && !loadTUMAccelerometerData(dirname, slamfile)) {
-    std::cout << "Error while loading Accelerometer information." << std::endl;
-    delete slamfile_ptr;
-    return nullptr;
+  if (accelerometer) {
+    auto accelerometer_sensor = makeAccelerometerSensor();
+    accelerometer_sensor->Index = slamfile.Sensors.size();
+    slamfile.Sensors.AddSensor(accelerometer_sensor);
+
+    if (!loadTUMAccelerometerData(dirname, slamfile, accelerometer_sensor)) {
+      std::cout << "Error while loading Accelerometer information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
+    }
   }
 
   return slamfile_ptr;

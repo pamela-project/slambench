@@ -10,6 +10,7 @@
 #ifndef FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_DATASET_UTILS_H_
 #define FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_DATASET_UTILS_H_
 
+#include <io/sensor/AccelerometerSensor.h>
 #include <boost/filesystem.hpp>
 
 namespace slambench {
@@ -136,6 +137,14 @@ namespace slambench {
       depth_sensor->CopyRadialTangentialDistortion(distortion);
 
       return depth_sensor;
+    }
+
+    /// Load a generalised accelerometer sensor
+    inline AccelerometerSensor* makeAccelerometerSensor() {
+      auto accelerometer_sensor = new AccelerometerSensor("Accelerometer");
+      accelerometer_sensor->Description = "AccelerometerSensor";
+      accelerometer_sensor->Index = 0;
+      return accelerometer_sensor;
     }
 
   }  // namespace io
