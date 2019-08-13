@@ -48,21 +48,6 @@ DepthSensor *GetDepthSensor(const Sensor::pose_t &pose,
   return sensor;
 }
 
-CameraSensor *GetRGBSensor(const Sensor::pose_t &pose, const CameraSensor::intrinsics_t &intrinsics) {
-  auto sensor = new CameraSensor("RGB", CameraSensor::kCameraType);
-  sensor->Index = 0;
-  sensor->Rate = 1;
-  sensor->Width = 640;
-  sensor->Height = 480;
-  sensor->FrameFormat = frameformat::Raster;
-  sensor->PixelFormat = pixelformat::RGB_III_888;
-
-  sensor->CopyPose(pose);
-  sensor->CopyIntrinsics(intrinsics);
-
-  return sensor;
-}
-
 void ICLNUIMReader::AddSensors(SLAMFile &file) {
   // TODO This information should come from the dataset !!
 
@@ -89,7 +74,9 @@ void ICLNUIMReader::AddSensors(SLAMFile &file) {
   int idx = 0;
 
   if (this->rgb) {
-    this->rgb_sensor = GetRGBSensor(pose, intrinsics);
+    this->rgb_sensor = makeRGBSensor(pose, intrinsics, {});
+    this->rgb_sensor->Rate = 1;
+    this->rgb_sensor->DistortionType = CameraSensor::NoDistortion;
     this->rgb_sensor->Index = idx++;
     file.Sensors.AddSensor(this->rgb_sensor);
   }

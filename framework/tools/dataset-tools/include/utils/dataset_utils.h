@@ -73,6 +73,7 @@ inline slambench::io::CameraSensor* makeGreySensor(const slambench::io::Sensor::
   return grey_sensor;
 }
 
+/// Load a generalised gt sensor
 inline slambench::io::GroundTruthSensor* makeGTSensor() {
 
   using namespace slambench::io;
@@ -82,6 +83,31 @@ inline slambench::io::GroundTruthSensor* makeGTSensor() {
   gt_sensor->Description = "GroundTruthSensor";
 
   return gt_sensor;
+}
+
+/// Load a generalised rgb sensor
+inline slambench::io::CameraSensor* makeRGBSensor(const slambench::io::Sensor::pose_t &pose,
+                                                  const slambench::io::CameraSensor::intrinsics_t &intrinsics,
+                                                  const slambench::io::CameraSensor::distortion_coefficients_t &distortion) {
+
+  using namespace slambench::io;
+
+  auto rgb_sensor = new CameraSensor("RGB", CameraSensor::kCameraType);
+
+  rgb_sensor->Index = 0;
+
+  rgb_sensor->Rate = 30.0;
+  rgb_sensor->Width = 640;
+  rgb_sensor->Height = 480;
+  rgb_sensor->FrameFormat = frameformat::Raster;
+  rgb_sensor->PixelFormat = pixelformat::RGB_III_888;
+  rgb_sensor->Description = "RGB";
+  rgb_sensor->CopyPose(pose);
+  rgb_sensor->CopyIntrinsics(intrinsics);
+  rgb_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
+  rgb_sensor->CopyRadialTangentialDistortion(distortion);
+
+  return rgb_sensor;
 }
 
 #endif  // FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_DATASET_UTILS_H_

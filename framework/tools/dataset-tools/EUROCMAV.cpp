@@ -14,7 +14,6 @@
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
 #include <io/sensor/CameraSensor.h>
-#include <io/sensor/GroundTruthSensor.h>
 #include <io/sensor/IMUSensor.h>
 #include <io/sensor/Sensor.h>
 
@@ -285,7 +284,7 @@ SLAMFile *EUROCMAVReader::GenerateSLAMFile() {
 
       // Create a RGB equivalent sensor
 
-      auto rgb_sensor = makeGreySensor(pose, intrinsics, distortion);
+      auto rgb_sensor = makeRGBSensor(pose, intrinsics, distortion);
 //      auto rgb_sensor = new CameraSensor(dirname + "clone");
       rgb_sensor->Rate = rate;
       rgb_sensor->Width = width;

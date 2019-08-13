@@ -121,25 +121,7 @@ bool loadBONNDepthData(const std::string &dirname,
 
 bool loadBONNRGBData(const std::string &dirname,
                      SLAMFile &file,
-                     const Sensor::pose_t &pose,
-                     const CameraSensor::intrinsics_t &intrinsics,
-                     const CameraSensor::distortion_coefficients_t &distortion) {
-
-  auto rgb_sensor = new CameraSensor("RGB", CameraSensor::kCameraType);
-  rgb_sensor->Index = 0;
-  rgb_sensor->Width = 640;
-  rgb_sensor->Height = 480;
-  rgb_sensor->FrameFormat = frameformat::Raster;
-  rgb_sensor->PixelFormat = pixelformat::RGB_III_888;
-  rgb_sensor->Description = "RGB";
-  rgb_sensor->CopyPose(pose);
-  rgb_sensor->CopyIntrinsics(intrinsics);
-  rgb_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
-  rgb_sensor->CopyRadialTangentialDistortion(distortion);
-  rgb_sensor->Index = file.Sensors.size();
-  rgb_sensor->Rate = 30.0;
-
-  file.Sensors.AddSensor(rgb_sensor);
+                     CameraSensor* rgb_sensor) {
 
   std::string line;
 
@@ -379,11 +361,16 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
   }
 
   // load RGB
-  if (rgb && !loadBONNRGBData(dirname, slamfile, pose,
-                              BONNReader::intrinsics_rgb, BONNReader::distortion_rgb)) {
-    std::cerr << "Error while loading RGB information." << std::endl;
-    delete slamfile_ptr;
-    return nullptr;
+  if (rgb) {
+    auto rgb_sensor = makeRGBSensor(pose, intrinsics_rgb, distortion_rgb);
+    rgb_sensor->Index = slamfile.Sensors.size();
+    slamfile.Sensors.AddSensor(rgb_sensor);
+
+    if (!loadBONNRGBData(dirname, slamfile, rgb_sensor)) {
+      std::cerr << "Error while loading RGB information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
+    }
   }
 
   // load GT
