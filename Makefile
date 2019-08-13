@@ -661,6 +661,10 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 #### BONN
 #################
 
+./datasets/BONN/%.ply :  ./datasets/BONN/%.zip
+	unzip $< -d datasets/BONN
+	touch $@ # This is a fix to ensure not regenerating the file again because of file create date
+
 ./datasets/BONN/%.zip :  # Example : $* = rgbd_bonn_balloon
 	mkdir -p $(@D)
 	cd $(@D)  &&  ${WGET} "http://www.ipb.uni-bonn.de/html/projects/rgbd_dynamic2019/$*.zip"
@@ -669,9 +673,13 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 	mkdir $@
 	unzip $< -d $@
 
-./datasets/BONN/%.slam :  ./datasets/BONN/%.dir
+./datasets/BONN/%.slam : ./datasets/BONN/%.dir ./datasets/BONN/rgbd_bonn_groundtruth_1mm_section.ply
 	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
-	./build/bin/dataset-generator -d bonn -i $</* -o $@ -grey true -rgb true -gt true -depth true
+	./build/bin/dataset-generator -d bonn -i $</* -o $@ -grey true -rgb true -gt true -depth true -ply datasets/BONN/rgbd_bonn_groundtruth_1mm_section.ply
+
+#./datasets/BONN/%.slam : ./datasets/BONN/%.dir ./datasets/BONN/rgbd_bonn_groundtruth.ply
+#	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+#	./build/bin/dataset-generator -d bonn -i $</* -o $@ -grey true -rgb true -gt true -depth true -ply datasets/BONN/rgbd_bonn_groundtruth.ply
 
 
 #### ORBSLAM Voc
@@ -680,7 +688,17 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 ./benchmarks/orbslam2/src/original/Vocabulary/ORBvoc.txt : ./benchmarks/orbslam2/src/original/Vocabulary/ORBvoc.txt.tar.gz
 	cd ./benchmarks/orbslam2/src/original/Vocabulary/ && tar -xf ORBvoc.txt.tar.gz
 
-.PRECIOUS: ./datasets/TUM/%.tgz ./datasets/TUM/%.dir ./datasets/TUM/%.raw datasets/ICL_NUIM/living_room_traj%_loop.tgz ./datasets/TUM/%.raw datasets/ICL_NUIM/living_room_traj%_loop.dir datasets/ICL_NUIM/livingRoom%.gt.freiburg datasets/ICL_NUIM/living_room_traj%_loop.raw
+.PRECIOUS: \
+./datasets/TUM/%.tgz \
+./datasets/TUM/%.dir \
+./datasets/TUM/%.raw \
+./datasets/ICL_NUIM/living_room_traj%_loop.tgz \
+./datasets/ICL_NUIM/living_room_traj%_loop.dir \
+./datasets/ICL_NUIM/livingRoom%.gt.freiburg \
+./datasets/ICL_NUIM/living_room_traj%_loop.raw \
+./datasets/BONN/%.zip \
+./datasets/BONN/%.ply \
+./datasets/BONN/%.dir
 
 ####################################
 ####    BUILD/CLEAN TOOL        ####

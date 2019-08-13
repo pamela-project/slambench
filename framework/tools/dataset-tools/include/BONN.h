@@ -44,6 +44,7 @@ namespace slambench {
 
      public:
       std::string input;
+      std::string plyfile;
       bool grey = true, rgb = true, depth = true, gt = true;
 
       explicit BONNReader(const std::string& name) : DatasetReader(name) {
@@ -71,6 +72,11 @@ namespace slambench {
                                                 "set to true or false to specify if the GROUNDTRUTH "
                                                 "POSE stream need to be include in the slam file.",
                                                 &this->gt, nullptr));
+
+        this->addParameter(TypedParameter<std::string>("ply", "ply-file",
+                                                       "When a PLY file is specified, the GROUNDTRUTH POINT "
+                                                       "CLOUD will be included in the slam file.",
+                                                       &this->plyfile, nullptr));
       }
 
       SLAMFile* GenerateSLAMFile() override;
