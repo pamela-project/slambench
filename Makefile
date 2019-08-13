@@ -7,7 +7,9 @@ GET_REPLY:=REPLY="y"
 WGET:=wget -q
 endif
 
-
+BoldGreen=\033[1;32m
+BoldRed=\033[1;31m
+ColorOff=\033[0m
 ####################################
 #### SLAMBENCH  INFOS (DEFAULT) ####
 ####################################
@@ -16,18 +18,19 @@ infos :
 	@${ECHO} -e "\n*** SLAMBench is an evaluation framework for SLAM algorithms. *** "
 	@${ECHO} -e "\n\
 	  (1) First, several dependencies are needed to compile SLAMBench and its use-cases.\n\
-	      If you may have already them installed on your system,\n\
-	      we propose you to download and install them automatically using the following command :\n\
-	      - \033[1;32mmake deps\033[0m\n\n\
-	      - \033[1;32mmake gcc_cuda (If you do not have a compatible toolchain for CUDA)\033[0m\n\n\
-	  (2) Then, to compile the SLAMBench framework you just need to type :\n\
-	      - \033[1;32mmake slambench\033[0m\n\n\
-	  (3) To compile the use-cases as well :\n\
-	      - \033[1;32mmake slambench APPS=\"kfusion;lsdslam\"\033[0m\n\n\
-	      However these use-cases are not distributed with SLAMBench, you will have to download them using the command:\n\
-	      - \033[1;32mmake usecases\033[0m\n\n\
-	  (4) Finally to run SLAM system with a particular dataset we recommand to run:\n\
-	      - \033[1;32mmake datasets\033[0m\n\n\
+	      We suggest that you to download and install them automatically using the following command:\n\
+     ${BoldGreen} - make deps ${ColorOff}\n\
+	  (2) Then, to compile the SLAMBench framework you just need to type:\n\
+	     ${BoldGreen} - make slambench ${ColorOff}\n\
+	  (3) SLAMBench integrates a number of algorithms, however they are not directly distribute with the framework\n\
+	      To download and build all the available algorithms, use:\n\
+	     ${BoldGreen} - make algorithms${ColorOff}\n\
+	      Alternatively, to see the list of available algorithms, use:\n\
+	     ${BoldGreen} - make usecases ${ColorOff}\n\
+	  (4) For information about downloading and building one of the available datasets, use:\n\
+	     ${BoldGreen} - make datasetslist ${ColorOff}\n\
+	  (5) Once the desired datasets and algorithms were built, you can run the benchmark using:\n\
+	     ${BoldGreen} - ./build/bin/benchmark_loader -i path/to/dataset.slam -load path/to/algorithm-library.so ${ColorOff}\n\
 	"
 
 ####################################
@@ -190,14 +193,14 @@ slambench: build/Makefile
 	@echo "The list of current binaries is: "
 	@echo ""
 	@echo "Loaders available: "
-	@echo -n "  - build/bin/benchmark_loader:    " ; if [ -f build/bin/benchmark_loader ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
-	@echo -n "  - build/bin/pangolin_loader:     " ; if [ -f build/bin/pangolin_loader ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies? did you try make pangolin)\033[0m" ; fi
+	@echo -n "  - build/bin/benchmark_loader:    " ; if [ -f build/bin/benchmark_loader ] ; then echo -e "${BoldGreen}Found${ColorOff}" ; else echo -e "${BoldRed}Not found (Missing dependencies?)${ColorOff}" ; fi
+	@echo -n "  - build/bin/pangolin_loader:     " ; if [ -f build/bin/pangolin_loader ] ; then echo -e "${BoldGreen}Found${ColorOff}" ; else echo -e "${BoldRed}Not found (Missing dependencies? did you try make pangolin)${ColorOff}" ; fi
 	@echo ""
 	@echo "Tools/Debugger available: "
-	@echo -n "  - build/bin/pointcloud_aligner:  " ; if [ -f build/bin/pointcloud_aligner ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies (i.e. pcl)?)\033[0m" ; fi
-	@echo -n "  - build/bin/dataset-generator:   " ; if [ -f build/bin/dataset-generator ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
-	@echo -n "  - build/bin/io-inspect-file:     " ; if [ -f build/bin/io-inspect-file ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
-	@echo -n "  - build/bin/io-readply:          " ; if [ -f build/bin/io-readply ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (Missing dependencies?)\033[0m" ; fi
+	@echo -n "  - build/bin/pointcloud_aligner:  " ; if [ -f build/bin/pointcloud_aligner ] ; then echo -e "${BoldGreen}Found${ColorOff}" ; else echo -e "${BoldRed}Not found (Missing dependencies (i.e. pcl)?)${ColorOff}" ; fi
+	@echo -n "  - build/bin/dataset-generator:   " ; if [ -f build/bin/dataset-generator ] ; then echo -e "${BoldGreen}Found${ColorOff}" ; else echo -e "${BoldRed}Not found (Missing dependencies?)${ColorOff}" ; fi
+	@echo -n "  - build/bin/io-inspect-file:     " ; if [ -f build/bin/io-inspect-file ] ; then echo -e "${BoldGreen}Found${ColorOff}" ; else echo -e "${BoldRed}Not found (Missing dependencies?)${ColorOff}" ; fi
+	@echo -n "  - build/bin/io-readply:          " ; if [ -f build/bin/io-readply ] ; then echo -e "${BoldGreen}Found${ColorOff}" ; else echo -e "${BoldRed}Not found (Missing dependencies?)${ColorOff}" ; fi
 	@echo ""
 	@echo "The list of current use-case libraries available is:"
 	@echo ""                                                                      
@@ -227,7 +230,7 @@ datasets :
 	@echo ""
 	@echo "If you do not find datasets in this list, you can use make to download them (make datasetslist). "
 	@echo "Here is a list of the datasets available."
-	@echo -e "If you are using one of those dataset, \033[1;31mplease refer to their respective publications\033[0m:"
+	@echo -e "If you are using any of the following datasets, ${BoldRed}please refer to their respective publications${ColorOff}:"
 	@echo "   - TUM RGB-D SLAM dataset [Sturm et al, IROS'12]: https://vision.in.tum.de/data/datasets/rgbd-dataset"
 	@echo "   - ICL-NUIM dataset [Handa et al, ICRA'14]: https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html"
 	@echo "   - EuRoC MAV Dataset [Burri et al, IJJR'16]: https://projects.asl.ethz.ch/datasets/doku.php"
@@ -304,21 +307,20 @@ datasetslist:
 	@echo ""
 	@echo ""
 	@echo "================================================================================================================="
-	@echo -e "If you are using one of those dataset, \033[1;31mplease refer to their respective publications\033[0m:"
+	@echo -e "If you are using any of the following datasets, ${BoldRed}please refer to their respective publications${ColorOff}:"
 	@echo "   - TUM RGB-D SLAM dataset [Sturm et al, IROS'12]: https://vision.in.tum.de/data/datasets/rgbd-dataset"
 	@echo "   - ICL-NUIM dataset [Handa et al, ICRA'14]: https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html"
 	@echo "   - EuRoC MAV Dataset [Burri et al, IJJR'16]: https://projects.asl.ethz.ch/datasets/doku.php"
 	@echo "   - SVO sample dataset [Forster et al, ICRA 2014]: https://github.com/uzh-rpg/rpg_svo"
 	@echo "================================================================================================================="
 
-.PHONY: slambench benchmarks benchmarkslist datasets datasetslist
+.PHONY: slambench benchmarks datasets datasetslist
 
 
 ####################################
 #### DATA SET GENERATION        ####
 ####################################
-
-
+check_generator:=if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
 
 #### EuRoCMAV
 ###############
@@ -333,7 +335,7 @@ datasetslist:
 	unzip $< -d $@
 
 ./datasets/EuRoCMAV/%.slam :  ./datasets/EuRoCMAV/%.dir 
-	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	${check_generator}
 	./build/bin/dataset-generator -d eurocmav -i $</mav0 -o $@ -imu true -stereo true -gt true  
 
 #### TUM      
@@ -348,7 +350,7 @@ datasetslist:
 	tar xzf $< -C $@
 
 ./datasets/TUM/%.slam :  ./datasets/TUM/%.dir 
-	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	${check_generator}
 	./build/bin/dataset-generator -d tum -i $</* -o $@ -grey true -rgb true -gt true -depth true -accelerometer true 
 
 #### ICL-NUIM      
@@ -370,11 +372,11 @@ datasets/ICL_NUIM/%_loop.dir :  datasets/ICL_NUIM/%_loop.tgz
 	tar xzf $< -C $@ 
 
 datasets/ICL_NUIM/living_room_traj%_loop.slam : datasets/ICL_NUIM/living_room_traj%_loop.dir datasets/ICL_NUIM/living-room.ply
-	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	${check_generator}
 	./build/bin/dataset-generator -d iclnuim -i $< -o $@ -ply  datasets/ICL_NUIM/living-room.ply -grey true -rgb true -gt true -depth true -pf true 
 
 datasets/ICL_NUIM/living_room_traj%_loop_neg.slam : datasets/ICL_NUIM/living_room_traj%_loop.dir datasets/ICL_NUIM/living-room.ply
-	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	${check_generator}
 	./build/bin/dataset-generator -d iclnuim -i $< -o $@ -ply  datasets/ICL_NUIM/living-room.ply -grey true -rgb true -gt true -depth true -pf false 
 
 
@@ -398,7 +400,7 @@ datasets/SVO/artificial.dir: ./datasets/SVO/artificial.tar.gz
 	tar -xzf $< -C $@
 
 datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
-	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	${check_generator}
 	./build/bin/dataset-generator -d svo -i $</sin2_tex2_h1_v8_d -o $@  
 
 
