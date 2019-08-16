@@ -1,0 +1,221 @@
+/*
+
+ Copyright (c) 2019 University of Edinburgh, Imperial College, University of Manchester.
+ Developed in the PAMELA project, EPSRC Programme Grant EP/K008730/1
+
+ This code is licensed under the MIT License.
+
+ */
+
+#ifndef FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_DATASET_BUILDER_H_
+#define FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_DATASET_BUILDER_H_
+
+#include <io/sensor/AccelerometerSensor.h>
+
+namespace slambench {
+  namespace io {
+
+    template <typename T, typename V>
+    class SensorBuilder {
+     protected:
+      std::string name_;
+      std::string description_;
+
+      float rate_;
+      int width_;
+      int height_;
+
+      frameformat::EFrameFormat frameFormat_;
+      pixelformat::EPixelFormat pixelFormat_;
+
+      Sensor::pose_t pose_;
+      CameraSensor::intrinsics_t intrinsics_;
+      CameraSensor::distortion_type_t distortion_type_ = CameraSensor::NoDistortion;
+      CameraSensor::distortion_coefficients_t distortion_;
+
+      DepthSensor::disparity_type_t disparity_type_;
+      DepthSensor::disparity_params_t disparity_;
+
+     public:
+      SensorBuilder() = default;
+
+      T& name(const std::string& name) {
+        name_ = name;
+        return static_cast<T&>(*this);
+      }
+
+      T& description(const std::string& description) {
+        description_ = description;
+        return static_cast<T&>(*this);
+      }
+
+      T& rate(float rate) {
+        rate_ = rate;
+        return static_cast<T&>(*this);
+      }
+
+      T& size(uint32_t width, uint32_t height) {
+        width_ = width;
+        height_ = height;
+        return static_cast<T&>(*this);
+      }
+
+      T& grey() {
+        frameFormat_ = frameformat::Raster;
+        pixelFormat_ = pixelformat::G_I_8;
+        description_ = "Grey";
+        return static_cast<T&>(*this);
+      }
+
+      T& rgb() {
+        frameFormat_ = frameformat::Raster;
+        pixelFormat_ = pixelformat::RGB_III_888;
+        description_ = "RGB";
+        return static_cast<T&>(*this);
+      }
+
+      T& depth() {
+        frameFormat_ = frameformat::Raster;
+        pixelFormat_ = pixelformat::D_I_16;
+        description_ = "Depth";
+        return static_cast<T&>(*this);
+      }
+
+      T& pose(const Sensor::pose_t& pose) {
+        pose_ = pose;
+        return static_cast<T&>(*this);
+      }
+
+      T& intrinsics(const CameraSensor::intrinsics_t& intrinsics) {
+        for(unsigned int i = 0; i < 4 ; ++i) {
+          intrinsics_[i] = intrinsics[i];
+        }
+        return static_cast<T&>(*this);
+      }
+
+      T& distortion(const CameraSensor::distortion_type_t& type,
+                    const CameraSensor::distortion_coefficients_t& distortion) {
+        distortion_type_ = type;
+        for(unsigned int i = 0; i < 5 ; ++i) {
+          distortion_[i] = distortion[i];
+        }
+        return static_cast<T&>(*this);
+      }
+
+      T& radialTangential(const CameraSensor::distortion_coefficients_t& distortion) {
+        distortion_type_ = CameraSensor::RadialTangential;
+        for(unsigned int i = 0; i < 5 ; ++i) {
+          distortion_[i] = distortion[i];
+        }
+        return static_cast<T&>(*this);
+      }
+
+      T& disparity(const DepthSensor::disparity_type_t& type,
+                   const DepthSensor::disparity_params_t& disparity) {
+        disparity_type_ = type;
+        for(int i = 0; i < 2; ++i) {
+          disparity_[i] = disparity[i];
+        }
+        return static_cast<T&>(*this);
+      }
+
+//      V* build() {
+//
+//        auto sensor = new V(name_);
+//
+//        sensor->Rate = rate_;
+//        sensor->Width = width_;
+//        sensor->Height = height_;
+//        sensor->FrameFormat = frameFormat_;
+//        sensor->PixelFormat = pixelFormat_;
+//        sensor->Description = description_;
+//        sensor->CopyPose(pose_);
+//        sensor->CopyIntrinsics(intrinsics_);
+//
+//        sensor->DistortionType = distortion_type_;
+//
+//        if (distortion_type_ == CameraSensor::RadialTangential) {
+//          sensor->CopyRadialTangentialDistortion(distortion_);
+//        }
+//
+//        return sensor;
+//      }
+
+    };
+
+    class CameraSensorBuilder : public SensorBuilder<CameraSensorBuilder, CameraSensor> {
+
+     public:
+      CameraSensor* build() {
+        auto sensor = new CameraSensor(name_, CameraSensor::kCameraType);
+
+        sensor->Rate = rate_;
+        sensor->Width = width_;
+        sensor->Height = height_;
+        sensor->FrameFormat = frameFormat_;
+        sensor->PixelFormat = pixelFormat_;
+        sensor->Description = description_;
+        sensor->CopyPose(pose_);
+        sensor->CopyIntrinsics(intrinsics_);
+
+        sensor->DistortionType = distortion_type_;
+
+        if (distortion_type_ == CameraSensor::RadialTangential) {
+          sensor->CopyRadialTangentialDistortion(distortion_);
+        }
+
+        return sensor;
+      }
+    };
+
+    class DepthSensorBuilder : public SensorBuilder<DepthSensorBuilder, DepthSensor> {
+
+     public:
+      DepthSensor* build() {
+        auto sensor = new DepthSensor(name_);
+
+        sensor->Rate = rate_;
+        sensor->Width = width_;
+        sensor->Height = height_;
+        sensor->FrameFormat = frameFormat_;
+        sensor->PixelFormat = pixelFormat_;
+        sensor->Description = description_;
+        sensor->CopyPose(pose_);
+        sensor->CopyIntrinsics(intrinsics_);
+        sensor->DistortionType = distortion_type_;
+
+        if (distortion_type_ == CameraSensor::RadialTangential) {
+          sensor->CopyRadialTangentialDistortion(distortion_);
+        }
+
+        sensor->DisparityType = disparity_type_;
+        sensor->CopyDisparityParams(disparity_);
+
+        return sensor;
+      }
+    };
+
+    class AccSensorBuilder : public SensorBuilder<AccSensorBuilder, AccelerometerSensor> {
+     public:
+      AccelerometerSensor* build() {
+        auto sensor = new AccelerometerSensor(name_);
+        sensor->Description = description_;
+        return sensor;
+      }
+    };
+
+    class GTSensorBuilder : public SensorBuilder<GTSensorBuilder, GroundTruthSensor> {
+     public:
+      GroundTruthSensor* build() {
+        auto sensor = new GroundTruthSensor(name_);
+        sensor->Description = description_;
+        sensor->Rate = rate_;
+        sensor->CopyPose(pose_);
+        return sensor;
+      }
+    };
+
+  }  // namespace io
+}  // namespace slambench
+
+#endif  // FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_DATASET_BUILDER_H_
