@@ -15,7 +15,7 @@
 namespace slambench {
   namespace io {
 
-    template <typename T, typename V>
+    template <typename T>
     class SensorBuilder {
      protected:
       std::string name_;
@@ -57,6 +57,16 @@ namespace slambench {
       T& size(uint32_t width, uint32_t height) {
         width_ = width;
         height_ = height;
+        return static_cast<T&>(*this);
+      }
+
+      T& frameFormat(const frameformat::EFrameFormat& format) {
+        frameFormat_ = format;
+        return static_cast<T&>(*this);
+      }
+
+      T& pixelFormat(const pixelformat::EPixelFormat& format) {
+        pixelFormat_ = format;
         return static_cast<T&>(*this);
       }
 
@@ -118,32 +128,9 @@ namespace slambench {
         }
         return static_cast<T&>(*this);
       }
-
-//      V* build() {
-//
-//        auto sensor = new V(name_);
-//
-//        sensor->Rate = rate_;
-//        sensor->Width = width_;
-//        sensor->Height = height_;
-//        sensor->FrameFormat = frameFormat_;
-//        sensor->PixelFormat = pixelFormat_;
-//        sensor->Description = description_;
-//        sensor->CopyPose(pose_);
-//        sensor->CopyIntrinsics(intrinsics_);
-//
-//        sensor->DistortionType = distortion_type_;
-//
-//        if (distortion_type_ == CameraSensor::RadialTangential) {
-//          sensor->CopyRadialTangentialDistortion(distortion_);
-//        }
-//
-//        return sensor;
-//      }
-
     };
 
-    class CameraSensorBuilder : public SensorBuilder<CameraSensorBuilder, CameraSensor> {
+    class CameraSensorBuilder : public SensorBuilder<CameraSensorBuilder> {
 
      public:
       CameraSensor* build() {
@@ -168,7 +155,56 @@ namespace slambench {
       }
     };
 
-    class DepthSensorBuilder : public SensorBuilder<DepthSensorBuilder, DepthSensor> {
+    class RGBSensorBuilder : public SensorBuilder<CameraSensorBuilder> {
+     public:
+      CameraSensor* build() {
+        auto sensor = new CameraSensor(name_, CameraSensor::kCameraType);
+
+        sensor->Rate = rate_;
+        sensor->Width = width_;
+        sensor->Height = height_;
+        sensor->FrameFormat = frameformat::Raster;
+        sensor->PixelFormat = pixelformat::RGB_III_888;
+        sensor->Description = description_.empty() ? "RGB" : description_;
+        sensor->CopyPose(pose_);
+        sensor->CopyIntrinsics(intrinsics_);
+
+        sensor->DistortionType = distortion_type_;
+
+        if (distortion_type_ == CameraSensor::RadialTangential) {
+          sensor->CopyRadialTangentialDistortion(distortion_);
+        }
+
+        return sensor;
+      }
+    };
+
+    class GreySensorBuilder : public SensorBuilder<CameraSensorBuilder> {
+
+     public:
+      CameraSensor* build() {
+        auto sensor = new CameraSensor(name_, CameraSensor::kCameraType);
+
+        sensor->Rate = rate_;
+        sensor->Width = width_;
+        sensor->Height = height_;
+        sensor->FrameFormat = frameformat::Raster;
+        sensor->PixelFormat = pixelformat::G_I_8;
+        sensor->Description = description_.empty() ? "Grey" : description_;
+        sensor->CopyPose(pose_);
+        sensor->CopyIntrinsics(intrinsics_);
+
+        sensor->DistortionType = distortion_type_;
+
+        if (distortion_type_ == CameraSensor::RadialTangential) {
+          sensor->CopyRadialTangentialDistortion(distortion_);
+        }
+
+        return sensor;
+      }
+    };
+
+    class DepthSensorBuilder : public SensorBuilder<DepthSensorBuilder> {
 
      public:
       DepthSensor* build() {
@@ -177,9 +213,9 @@ namespace slambench {
         sensor->Rate = rate_;
         sensor->Width = width_;
         sensor->Height = height_;
-        sensor->FrameFormat = frameFormat_;
-        sensor->PixelFormat = pixelFormat_;
-        sensor->Description = description_;
+        sensor->FrameFormat = frameformat::Raster;
+        sensor->PixelFormat = pixelformat::D_I_16;
+        sensor->Description = description_.empty() ? "Depth" : description_;
         sensor->CopyPose(pose_);
         sensor->CopyIntrinsics(intrinsics_);
         sensor->DistortionType = distortion_type_;
@@ -195,7 +231,7 @@ namespace slambench {
       }
     };
 
-    class AccSensorBuilder : public SensorBuilder<AccSensorBuilder, AccelerometerSensor> {
+    class AccSensorBuilder : public SensorBuilder<AccSensorBuilder> {
      public:
       AccelerometerSensor* build() {
         auto sensor = new AccelerometerSensor(name_);
@@ -204,7 +240,7 @@ namespace slambench {
       }
     };
 
-    class GTSensorBuilder : public SensorBuilder<GTSensorBuilder, GroundTruthSensor> {
+    class GTSensorBuilder : public SensorBuilder<GTSensorBuilder> {
      public:
       GroundTruthSensor* build() {
         auto sensor = new GroundTruthSensor(name_);
