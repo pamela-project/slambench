@@ -155,7 +155,7 @@ namespace slambench {
       }
     };
 
-    class RGBSensorBuilder : public SensorBuilder<CameraSensorBuilder> {
+    class RGBSensorBuilder : public SensorBuilder<RGBSensorBuilder> {
      public:
       CameraSensor* build() {
         auto sensor = new CameraSensor(name_, CameraSensor::kCameraType);
@@ -179,7 +179,7 @@ namespace slambench {
       }
     };
 
-    class GreySensorBuilder : public SensorBuilder<CameraSensorBuilder> {
+    class GreySensorBuilder : public SensorBuilder<GreySensorBuilder> {
 
      public:
       CameraSensor* build() {
