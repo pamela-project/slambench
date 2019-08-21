@@ -8,7 +8,7 @@
  */
 
 #include "include/SVO.h"
-#include "include/utils/dataset_utils.h"
+#include "include/utils/sensor_builder.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
@@ -118,12 +118,13 @@ SLAMFile *SVOReader::GenerateSLAMFile() {
   pose.block(0, 3, 3, 1) << translation[0], translation[1], translation[2];
 
   // load Grey
-
-  auto grey_sensor = makeGreySensor(pose, svo_grey, {});
-
-  grey_sensor->Width = 752;
-  grey_sensor->Height = 480;
-  grey_sensor->DistortionType = CameraSensor::NoDistortion;
+  auto grey_sensor = GreySensorBuilder()
+      .name("Grey")
+      .size(752, 480)
+      .description("Grey")
+      .pose(pose)
+      .intrinsics(svo_grey)
+      .build();
 
   grey_sensor->Index = slamfile.Sensors.size();
   slamfile.Sensors.AddSensor(grey_sensor);
@@ -135,7 +136,11 @@ SLAMFile *SVOReader::GenerateSLAMFile() {
   }
 
   // load GT
-  auto gt_sensor = makeGTSensor();
+  auto gt_sensor = GTSensorBuilder()
+      .name("GT")
+      .description("GroundTruthSensor")
+      .build();
+
   gt_sensor->Index = slamfile.Sensors.size();
   slamfile.Sensors.AddSensor(gt_sensor);
 

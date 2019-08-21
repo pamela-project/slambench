@@ -424,7 +424,6 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
 
   // load Depth
   if (depth) {
-
     auto depth_sensor = DepthSensorBuilder()
         .name("Depth")
         .rate(30.0)
@@ -447,7 +446,6 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
 
   // load Grey
   if (grey) {
-
     auto grey_sensor = GreySensorBuilder()
         .name("Grey")
         .rate(30.0)
@@ -469,7 +467,6 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
 
   // load RGB
   if (rgb) {
-
     auto rgb_sensor = RGBSensorBuilder()
         .name("RGB")
         .rate(30.0)
@@ -491,7 +488,6 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
 
   // load GT
   if (gt) {
-
     auto gt_sensor = GTSensorBuilder()
         .name("GroundTruth")
         .description("GroundTruthSensor")
@@ -509,7 +505,6 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
 
   // load Accelerometer
   if (accelerometer) {
-
     auto accelerometer_sensor = AccSensorBuilder()
         .name("Accelerometer")
         .description("AccelerometerSensor")

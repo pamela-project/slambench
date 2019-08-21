@@ -9,6 +9,7 @@
 
 #include "include/ICL.h"
 #include "include/utils/dataset_utils.h"
+#include "include/utils/sensor_builder.h"
 #include "include/utils/RegexPattern.h"
 
 #include <io/SLAMFile.h>
@@ -646,9 +647,13 @@ SLAMFile *ICLReader::GenerateSLAMFile() {
 
   // load Accelerometer: This one failed
   if (accelerometer) {
-    auto accelerometer_sensor = makeAccelerometerSensor();
+    auto accelerometer_sensor = AccSensorBuilder()
+        .name("Accelerometer")
+        .rate(1)
+        .description("AccelerometerSensor")
+        .build();
+
     accelerometer_sensor->Index = slamfile.Sensors.size();
-    accelerometer_sensor->Rate = 1;
     slamfile.Sensors.AddSensor(accelerometer_sensor);
 
     if (!loadICLAccelerometerData(dirname, slamfile, accelerometer_sensor)) {

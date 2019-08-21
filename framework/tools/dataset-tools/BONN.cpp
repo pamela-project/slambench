@@ -10,7 +10,8 @@
 #include "include/BONN.h"
 #include "include/utils/RegexPattern.h"
 #include "include/utils/dataset_utils.h"
-#include "utils/PlyASCIIReader.h"
+#include "include/utils/sensor_builder.h"
+#include "include/utils/PlyASCIIReader.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
@@ -21,7 +22,6 @@
 #include <iostream>
 
 #include <io/sensor/PointCloudSensor.h>
-#include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
@@ -350,7 +350,16 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
 
   // load Depth
   if (depth) {
-    auto depth_sensor = makeDepthSensor(pose, intrinsics_depth, distortion_depth, disparity_params, disparity_type);
+    auto depth_sensor = DepthSensorBuilder()
+        .name("Depth")
+        .rate(30.0)
+        .size(640, 480)
+        .pose(pose)
+        .intrinsics(intrinsics_depth)
+        .radialTangential(distortion_depth)
+        .disparity(disparity_type, disparity_params)
+        .build();
+
     depth_sensor->Index = slamfile.Sensors.size();
     slamfile.Sensors.AddSensor(depth_sensor);
 
@@ -363,7 +372,15 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
 
   // load Grey
   if (grey) {
-    auto grey_sensor = makeGreySensor(pose, intrinsics_rgb, distortion_rgb);
+    auto grey_sensor = GreySensorBuilder()
+        .name("Grey")
+        .rate(30.0)
+        .size(640, 480)
+        .pose(pose)
+        .intrinsics(intrinsics_rgb)
+        .radialTangential(distortion_rgb)
+        .build();
+
     grey_sensor->Index = slamfile.Sensors.size();
     slamfile.Sensors.AddSensor(grey_sensor);
 
@@ -376,7 +393,15 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
 
   // load RGB
   if (rgb) {
-    auto rgb_sensor = makeRGBSensor(pose, intrinsics_rgb, distortion_rgb);
+    auto rgb_sensor = RGBSensorBuilder()
+        .name("RGB")
+        .rate(30.0)
+        .size(640, 480)
+        .pose(pose)
+        .intrinsics(intrinsics_rgb)
+        .radialTangential(distortion_rgb)
+        .build();
+
     rgb_sensor->Index = slamfile.Sensors.size();
     slamfile.Sensors.AddSensor(rgb_sensor);
 
@@ -389,9 +414,12 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
 
   // load GT
   if (gt) {
-    auto gt_sensor = makeGTSensor();
+    auto gt_sensor = GTSensorBuilder()
+        .name("GroundTruth")
+        .description("GroundTruthSensor")
+        .build();
+
     gt_sensor->Index = slamfile.Sensors.size();
-    gt_sensor->Description = "GroundTruthSensor";
     slamfile.Sensors.AddSensor(gt_sensor);
 
     if(!loadBONNGroundTruthData(dirname, slamfile, gt_sensor)) {

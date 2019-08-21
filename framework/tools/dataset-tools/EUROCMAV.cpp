@@ -10,6 +10,7 @@
 #include "include/EUROCMAV.h"
 #include "include/utils/RegexPattern.h"
 #include "include/utils/dataset_utils.h"
+#include "include/utils/sensor_builder.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
@@ -272,24 +273,30 @@ SLAMFile *EUROCMAVReader::GenerateSLAMFile() {
       };
 
       // Create a Grey sensor
+      auto grey_sensor = GreySensorBuilder()
+          .name(dirname)
+          .rate(rate)
+          .size(width, height)
+          .description(sensor["comment"].as<std::string>())
+          .intrinsics(intrinsics)
+          .radialTangential(distortion)
+          .pose(pose)
+          .build();
 
-      auto grey_sensor = makeGreySensor(pose, intrinsics, distortion);
-      //      grey_sensor-> = dirname;
-      grey_sensor->Rate = rate;
-      grey_sensor->Width = width;
-      grey_sensor->Height = height;
-      grey_sensor->Description = sensor["comment"].as<std::string>();
       grey_sensor->Index = slamfile->Sensors.size();
       slamfile->Sensors.AddSensor(grey_sensor);
 
       // Create a RGB equivalent sensor
+      auto rgb_sensor = RGBSensorBuilder()
+          .name(dirname + "clone")
+          .description("RGB clone from " + sensor["comment"].as<std::string>())
+          .rate(rate)
+          .size(width, height)
+          .intrinsics(intrinsics)
+          .pose(pose)
+          .radialTangential(distortion)
+          .build();
 
-      auto rgb_sensor = makeRGBSensor(pose, intrinsics, distortion);
-//      auto rgb_sensor = new CameraSensor(dirname + "clone");
-      rgb_sensor->Rate = rate;
-      rgb_sensor->Width = width;
-      rgb_sensor->Height = height;
-      rgb_sensor->Description = "RGB clone from " + sensor["comment"].as<std::string>();
       rgb_sensor->Index = slamfile->Sensors.size();
 
       if (this->rgb) {
@@ -325,6 +332,7 @@ SLAMFile *EUROCMAVReader::GenerateSLAMFile() {
       }
     } else if (sensor_type == "imu" and this->imu) {
       std::cerr << "Found sensor type " << sensor_type << " from directory " << dirname << std::endl;
+
       auto imu_sensor = new IMUSensor(dirname);
       imu_sensor->Index = slamfile->Sensors.size();
       imu_sensor->Description = sensor["comment"].as<std::string>();
@@ -366,7 +374,11 @@ SLAMFile *EUROCMAVReader::GenerateSLAMFile() {
     } else if (sensor_type == "visual-inertial" and this->gt) {
       std::cerr << "Found sensor type " << sensor_type << " from directory " << dirname << std::endl;
 
-      auto gt_sensor = makeGTSensor();
+      auto gt_sensor = GTSensorBuilder()
+          .name(dirname)
+          .description("Ground Truth")
+          .build();
+
       gt_sensor->Index = slamfile->Sensors.size();
       slamfile->Sensors.AddSensor(gt_sensor);
 

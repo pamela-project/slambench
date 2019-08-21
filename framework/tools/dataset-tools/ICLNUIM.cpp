@@ -9,6 +9,7 @@
 
 #include "include/ICLNUIM.h"
 #include "include/utils/dataset_utils.h"
+#include "include/utils/sensor_builder.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
@@ -47,33 +48,53 @@ void ICLNUIMReader::AddSensors(SLAMFile &file) {
   int idx = 0;
 
   if (this->rgb) {
-    this->rgb_sensor = makeRGBSensor(pose, intrinsics, {});
-    this->rgb_sensor->Rate = 1;
-    this->rgb_sensor->DistortionType = CameraSensor::NoDistortion;
+    this->rgb_sensor = RGBSensorBuilder()
+        .name("RGB")
+        .rate(1)
+        .size(640, 480)
+        .pose(pose)
+        .intrinsics(intrinsics)
+        .build();
+
     this->rgb_sensor->Index = idx++;
     file.Sensors.AddSensor(this->rgb_sensor);
   }
 
   if (this->depth) {
-    this->depth_sensor = makeDepthSensor(pose_depth, intrinsics_depth, {}, disparity_params, disparity_type);
-    this->depth_sensor->Rate = 1;
-    this->depth_sensor->DistortionType = CameraSensor::NoDistortion;
+    this->depth_sensor = DepthSensorBuilder()
+        .name("Depth")
+        .rate(1)
+        .size(640, 480)
+        .disparity(disparity_type, disparity_params)
+        .pose(pose_depth)
+        .intrinsics(intrinsics_depth)
+        .build();
+
     this->depth_sensor->Index = idx++;
     file.Sensors.AddSensor(this->depth_sensor);
   }
 
   if (this->grey) {
-    this->grey_sensor = makeGreySensor(pose, intrinsics, {});
-    this->grey_sensor->Rate = 1;
-    this->grey_sensor->DistortionType = CameraSensor::NoDistortion;
+    this->grey_sensor = GreySensorBuilder()
+        .name("Grey")
+        .rate(1)
+        .size(640, 480)
+        .pose(pose)
+        .intrinsics(intrinsics)
+        .build();
+
     this->grey_sensor->Index = idx++;
     file.Sensors.AddSensor(this->grey_sensor);
   }
 
   if (this->gt) {
-    this->gt_sensor = makeGTSensor();
-    this->gt_sensor->Rate = 1;
-    this->gt_sensor->CopyPose(pose);
+    this->gt_sensor = GTSensorBuilder()
+        .name("GroundTruth")
+        .rate(1)
+        .description("Ground Truth")
+        .pose(pose)
+        .build();
+
     this->gt_sensor->Index = idx++;
     file.Sensors.AddSensor(this->gt_sensor);
   }
