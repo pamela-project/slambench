@@ -10,7 +10,6 @@
 #ifndef FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_DATASET_UTILS_H_
 #define FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_DATASET_UTILS_H_
 
-#include <io/sensor/AccelerometerSensor.h>
 #include <boost/filesystem.hpp>
 
 namespace slambench {

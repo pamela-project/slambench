@@ -69,27 +69,6 @@ namespace slambench {
         return static_cast<T&>(*this);
       }
 
-      T& grey() {
-        frameFormat_ = frameformat::Raster;
-        pixelFormat_ = pixelformat::G_I_8;
-        description_ = "Grey";
-        return static_cast<T&>(*this);
-      }
-
-      T& rgb() {
-        frameFormat_ = frameformat::Raster;
-        pixelFormat_ = pixelformat::RGB_III_888;
-        description_ = "RGB";
-        return static_cast<T&>(*this);
-      }
-
-      T& depth() {
-        frameFormat_ = frameformat::Raster;
-        pixelFormat_ = pixelformat::D_I_16;
-        description_ = "Depth";
-        return static_cast<T&>(*this);
-      }
-
       T& pose(const Sensor::pose_t& pose) {
         pose_ = pose;
         return static_cast<T&>(*this);

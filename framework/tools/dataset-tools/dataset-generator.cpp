@@ -15,8 +15,6 @@
 #include <io/SLAMFrame.h>
 #include <io/format/PointCloud.h>
 
-#include <unistd.h>
-#include <cmath>
 #include <sstream>
 #include <string>
 
