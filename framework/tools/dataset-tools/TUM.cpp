@@ -10,6 +10,7 @@
 #include "include/TUM.h"
 #include "include/utils/RegexPattern.h"
 #include "include/utils/dataset_utils.h"
+#include "include/utils/sensor_builder.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
@@ -417,11 +418,22 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
 
   } else  {
     std::cout << "Camera calibration might be wrong !." << std::endl;
+    delete slamfile_ptr;
+    return nullptr;
   }
 
   // load Depth
   if (depth) {
-    auto depth_sensor = makeDepthSensor(pose, intrinsics_depth, distortion_depth, disparity_params, disparity_type);
+    auto depth_sensor = DepthSensorBuilder()
+        .name("Depth")
+        .rate(30.0)
+        .size(640, 480)
+        .pose(pose)
+        .intrinsics(intrinsics_depth)
+        .radialTangential(distortion_depth)
+        .disparity(disparity_type, disparity_params)
+        .build();
+
     depth_sensor->Index = slamfile.Sensors.size();
     slamfile.Sensors.AddSensor(depth_sensor);
 
@@ -434,7 +446,15 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
 
   // load Grey
   if (grey) {
-    auto grey_sensor = makeGreySensor(pose, intrinsics_rgb, distortion_rgb);
+    auto grey_sensor = GreySensorBuilder()
+        .name("Grey")
+        .rate(30.0)
+        .size(640, 480)
+        .pose(pose)
+        .intrinsics(intrinsics_rgb)
+        .radialTangential(distortion_rgb)
+        .build();
+
     grey_sensor->Index = slamfile.Sensors.size();
     slamfile.Sensors.AddSensor(grey_sensor);
 
@@ -447,7 +467,15 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
 
   // load RGB
   if (rgb) {
-    auto rgb_sensor = makeRGBSensor(pose, intrinsics_rgb, distortion_rgb);
+    auto rgb_sensor = RGBSensorBuilder()
+        .name("RGB")
+        .rate(30.0)
+        .size(640, 480)
+        .pose(pose)
+        .intrinsics(intrinsics_rgb)
+        .radialTangential(distortion_rgb)
+        .build();
+
     rgb_sensor->Index = slamfile.Sensors.size();
     slamfile.Sensors.AddSensor(rgb_sensor);
 
@@ -460,9 +488,12 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
 
   // load GT
   if (gt) {
-    auto gt_sensor = makeGTSensor();
+    auto gt_sensor = GTSensorBuilder()
+        .name("GroundTruth")
+        .description("GroundTruthSensor")
+        .build();
+
     gt_sensor->Index = slamfile.Sensors.size();
-    gt_sensor->Description = "GroundTruthSensor";
     slamfile.Sensors.AddSensor(gt_sensor);
 
     if(!loadTUMGroundTruthData(dirname, slamfile, gt_sensor)) {
@@ -472,9 +503,13 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
     }
   }
 
-  // load Accelerometer: This one failed
+  // load Accelerometer
   if (accelerometer) {
-    auto accelerometer_sensor = makeAccelerometerSensor();
+    auto accelerometer_sensor = AccSensorBuilder()
+        .name("Accelerometer")
+        .description("AccelerometerSensor")
+        .build();
+
     accelerometer_sensor->Index = slamfile.Sensors.size();
     slamfile.Sensors.AddSensor(accelerometer_sensor);
 
