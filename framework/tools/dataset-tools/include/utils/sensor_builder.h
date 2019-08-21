@@ -36,9 +36,8 @@ namespace slambench {
       DepthSensor::disparity_type_t disparity_type_;
       DepthSensor::disparity_params_t disparity_;
 
-     public:
       SensorBuilder() = default;
-
+    public:
       T& name(const std::string& name) {
         name_ = name;
         return static_cast<T&>(*this);
@@ -131,17 +130,16 @@ namespace slambench {
     };
 
     class CameraSensorBuilder : public SensorBuilder<CameraSensorBuilder> {
-
      public:
       CameraSensor* build() {
-        auto sensor = new CameraSensor(name_, CameraSensor::kCameraType);
-
+        auto sensor = new CameraSensor(name_.empty() ? "Camera" : name_,
+                                       CameraSensor::kCameraType);
         sensor->Rate = rate_;
         sensor->Width = width_;
         sensor->Height = height_;
         sensor->FrameFormat = frameFormat_;
         sensor->PixelFormat = pixelFormat_;
-        sensor->Description = description_;
+        sensor->Description = description_.empty() ? "Camera" : description_;
         sensor->CopyPose(pose_);
         sensor->CopyIntrinsics(intrinsics_);
 
@@ -158,8 +156,8 @@ namespace slambench {
     class RGBSensorBuilder : public SensorBuilder<RGBSensorBuilder> {
      public:
       CameraSensor* build() {
-        auto sensor = new CameraSensor(name_, CameraSensor::kCameraType);
-
+        auto sensor = new CameraSensor(name_.empty() ? "RGB" : name_,
+                                       CameraSensor::kCameraType);
         sensor->Rate = rate_;
         sensor->Width = width_;
         sensor->Height = height_;
@@ -183,8 +181,8 @@ namespace slambench {
 
      public:
       CameraSensor* build() {
-        auto sensor = new CameraSensor(name_, CameraSensor::kCameraType);
-
+        auto sensor = new CameraSensor(name_.empty() ? "Grey" : name_,
+                                       CameraSensor::kCameraType);
         sensor->Rate = rate_;
         sensor->Width = width_;
         sensor->Height = height_;
@@ -208,7 +206,7 @@ namespace slambench {
 
      public:
       DepthSensor* build() {
-        auto sensor = new DepthSensor(name_);
+        auto sensor = new DepthSensor(name_.empty() ? "Depth" : name_);
 
         sensor->Rate = rate_;
         sensor->Width = width_;
@@ -234,8 +232,8 @@ namespace slambench {
     class AccSensorBuilder : public SensorBuilder<AccSensorBuilder> {
      public:
       AccelerometerSensor* build() {
-        auto sensor = new AccelerometerSensor(name_);
-        sensor->Description = description_;
+        auto sensor = new AccelerometerSensor(name_.empty() ? "Accelerometer" : name_);
+        sensor->Description = description_.empty() ? "Accelerometer" : description_;
         return sensor;
       }
     };
@@ -243,8 +241,8 @@ namespace slambench {
     class GTSensorBuilder : public SensorBuilder<GTSensorBuilder> {
      public:
       GroundTruthSensor* build() {
-        auto sensor = new GroundTruthSensor(name_);
-        sensor->Description = description_;
+        auto sensor = new GroundTruthSensor(name_.empty() ? "GroundTruth" : name_);
+        sensor->Description = description_.empty() ? "GroundTruth" : description_;
         sensor->Rate = rate_;
         sensor->CopyPose(pose_);
         return sensor;
