@@ -135,8 +135,9 @@ namespace slambench {
     class RGBSensorBuilder : public SensorBuilder<RGBSensorBuilder> {
      public:
       CameraSensor* build() {
-        auto sensor = new CameraSensor(name_.empty() ? "RGB" : name_,
-                                       CameraSensor::kCameraType);
+
+        std::string name =  name_.empty() ? "RGB" : name_;
+        auto sensor = new CameraSensor(name, CameraSensor::kCameraType);
         sensor->Rate = rate_;
         sensor->Width = width_;
         sensor->Height = height_;
@@ -160,8 +161,8 @@ namespace slambench {
 
      public:
       CameraSensor* build() {
-        auto sensor = new CameraSensor(name_.empty() ? "Grey" : name_,
-                                       CameraSensor::kCameraType);
+        std::string name =  name_.empty() ? "Grey" : name_;
+        auto sensor = new CameraSensor(name, CameraSensor::kCameraType);
         sensor->Rate = rate_;
         sensor->Width = width_;
         sensor->Height = height_;
@@ -185,7 +186,8 @@ namespace slambench {
 
      public:
       DepthSensor* build() {
-        auto sensor = new DepthSensor(name_.empty() ? "Depth" : name_);
+        std::string name =  name_.empty() ? "Depth" : name_;
+        auto sensor = new DepthSensor(name);
 
         sensor->Rate = rate_;
         sensor->Width = width_;
@@ -211,7 +213,8 @@ namespace slambench {
     class AccSensorBuilder : public SensorBuilder<AccSensorBuilder> {
      public:
       AccelerometerSensor* build() {
-        auto sensor = new AccelerometerSensor(name_.empty() ? "Accelerometer" : name_);
+        std::string name =  name_.empty() ? "Accelerometer" : name_;
+        auto sensor = new AccelerometerSensor(name);
         sensor->Description = description_.empty() ? "Accelerometer" : description_;
         return sensor;
       }
@@ -220,7 +223,8 @@ namespace slambench {
     class GTSensorBuilder : public SensorBuilder<GTSensorBuilder> {
      public:
       GroundTruthSensor* build() {
-        auto sensor = new GroundTruthSensor(name_.empty() ? "GroundTruth" : name_);
+        std::string name =  name_.empty() ? "GroundTruth" : name_;
+        auto sensor = new GroundTruthSensor(name);
         sensor->Description = description_.empty() ? "GroundTruth" : description_;
         sensor->Rate = rate_;
         sensor->CopyPose(pose_);

@@ -45,8 +45,6 @@ void ICLNUIMReader::AddSensors(SLAMFile &file) {
   CameraSensor::intrinsics_t intrinsics_depth{0.751875, -1.0, 0.4992185, 0.4989583};
   if (this->positive_focal) intrinsics_depth[1] = 1.0;  // TODO : This is actually -1, bug .. no.
 
-  int idx = 0;
-
   if (this->rgb) {
     this->rgb_sensor = RGBSensorBuilder()
         .name("RGB")
@@ -56,7 +54,7 @@ void ICLNUIMReader::AddSensors(SLAMFile &file) {
         .intrinsics(intrinsics)
         .build();
 
-    this->rgb_sensor->Index = idx++;
+    this->rgb_sensor->Index = file.Sensors.size();
     file.Sensors.AddSensor(this->rgb_sensor);
   }
 
@@ -70,7 +68,7 @@ void ICLNUIMReader::AddSensors(SLAMFile &file) {
         .intrinsics(intrinsics_depth)
         .build();
 
-    this->depth_sensor->Index = idx++;
+    this->depth_sensor->Index = file.Sensors.size();
     file.Sensors.AddSensor(this->depth_sensor);
   }
 
@@ -83,7 +81,7 @@ void ICLNUIMReader::AddSensors(SLAMFile &file) {
         .intrinsics(intrinsics)
         .build();
 
-    this->grey_sensor->Index = idx++;
+    this->grey_sensor->Index = file.Sensors.size();
     file.Sensors.AddSensor(this->grey_sensor);
   }
 
@@ -95,7 +93,7 @@ void ICLNUIMReader::AddSensors(SLAMFile &file) {
         .pose(pose)
         .build();
 
-    this->gt_sensor->Index = idx++;
+    this->gt_sensor->Index = file.Sensors.size();
     file.Sensors.AddSensor(this->gt_sensor);
   }
 }
@@ -104,8 +102,8 @@ static void undistort_frame(slambench::io::SLAMFileFrame *frame, void *data) {
 
   auto depthMap = (uint16_t *)data;
 
-  uint32_t w = ((CameraSensor *)frame->FrameSensor)->Width;
-  uint32_t h = ((CameraSensor *)frame->FrameSensor)->Height;
+  uint32_t w = dynamic_cast<CameraSensor*>(frame->FrameSensor)->Width;
+  uint32_t h = dynamic_cast<CameraSensor*>(frame->FrameSensor)->Height;
 
   float u0 = 319.50;
   float v0 = 239.50;
@@ -131,27 +129,8 @@ static float3 normalise(const float3 &input) {
   return output;
 }
 
-// TODO: is this used / needed?
-void printMat(const Eigen::Matrix4f &mat, const std::string& color = "\033[0m") {
-  std::cout << std::fixed << std::setprecision(3) << color
-            << std::setw(6) << mat(0, 0) << " "
-            << std::setw(6) << mat(0, 1) << " "
-            << std::setw(6) << mat(0, 2) << " "
-            << std::setw(6) << mat(0, 3) << " "
-            << std::setw(6) << mat(1, 0) << " "
-            << std::setw(6) << mat(1, 1) << " "
-            << std::setw(6) << mat(1, 2) << " "
-            << std::setw(6) << mat(1, 3) << " "
-            << std::setw(6) << mat(2, 0) << " "
-            << std::setw(6) << mat(2, 1) << " "
-            << std::setw(6) << mat(2, 2) << " "
-            << std::setw(6) << mat(2, 3) << " "
-            << std::setw(6) << mat(3, 0) << " "
-            << std::setw(6) << mat(3, 1) << " "
-            << std::setw(6) << mat(3, 2) << " "
-            << std::setw(6) << mat(3, 3) << " "
-            << "\033[0m" << std::endl;
-}
+// Function to print matrix values existed in commit d2c324d and earlier
+//void printMat(const Eigen::Matrix4f &mat, const std::string& color = "\033[0m");
 
 bool FillPose(const std::string &filename, GroundTruthSensor::pose_t &pose, bool positive_focal) {
 
@@ -173,8 +152,6 @@ bool FillPose(const std::string &filename, GroundTruthSensor::pose_t &pose, bool
 
   while(std::getline(istream, line)) {
 
-    //std::cout << line << std::endl;
-
     boost::cmatch match;
     if(!boost::regex_search(line.c_str(), match, key_regex)) {
       continue;
@@ -195,22 +172,12 @@ bool FillPose(const std::string &filename, GroundTruthSensor::pose_t &pose, bool
     kvs[key].y = strtof(match.str(3).c_str(), nullptr);
     kvs[key].z = strtof(match.str(5).c_str(), nullptr);
   }
-  //
-  //std::cout << "" << std::endl;
-  //for (auto item : kvs) {
-  //	std::cout << item.first  << "=" << "[" <<  item.second.x << ", " <<  item.second.y << ", " <<  item.second.z << "]"  << std::endl;
-  //}
-  //std::cout << "" << std::endl;
 
   // row 3
   float3 los = normalise(kvs["cam_dir"]);
   float3 up = normalise(kvs["cam_up"]);
   float3 right = normalise(kvs["cam_right"]);
 
-  // std::cout << std::setw(13)  << los.x   << std::setw(13)  << los.y   << std::setw(13)   << los.z
-  // 		   << std::setw(13) << up.x    << std::setw(13)  << up.y    << std::setw(13)  << up.z
-  // 		   << std::setw(13) << right.x  << std::setw(13) << right.y  << std::setw(13) << right.z  << std::endl;
-  //
   pose(0, 0) = right.x;
   pose(0, 1) = right.y;
   pose(0, 2) = right.z;
@@ -345,28 +312,6 @@ bool ICLNUIMReader::AddFrames(const std::string &dirname, SLAMFile &file) {
 
   while (GetFrame(dirname, file, frame_no)) {
     frame_no++;
-  }
-
-  return true;
-}
-
-// Case-insensitive string equality check
-bool strEqualityCheck(const char *a, const char *b) {
-  if (a == nullptr || b == nullptr) {
-    throw std::logic_error("Cannot handle null strings");
-  }
-
-  while (*a || *b) {
-    if (*a == '\0' || *b == '\0') {
-      return false;
-    }
-
-    if (tolower(*a) != tolower(*b)) {
-      return false;
-    }
-
-    a++;
-    b++;
   }
 
   return true;

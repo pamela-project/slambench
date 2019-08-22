@@ -46,37 +46,37 @@ namespace slambench {
       explicit ICLNUIMReader(const std::string &name) : DatasetReader(name) {
         this->addParameter(TypedParameter<std::string>("i", "input-directory",
                                                        "path of the ICLNUIM dataset directory",
-                                                       &this->input, NULL));
+                                                       &this->input, nullptr));
 
         this->addParameter(TypedParameter<bool>("grey", "grey",
                                                 "set to true or false to specify if the GREY "
                                                 "stream need to be include in the slam file.",
-                                                &this->grey, NULL));
+                                                &this->grey, nullptr));
 
         this->addParameter(TypedParameter<bool>("rgb", "rgb",
                                                 "set to true or false to specify if the RGB "
                                                 "stream need to be include in the slam file.",
-                                                &this->rgb, NULL));
+                                                &this->rgb, nullptr));
 
         this->addParameter(TypedParameter<bool>("depth", "depth",
                                                 "set to true or false to specify if the DEPTH "
                                                 "stream need to be include in the slam file.",
-                                                &this->depth, NULL));
+                                                &this->depth, nullptr));
 
         this->addParameter(TypedParameter<bool>("gt", "gt",
                                                 "set to true or false to specify if the "
                                                 "GROUNDTRUTH POSE stream need to be include in the slam file.",
-                                                &this->gt, NULL));
+                                                &this->gt, nullptr));
 
         this->addParameter(TypedParameter<std::string>("ply", "ply-file",
                                                        "When a PLY file is specified, the GROUNDTRUTH POINT CLOUD "
                                                        "will be included in the slam file.",
-                                                       &this->plyfile, NULL));
+                                                       &this->plyfile, nullptr));
 
         this->addParameter(TypedParameter<bool>("pf", "positive-focal",
                                                 "This is a workaround to correct the ICLNUIM "
                                                 "to a positive focal length.",
-                                                &this->positive_focal, NULL));
+                                                &this->positive_focal, nullptr));
       }
 
       SLAMFile *GenerateSLAMFile() override;

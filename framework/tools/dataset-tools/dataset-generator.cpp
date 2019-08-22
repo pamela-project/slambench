@@ -119,7 +119,7 @@ class MainComponent : public ParameterComponent {
                                                    &this->dataset, nullptr, this->dataset_callback));
 
     this->addParameter(TypedParameter<std::string>("o",
-                                                   "log-file",
+                                                   "output",
                                                    "Output slam file", &this->output, nullptr));
 
     this->addParameter(TypedParameter<bool>("q", "quiet",
