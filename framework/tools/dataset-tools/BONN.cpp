@@ -1,7 +1,7 @@
 /*
 
- Copyright (c) 2017 University of Edinburgh, Imperial College, University of
- Manchester. Developed in the PAMELA project, EPSRC Programme Grant EP/K008730/1
+ Copyright (c) 2017 University of Edinburgh, Imperial College, University of Manchester.
+ Developed in the PAMELA project, EPSRC Programme Grant EP/K008730/1
 
  This code is licensed under the MIT License.
 
@@ -9,7 +9,9 @@
 
 #include "include/BONN.h"
 #include "include/utils/RegexPattern.h"
-#include "utils/PlyASCIIReader.h"
+#include "include/utils/dataset_utils.h"
+#include "include/utils/sensor_builder.h"
+#include "include/utils/PlyASCIIReader.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
@@ -20,7 +22,6 @@
 #include <iostream>
 
 #include <io/sensor/PointCloudSensor.h>
-#include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
@@ -30,373 +31,266 @@ constexpr CameraSensor::intrinsics_t BONNReader::intrinsics_rgb;
 constexpr DepthSensor::intrinsics_t BONNReader::intrinsics_depth;
 constexpr CameraSensor::distortion_coefficients_t BONNReader::distortion_rgb;
 constexpr DepthSensor::distortion_coefficients_t BONNReader::distortion_depth;
-
-/*
- *
- * The dataset folder contains :
- * > depth  depth.txt  groundtruth.txt  rgb  rgb.txt
- *
- */
-
-bool analyseBONNFolder(const std::string &dirname) {
-
-    static const std::vector<std::string> requirements = {"rgb.txt",
-                                                          "rgb",
-                                                          "depth.txt",
-                                                          "depth",
-                                                          "groundtruth.txt"};
-
-    try {
-        if (!boost::filesystem::exists(dirname)) return false;
-
-        boost::filesystem::directory_iterator end_itr;  // default construction yields past-the-end
-
-        for (auto const &requirement : requirements) {
-            bool seen = false;
-
-            for (boost::filesystem::directory_iterator itr(dirname); itr != end_itr; ++itr) {
-                if (requirement == itr->path().filename()) {
-                    seen = true;
-                }
-            }
-
-            if (!seen) {
-                std::cout << "File not found: <dataset_dir>/" << requirement << std::endl;
-                return false;
-            }
-        }
-    } catch (boost::filesystem::filesystem_error &e) {
-        std::cerr << "I/O Error with directory " << dirname << std::endl;
-        std::cerr << e.what() << std::endl;
-        return false;
-    }
-
-    return true;
-}
+constexpr DepthSensor::disparity_params_t BONNReader::disparity_params;
+constexpr DepthSensor::disparity_type_t BONNReader::disparity_type;
 
 bool loadBONNDepthData(const std::string &dirname,
-                       SLAMFile &file,
-                       const Sensor::pose_t &pose,
-                       const DepthSensor::intrinsics_t &intrinsics,
-                       const CameraSensor::distortion_coefficients_t &distortion,
-                       const DepthSensor::disparity_params_t &disparity_params,
-                       const DepthSensor::disparity_type_t &disparity_type) {
+                      SLAMFile &file,
+                      DepthSensor* depth_sensor) {
 
-    DepthSensor *depth_sensor = new DepthSensor("Depth");
-    depth_sensor->Index = 0;
-    depth_sensor->Width = 640;
-    depth_sensor->Height = 480;
-    depth_sensor->FrameFormat = frameformat::Raster;
-    depth_sensor->PixelFormat = pixelformat::D_I_16;
-    depth_sensor->DisparityType = disparity_type;
-    depth_sensor->Description = "Depth";
-    depth_sensor->CopyPose(pose);
-    depth_sensor->CopyIntrinsics(intrinsics);
-    depth_sensor->CopyDisparityParams(disparity_params);
-    depth_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
-    depth_sensor->CopyRadialTangentialDistortion(distortion);
-    depth_sensor->Index = file.Sensors.size();
-    depth_sensor->Rate = 30.0;
+  std::string line;
 
-    file.Sensors.AddSensor(depth_sensor);
+  printf("Directory name: %s\n", dirname.c_str());
+  std::ifstream infile(dirname + "/" + "depth.txt");
 
-    std::string line;
+  boost::smatch match;
 
-    printf("Directory name: %s\n", dirname.c_str());
-    std::ifstream infile(dirname + "/" + "depth.txt");
+  boost::regex comment = boost::regex(RegexPattern::comment);
 
-    boost::smatch match;
+  const std::string& start = RegexPattern::start;
+  const std::string& end = RegexPattern::end;
+  const std::string& ts = RegexPattern::timestamp;
+  const std::string& ws = RegexPattern::whitespace;
+  const std::string& fn = RegexPattern::filename;
 
-    boost::regex comment = boost::regex(RegexPattern::comment);
+  // format: timestamp filename
+  std::string expr = start
+      + ts  + ws       // timestamp
+      + fn + end;      // filename
 
-    const std::string& start = RegexPattern::start;
-    const std::string& end = RegexPattern::end;
-    const std::string& ts = RegexPattern::timestamp;
-    const std::string& ws = RegexPattern::whitespace;
-    const std::string& fn = RegexPattern::filename;
+  boost::regex depth_line = boost::regex(expr);
 
-    // format: timestamp filename
-    std::string expr = start
-                       + ts  + ws       // timestamp
-                       + fn + end;      // filename
+  int lineCount = 0;
 
-    boost::regex depth_line = boost::regex(expr);
+  while (std::getline(infile, line)) {
+    printf("line %d: %s\n", lineCount, line.c_str());
+    lineCount++;
 
-    int lineCount = 0;
+    if (line.empty()) {
+      continue;
+    } else if (boost::regex_match(line, match, comment)) {
+      continue;
+    } else if (boost::regex_match(line, match, depth_line)) {
 
-    while (std::getline(infile, line)) {
-        printf("line %d: %s\n", lineCount, line.c_str());
-        lineCount++;
+      int timestampS = std::stoi(match[1]);
+      int timestampNS = std::stoi(match[2]) * std::pow(10, 9 - match[2].length());
 
-        if (line.size() == 0) {
-            continue;
-        } else if (boost::regex_match(line, match, comment)) {
-            continue;
-        } else if (boost::regex_match(line, match, depth_line)) {
+      std::string depth_filename = match[3];
 
-            int timestampS = std::stoi(match[1]);
-            int timestampNS = std::stoi(match[2]) * std::pow(10, 9 - match[2].length());
+      auto depth_frame = new ImageFileFrame();
+      depth_frame->FrameSensor = depth_sensor;
+      depth_frame->Timestamp.S = timestampS;
+      depth_frame->Timestamp.Ns = timestampNS;
 
-            std::string depth_filename = match[3];
+      std::stringstream frame_name;
+      frame_name << dirname << "/" << depth_filename;
+      depth_frame->Filename = frame_name.str();
 
-            ImageFileFrame *depth_frame = new ImageFileFrame();
-            depth_frame->FrameSensor = depth_sensor;
-            depth_frame->Timestamp.S = timestampS;
-            depth_frame->Timestamp.Ns = timestampNS;
+      if (access(depth_frame->Filename.c_str(), F_OK) < 0) {
+        printf("No depth image for frame (%s)\n", frame_name.str().c_str());
+        perror("");
+        continue;
+      }
 
-            std::stringstream frame_name;
-            frame_name << dirname << "/" << depth_filename;
-            depth_frame->Filename = frame_name.str();
+      file.AddFrame(depth_frame);
 
-            if (access(depth_frame->Filename.c_str(), F_OK) < 0) {
-                printf("No depth image for frame (%s)\n", frame_name.str().c_str());
-                perror("");
-                continue;
-            }
-
-            file.AddFrame(depth_frame);
-
-        } else {
-            std::cerr << "Unknown line:" << line << std::endl;
-            return false;
-        }
+    } else {
+      std::cerr << "Unknown line:" << line << std::endl;
+      return false;
     }
-    return true;
+  }
+  return true;
 }
 
 bool loadBONNRGBData(const std::string &dirname,
                      SLAMFile &file,
-                     const Sensor::pose_t &pose,
-                     const CameraSensor::intrinsics_t &intrinsics,
-                     const CameraSensor::distortion_coefficients_t &distortion) {
+                     CameraSensor* rgb_sensor) {
 
-    CameraSensor *rgb_sensor = new CameraSensor("RGB", CameraSensor::kCameraType);
-    rgb_sensor->Index = 0;
-    rgb_sensor->Width = 640;
-    rgb_sensor->Height = 480;
-    rgb_sensor->FrameFormat = frameformat::Raster;
-    rgb_sensor->PixelFormat = pixelformat::RGB_III_888;
-    rgb_sensor->Description = "RGB";
-    rgb_sensor->CopyPose(pose);
-    rgb_sensor->CopyIntrinsics(intrinsics);
-    rgb_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
-    rgb_sensor->CopyRadialTangentialDistortion(distortion);
-    rgb_sensor->Index = file.Sensors.size();
-    rgb_sensor->Rate = 30.0;
+  std::string line;
 
-    file.Sensors.AddSensor(rgb_sensor);
+  std::ifstream infile(dirname + "/" + "rgb.txt");
 
-    std::string line;
+  boost::smatch match;
 
-    std::ifstream infile(dirname + "/" + "rgb.txt");
+  boost::regex comment = boost::regex(RegexPattern::comment);
 
-    boost::smatch match;
+  const std::string& start = RegexPattern::start;
+  const std::string& end = RegexPattern::end;
+  const std::string& ts = RegexPattern::timestamp;
+  const std::string& ws = RegexPattern::whitespace;
+  const std::string& fn = RegexPattern::filename;
 
-    boost::regex comment = boost::regex(RegexPattern::comment);
+  // format: timestamp filename
+  std::string expr = start
+      + ts  + ws       // timestamp
+      + fn + end;      // filename
 
-    const std::string& start = RegexPattern::start;
-    const std::string& end = RegexPattern::end;
-    const std::string& ts = RegexPattern::timestamp;
-    const std::string& ws = RegexPattern::whitespace;
-    const std::string& fn = RegexPattern::filename;
+  boost::regex rgb_line = boost::regex(expr);
 
-    // format: timestamp filename
-    std::string expr = start
-                       + ts  + ws       // timestamp
-                       + fn + end;      // filename
+  while (std::getline(infile, line)) {
+    if (line.empty()) {
+      continue;
+    } else if (boost::regex_match(line, match, comment)) {
+      continue;
+    } else if (boost::regex_match(line, match, rgb_line)) {
 
-    boost::regex rgb_line = boost::regex(expr);
+      int timestampS = std::stoi(match[1]);
+      int timestampNS = std::stoi(match[2]) * std::pow(10, 9 - match[2].length());
 
-    while (std::getline(infile, line)) {
-        if (line.size() == 0) {
-            continue;
-        } else if (boost::regex_match(line, match, comment)) {
-            continue;
-        } else if (boost::regex_match(line, match, rgb_line)) {
+      std::string rgb_filename = match[3];
 
-            int timestampS = std::stoi(match[1]);
-            int timestampNS = std::stoi(match[2]) * std::pow(10, 9 - match[2].length());
+      auto rgb_frame = new ImageFileFrame();
+      rgb_frame->FrameSensor = rgb_sensor;
+      rgb_frame->Timestamp.S = timestampS;
+      rgb_frame->Timestamp.Ns = timestampNS;
 
-            std::string rgb_filename = match[3];
+      std::stringstream frame_name;
+      frame_name << dirname << "/" << rgb_filename;
+      rgb_frame->Filename = frame_name.str();
 
-            ImageFileFrame *rgb_frame = new ImageFileFrame();
-            rgb_frame->FrameSensor = rgb_sensor;
-            rgb_frame->Timestamp.S = timestampS;
-            rgb_frame->Timestamp.Ns = timestampNS;
+      if (access(rgb_frame->Filename.c_str(), F_OK) < 0) {
+        printf("No RGB image for frame (%s)\n", frame_name.str().c_str());
+        perror("");
+        return false;
+      }
 
-            std::stringstream frame_name;
-            frame_name << dirname << "/" << rgb_filename;
-            rgb_frame->Filename = frame_name.str();
+      file.AddFrame(rgb_frame);
 
-            if (access(rgb_frame->Filename.c_str(), F_OK) < 0) {
-                printf("No RGB image for frame (%s)\n", frame_name.str().c_str());
-                perror("");
-                return false;
-            }
-
-            file.AddFrame(rgb_frame);
-
-        } else {
-            std::cerr << "Unknown line:" << line << std::endl;
-            return false;
-        }
+    } else {
+      std::cerr << "Unknown line:" << line << std::endl;
+      return false;
     }
-    return true;
+  }
+  return true;
 }
 
-bool loadBONNGreyData(const std::string &dirname,
-                      SLAMFile &file,
-                      const Sensor::pose_t &pose,
-                      const CameraSensor::intrinsics_t &intrinsics,
-                      const CameraSensor::distortion_coefficients_t &distortion) {
+bool loadBONNGreyData(const std::string &dirname, SLAMFile &file, CameraSensor* grey_sensor) {
 
-    CameraSensor *grey_sensor = new CameraSensor("Grey", CameraSensor::kCameraType);
-    grey_sensor->Index = 0;
-    grey_sensor->Width = 640;
-    grey_sensor->Height = 480;
-    grey_sensor->FrameFormat = frameformat::Raster;
-    grey_sensor->PixelFormat = pixelformat::G_I_8;
-    grey_sensor->Description = "Grey";
+  std::string line;
 
-    grey_sensor->CopyPose(pose);
-    grey_sensor->CopyIntrinsics(intrinsics);
-    grey_sensor->CopyRadialTangentialDistortion(distortion);
-    grey_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
-    grey_sensor->Index = file.Sensors.size();
-    grey_sensor->Rate = 30.0;
+  std::ifstream infile(dirname + "/" + "rgb.txt");
 
-    file.Sensors.AddSensor(grey_sensor);
+  boost::smatch match;
 
-    std::string line;
+  boost::regex comment = boost::regex(RegexPattern::comment);
 
-    std::ifstream infile(dirname + "/" + "rgb.txt");
+  const std::string& start = RegexPattern::start;
+  const std::string& end = RegexPattern::end;
+  const std::string& ts = RegexPattern::timestamp;
+  const std::string& ws = RegexPattern::whitespace;
+  const std::string& fn = RegexPattern::filename;
 
-    boost::smatch match;
+  // format: timestamp filename
+  std::string expr = start
+      + ts  + ws       // timestamp
+      + fn + end;      // filename
 
-    boost::regex comment = boost::regex(RegexPattern::comment);
+  boost::regex rgb_line = boost::regex(expr);
 
-    const std::string& start = RegexPattern::start;
-    const std::string& end = RegexPattern::end;
-    const std::string& ts = RegexPattern::timestamp;
-    const std::string& ws = RegexPattern::whitespace;
-    const std::string& fn = RegexPattern::filename;
+  while (std::getline(infile, line)) {
+    if (line.empty()) {
+      continue;
+    } else if (boost::regex_match(line, match, comment)) {
+      continue;
+    } else if (boost::regex_match(line, match, rgb_line)) {
 
-    // format: timestamp filename
-    std::string expr = start
-                       + ts  + ws       // timestamp
-                       + fn + end;      // filename
+      int timestampS = std::stoi(match[1]);
+      int timestampNS = std::stoi(match[2]) * std::pow(10, 9 - match[2].length());
 
-    boost::regex rgb_line = boost::regex(expr);
+      std::string rgb_filename = match[3];
 
-    while (std::getline(infile, line)) {
-        if (line.size() == 0) {
-            continue;
-        } else if (boost::regex_match(line, match, comment)) {
-            continue;
-        } else if (boost::regex_match(line, match, rgb_line)) {
+      auto grey_frame = new ImageFileFrame();
+      grey_frame->FrameSensor = grey_sensor;
+      grey_frame->Timestamp.S = timestampS;
+      grey_frame->Timestamp.Ns = timestampNS;
 
-            int timestampS = std::stoi(match[1]);
-            int timestampNS = std::stoi(match[2]) * std::pow(10, 9 - match[2].length());
+      std::stringstream frame_name;
+      frame_name << dirname << "/" << rgb_filename;
+      grey_frame->Filename = frame_name.str();
 
-            std::string rgb_filename = match[3];
+      if (access(grey_frame->Filename.c_str(), F_OK) < 0) {
+        printf("No RGB image for frame (%s)\n", frame_name.str().c_str());
+        perror("");
+        return false;
+      }
 
-            ImageFileFrame *grey_frame = new ImageFileFrame();
-            grey_frame->FrameSensor = grey_sensor;
-            grey_frame->Timestamp.S = timestampS;
-            grey_frame->Timestamp.Ns = timestampNS;
+      file.AddFrame(grey_frame);
 
-            std::stringstream frame_name;
-            frame_name << dirname << "/" << rgb_filename;
-            grey_frame->Filename = frame_name.str();
-
-            if (access(grey_frame->Filename.c_str(), F_OK) < 0) {
-                printf("No RGB image for frame (%s)\n", frame_name.str().c_str());
-                perror("");
-                return false;
-            }
-
-            file.AddFrame(grey_frame);
-
-        } else {
-            std::cerr << "Unknown line:" << line << std::endl;
-            return false;
-        }
+    } else {
+      std::cerr << "Unknown line:" << line << std::endl;
+      return false;
     }
-    return true;
+  }
+  return true;
 }
 
-bool loadBONNGroundTruthData(const std::string &dirname, SLAMFile &file) {
+bool loadBONNGroundTruthData(const std::string &dirname, SLAMFile &file, GroundTruthSensor* gt_sensor) {
 
-    GroundTruthSensor *gt_sensor = new GroundTruthSensor("GroundTruth");
-    gt_sensor->Index = file.Sensors.size();
-    gt_sensor->Description = "GroundTruthSensor";
-    file.Sensors.AddSensor(gt_sensor);
+  std::ifstream infile(dirname + "/" + "groundtruth.txt");
 
-    std::ifstream infile(dirname + "/" + "groundtruth.txt");
+  std::string line;
+  boost::smatch match;
 
-    std::string line;
-    boost::smatch match;
+  const std::string& ts = RegexPattern::timestamp;
+  const std::string& ws = RegexPattern::whitespace;
+  const std::string& num = RegexPattern::number;
+  const std::string& start = RegexPattern::start;
+  const std::string& end = RegexPattern::end;
 
-    const std::string& ts = RegexPattern::timestamp;
-    const std::string& ws = RegexPattern::whitespace;
-    const std::string& num = RegexPattern::number;
-    const std::string& start = RegexPattern::start;
-    const std::string& end = RegexPattern::end;
+  // format: timestamp tx ty tz qx qy qz qw
+  std::string expr = start
+      + ts  + ws       // timestamp
+      + num + ws       // tx
+      + num + ws       // ty
+      + num + ws       // tz
+      + num + ws       // qx
+      + num + ws       // qy
+      + num + ws       // qz
+      + num + end;     // qw
 
-    // format: timestamp tx ty tz qx qy qz qw
-    std::string expr = start
-                       + ts  + ws       // timestamp
-                       + num + ws       // tx
-                       + num + ws       // ty
-                       + num + ws       // tz
-                       + num + ws       // qx
-                       + num + ws       // qy
-                       + num + ws       // qz
-                       + num + end;     // qw
+  boost::regex groundtruth_line = boost::regex(expr);
+  boost::regex comment = boost::regex(RegexPattern::comment);
 
-    boost::regex groundtruth_line = boost::regex(expr);
-    boost::regex comment = boost::regex(RegexPattern::comment);
+  while (std::getline(infile, line)) {
+    if (line.empty()) {
+      continue;
+    } else if (boost::regex_match(line, match, comment)) {
+      continue;
+    } else if (boost::regex_match(line, match, groundtruth_line)) {
 
-    while (std::getline(infile, line)) {
-        if (line.size() == 0) {
-            continue;
-        } else if (boost::regex_match(line, match, comment)) {
-            continue;
-        } else if (boost::regex_match(line, match, groundtruth_line)) {
+      int timestampS = std::stoi(match[1]);
+      int timestampNS = std::stoi(match[2]) * std::pow(10, 9 - match[2].length());
 
-            int timestampS = std::stoi(match[1]);
-            int timestampNS = std::stoi(match[2]) * std::pow(10, 9 - match[2].length());
+      float tx = std::stof(match[3]);
+      float ty = std::stof(match[4]);
+      float tz = std::stof(match[5]);
 
-            float tx = std::stof(match[3]);
-            float ty = std::stof(match[4]);
-            float tz = std::stof(match[5]);
+      float QX = std::stof(match[6]);
+      float QY = std::stof(match[7]);
+      float QZ = std::stof(match[8]);
+      float QW = std::stof(match[9]);
 
-            float QX = std::stof(match[6]);
-            float QY = std::stof(match[7]);
-            float QZ = std::stof(match[8]);
-            float QW = std::stof(match[9]);
+      Eigen::Matrix3f rotationMat = Eigen::Quaternionf(QW, QX, QY, QZ).toRotationMatrix();
+      Eigen::Matrix4f pose = Eigen::Matrix4f::Identity();
 
-            Eigen::Matrix3f rotationMat = Eigen::Quaternionf(QW, QX, QY, QZ).toRotationMatrix();
-            Eigen::Matrix4f pose = Eigen::Matrix4f::Identity();
+      pose.block(0, 0, 3, 3) = rotationMat;
+      pose.block(0, 3, 3, 1) << tx, ty, tz;
 
-            pose.block(0, 0, 3, 3) = rotationMat;
-            pose.block(0, 3, 3, 1) << tx, ty, tz;
+      auto gt_frame = new SLAMInMemoryFrame();
+      gt_frame->FrameSensor = gt_sensor;
+      gt_frame->Timestamp.S = timestampS;
+      gt_frame->Timestamp.Ns = timestampNS;
+      gt_frame->Data = malloc(gt_frame->GetSize());
 
-            SLAMInMemoryFrame *gt_frame = new SLAMInMemoryFrame();
-            gt_frame->FrameSensor = gt_sensor;
-            gt_frame->Timestamp.S = timestampS;
-            gt_frame->Timestamp.Ns = timestampNS;
-            gt_frame->Data = malloc(gt_frame->GetSize());
+      memcpy(gt_frame->Data, pose.data(), gt_frame->GetSize());
 
-            memcpy(gt_frame->Data, pose.data(), gt_frame->GetSize());
-
-            file.AddFrame(gt_frame);
-        } else {
-            std::cerr << "Unknown line: " << line << std::endl;
-            return false;
-        }
+      file.AddFrame(gt_frame);
+    } else {
+      std::cerr << "Unknown line: " << line << std::endl;
+      return false;
     }
-    return true;
+  }
+  return true;
 }
 
 
@@ -431,64 +325,116 @@ bool loadBONNPointCloudData(slambench::io::SLAMFile &slamfile, const std::string
 
 SLAMFile *BONNReader::GenerateSLAMFile() {
 
-    if (!(grey || rgb || depth)) {
-        std::cerr << "No sensors defined\n";
-        return nullptr;
+  if (!(grey || rgb || depth)) {
+    std::cerr << "No sensors defined\n";
+    return nullptr;
+  }
+
+  std::string dirname = input;
+
+  const std::vector<std::string> requirements = {"rgb.txt",
+                                                 "rgb",
+                                                 "depth.txt",
+                                                 "depth",
+                                                 "groundtruth.txt"};
+
+  if (!checkRequirements(dirname, requirements)) {
+    std::cerr << "Invalid folder." << std::endl;
+    return nullptr;
+  }
+
+  auto slamfile_ptr = new SLAMFile();
+  auto &slamfile = *slamfile_ptr;
+
+  Sensor::pose_t pose = Eigen::Matrix4f::Identity();
+
+  // load Depth
+  if (depth) {
+    auto depth_sensor = DepthSensorBuilder()
+        .name("Depth")
+        .rate(30.0)
+        .size(640, 480)
+        .pose(pose)
+        .intrinsics(intrinsics_depth)
+        .distortion(CameraSensor::distortion_type_t::RadialTangential, distortion_depth)
+        .disparity(disparity_type, disparity_params)
+        .build();
+
+    depth_sensor->Index = slamfile.Sensors.size();
+    slamfile.Sensors.AddSensor(depth_sensor);
+
+    if (!loadBONNDepthData(dirname, slamfile, depth_sensor)) {
+      std::cout << "Error while loading depth information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
     }
+  }
 
-    std::string dirname = input;
+  // load Grey
+  if (grey) {
+    auto grey_sensor = GreySensorBuilder()
+        .name("Grey")
+        .rate(30.0)
+        .size(640, 480)
+        .pose(pose)
+        .intrinsics(intrinsics_rgb)
+        .distortion(CameraSensor::distortion_type_t::RadialTangential, distortion_rgb)
+        .build();
 
-    if (!analyseBONNFolder(dirname)) {
-        std::cerr << "Invalid folder." << std::endl;
-        return nullptr;
+    grey_sensor->Index = slamfile.Sensors.size();
+    slamfile.Sensors.AddSensor(grey_sensor);
+
+    if (!loadBONNGreyData(dirname, slamfile, grey_sensor)) {
+      std::cerr << "Error while loading Grey information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
     }
+  }
 
-    SLAMFile *slamfile_ptr = new SLAMFile();
-    SLAMFile &slamfile = *slamfile_ptr;
+  // load RGB
+  if (rgb) {
+    auto rgb_sensor = RGBSensorBuilder()
+        .name("RGB")
+        .rate(30.0)
+        .size(640, 480)
+        .pose(pose)
+        .intrinsics(intrinsics_rgb)
+        .distortion(CameraSensor::distortion_type_t::RadialTangential, distortion_rgb)
+        .build();
 
-    Sensor::pose_t pose = Eigen::Matrix4f::Identity();
+    rgb_sensor->Index = slamfile.Sensors.size();
+    slamfile.Sensors.AddSensor(rgb_sensor);
 
-    DepthSensor::disparity_params_t disparity_params = {0.001, 0.0};
-    DepthSensor::disparity_type_t disparity_type = DepthSensor::affine_disparity;
-
-    // load Depth
-    if (depth && !loadBONNDepthData(dirname, slamfile, pose,
-                                    BONNReader::intrinsics_depth, BONNReader::distortion_depth,
-                                    disparity_params, disparity_type)) {
-        std::cerr << "Error while loading depth information." << std::endl;
-        delete slamfile_ptr;
-        return nullptr;
+    if (!loadBONNRGBData(dirname, slamfile, rgb_sensor)) {
+      std::cerr << "Error while loading RGB information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
     }
+  }
 
-    // load Grey
-    if (grey && !loadBONNGreyData(dirname, slamfile, pose,
-                                  BONNReader::intrinsics_rgb, BONNReader::distortion_rgb)) {
-        std::cerr << "Error while loading Grey information." << std::endl;
-        delete slamfile_ptr;
-        return nullptr;
-    }
+  // load GT
+  if (gt) {
+    auto gt_sensor = GTSensorBuilder()
+        .name("GroundTruth")
+        .description("GroundTruthSensor")
+        .build();
 
-    // load RGB
-    if (rgb && !loadBONNRGBData(dirname, slamfile, pose,
-                                BONNReader::intrinsics_rgb, BONNReader::distortion_rgb)) {
-        std::cerr << "Error while loading RGB information." << std::endl;
-        delete slamfile_ptr;
-        return nullptr;
-    }
+    gt_sensor->Index = slamfile.Sensors.size();
+    slamfile.Sensors.AddSensor(gt_sensor);
 
-    // load GT
-    if (gt && !loadBONNGroundTruthData(dirname, slamfile)) {
-        std::cerr << "Error while loading gt information." << std::endl;
-        delete slamfile_ptr;
-        return nullptr;
+    if(!loadBONNGroundTruthData(dirname, slamfile, gt_sensor)) {
+      std::cerr << "Error while loading gt information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
     }
+  }
 
-    // load PointCloud
-    if (!plyfile.empty() && !loadBONNPointCloudData(slamfile, plyfile)) {
-        std::cerr << "Error while loading point cloud information." << std::endl;
-        delete slamfile_ptr;
-        return nullptr;
-    }
+  // load PointCloud
+  if (!plyfile.empty() && !loadBONNPointCloudData(slamfile, plyfile)) {
+    std::cerr << "Error while loading point cloud information." << std::endl;
+    delete slamfile_ptr;
+    return nullptr;
+  }
 
   return slamfile_ptr;
 }
