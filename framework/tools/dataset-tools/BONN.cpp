@@ -356,7 +356,7 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
         .size(640, 480)
         .pose(pose)
         .intrinsics(intrinsics_depth)
-        .radialTangential(distortion_depth)
+        .distortion(CameraSensor::distortion_type_t::RadialTangential, distortion_depth)
         .disparity(disparity_type, disparity_params)
         .build();
 
@@ -378,7 +378,7 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
         .size(640, 480)
         .pose(pose)
         .intrinsics(intrinsics_rgb)
-        .radialTangential(distortion_rgb)
+        .distortion(CameraSensor::distortion_type_t::RadialTangential, distortion_rgb)
         .build();
 
     grey_sensor->Index = slamfile.Sensors.size();
@@ -399,7 +399,7 @@ SLAMFile *BONNReader::GenerateSLAMFile() {
         .size(640, 480)
         .pose(pose)
         .intrinsics(intrinsics_rgb)
-        .radialTangential(distortion_rgb)
+        .distortion(CameraSensor::distortion_type_t::RadialTangential, distortion_rgb)
         .build();
 
     rgb_sensor->Index = slamfile.Sensors.size();

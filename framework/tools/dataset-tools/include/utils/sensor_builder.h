@@ -90,14 +90,6 @@ namespace slambench {
         return static_cast<T&>(*this);
       }
 
-      T& radialTangential(const CameraSensor::distortion_coefficients_t& distortion) {
-        distortion_type_ = CameraSensor::RadialTangential;
-        for(unsigned int i = 0; i < 5 ; ++i) {
-          distortion_[i] = distortion[i];
-        }
-        return static_cast<T&>(*this);
-      }
-
       T& disparity(const DepthSensor::disparity_type_t& type,
                    const DepthSensor::disparity_params_t& disparity) {
         disparity_type_ = type;

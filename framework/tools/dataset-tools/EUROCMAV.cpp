@@ -279,7 +279,7 @@ SLAMFile *EUROCMAVReader::GenerateSLAMFile() {
           .size(width, height)
           .description(sensor["comment"].as<std::string>())
           .intrinsics(intrinsics)
-          .radialTangential(distortion)
+          .distortion(CameraSensor::distortion_type_t::RadialTangential, distortion)
           .pose(pose)
           .build();
 
@@ -294,7 +294,7 @@ SLAMFile *EUROCMAVReader::GenerateSLAMFile() {
           .size(width, height)
           .intrinsics(intrinsics)
           .pose(pose)
-          .radialTangential(distortion)
+          .distortion(CameraSensor::distortion_type_t::RadialTangential, distortion)
           .build();
 
       rgb_sensor->Index = slamfile->Sensors.size();
