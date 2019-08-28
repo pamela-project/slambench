@@ -128,16 +128,16 @@ int main(int argc, char * argv[])
 
 			}
 //			FIXME: workaround for ground truth
-            auto depth_est_output = lib->GetOutputManager().GetOutput("depth_est");
-            auto depth_est_gt = lib->GetOutputManager().GetOutput("depth_gt");
-            if(!(depth_est_output&&depth_est_gt)) {
-                std::cerr<<"This algorithm does not provide depth estimation"<<std::endl;
-            }
-            else {
-                auto depth_metric = new slambench::metrics::DepthEstimationMetric(depth_est_output,depth_est_gt);
-                lib->GetMetricManager().AddFrameMetric(depth_metric);
-                cw.AddColumn(new slambench::CollectionValueLibColumnInterface(lib, depth_metric, lib->GetMetricManager().GetFramePhase()));
-            }
+//            auto depth_est_output = lib->GetOutputManager().GetOutput("depth_est");
+//            auto depth_est_gt = lib->GetOutputManager().GetOutput("depth_gt");
+//            if(!(depth_est_output&&depth_est_gt)) {
+//                std::cerr<<"This algorithm does not provide depth estimation"<<std::endl;
+//            }
+//            else {
+//                auto depth_metric = new slambench::metrics::DepthEstimationMetric(depth_est_output,depth_est_gt);
+//                lib->GetMetricManager().AddFrameMetric(depth_metric);
+//                cw.AddColumn(new slambench::CollectionValueLibColumnInterface(lib, depth_metric, lib->GetMetricManager().GetFramePhase()));
+//            }
 
 			// Add a duration metric
 			lib->GetMetricManager().AddFrameMetric(duration_metric);
