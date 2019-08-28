@@ -7,22 +7,21 @@
 
  */
 
-
 #ifndef FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_DATASETREADER_H_
 #define FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_DATASETREADER_H_
 
 #include <ParameterComponent.h>
 
 namespace slambench {
-    namespace io {
-        class SLAMFile;
-    }
+  namespace io {
+    class SLAMFile;
+  }
 }
 
 class DatasetReader : public ParameterComponent {
-public :
-    DatasetReader(const std::string& name) : ParameterComponent(name) {}
-    virtual slambench::io::SLAMFile* GenerateSLAMFile() = 0;
+ public :
+  DatasetReader(const std::string& name) : ParameterComponent(name) {}
+  virtual slambench::io::SLAMFile* GenerateSLAMFile() = 0;
 };
 
 #endif /* FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_DATASETREADER_H_ */
