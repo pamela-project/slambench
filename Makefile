@@ -770,19 +770,19 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 
 ./datasets/UZHFPV/%_snapdragon_with_gt.slam :  ./datasets/UZHFPV/%_snapdragon_with_gt.dir
 	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
-	echo ./build/bin/dataset-generator -d uzhfpv -i $</ -o $@ -imu true -stereo true -events false -gt true
+	./build/bin/dataset-generator -d uzhfpv -i $</ -o $@ -imu true --stereo true --event false -gt true
 
 ./datasets/UZHFPV/%_davis_with_gt.slam :  ./datasets/UZHFPV/%_davis_with_gt.dir
 	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
-	echo ./build/bin/dataset-generator -d uzhfpv -i $</ -o $@ -imu true -stereo false -events true -gt true
+	./build/bin/dataset-generator -d uzhfpv -i $</ -o $@ -imu true --stereo false --event true -gt true
 
 ./datasets/UZHFPV/%_snapdragon.slam :  ./datasets/UZHFPV/%_snapdragon.dir
 	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
-	echo ./build/bin/dataset-generator -d uzhfpv -i $</ -o $@ -imu true -stereo true -events false -gt false
+	./build/bin/dataset-generator -d uzhfpv -i $</ -o $@ -imu true --stereo true --event false -gt false
 
 ./datasets/UZHFPV/%_davis.slam :  ./datasets/UZHFPV/%_davis.dir
 	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
-	echo ./build/bin/dataset-generator -d uzhfpv -i $</ -o $@ -imu true -stereo false -events true -gt false
+	./build/bin/dataset-generator -d uzhfpv -i $</ -o $@ -imu true --stereo false --event true -gt false
 
 
 #### ORBSLAM Voc

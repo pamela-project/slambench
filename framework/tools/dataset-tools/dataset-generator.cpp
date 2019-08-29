@@ -24,6 +24,7 @@
 #include "include/ICLNUIM.h"
 #include "include/SVO.h"
 #include "include/TUM.h"
+#include "include/UZHFPV.h"
 
 using namespace slambench::io;
 
@@ -80,9 +81,11 @@ class MainComponent : public ParameterComponent {
       config->reader = new SVOReader("");
     } else if (dataset_name == "bonn") {
       config->reader = new BONNReader("");
+    } else if (dataset_name == "uzhfpv") {
+      config->reader = new UZHFPVReader("");
     }
 
-    if (config->reader) {
+  if (config->reader) {
       config->param_manager.AddComponent(config->reader);
     } else {
       std::cout << "Data format not found" << std::endl;
