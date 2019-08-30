@@ -197,6 +197,79 @@ bool loadGTData(const std::string &dirname,
   return true;
 }
 */
+bool loadUZHFPVGroundTruthData(const std::string &dirname, SLAMFile &file, GroundTruthSensor* gt_sensor) {
+
+  std::ifstream infile(dirname + "/" + "groundtruth.txt");
+
+  std::string line;
+  boost::smatch match;
+
+  const std::string& ts = RegexPattern::timestamp;
+  const std::string& ws = RegexPattern::whitespace;
+  const std::string& id = RegexPattern::integer;
+  const std::string& dec = RegexPattern::decimal;
+  const std::string& start = RegexPattern::start;
+  const std::string& end = RegexPattern::end;
+
+  // format: id timestamp tx ty tz qx qy qz qw
+  std::string expr = start
+      + id + ws        // id
+      + ts  + ws       // timestamp
+      + dec + ws       // tx
+      + dec + ws       // ty
+      + dec + ws       // tz
+      + dec + ws       // qx
+      + dec + ws       // qy
+      + dec + ws       // qz
+      + dec + end;     // qw
+
+  boost::regex groundtruth_line = boost::regex(expr);
+  boost::regex comment = boost::regex(RegexPattern::comment);
+
+  while (std::getline(infile, line)) {
+    if (line.empty()) {
+      continue;
+    } else if (boost::regex_match(line, match, comment)) {
+      continue;
+    } else if (boost::regex_match(line, match, groundtruth_line)) {
+
+//      int identifier = std::stoi(match[1]);
+
+      int timestampS = std::stoi(match[2]);
+      int timestampNS = std::stod(match[3]) * std::pow(10, 9 - match[3].length());
+
+      float tx = std::stof(match[4]);
+      float ty = std::stof(match[5]);
+      float tz = std::stof(match[6]);
+
+      float QX = std::stof(match[7]);
+      float QY = std::stof(match[8]);
+      float QZ = std::stof(match[9]);
+      float QW = std::stof(match[10]);
+
+      Eigen::Matrix3f rotationMat = Eigen::Quaternionf(QW, QX, QY, QZ).toRotationMatrix();
+      Eigen::Matrix4f pose = Eigen::Matrix4f::Identity();
+      pose.block(0, 0, 3, 3) = rotationMat;
+      pose.block(0, 3, 3, 1) << tx, ty, tz;
+
+      auto gt_frame = new SLAMInMemoryFrame();
+      gt_frame->FrameSensor = gt_sensor;
+      gt_frame->Timestamp.S = timestampS;
+      gt_frame->Timestamp.Ns = timestampNS;
+      gt_frame->Data = malloc(gt_frame->GetSize());
+
+      memcpy(gt_frame->Data, pose.data(), gt_frame->GetSize());
+
+      file.AddFrame(gt_frame);
+
+    } else {
+      std::cout << "Unknown line:" << line << std::endl;
+      return false;
+    }
+  }
+  return true;
+}
+
 SLAMFile *UZHFPVReader::GenerateSLAMFile() {
 
   std::string dirname = input;
@@ -235,6 +308,23 @@ SLAMFile *UZHFPVReader::GenerateSLAMFile() {
   auto &slamfile = *slamfile_ptr;
 
   // load images
+
+  // load GT
+  if (gt) {
+    auto gt_sensor = GTSensorBuilder()
+        .name("GroundTruth")
+        .description("GroundTruthSensor")
+        .build();
+
+    gt_sensor->Index = slamfile.Sensors.size();
+    slamfile.Sensors.AddSensor(gt_sensor);
+
+    if(!loadUZHFPVGroundTruthData(dirname, slamfile, gt_sensor)) {
+      std::cerr << "Error while loading gt information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
+    }
+  }
 
   return slamfile_ptr;
 }

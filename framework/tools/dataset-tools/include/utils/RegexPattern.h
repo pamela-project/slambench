@@ -18,6 +18,7 @@ class RegexPattern {
 
   // components
   static constexpr auto whitespace = "\\s+";
+  static constexpr auto integer = "(\\d+)";
   static constexpr auto decimal = "([-0-9.]+)";
   static constexpr auto nanoseconds = "([0-9]+)";
   static constexpr auto number = R"(([+\-]?(?:0|[1-9]\d*)(?:\.\d*)?(?:[eE][+\-]?\d+)?|[-0-9.]+))";
