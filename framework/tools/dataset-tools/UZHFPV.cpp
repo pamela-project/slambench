@@ -32,6 +32,75 @@
 
 using namespace slambench::io;
 
+bool loadUZHFPVGreyData(const std::string& dirname,
+                        const std::string& filename,
+                        SLAMFile &file,
+                        CameraSensor* grey_sensor) {
+
+  std::string line;
+
+  std::ifstream infile(dirname + "/" + filename);
+
+  boost::smatch match;
+
+  boost::regex comment = boost::regex(RegexPattern::comment);
+
+  const std::string& start = RegexPattern::start;
+  const std::string& end = RegexPattern::end;
+  const std::string& id = RegexPattern::decimal;
+  const std::string& ts = RegexPattern::timestamp;
+  const std::string& ws = RegexPattern::whitespace;
+  const std::string& fn = RegexPattern::filename;
+
+  // format: id timestamp filename
+  std::string expr = start
+      + id  + ws       // id
+      + ts  + ws       // timestamp
+      + fn  + ws       // filename
+      + end;
+
+  boost::regex grey_line = boost::regex(expr);
+
+  while (std::getline(infile, line)) {
+    if (line.empty()) {
+      continue;
+    } else if (boost::regex_match(line, match, comment)) {
+      continue;
+    } else if (boost::regex_match(line, match, grey_line)) {
+
+      std::cout << line << std::endl;
+
+//      int identifer = std::stoi(match[1]);
+
+      int timestampS = std::stoi(match[2]);
+      int timestampNS = std::stod(match[3]) * std::pow(10, 9 - match[3].length());
+      std::string grey_filename = match[4];
+
+      auto grey_frame = new ImageFileFrame();
+      grey_frame->FrameSensor = grey_sensor;
+      grey_frame->Timestamp.S = timestampS;
+      grey_frame->Timestamp.Ns = timestampNS;
+
+      std::stringstream frame_name;
+      frame_name << dirname << "/" << grey_filename;
+      grey_frame->Filename = frame_name.str();
+
+      if (access(grey_frame->Filename.c_str(), F_OK) < 0) {
+        printf("No Grey image for frame (%s)\n", frame_name.str().c_str());
+        perror("");
+        return false;
+      }
+
+      file.AddFrame(grey_frame);
+
+    } else {
+      std::cout << "Unknown line:" << line << std::endl;
+      return false;
+    }
+  }
+  return true;
+}
+
 bool loadUZHFPVGroundTruthData(const std::string &dirname,
                                SLAMFile &file,
                                GroundTruthSensor* gt_sensor) {
@@ -186,7 +255,6 @@ SLAMFile *UZHFPVReader::GenerateSLAMFile() {
   std::string dirname = input;
 
   // check requirements for slamfile
-
   std::vector<std::string> requirements = {"img"};
 
   if (imu) {
@@ -217,6 +285,87 @@ SLAMFile *UZHFPVReader::GenerateSLAMFile() {
 
   auto slamfile_ptr = new SLAMFile();
   auto &slamfile = *slamfile_ptr;
+
+  // load camera data
+  if (stereo) {
+
+    // Parameters taken from indoor_forward calibration file: camchain-..indoor_forward_calib_snapdragon_cam.yaml
+
+    CameraSensor::intrinsics_t cam0_intrinsics = {278.66723066149086, 278.48991409740296,
+                                                  319.75221200593535, 241.96858910358173};
+
+    CameraSensor::distortion_coefficients_t cam0_distortion = {-0.013721808247486035, 0.020727425669427896,
+                                                               -0.012786476702685545, 0.0025242267320687625};
+
+    CameraSensor::intrinsics_t cam1_intrinsics = {277.61640629770613, 277.63749695723294,
+                                                  314.8944703346039, 236.04310050462587};
+
+    CameraSensor::distortion_coefficients_t cam1_distortion = {-0.008456929295619607, 0.011407590938612062,
+                                                               -0.006951788325762078, 0.0015368127092821786};
+
+    // snapdragon stereo left
+    auto left_sensor = GreySensorBuilder()
+        .name("Grey Left Stereo")
+        .size(640, 480)
+        .intrinsics(cam0_intrinsics)
+//        .distortion(CameraSensor::distortion_type_t::Equidistant, cam0_distortion)
+        .rate(30)
+        .build();
+
+    left_sensor->Index = slamfile.Sensors.size();
+    slamfile.Sensors.AddSensor(left_sensor);
+
+    if (!loadUZHFPVGreyData(dirname, "left_images.txt", slamfile, left_sensor)) {
+      std::cerr << "Error while loading grey left stereo information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
+    }
+
+    // snapdragon stereo right
+    auto right_sensor = GreySensorBuilder()
+        .name("Grey Right Stereo")
+        .size(640, 480)
+        .intrinsics(cam1_intrinsics)
+//        .distortion(CameraSensor::distortion_type_t::Equidistant, cam1_distortion)
+        .rate(30) // from paper
+        .build();
+
+    right_sensor->Index = slamfile.Sensors.size();
+    slamfile.Sensors.AddSensor(right_sensor);
+
+    if (!loadUZHFPVGreyData(dirname, "right_images.txt", slamfile, right_sensor)) {
+      std::cerr << "Error while loading grey right stereo information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
+    }
+
+  } else {
+    // Parameters taken from indoor_forward calibration file: camchain-..indoor_forward_calib_davis_cam.yaml
+
+    CameraSensor::intrinsics_t cam0_intrinsics = {172.98992850734132, 172.98303181090185,
+                                                  163.33639726024606, 134.99537889030861};
+
+    CameraSensor::distortion_coefficients_t cam0_distortion = {-0.027576733308582076, -0.006593578674675004,
+                                                               0.0008566938165177085, -0.00030899587045247486};
+
+    // davis grey camera
+    auto grey_sensor = GreySensorBuilder()
+        .name("Grey")
+        .size(346, 260)
+        .intrinsics(cam0_intrinsics)
+//        .distortion(CameraSensor::distortion_type_t::Equidistant, cam0_distortion)
+        .rate(50) // from paper
+        .build();
+
+    grey_sensor->Index = slamfile.Sensors.size();
+    slamfile.Sensors.AddSensor(grey_sensor);
+
+    if (!loadUZHFPVGreyData(dirname, "images.txt", slamfile, grey_sensor)) {
+      std::cerr << "Error while loading Grey information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
+    }
+  }
 
   // load IMU data
   if (imu) {
