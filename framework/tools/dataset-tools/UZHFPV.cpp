@@ -197,7 +197,9 @@ bool loadGTData(const std::string &dirname,
   return true;
 }
 */
-bool loadUZHFPVGroundTruthData(const std::string &dirname, SLAMFile &file, GroundTruthSensor* gt_sensor) {
+bool loadUZHFPVGroundTruthData(const std::string &dirname,
+                               SLAMFile &file,
+                               GroundTruthSensor* gt_sensor) {
 
   std::ifstream infile(dirname + "/" + "groundtruth.txt");
 
@@ -270,6 +272,80 @@ bool loadUZHFPVGroundTruthData(const std::string &dirname, SLAMFile &file, Groun
   return true;
 }
 
+bool loadUZHFPVIMUData(const std::string &dirname,
+                       SLAMFile &file,
+                       IMUSensor *IMU_sensor) {
+
+  std::string line;
+
+  boost::smatch match;
+  std::ifstream infile(dirname + "/" + "imu.txt");
+
+  const std::string& ts = RegexPattern::timestamp;
+  const std::string& ws = RegexPattern::whitespace;
+  const std::string& id = RegexPattern::integer;
+  const std::string& dec = RegexPattern::decimal;
+  const std::string& start = RegexPattern::start;
+  const std::string& end = RegexPattern::end;
+
+  // format: timestamp ang_vel_x ang_vel_y ang_vel_z lin_acc_x lin_acc_y lin_acc_z
+  std::string expr = start
+      + id  + ws             // id
+      + ts  + ws             // timestamp
+      + dec + ws             // ang_vel_x
+      + dec + ws             // ang_vel_y
+      + dec + ws             // ang_vel_z
+      + dec + ws             // lin_acc_x
+      + dec + ws             // lin_acc_y
+      + dec + end;           // lin_acc_z
+
+  boost::regex imu_line = boost::regex(expr);
+  boost::regex comment = boost::regex(RegexPattern::comment);
+
+  while (std::getline(infile, line)) {
+    if (line.empty()) {
+      continue;
+    } else if (boost::regex_match(line, match, comment)) {
+      continue;
+    } else if (boost::regex_match(line, match, imu_line)) {
+
+//      int identifier = std::stoi(match[1]);
+
+      int timestampS = std::stoi(match[2]);
+      int timestampNS = std::stod(match[3]) * std::pow(10, 9 - match[3].length());
+
+      float gx = std::stof(match[4]);
+      float gy = std::stof(match[5]);
+      float gz = std::stof(match[6]);
+      float ax = std::stof(match[7]);
+      float ay = std::stof(match[8]);
+      float az = std::stof(match[9]);
+
+      auto IMU_frame = new SLAMInMemoryFrame();
+      IMU_frame->FrameSensor = IMU_sensor;
+      IMU_frame->Timestamp.S = timestampS;
+      IMU_frame->Timestamp.Ns = timestampNS;
+      IMU_frame->Data = malloc(IMU_sensor->GetFrameSize(IMU_frame));
+
+      ((float *)IMU_frame->Data)[0] = gx;
+      ((float *)IMU_frame->Data)[1] = gy;
+      ((float *)IMU_frame->Data)[2] = gz;
+
+      ((float *)IMU_frame->Data)[3] = ax;
+      ((float *)IMU_frame->Data)[4] = ay;
+      ((float *)IMU_frame->Data)[5] = az;
+
+      file.AddFrame(IMU_frame);
+
+    } else {
+      std::cerr << "Unknown line: " << line << std::endl;
+      return false;
+    }
+  }
+  return true;
+}
+
+
 SLAMFile *UZHFPVReader::GenerateSLAMFile() {
 
   std::string dirname = input;
@@ -307,7 +383,33 @@ SLAMFile *UZHFPVReader::GenerateSLAMFile() {
   auto slamfile_ptr = new SLAMFile();
   auto &slamfile = *slamfile_ptr;
 
-  // load images
+  // load IMU data
+  if (imu) {
+    auto imu_sensor = new IMUSensor(dirname);
+
+    // parameters from calibration imu.yaml
+    imu_sensor->AcceleratorNoiseDensity = 0.1;
+    imu_sensor->AcceleratorBiasDiffusion = 0.002;
+    imu_sensor->GyroscopeNoiseDensity = 0.05;
+    imu_sensor->GyroscopeBiasDiffusion = 4.0e-05;
+
+    if (stereo) {
+      // snapdragon
+      imu_sensor->Rate = 500.0; // from calibration imu.yaml
+    } else {
+      // davis
+      imu_sensor->Rate = 1000.0; // from calibration imu.yaml
+    }
+
+    imu_sensor->Index = slamfile.Sensors.size();
+    slamfile.Sensors.AddSensor(imu_sensor);
+
+    if(!loadUZHFPVIMUData(dirname, slamfile, imu_sensor)) {
+      std::cerr << "Error while loading gt information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
+    }
+  }
 
   // load GT
   if (gt) {
