@@ -14,6 +14,7 @@
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
+#include <io/Event.h>
 #include <io/sensor/CameraSensor.h>
 #include <io/sensor/IMUSensor.h>
 #include <io/sensor/Sensor.h>
@@ -27,6 +28,7 @@
 
 #include <iostream>
 
+#include <io/sensor/EventCameraSensor.h>
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
@@ -249,6 +251,92 @@ bool loadUZHFPVIMUData(const std::string &dirname,
   return true;
 }
 
+bool loadUZHFPVEventData(const std::string &dirname,
+                       SLAMFile &file,
+                       EventCameraSensor *event_sensor) {
+
+  using namespace slambench;
+
+  std::string line;
+
+  boost::smatch match;
+  std::ifstream infile(dirname + "/" + "events.txt");
+
+  const std::string& ts = RegexPattern::timestamp;
+  const std::string& ws = RegexPattern::whitespace;
+  const std::string& num = RegexPattern::integer;
+  const std::string& start = RegexPattern::start;
+  const std::string& end = RegexPattern::end;
+
+  // format: timestamp x y polarity
+  std::string expr = start
+      + ts  + ws             // timestamp
+      + num + ws             // x
+      + num + ws             // y
+      + num + end;           // polarity
+
+  boost::regex events_line = boost::regex(expr);
+  boost::regex comment = boost::regex(RegexPattern::comment);
+
+  std::vector<Event> events = {};
+
+  while (std::getline(infile, line)) {
+    if (line.empty()) {
+      continue;
+    } else if (boost::regex_match(line, match, comment)) {
+      continue;
+    } else if (boost::regex_match(line, match, events_line)) {
+
+      uint32_t timestampS = std::stoi(match[0]);
+      uint32_t timestampNs = std::stod(match[2]) * std::pow(10, 9 - match[2].length());
+
+      auto timestamp = TimeStamp{timestampS, timestampNs};
+      int x = std::stoi(match[3]);
+      int y = std::stoi(match[4]);
+      bool p = std::stoi(match[5]);
+
+      events.emplace_back(timestamp, x, y, p);
+
+    } else {
+      std::cerr << "Unknown line: " << line << std::endl;
+      return false;
+    }
+  }
+
+  size_t current_index = 0;
+  auto current_ts = events[current_index].ts_;
+  size_t i = current_index;
+
+  // loop runs once per SLAM Frame
+  while(current_index < events.size() - 1) {
+
+    auto event_frame = new SLAMInMemoryFrame();
+    event_frame->FrameSensor = event_sensor;
+    event_frame->Timestamp = current_ts;
+
+    // loop from current position until frame found with time difference greater than framerate
+    for(i = current_index; i < events.size(); ++i) {
+      auto delta = events[i].ts_ - current_ts;
+      if (delta > std::chrono::milliseconds{20}) break;
+    }
+
+    size_t count = (i - 1) - current_index;
+    size_t variable_size = sizeof(Event) * count;
+
+    // copy from and to points into malloc'd memory
+    event_frame->SetVariableSize(variable_size);
+    event_frame->Data = malloc(event_sensor->GetFrameSize(event_frame));
+    memcpy(event_frame->Data, &events[current_index], event_sensor->GetFrameSize(event_frame));
+
+    file.AddFrame(event_frame);
+
+    // set index to beginning of next frame
+    current_index = i;
+    current_ts = events[current_index].ts_;
+  }
+
+  return true;
+}
 
 SLAMFile *UZHFPVReader::GenerateSLAMFile() {
 
@@ -285,6 +373,21 @@ SLAMFile *UZHFPVReader::GenerateSLAMFile() {
 
   auto slamfile_ptr = new SLAMFile();
   auto &slamfile = *slamfile_ptr;
+
+  // load events data
+  if (events) {
+    auto event_sensor = new EventCameraSensor(dirname);
+    event_sensor->Width = 346;
+    event_sensor->Height = 260;
+    event_sensor->Index = slamfile.Sensors.size();
+    slamfile.Sensors.AddSensor(event_sensor);
+
+    if (!loadUZHFPVEventData(dirname, slamfile, event_sensor)) {
+      std::cerr << "Error while loading grey left stereo information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
+    }
+  }
 
   // load camera data
   if (stereo) {

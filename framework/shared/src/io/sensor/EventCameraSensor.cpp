@@ -58,4 +58,4 @@ class EventCameraSensorDeserialiser : public SensorDeserialiser {
 
 };
 
-static slambench::io::SensorDatabaseRegistration evcam_reg(EventCameraSensor::kEventCameraType, slambench::io::SensorDatabaseEntry(new EventCameraSensorSerialiser(), new EventCameraSensorDeserialiser(), false, false));
+static slambench::io::SensorDatabaseRegistration evcam_reg(EventCameraSensor::kEventCameraType, slambench::io::SensorDatabaseEntry(new EventCameraSensorSerialiser(), new EventCameraSensorDeserialiser(), false, true));
