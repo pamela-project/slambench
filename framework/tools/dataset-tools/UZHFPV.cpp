@@ -325,8 +325,10 @@ bool loadUZHFPVEventData(const std::string &dirname,
 
     // copy from and to points into malloc'd memory
     event_frame->SetVariableSize(variable_size);
-    event_frame->Data = malloc(event_sensor->GetFrameSize(event_frame));
-    memcpy(event_frame->Data, &events[current_index], event_sensor->GetFrameSize(event_frame));
+    event_frame->Data = malloc(variable_size);
+    std::cout << variable_size << std::endl;
+    std::cout << event_sensor->GetFrameSize(event_frame) << std::endl;
+    memcpy(event_frame->Data, &events[current_index], variable_size);
 
     file.AddFrame(event_frame);
 
