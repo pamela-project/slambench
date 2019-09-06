@@ -70,8 +70,6 @@ bool loadUZHFPVGreyData(const std::string& dirname,
       continue;
     } else if (boost::regex_match(line, match, grey_line)) {
 
-      std::cout << line << std::endl;
-
 //      int identifer = std::stoi(match[1]);
 
       int timestampS = std::stoi(match[2]);
@@ -326,8 +324,6 @@ bool loadUZHFPVEventData(const std::string &dirname,
     // copy from and to points into malloc'd memory
     event_frame->SetVariableSize(variable_size);
     event_frame->Data = malloc(variable_size);
-    std::cout << variable_size << std::endl;
-    std::cout << event_sensor->GetFrameSize(event_frame) << std::endl;
     memcpy(event_frame->Data, &events[current_index], variable_size);
 
     file.AddFrame(event_frame);
