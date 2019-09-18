@@ -250,8 +250,8 @@ bool loadUZHFPVIMUData(const std::string &dirname,
 }
 
 bool loadUZHFPVEventData(const std::string &dirname,
-                       SLAMFile &file,
-                       EventCameraSensor *event_sensor) {
+                         SLAMFile &file,
+                         EventCameraSensor *event_sensor) {
 
   using namespace slambench;
 
@@ -372,6 +372,8 @@ SLAMFile *UZHFPVReader::GenerateSLAMFile() {
   auto slamfile_ptr = new SLAMFile();
   auto &slamfile = *slamfile_ptr;
 
+  Sensor::pose_t pose = Eigen::Matrix4f::Identity();
+
   // load events data
   if (events) {
     auto event_sensor = new EventCameraSensor(dirname);
@@ -390,26 +392,13 @@ SLAMFile *UZHFPVReader::GenerateSLAMFile() {
   // load camera data
   if (stereo) {
 
-    // Parameters taken from indoor_forward calibration file: camchain-..indoor_forward_calib_snapdragon_cam.yaml
-
-    CameraSensor::intrinsics_t cam0_intrinsics = {278.66723066149086, 278.48991409740296,
-                                                  319.75221200593535, 241.96858910358173};
-
-    CameraSensor::distortion_coefficients_t cam0_distortion = {-0.013721808247486035, 0.020727425669427896,
-                                                               -0.012786476702685545, 0.0025242267320687625};
-
-    CameraSensor::intrinsics_t cam1_intrinsics = {277.61640629770613, 277.63749695723294,
-                                                  314.8944703346039, 236.04310050462587};
-
-    CameraSensor::distortion_coefficients_t cam1_distortion = {-0.008456929295619607, 0.011407590938612062,
-                                                               -0.006951788325762078, 0.0015368127092821786};
-
     // snapdragon stereo left
     auto left_sensor = GreySensorBuilder()
         .name("Grey Left Stereo")
         .size(640, 480)
-        .intrinsics(cam0_intrinsics)
-//        .distortion(CameraSensor::distortion_type_t::Equidistant, cam0_distortion)
+        .pose(pose)
+        .intrinsics(snapdragon_cam0_intrinsics)
+        .distortion(CameraSensor::distortion_type_t::Equidistant, snapdragon_cam0_distortion)
         .rate(30)
         .build();
 
@@ -426,8 +415,9 @@ SLAMFile *UZHFPVReader::GenerateSLAMFile() {
     auto right_sensor = GreySensorBuilder()
         .name("Grey Right Stereo")
         .size(640, 480)
-        .intrinsics(cam1_intrinsics)
-//        .distortion(CameraSensor::distortion_type_t::Equidistant, cam1_distortion)
+        .pose(pose)
+        .intrinsics(snapdragon_cam1_intrinsics)
+        .distortion(CameraSensor::distortion_type_t::Equidistant, snapdragon_cam1_distortion)
         .rate(30) // from paper
         .build();
 
@@ -441,20 +431,13 @@ SLAMFile *UZHFPVReader::GenerateSLAMFile() {
     }
 
   } else {
-    // Parameters taken from indoor_forward calibration file: camchain-..indoor_forward_calib_davis_cam.yaml
-
-    CameraSensor::intrinsics_t cam0_intrinsics = {172.98992850734132, 172.98303181090185,
-                                                  163.33639726024606, 134.99537889030861};
-
-    CameraSensor::distortion_coefficients_t cam0_distortion = {-0.027576733308582076, -0.006593578674675004,
-                                                               0.0008566938165177085, -0.00030899587045247486};
-
     // davis grey camera
     auto grey_sensor = GreySensorBuilder()
         .name("Grey")
         .size(346, 260)
-        .intrinsics(cam0_intrinsics)
-//        .distortion(CameraSensor::distortion_type_t::Equidistant, cam0_distortion)
+        .pose(pose)
+        .intrinsics(davis_intrinsics)
+        .distortion(CameraSensor::distortion_type_t::Equidistant, davis_distortion)
         .rate(50) // from paper
         .build();
 

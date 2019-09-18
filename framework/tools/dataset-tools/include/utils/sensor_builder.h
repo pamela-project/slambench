@@ -120,6 +120,10 @@ namespace slambench {
           sensor->CopyRadialTangentialDistortion(distortion_);
         }
 
+        if (distortion_type_ == CameraSensor::Equidistant) {
+          sensor->CopyEquidistantDistortion(distortion_);
+        }
+
         return sensor;
       }
     };
@@ -143,6 +147,10 @@ namespace slambench {
 
         if (distortion_type_ == CameraSensor::RadialTangential) {
           sensor->CopyRadialTangentialDistortion(distortion_);
+        }
+
+        if (distortion_type_ == CameraSensor::Equidistant) {
+          sensor->CopyEquidistantDistortion(distortion_);
         }
 
         return sensor;
@@ -170,6 +178,10 @@ namespace slambench {
           sensor->CopyRadialTangentialDistortion(distortion_);
         }
 
+        if (distortion_type_ == CameraSensor::Equidistant) {
+          sensor->CopyEquidistantDistortion(distortion_);
+        }
+
         return sensor;
       }
     };
@@ -193,6 +205,10 @@ namespace slambench {
 
         if (distortion_type_ == CameraSensor::RadialTangential) {
           sensor->CopyRadialTangentialDistortion(distortion_);
+        }
+
+        if (distortion_type_ == CameraSensor::Equidistant) {
+          sensor->CopyEquidistantDistortion(distortion_);
         }
 
         sensor->DisparityType = disparity_type_;
