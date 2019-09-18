@@ -10,6 +10,8 @@
 #ifndef IO_EVENT_H
 #define IO_EVENT_H
 
+#include <TimeStamp.h>
+
 namespace slambench {
   namespace io {
     
