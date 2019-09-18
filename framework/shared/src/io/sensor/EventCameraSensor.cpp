@@ -8,6 +8,8 @@
  */
 
 
+#include "io/serialisation/Serialiser.h"
+#include "io/deserialisation/Deserialiser.h"
 #include "io/sensor/EventCameraSensor.h"
 #include "io/sensor/SensorDatabase.h"
 
@@ -33,10 +35,11 @@ size_t EventCameraSensor::GetFrameSize(const SLAMFrame *frame) const {
 }
 
 class EventCameraSensorSerialiser : public SensorSerialiser {
-	bool SerialiseSensorSpecific(Serialiser* serialiser, const Sensor* sensor) override {
-		(void)serialiser;
-		(void)sensor;
-		return false;
+  bool SerialiseSensorSpecific(Serialiser* serialiser, const Sensor* s) override {
+		EventCameraSensor *sensor = (EventCameraSensor*)s;
+		serialiser->Write(&sensor->Width, sizeof(sensor->Width));
+		serialiser->Write(&sensor->Height, sizeof(sensor->Height));
+		return true;
 	}
 
 };
@@ -44,18 +47,27 @@ class EventCameraSensorSerialiser : public SensorSerialiser {
 
 class EventCameraSensorDeserialiser : public SensorDeserialiser {
 	bool InstantiateSensor(const Sensor::sensor_name_t &sensor_name, const Sensor::sensor_type_t &type, Sensor** s) override {
-		(void)type;
-		(void)s;
-		(void)sensor_name;
-		return false;
+		if(type != EventCameraSensor::kEventCameraType) {
+			return false;
+		}
+
+		*s = new EventCameraSensor(sensor_name);
+
+		return true;
 	}
-	bool DeserialiseSensorSpecific(Deserialiser* d, Sensor* s) override {
-		(void)d;
-		(void)s;
-		return false;
+
+	bool DeserialiseSensorSpecific(Deserialiser* deserialiser, Sensor* s) override {
+		EventCameraSensor *sensor = (EventCameraSensor*)s;
+
+		assert(sensor->GetType() == EventCameraSensor::kEventCameraType);
+
+		deserialiser->Read(&sensor->Width, sizeof(sensor->Width));
+		deserialiser->Read(&sensor->Height, sizeof(sensor->Height));
+          	
+		return true;
 	}
 
 
 };
 
-static slambench::io::SensorDatabaseRegistration evcam_reg(EventCameraSensor::kEventCameraType, slambench::io::SensorDatabaseEntry(new EventCameraSensorSerialiser(), new EventCameraSensorDeserialiser(), false, false));
+static slambench::io::SensorDatabaseRegistration evcam_reg(EventCameraSensor::kEventCameraType, slambench::io::SensorDatabaseEntry(new EventCameraSensorSerialiser(), new EventCameraSensorDeserialiser(), false, true));

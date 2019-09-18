@@ -445,6 +445,7 @@ datasets :
 	@echo "   - EuRoC MAV Dataset [Burri et al, IJJR'16]: https://projects.asl.ethz.ch/datasets/doku.php"
 	@echo "   - SVO sample dataset [Forster et al, ICRA 2014]: https://github.com/uzh-rpg/rpg_svo"
 	@echo "   - Bonn RGB-D Dynamic Dataset [Palazzolo et al, IROS'19]: http://www.ipb.uni-bonn.de/data/rgbd-dynamic-dataset/"
+	@echo "   - UZH-FPV Drone Racing Dataset [Delmerico et al, ICRA'19]: http://rpg.ifi.uzh.ch/uzh-fpv.html"
 	@echo "================================================================================================================="
 
 datasetslist:
@@ -553,6 +554,78 @@ datasetslist:
 	@echo "make ./datasets/BONN/rgbd_bonn_static_close_far.slam"
 	@echo ""
 	@echo ""
+	@echo "### UZH FPV Drone Indoor forward facing"
+	@echo ""
+	@echo "make ./datasets/UZHFPV/indoor_forward_3_snapdragon_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_forward_3_davis_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_forward_5_snapdragon_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_forward_5_davis_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_forward_6_snapdragon_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_forward_6_davis_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_forward_7_snapdragon_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_forward_7_davis_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_forward_8_snapdragon.slam"
+	@echo "make ./datasets/UZHFPV/indoor_forward_8_davis.slam"
+	@echo "make ./datasets/UZHFPV/indoor_forward_9_snapdragon_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_forward_9_davis_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_forward_10_snapdragon_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_forward_10_davis_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_forward_11_snapdragon.slam"
+	@echo "make ./datasets/UZHFPV/indoor_forward_11_davis.slam"
+	@echo "make ./datasets/UZHFPV/indoor_forward_12_snapdragon.slam"
+	@echo "make ./datasets/UZHFPV/indoor_forward_12_davis.slam"
+	@echo ""
+	@echo ""
+	@echo "### UZH FPV Drone Indoor 45 degree downward facing"
+	@echo ""
+	@echo "make ./datasets/UZHFPV/indoor_45_1_snapdragon.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_1_davis.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_2_snapdragon_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_2_davis_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_3_snapdragon.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_3_davis.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_4_snapdragon_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_4_davis_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_9_snapdragon_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_9_davis_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_11_snapdragon.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_11_davis.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_12_snapdragon_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_12_davis_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_13_snapdragon_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_13_davis_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_14_snapdragon_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_14_davis_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_16_snapdragon.slam"
+	@echo "make ./datasets/UZHFPV/indoor_45_16_davis.slam"
+	@echo ""
+	@echo ""
+	@echo "### UZH FPV Drone Outdoor forward facing"
+	@echo ""
+	@echo "make ./datasets/UZHFPV/outdoor_forward_1_snapdragon_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/outdoor_forward_1_davis_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/outdoor_forward_2_snapdragon.slam"
+	@echo "make ./datasets/UZHFPV/outdoor_forward_2_davis.slam"
+	@echo "make ./datasets/UZHFPV/outdoor_forward_3_snapdragon_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/outdoor_forward_3_davis_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/outdoor_forward_5_snapdragon_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/outdoor_forward_5_davis_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/outdoor_forward_6_snapdragon.slam"
+	@echo "make ./datasets/UZHFPV/outdoor_forward_6_davis.slam"
+	@echo "make ./datasets/UZHFPV/outdoor_forward_9_snapdragon.slam"
+	@echo "make ./datasets/UZHFPV/outdoor_forward_9_davis.slam"
+	@echo "make ./datasets/UZHFPV/outdoor_forward_10_snapdragon.slam"
+	@echo "make ./datasets/UZHFPV/outdoor_forward_10_davis.slam"
+	@echo ""
+	@echo ""
+	@echo "### UZH FPV Drone Outdoor 45 degree downward facing"
+	@echo ""
+	@echo "make ./datasets/UZHFPV/outdoor_45_1_snapdragon_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/outdoor_45_1_davis_with_gt.slam"
+	@echo "make ./datasets/UZHFPV/outdoor_45_2_snapdragon.slam"
+	@echo "make ./datasets/UZHFPV/outdoor_45_2_davis.slam"
+	@echo ""
+	@echo ""
 	@echo "### SVO test dataset"
 	@echo ""
 	@echo "make datasets/SVO/artificial.slam"
@@ -565,6 +638,7 @@ datasetslist:
 	@echo "   - EuRoC MAV Dataset [Burri et al, IJJR'16]: https://projects.asl.ethz.ch/datasets/doku.php"
 	@echo "   - SVO sample dataset [Forster et al, ICRA 2014]: https://github.com/uzh-rpg/rpg_svo"
 	@echo "   - Bonn RGB-D Dynamic Dataset [Palazzolo et al, IROS'19]: http://www.ipb.uni-bonn.de/data/rgbd-dynamic-dataset/"
+	@echo "   - UZH-FPV Drone Racing Dataset [Delmerico et al, ICRA'19]: http://rpg.ifi.uzh.ch/uzh-fpv.html"
 	@echo "================================================================================================================="
 
 .PHONY: slambench benchmarks benchmarkslist datasets datasetslist
@@ -682,6 +756,35 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 #	./build/bin/dataset-generator -d bonn -i $</* -o $@ -grey true -rgb true -gt true -depth true -ply datasets/BONN/rgbd_bonn_groundtruth.ply
 
 
+#### UZHFPV Drone
+###############
+
+./datasets/UZHFPV/%.zip :  # Example : $* = indoor_foward_3_snapdragon_with_gt
+	echo download $*.zip
+	mkdir -p $(@D)
+	cd $(@D)  &&  ${WGET} "http://rpg.ifi.uzh.ch/datasets/uzh-fpv/$*.zip"
+
+./datasets/UZHFPV/%.dir : ./datasets/UZHFPV/%.zip
+	mkdir $@
+	unzip $< -d $@
+
+./datasets/UZHFPV/%_snapdragon_with_gt.slam :  ./datasets/UZHFPV/%_snapdragon_with_gt.dir
+	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	./build/bin/dataset-generator -d uzhfpv -i $< -o $@ -imu true --stereo true --event false -gt true
+
+./datasets/UZHFPV/%_davis_with_gt.slam :  ./datasets/UZHFPV/%_davis_with_gt.dir
+	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	./build/bin/dataset-generator -d uzhfpv -i $< -o $@ -imu true --stereo false --event true -gt true
+
+./datasets/UZHFPV/%_snapdragon.slam :  ./datasets/UZHFPV/%_snapdragon.dir
+	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	./build/bin/dataset-generator -d uzhfpv -i $< -o $@ -imu true --stereo true --event false -gt false
+
+./datasets/UZHFPV/%_davis.slam :  ./datasets/UZHFPV/%_davis.dir
+	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	./build/bin/dataset-generator -d uzhfpv -i $< -o $@ -imu true --stereo false --event true -gt false
+
+
 #### ORBSLAM Voc
 #################
 
@@ -698,7 +801,9 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 ./datasets/ICL_NUIM/living_room_traj%_loop.raw \
 ./datasets/BONN/%.zip \
 ./datasets/BONN/%.ply \
-./datasets/BONN/%.dir
+./datasets/BONN/%.dir \
+./datasets/UZHFPV/%.dir \
+./datasets/UZHFPV/%.zip
 
 ####################################
 ####    BUILD/CLEAN TOOL        ####
