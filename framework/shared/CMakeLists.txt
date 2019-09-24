@@ -163,7 +163,7 @@ add_library(slambench-utils
     src/ParameterManager
 )
 
-
+target_include_directories(slambench-utils  PRIVATE ${Boost_INCLUDE_DIRS})
 target_include_directories(slambench-io  PRIVATE ${Boost_INCLUDE_DIRS})
 target_include_directories(slambench-metrics PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(slambench-io PRIVATE slambench-utils pthread  ${Boost_LIBRARIES})

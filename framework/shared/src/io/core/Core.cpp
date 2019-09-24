@@ -9,6 +9,7 @@
 
 
 
+#include <string>
 #include "io/core/Core.h"
 
 using namespace slambench::io::core;
