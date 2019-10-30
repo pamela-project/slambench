@@ -24,10 +24,14 @@
 #include <pangolin/pangolin.h>
 
 
+#define THREAD_COMPUTE
+#undef  THREAD_GUI
+
 std::string alignment_technique = "original";
 std::string default_alignment_technique = "original";
 
 void run_pangolin(bool *stay_on, SLAMBenchConfiguration *config);
+void run_compute (bool *stay_on, SLAMBenchConfiguration *config);
 static SLAMBenchUI * volatile ui = nullptr;
 
 int main(int argc, char * argv[])
@@ -112,23 +116,28 @@ int main(int argc, char * argv[])
 		// We Start the GUI
 		//***************************************************************************************
 
-
 		bool stay_on = true;
+
+#ifdef THREAD_GUI
 		std::thread pangolin_thread(run_pangolin, &stay_on, config);
-		while(ui == nullptr) ; // spin until UI is initialised
+#else
+		run_pangolin (&stay_on, config);
+#endif // THREAD_GUI
 
-		//***************************************************************************************
-		// We Start the Experiment
-		//***************************************************************************************
+#ifdef THREAD_COMPUTE
+		std::thread compute_thread(run_compute, &stay_on, config);
+#else
+		run_compute (&stay_on, config);
+#endif // THREAD_COMPUTE
 
-		SLAMBenchConfiguration::compute_loop_algorithm( config, &stay_on, ui);
+#ifdef THREAD_COMPUTE
+		compute_thread.join();
+#endif // THREAD_COMPUTE
 
-		//***************************************************************************************
-		// We End and wait until the GUI stop
-		//***************************************************************************************
-
-		stay_on = false;
+#ifdef THREAD_GUI
 		pangolin_thread.join();
+#endif // THREAD_GUI
+
 
 	} catch (const SLAMBenchException& e) {
 
@@ -140,6 +149,22 @@ int main(int argc, char * argv[])
 	return 0;
 }
 
+void run_compute(bool *stay_on, SLAMBenchConfiguration *config) {
+
+	while(ui == nullptr) ; // spin until UI is initialised
+
+	//***************************************************************************************
+	// We Start the Experiment
+	//***************************************************************************************
+
+	SLAMBenchConfiguration::compute_loop_algorithm( config, stay_on, ui);
+
+	//***************************************************************************************
+	// We End and wait until the GUI stop
+	//***************************************************************************************
+
+	*stay_on = false;
+}
 void run_pangolin(bool *stay_on, SLAMBenchConfiguration *config) {
 	std::cerr << "Creation of GUI interface." << std::endl;
 	SLAMBenchUI_Pangolin * ui_pangolin = new SLAMBenchUI_Pangolin();
