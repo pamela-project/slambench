@@ -26,8 +26,8 @@ endif()
 
 set(OPTFLAGS "-O3")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g ${OPTFLAGS}                 -Wall -Wno-unknown-pragmas -Wextra -Werror -Wno-error=deprecated-declarations -Wno-error=unused-result -Wno-error=reorder ")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g ${OPTFLAGS} --std=c++11 -Wall -Wno-unknown-pragmas -Wextra -Werror -Wno-error=deprecated-declarations -Wno-error=unused-result -Wno-error=reorder ")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g ${OPTFLAGS}                 -Wall -Wno-unknown-pragmas -Wextra -Werror -Wno-error=deprecated-copy -Wno-error=deprecated-declarations -Wno-error=unused-result -Wno-error=reorder ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g ${OPTFLAGS} --std=c++11 -Wall -Wno-unknown-pragmas -Wextra -Werror -Wno-error=deprecated-copy -Wno-error=deprecated-declarations -Wno-error=unused-result -Wno-error=reorder ")
 
 
 if(APPLE)
