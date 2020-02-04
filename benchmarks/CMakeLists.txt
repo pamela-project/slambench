@@ -23,12 +23,16 @@ if (CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}     -Wno-error=implicit-fallthrough= -Wno-int-in-bool-context ")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=implicit-fallthrough= -Wno-int-in-bool-context ")
   endif()
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 9.0)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}     -Wno-error=deprecated-copy")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=deprecated-copy")
+  endif()
 endif()
 
 set(OPTFLAGS "-O3")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g ${OPTFLAGS}                 -Wall -Wno-unknown-pragmas -Wextra  -Wno-error=deprecated-declarations -Wno-error=unused-result -Wno-error=reorder ")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g ${OPTFLAGS} --std=c++11 -Wall -Wno-unknown-pragmas -Wextra  -Wno-error=deprecated-declarations -Wno-error=unused-result -Wno-error=reorder ")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g ${OPTFLAGS}                 -Wall -Wno-unknown-pragmas -Wextra -Wno-error=deprecated-declarations -Wno-error=unused-result -Wno-error=reorder")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g ${OPTFLAGS} --std=c++11 -Wall -Wno-unknown-pragmas -Wextra -Wno-error=deprecated-declarations -Wno-error=unused-result -Wno-error=reorder")
 
 
 if(APPLE)
