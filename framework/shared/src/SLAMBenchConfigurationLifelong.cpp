@@ -139,22 +139,7 @@ void dataset_callback(Parameter* param, ParameterComponent* caller) {
 
     TypedParameter<std::vector<std::string>>* parameter =  dynamic_cast<TypedParameter<std::vector<std::string>>*>(param) ;
 
-    std::string input_name = parameter->getTypedValue()[0];
-    std::size_t found = input_name.find_last_of("/");
-    std::string scene = input_name.substr(found + 1, 20);
-    std::size_t found2 = scene.find("-");
-    std::size_t found3 = scene.find("-", found2 + 1);
-    scene = scene.substr(0, found3);
-
     for (std::string input_name : parameter->getTypedValue()) {
-        std::size_t found_ = input_name.find_last_of("/");
-        std::string scene_ = input_name.substr(found_ + 1, 20);
-        std::size_t found2_ = scene_.find("-");
-        std::size_t found3_ = scene_.find("-", found2_ + 1);
-        scene_ = scene_.substr(0, found3_);
-        if(scene_ != scene) {
-            throw std::logic_error("input sequences must be the same scene!");
-        }
         config->add_input(input_name);
         config->input_filenames.push_back(input_name);
     }

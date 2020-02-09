@@ -300,123 +300,51 @@ bool loadOpenLORISDepthData(const std::string &dirname, const std::string &senso
 }
 
 
-bool loadOpenLORISRGBData(const std::string &dirname, const std::string &sensor_name, SLAMFile &file) {
-	std::string filename = dirname + "/sensors.yaml";
-	YAML::Node f = YAML::LoadFile(filename.c_str());
+bool loadOpenLORISImageData(const std::string &dirname,          // directory of data
+                            const std::string &name_in_yaml,     // sensor name in sensors.yaml
+                            const std::string &index_filename,   // filename of the data index (.txt)
+                            bool greyscale,
+                            SLAMFile &file,
+						    const std::string &out_sensor_name)  // name in .slam, should be identical
+{
+	YAML::Node yaml = YAML::LoadFile((dirname + "/sensors.yaml").c_str());
 
-	CameraSensor *rgb_sensor = new CameraSensor("RGB", CameraSensor::kCameraType);
-	rgb_sensor->Index = 0;
-	rgb_sensor->Width = f[sensor_name]["width"].as<int>();
-	rgb_sensor->Height = f[sensor_name]["height"].as<int>();
-	rgb_sensor->FrameFormat = frameformat::Raster;
-	rgb_sensor->PixelFormat = pixelformat::RGB_III_888;
-	rgb_sensor->Description = "RGB";
-	Eigen::Matrix4f pose = compute_trans_matrix("base_link", sensor_name, dirname + "/trans_matrix.yaml");
-	rgb_sensor->CopyPose(pose);
+	CameraSensor *sensor = new CameraSensor(out_sensor_name, CameraSensor::kCameraType);
+	sensor->Index = 0;
+	sensor->Width = yaml[name_in_yaml]["width"].as<int>();
+	sensor->Height = yaml[name_in_yaml]["height"].as<int>();
+	sensor->FrameFormat = frameformat::Raster;
+	sensor->PixelFormat = greyscale ? pixelformat::G_I_8 : pixelformat::RGB_III_888;
+	sensor->Description = greyscale ? "Grey" : "RGB";
+	Eigen::Matrix4f pose = compute_trans_matrix("base_link", name_in_yaml, dirname + "/trans_matrix.yaml");
+	sensor->CopyPose(pose);
 
-	rgb_sensor->Intrinsics[0] = f[sensor_name]["intrinsics"]["data"][0].as<float>() / rgb_sensor->Width;
-	rgb_sensor->Intrinsics[1] = f[sensor_name]["intrinsics"]["data"][2].as<float>() / rgb_sensor->Height;
-	rgb_sensor->Intrinsics[2] = f[sensor_name]["intrinsics"]["data"][1].as<float>() / rgb_sensor->Width;
-	rgb_sensor->Intrinsics[3] = f[sensor_name]["intrinsics"]["data"][3].as<float>() / rgb_sensor->Height;
+	sensor->Intrinsics[0] = yaml[name_in_yaml]["intrinsics"]["data"][0].as<float>() / sensor->Width;
+	sensor->Intrinsics[1] = yaml[name_in_yaml]["intrinsics"]["data"][2].as<float>() / sensor->Height;
+	sensor->Intrinsics[2] = yaml[name_in_yaml]["intrinsics"]["data"][1].as<float>() / sensor->Width;
+	sensor->Intrinsics[3] = yaml[name_in_yaml]["intrinsics"]["data"][3].as<float>() / sensor->Height;
 
-	if (f[sensor_name]["distortion_model"].as<std::string>() == "radial-tangential") {
-		rgb_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
-		rgb_sensor->RadialTangentialDistortion[0] = f[sensor_name]["distortion_coefficients"]["data"][0].as<float>();
-		rgb_sensor->RadialTangentialDistortion[1] = f[sensor_name]["distortion_coefficients"]["data"][1].as<float>();
-		rgb_sensor->RadialTangentialDistortion[2] = f[sensor_name]["distortion_coefficients"]["data"][2].as<float>();
-		rgb_sensor->RadialTangentialDistortion[3] = f[sensor_name]["distortion_coefficients"]["data"][3].as<float>();
-		rgb_sensor->RadialTangentialDistortion[4] = 0;//??
-	}
-	rgb_sensor->Index =file.Sensors.size();
-	rgb_sensor->Rate = f[sensor_name]["fps"].as<float>();
-
-	file.Sensors.AddSensor(rgb_sensor);
-
-	std::string line;
-
-	std::ifstream infile(dirname + "/" + "color.txt");
-
-	boost::smatch match;
-
-	while (std::getline(infile, line)){
-
-
-		if (line.size() == 0) {
-			continue;
-		} else if (boost::regex_match(line,match,boost::regex("^\\s*#.*$"))) {
-			continue;
-		} else if (boost::regex_match(line,match,boost::regex("^([0-9]+)[.]([0-9]+)\\s+(.*)$"))) {
-
-		  int timestampS = std::stoi(match[1]);
-		  int timestampNS = std::stoi(match[2]) *  std::pow ( 10, 9 - match[2].length());
-		  std::string rgbfilename = match[3];
-
-		  ImageFileFrame *rgb_frame = new ImageFileFrame();
-		  rgb_frame->FrameSensor = rgb_sensor;
-		  rgb_frame->Timestamp.S  = timestampS;
-		  rgb_frame->Timestamp.Ns = timestampNS;
-
-		  std::stringstream frame_name;
-		  frame_name << dirname << "/" << rgbfilename ;
-		  rgb_frame->Filename = frame_name.str();
-
-		  if(access(rgb_frame->Filename.c_str(), F_OK) < 0) {
-		    printf("No RGB image for frame (%s)\n", frame_name.str().c_str());
-		    perror("");
-		    return false;
-		  }
-
-		  file.AddFrame(rgb_frame);
-
-		} else {
-		  std::cerr << "Unknown line:" << line << std::endl;
-		  return false;
-		}
-
-	}
-	return true;
-}
-
-bool loadOpenLORISGreyData(const std::string &dirname, const std::string &sensor_name, const std::string &source_name, SLAMFile &file) {
-	std::string filename = dirname + "/sensors.yaml";
-	YAML::Node f = YAML::LoadFile(filename.c_str());
-
-	CameraSensor *grey_sensor = new CameraSensor(sensor_name, CameraSensor::kCameraType);
-	grey_sensor->Index = 0;
-	grey_sensor->Width = f[sensor_name]["width"].as<int>();
-	grey_sensor->Height = f[sensor_name]["height"].as<int>();
-	grey_sensor->FrameFormat = frameformat::Raster;
-	grey_sensor->PixelFormat = pixelformat::G_I_8;
-	grey_sensor->Description = "Grey";
-	Eigen::Matrix4f pose = compute_trans_matrix("base_link", sensor_name, dirname + "/trans_matrix.yaml");
-	grey_sensor->CopyPose(pose);
-
-	grey_sensor->Intrinsics[0] = f[sensor_name]["intrinsics"]["data"][0].as<float>() / grey_sensor->Width;
-	grey_sensor->Intrinsics[1] = f[sensor_name]["intrinsics"]["data"][2].as<float>() / grey_sensor->Height;
-	grey_sensor->Intrinsics[2] = f[sensor_name]["intrinsics"]["data"][1].as<float>() / grey_sensor->Width;
-	grey_sensor->Intrinsics[3] = f[sensor_name]["intrinsics"]["data"][3].as<float>() / grey_sensor->Height;
-
-	if (f[sensor_name]["distortion_model"].as<std::string>() == "radial-tangential") {
-		grey_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
-	} else if (f[sensor_name]["distortion_model"].as<std::string>() == "Kannala-Brandt") {
-		grey_sensor->DistortionType = slambench::io::CameraSensor::KannalaBrandt;
+	if (yaml[name_in_yaml]["distortion_model"].as<std::string>() == "radial-tangential") {
+		sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
+	} else if (yaml[name_in_yaml]["distortion_model"].as<std::string>() == "Kannala-Brandt") {
+		sensor->DistortionType = slambench::io::CameraSensor::KannalaBrandt;
 	}
 
-	grey_sensor->RadialTangentialDistortion[0] = f[sensor_name]["distortion_coefficients"]["data"][0].as<float>();
-	grey_sensor->RadialTangentialDistortion[1] = f[sensor_name]["distortion_coefficients"]["data"][1].as<float>();
-	grey_sensor->RadialTangentialDistortion[2] = f[sensor_name]["distortion_coefficients"]["data"][2].as<float>();
-	grey_sensor->RadialTangentialDistortion[3] = f[sensor_name]["distortion_coefficients"]["data"][3].as<float>();
-	grey_sensor->RadialTangentialDistortion[4] = 0;
-	grey_sensor->Index =file.Sensors.size();
-	grey_sensor->Rate = f[sensor_name]["fps"].as<float>();
+	sensor->RadialTangentialDistortion[0] = yaml[name_in_yaml]["distortion_coefficients"]["data"][0].as<float>();
+	sensor->RadialTangentialDistortion[1] = yaml[name_in_yaml]["distortion_coefficients"]["data"][1].as<float>();
+	sensor->RadialTangentialDistortion[2] = yaml[name_in_yaml]["distortion_coefficients"]["data"][2].as<float>();
+	sensor->RadialTangentialDistortion[3] = yaml[name_in_yaml]["distortion_coefficients"]["data"][3].as<float>();
+	sensor->RadialTangentialDistortion[4] = 0;
+	sensor->Index =file.Sensors.size();
+	sensor->Rate = yaml[name_in_yaml]["fps"].as<float>();
 
-	file.Sensors.AddSensor(grey_sensor);
+	file.Sensors.AddSensor(sensor);
 
 	std::cout<<"Grey camera sensor created..."<<std::endl;
 
 	std::string line;
 
-	std::ifstream infile(dirname + "/" + source_name + ".txt");
+	std::ifstream infile(dirname + "/" + index_filename);
 
 	boost::smatch match;
 
@@ -434,7 +362,7 @@ bool loadOpenLORISGreyData(const std::string &dirname, const std::string &sensor
 		  std::string rgbfilename = match[3];
 
 		  ImageFileFrame *grey_frame = new ImageFileFrame();
-		  grey_frame->FrameSensor = grey_sensor;
+		  grey_frame->FrameSensor = sensor;
 		  grey_frame->Timestamp.S  = timestampS;
 		  grey_frame->Timestamp.Ns = timestampNS;
 
@@ -828,7 +756,7 @@ SLAMFile* OpenLORISReader::GenerateSLAMFile () {
 	 * load RGB
 	 */
 
-	if(color && !loadOpenLORISRGBData(dirname, "d400_color_optical_frame", slamfile)) {
+	if(color && !loadOpenLORISImageData(dirname, "d400_color_optical_frame", "color.txt", false, slamfile, "RGB")) {
 		std::cout << "Error while loading OpenLORIS RGB information." << std::endl;
 		delete slamfilep;
 		return nullptr;
@@ -838,7 +766,7 @@ SLAMFile* OpenLORISReader::GenerateSLAMFile () {
 	 * load Grey
 	 */
 
-	if(grey && !loadOpenLORISGreyData(dirname, "d400_color_optical_frame", "color", slamfile)) {
+	if(grey && !loadOpenLORISImageData(dirname, "d400_color_optical_frame", "color.txt", true, slamfile, "Grey")) {
 		std::cout << "Error while loading OpenLORIS Grey information." << std::endl;
 		delete slamfilep;
 		return nullptr;
@@ -884,13 +812,13 @@ SLAMFile* OpenLORISReader::GenerateSLAMFile () {
 	 * load Fisheyes
 	 */
 
-	if(fisheye1 && !loadOpenLORISGreyData(dirname, "t265_fisheye1_optical_frame", "fisheye1", slamfile)) {
+	if(fisheye1 && !loadOpenLORISImageData(dirname, "t265_fisheye1_optical_frame", "fisheye1.txt", true, slamfile, "t265_fisheye1")) {
 		std::cout << "Error while loading OpenLORIS fisheye1 information." << std::endl;
 		delete slamfilep;
 		return nullptr;
 	}
 
-	if(fisheye2 && !loadOpenLORISGreyData(dirname, "t265_fisheye2_optical_frame", "fisheye2", slamfile)) {
+	if(fisheye2 && !loadOpenLORISImageData(dirname, "t265_fisheye2_optical_frame", "fisheye2.txt", true, slamfile, "t265_fisheye2")) {
 		std::cout << "Error while loading OpenLORIS fisheye2 information." << std::endl;
 		delete slamfilep;
 		return nullptr;

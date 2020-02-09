@@ -683,8 +683,19 @@ datasets/OpenLORIS/%.slam : ./datasets/OpenLORIS/%.dir
 	echo "Generated $@"
 
 datasets/OpenLORIS/%.all :
-	scene=datasets/OpenLORIS/$*; for f in $$scene*-package.tar; do echo $$f && mkdir -p $$scene && tar xvf $$f -C $$scene; done
-	scene=datasets/OpenLORIS/$*; for f in $$scene/*.7z; do target=`echo $$f | tr .7z .sl`am && $(MAKE) $$target; done
+	# if there are any tar, untar them; then build each 7z into a slam file
+	scene=datasets/OpenLORIS/$*; \
+	if [ -f $$scene*-package.tar ]; then \
+		mkdir -p $$scene; \
+		for f in $$scene*-package.tar; do \
+			echo $$f && tar xvf $$f -C $$scene; \
+		done; \
+	fi; \
+	for f in $$scene/*.7z; do \
+		target=`echo $$f | tr .7z .sl`am ; \
+		echo =============== $$target =============== ; \
+		$(MAKE) $$target; \
+	done
 
 .SECONDARY: $(OBJS)
 
