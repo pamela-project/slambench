@@ -21,6 +21,14 @@ bool CUDAMonitor::Init() {
 		if (libcuda_cudaMemGetInfo == nullptr) {
 			std::cerr << "*** CUDA Monitor: cudaMemGetInfo is not available" << std::endl;
 		}
+    libcuda_cudaGetDeviceProperties = (cudaGetDeviceProperties_t)dlsym(RTLD_NEXT, "cudaGetDeviceProperties");
+    if (libcuda_cudaGetDeviceProperties == nullptr) {
+        std::cerr << "*** CUDA Monitor: cudaGetDeviceProperties is not available" << std::endl;
+    } else {
+        cudaDeviceProp prop;
+        libcuda_cudaGetDeviceProperties(&prop, 0);
+        device_name = prop.name;
+    }
 	 return libcuda_cudaMemGetInfo != nullptr;
 }
 

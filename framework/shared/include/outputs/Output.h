@@ -55,6 +55,7 @@ namespace slambench {
 			
 			void AddUpdateCallback(callback_t callback) { update_callbacks_.push_back(callback); }
 			void RemoveUpdateCallback(callback_t callback);
+			virtual void reset() {}
 		protected:
 			void Updated() const;
 			
@@ -80,6 +81,9 @@ namespace slambench {
 
 			const value_map_t &GetValues() const override;
 			const value_map_t::value_type &GetMostRecentValue() const override;
+			void reset() override {
+				values_.clear();
+			}
 		private:
 			value_map_t  values_;
 		};
@@ -111,10 +115,14 @@ namespace slambench {
 			virtual ~AlignmentOutput();
 			
 			void Recalculate() override;
+			Eigen::Matrix4f& getTransformation() {
+				return transformation;
+			}
 		private:
 			TrajectoryInterface *gt_trajectory_;
 			BaseOutput *trajectory_;
 			TrajectoryAlignmentMethod *method_;
+			Eigen::Matrix4f transformation;
 		};
 		
 		class AlignedPoseOutput : public DerivedOutput {

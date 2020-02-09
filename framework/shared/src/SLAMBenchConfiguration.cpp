@@ -228,6 +228,29 @@ SLAMBenchConfiguration::SLAMBenchConfiguration () :
 
 };
 
+SLAMBenchConfiguration::SLAMBenchConfiguration (void (*custom_input_callback)(Parameter*, ParameterComponent*),void (*libs_callback)(Parameter*, ParameterComponent*)) :
+				ParameterComponent("") , input_stream_(nullptr)  {
+
+	initialised_ = false;
+	this->input_interface = NULL;
+	this->log_stream = NULL;
+	this->library_names = {};
+
+	// Run Related
+	this->addParameter(TypedParameter<unsigned int>("fl",     "frame-limit",      "last frame to compute",                   &this->frame_limit, &default_frame_limit));
+	this->addParameter(TypedParameter<std::string>("o",     "log-file",      "Output log file",                   &this->log_file, &default_log_file, log_callback));
+	this->addParameter(TypedParameter<std::vector<std::string>>("i",     "input" ,        "Specify the input file or mode." ,  &this->input_files, &default_input_files , custom_input_callback ));
+	this->addParameter(TypedParameter<std::vector<std::string> >("load",  "load-slam-library" , "Load a specific SLAM library."     , &this->library_names, &default_libraries , libs_callback ));
+	this->addParameter(TriggeredParameter("dse",   "dse",    "Output solution space of parameters.",    dse_callback));
+	this->addParameter(TriggeredParameter("h",     "help",   "Print the help.", help_callback));
+    this->addParameter(TypedParameter<bool>("realtime",     "realtime-mode",      "realtime frame loading mode",                   &this->realtime_mode_, &default_is_false));
+    this->addParameter(TypedParameter<double>("realtime-mult",     "realtime-multiplier",      "realtime frame loading mode",                   &this->realtime_mult_, &default_realtime_mult));
+
+	param_manager_.AddComponent(this);
+
+};
+
+
 void SLAMBenchConfiguration::start_statistics () {
 
 	get_log_stream().setf(std::ios::fixed, std::ios::floatfield);

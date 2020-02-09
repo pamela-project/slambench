@@ -25,6 +25,7 @@
 #include "include/SVO.h"
 #include "include/TUM.h"
 #include "include/UZHFPV.h"
+#include "include/OpenLORIS.h"
 
 using namespace slambench::io;
 
@@ -83,6 +84,8 @@ class MainComponent : public ParameterComponent {
       config->reader = new BONNReader("");
     } else if (dataset_name == "uzhfpv") {
       config->reader = new UZHFPVReader("");
+    } else if (dataset_name == "OpenLORIS") {
+      config->reader = new OpenLORISReader("");
     }
 
   if (config->reader) {
@@ -118,7 +121,7 @@ class MainComponent : public ParameterComponent {
 
     this->addParameter(TypedParameter<std::string>("d", "dataset",
                                                    "Name of the input dataset type "
-                                                   "(iclnuim, tum, eurocmav, icl, svo, bonn)",
+                                                   "(iclnuim, tum, eurocmav, icl, svo, bonn, OpenLORIS)",
                                                    &this->dataset, nullptr, this->dataset_callback));
 
     this->addParameter(TypedParameter<std::string>("o",

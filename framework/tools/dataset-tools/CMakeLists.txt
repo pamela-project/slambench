@@ -25,6 +25,10 @@ if (Boost_FOUND)
 	add_library(SVO SVO.cpp)
 	target_link_libraries(SVO slambench-io ${Boost_LIBRARIES})
 	target_include_directories(SVO PRIVATE ${Boost_INCLUDE_DIRS})
+
+	add_library(OpenLORIS OpenLORIS.cpp)
+	target_link_libraries(OpenLORIS slambench-io ${Boost_LIBRARIES})
+	target_include_directories(OpenLORIS PRIVATE ${Boost_INCLUDE_DIRS})
 	
 	add_library(ICL ICL.cpp)
 	target_link_libraries(ICL slambench-io ${Boost_LIBRARIES})
@@ -47,7 +51,7 @@ if (Boost_FOUND)
 	target_include_directories(ICLNUIM PRIVATE ${Boost_INCLUDE_DIRS})
     
 	add_executable(dataset-generator dataset-generator.cpp)
-	target_link_libraries(dataset-generator TUM ICLNUIM ICL EUROCMAV SVO BONN UZHFPV)
+	target_link_libraries(dataset-generator TUM ICLNUIM ICL EUROCMAV SVO BONN UZHFPV OpenLORIS)
 
 else (Boost_FOUND)
     message(STATUS "Dataset generators require Boost.")

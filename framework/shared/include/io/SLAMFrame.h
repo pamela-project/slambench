@@ -100,6 +100,9 @@ namespace slambench {
 			
 			void *GetData() override;
 			void FreeData() override;
+			FrameBuffer& getFrameBuffer() {
+				return _buffer;
+			}
 			
 		private:
 			FrameBuffer &_buffer;

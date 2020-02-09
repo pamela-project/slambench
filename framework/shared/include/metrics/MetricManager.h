@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 
+
 namespace slambench {
 	namespace metrics {
 		
@@ -61,6 +62,34 @@ namespace slambench {
 
 			void BeginInit();
 			void EndInit();
+
+			void reset() {
+				// for(auto i : all_metrics_) {
+				// 	delete i;
+				// }
+				// for(auto i : frame_data_) {
+				// 	delete i;
+				// }
+				// for(auto i : frame_metrics_) {
+				// 	delete i;
+				// }
+				// for(auto i : phase_metrics_) {
+				// 	delete i;
+				// }
+				// for(auto i : phases_) {
+				// 	delete i;
+				// }
+				all_metrics_.clear();
+				frame_data_.clear();
+				frame_metrics_.clear();
+				phase_metrics_.clear();
+				// phases_.clear();
+			}
+
+			std::vector<double>& getDuration() {
+				return frame_phase_duration;
+			}
+
 		private:
 			metric_list_t frame_metrics_;
 			metric_list_t phase_metrics_;
@@ -74,6 +103,9 @@ namespace slambench {
 			Phase frame_phase_;
 			
 			uint64_t frame_counter_;
+
+			char duration_metric_typeid[100];
+			std::vector<double> frame_phase_duration;
 		};
 	}
 }

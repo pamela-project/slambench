@@ -20,6 +20,10 @@ add_executable(benchmark_loader benchmark_loader.cpp)
 TARGET_INCLUDE_DIRECTORIES(benchmark_loader PUBLIC ${SLAMBENCH_INCLUDE_DIR})
 target_link_libraries(benchmark_loader PRIVATE pthread ${SLAMBENCH_LIBRARIES})
 
+add_executable(lifelong_loader lifelong_loader.cpp)
+TARGET_INCLUDE_DIRECTORIES(lifelong_loader PUBLIC ${SLAMBENCH_INCLUDE_DIR})
+target_link_libraries(lifelong_loader PRIVATE pthread ${SLAMBENCH_LIBRARIES})
+
 find_package(Pangolin QUIET)
 find_package(TOON QUIET)
 

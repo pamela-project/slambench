@@ -631,6 +631,20 @@ datasetslist:
 	@echo "make datasets/SVO/artificial.slam"
 	@echo ""
 	@echo ""
+	@echo "### OpenLORIS-Scene datasets"
+	@echo ""
+	@echo "# SLAMBench cannot download OpenLORIS data for you. Please manually download the package data (*-package.tar), put them into ./datasets/OpenLORIS/, and then run the following commands to build data sequences in each scene."
+	@echo "# Please make sure 7z has been installed (try with 'sudo apt-get install p7zip' if you are using Ubuntu)."
+	@echo "make ./datasets/OpenLORIS/office1.all"
+	@echo "make ./datasets/OpenLORIS/corridor1.all"
+	@echo "make ./datasets/OpenLORIS/home1.all"
+	@echo "make ./datasets/OpenLORIS/cafe1.all"
+	@echo "make ./datasets/OpenLORIS/market1.all"
+	@echo ""
+	@echo "# You can also build only one sequence, for example:"
+	@echo "make ./datasets/OpenLORIS/office1/office1-1.slam"
+	@echo ""
+	@echo ""
 	@echo "================================================================================================================="
 	@echo -e "If you are using one of those dataset, \033[1;31mplease refer to their respective publications\033[0m:"
 	@echo "   - TUM RGB-D SLAM dataset [Sturm et al, IROS'12]: https://vision.in.tum.de/data/datasets/rgbd-dataset"
@@ -639,6 +653,7 @@ datasetslist:
 	@echo "   - SVO sample dataset [Forster et al, ICRA 2014]: https://github.com/uzh-rpg/rpg_svo"
 	@echo "   - Bonn RGB-D Dynamic Dataset [Palazzolo et al, IROS'19]: http://www.ipb.uni-bonn.de/data/rgbd-dynamic-dataset/"
 	@echo "   - UZH-FPV Drone Racing Dataset [Delmerico et al, ICRA'19]: http://rpg.ifi.uzh.ch/uzh-fpv.html"
+	@echo "   - OpenLORIS-Scene datasets [Shi et al, ICRA'20]: https://lifelong-robotic-vision.github.io/dataset/scene"
 	@echo "================================================================================================================="
 
 .PHONY: slambench benchmarks benchmarkslist datasets datasetslist
@@ -648,6 +663,30 @@ datasetslist:
 #### DATA SET GENERATION        ####
 ####################################
 
+
+#### OpenLORIS-Scene
+####################
+
+datasets/OpenLORIS/%.7z :  # Example : $* = office1/office1-3
+	# extract 7z from the tar file of the scene, e.g. office1-1_7-package.tar
+	for f in $(@D)*-package.tar; do echo $$f && mkdir -p $(@D) && tar xvf $$f -C $(@D); done
+	if [ ! -f $@ ]; then echo "Could not find $(@D)*-package.tar or $@. Please download the data first."; fi
+
+datasets/OpenLORIS/%.dir : ./datasets/OpenLORIS/%.7z
+	7z x $< -o$(@D) -aos
+	# add the '.dir' suffix
+	mv $(subst .7z,,$<) $(subst .7z,.dir,$<)
+
+datasets/OpenLORIS/%.slam : ./datasets/OpenLORIS/%.dir
+	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	./build/bin/dataset-generator -d OpenLORIS -i $</ -o $@
+	echo "Generated $@"
+
+datasets/OpenLORIS/%.all :
+	scene=datasets/OpenLORIS/$*; for f in $$scene*-package.tar; do echo $$f && mkdir -p $$scene && tar xvf $$f -C $$scene; done
+	scene=datasets/OpenLORIS/$*; for f in $$scene/*.7z; do target=`echo $$f | tr .7z .sl`am && $(MAKE) $$target; done
+
+.SECONDARY: $(OBJS)
 
 
 #### EuRoCMAV
@@ -664,7 +703,7 @@ datasetslist:
 
 ./datasets/EuRoCMAV/%.slam :  ./datasets/EuRoCMAV/%.dir 
 	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
-	./build/bin/dataset-generator -d eurocmav -i $</mav0 -o $@ -imu true -stereo true -gt true  
+	./build/bin/dataset-generator -d eurocmav -i $</mav0 -o $@ -imu true -stereo true -gt true
 
 #### TUM      
 ###############

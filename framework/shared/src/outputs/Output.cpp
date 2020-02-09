@@ -172,7 +172,7 @@ void AlignmentOutput::Recalculate()
 	
 	slambench::outputs::PoseOutputTrajectoryInterface traj_int(trajectory_);
 
-	auto transformation = (*method_)(gt_trajectory_->GetAll(), traj_int.GetAll());
+	transformation = (*method_)(gt_trajectory_->GetAll(), traj_int.GetAll());
 	auto &last_point = trajectory_->GetMostRecentValue();
 
 	target.insert({last_point.first, new values::TypedValue<Eigen::Matrix4f>(transformation)});

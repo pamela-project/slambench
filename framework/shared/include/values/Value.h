@@ -88,6 +88,7 @@ namespace slambench {
 			
 			void Dispatch(ValueDispatch *vd);
 			void Dispatch(ConstValueDispatch *vd) const;
+
 		private:
 			ValueType value_type_;
 		};

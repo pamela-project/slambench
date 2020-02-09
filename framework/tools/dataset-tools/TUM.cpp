@@ -22,6 +22,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
+#include <fstream>
 #include <iostream>
 
 using namespace slambench::io;

@@ -79,9 +79,10 @@ Value *ATEMetric::GetValue(Phase* phase)
 		// Step 1 : ensure GT in the futre exists
 		//***************************************
 
-		while(gt_iterator->first < es_iterator->first ) {
+		while((gt_iterator->first < es_iterator->first) && gt_iterator != gt_traj.end() ) {
 			gt_iterator++;
 		}
+
 
 		if(gt_iterator == gt_traj.end()) {
 			std::cerr << "**** Error: No more groundtruth to compare with." << std::endl;
