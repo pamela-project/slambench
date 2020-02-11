@@ -269,6 +269,11 @@ usecases:
 	@echo    "    available targets are : flame"
 	@echo ""
 
+	@echo -n "  - ReFusion [Palazollo et al, IROS '19]: "; if [ -f benchmarks/flame ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make refusion)\033[0m" ; fi
+	@echo    "    repository: https://github.com/mihaibujanca/refusion"
+	@echo    "    available targets are : refusion"
+	@echo ""
+
 	@echo "If you want to test SLAMBench with existing SLAM algorithms, once you have download it please run \"make slambench APPS=slam1,slam2,...\""
 	@echo "   e.g. make slambench APPS=kfusion,orbslam2"
 	@echo "   You can also use \"make slambench APPS=all\" to compile them all."
@@ -424,9 +429,22 @@ flame:
 	@echo "cmake_minimum_required(VERSION 2.8)"      > benchmarks/flame/src/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
+refusion:
+	@echo "================================================================================================================="
+	@echo    "  - ReFusion [Palazollo et al. IROS'19]: "
+	@echo    "    repository: https://github.com/PRBonn/refusion"
+	@echo    "    Used repository: https://github.com/mihaibujanca/refusion"
+	@echo "================================================================================================================="
+	@echo ""
+	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
+	mkdir benchmarks/refusion/src/original -p
+	rm benchmarks/refusion/src/original -rf
+	git clone   https://github.com/mihaibujanca/refusion   benchmarks/refusion/src/original
+	@echo "cmake_minimum_required(VERSION 2.8)"      > benchmarks/refusion/src/CMakeLists.txt
+	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
-.PHONY: efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame
-algorithms : efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame
+.PHONY: efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame refusion
+algorithms : efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame refusion
 
 
 datasets :
