@@ -17,6 +17,7 @@
 #include <io/sensor/CameraSensor.h>
 #include <io/sensor/DepthSensor.h>
 #include <io/sensor/GroundTruthSensor.h>
+#include <fstream>
 #include "DatasetReader.h"
 
 namespace slambench {
@@ -29,7 +30,7 @@ namespace slambench {
       DepthSensor *depth_sensor = nullptr;
       CameraSensor *grey_sensor = nullptr;
       GroundTruthSensor *gt_sensor = nullptr;
-
+      std::ifstream istream;
       static constexpr DepthSensor::disparity_params_t disparity_params = {0.001, 0.0};
       static constexpr DepthSensor::disparity_type_t disparity_type = DepthSensor::affine_disparity;
 

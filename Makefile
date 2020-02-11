@@ -808,18 +808,40 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 
 #### ETH Illumination
 ###############
+./datasets/ETHI/%.zip :
+	echo download $*.zip
+	mkdir -p $(@D)
+	cd $(@D)  &&  ${WGET} "https://cvg.ethz.ch/research/illumination-change-robust-dslam/$*.zip"
+
 ./datasets/ETHI/%.dir : ./datasets/ETHI/%.zip
 	mkdir $@
 	unzip $< -d $@
-#TODO: make sure .ply exists
-./datasets/ETHI/%.slam : ./datasets/ETHI/%.dir
+
+### TUM-based sequences contain "real", ICLNUIM-based sequences contain "syn"
+### Add accelerometer.txt to prevent TUM breaking. Make sure depth.txt and rgb.txt exist in their respective folders.
+###
+./datasets/ETHI/%.slam : ./datasets/ETHI/%.dir ./datasets/ICL_NUIM/living-room.ply.tar.gz
 	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
-	echo "$$d"; \
-	touch "$$d"/accelerometer.txt; \
-	cp "$$d"/depth.txt "$$d"/depth/; \
-	cp "$$d"/rgb.txt "$$d"/rgb/; \
-	./build/bin/dataset-generator -d tum -i "$$d" -o $@ -grey true -rgb true -gt true -depth true -accelerometer false; \
-	done; fi;
+	for d in $</*; do \
+  		echo "$$d"; \
+		case "$(@F)" in \
+			(*real*) touch "$$d"/accelerometer.txt;
+			 		 cp "$$d"/depth.txt "$$d"/depth/; \
+			 		 cp "$$d"/rgb.txt "$$d"/rgb/; \
+			 		 ./build/bin/dataset-generator -d tum -i "$$d" -o $@ -grey true -rgb true -gt true -depth true -accelerometer false ;; \
+			(*syn*) cd "$$d"; \
+					for file in depth/*.png; do \
+						  base=`basename -- "$$file" .png`;\
+						  mv "$$file" "scene_00_$$base.depth.png"; \
+					done;\
+					for file in rgb/*.png; do \
+						  base=`basename -- "$$file"`;\
+						  mv "$$file" "scene_00_$$base"; \
+					done;\
+					cd -; \
+					./build/bin/dataset-generator -d iclnuim -i "$$d" -o $@ -ply  datasets/ICL_NUIM/living-room.ply -grey true -rgb true -gt true -depth true -pf true ;;\
+		esac \
+	done;
 
 #if echo $(@F) | grep "syn" ; then make ./datasets/ICL_NUIM/living-room.ply.tar.gz; \
 #		./build/bin/dataset-generator -d iclnuim -i $</* -o $@ -ply  datasets/ICL_NUIM/living-room.ply -grey true -rgb true -gt true -depth true -pf true \
@@ -842,7 +864,9 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 ./datasets/BONN/%.ply \
 ./datasets/BONN/%.dir \
 ./datasets/UZHFPV/%.dir \
-./datasets/UZHFPV/%.zip
+./datasets/UZHFPV/%.zip \
+./datasets/ETHI/%.dir \
+./datasets/ETHI/%.zip
 
 ####################################
 ####    BUILD/CLEAN TOOL        ####
