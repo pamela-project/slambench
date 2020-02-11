@@ -45,9 +45,13 @@ if (Boost_FOUND)
 	add_library(ICLNUIM ICLNUIM.cpp)
 	target_link_libraries(ICLNUIM slambench-io)
 	target_include_directories(ICLNUIM PRIVATE ${Boost_INCLUDE_DIRS})
-    
+
+	add_library(ETHI ETHI.cpp)
+	target_link_libraries(ETHI slambench-io TUM ICLNUIM)
+	target_include_directories(ETHI PRIVATE ${Boost_INCLUDE_DIRS})
+
 	add_executable(dataset-generator dataset-generator.cpp)
-	target_link_libraries(dataset-generator TUM ICLNUIM ICL EUROCMAV SVO BONN UZHFPV)
+	target_link_libraries(dataset-generator TUM ICLNUIM ICL EUROCMAV SVO BONN UZHFPV ETHI)
 
 else (Boost_FOUND)
     message(STATUS "Dataset generators require Boost.")

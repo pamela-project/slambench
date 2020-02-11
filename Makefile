@@ -493,6 +493,26 @@ datasetslist:
 	@echo ""
 	@echo "## https://vision.in.tum.de/rgbd/dataset/freiburg3/rgbd_dataset_freiburg3_long_office_household.tgz"
 	@echo ""
+	@echo "### ETH Illumination TUM-based"
+	@echo ""
+	@echo "make ./datasets/ETHI/ethl_real_flash.slam"
+	@echo "make ./datasets/ETHI/ethl_real_local.slam"
+	@echo "make ./datasets/ETHI/ethl_real_global.slam"
+	@echo ""
+	@echo "### ETH Illumination ICLNUIM-based"
+	@echo ""
+	@echo "make ./datasets/ETHI/ethl_syn1.slam"
+	@echo "make ./datasets/ETHI/ethl_syn1_local.slam"
+	@echo "make ./datasets/ETHI/ethl_syn1_global.slam"
+	@echo "make ./datasets/ETHI/ethl_syn1_loc_glo.slam"
+	@echo "make ./datasets/ETHI/ethl_syn1_flash.slam"
+	@echo "make ./datasets/ETHI/ethl_syn2.slam"
+	@echo "make ./datasets/ETHI/ethl_syn2_local.slam"
+	@echo "make ./datasets/ETHI/ethl_syn2_global.slam"
+	@echo "make ./datasets/ETHI/ethl_syn2_loc_glo.slam"
+	@echo "make ./datasets/ETHI/ethl_syn2_flash.slam"
+	@echo ""
+	@echo ""
 	@echo ""
 	@echo "### EuRoC MAV Machine Hall"
 	@echo ""
@@ -635,8 +655,9 @@ datasetslist:
 	@echo -e "If you are using one of those dataset, \033[1;31mplease refer to their respective publications\033[0m:"
 	@echo "   - TUM RGB-D SLAM dataset [Sturm et al, IROS'12]: https://vision.in.tum.de/data/datasets/rgbd-dataset"
 	@echo "   - ICL-NUIM dataset [Handa et al, ICRA'14]: https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html"
+	@echo "   - SVO sample dataset [Forster et al, ICRA '14]: https://github.com/uzh-rpg/rpg_svo"
 	@echo "   - EuRoC MAV Dataset [Burri et al, IJJR'16]: https://projects.asl.ethz.ch/datasets/doku.php"
-	@echo "   - SVO sample dataset [Forster et al, ICRA 2014]: https://github.com/uzh-rpg/rpg_svo"
+	@echo "   - ETHI Dataset [Park et al, ICRA'17]: https://cvg.ethz.ch/research/illumination-change-robust-dslam/"
 	@echo "   - Bonn RGB-D Dynamic Dataset [Palazzolo et al, IROS'19]: http://www.ipb.uni-bonn.de/data/rgbd-dynamic-dataset/"
 	@echo "   - UZH-FPV Drone Racing Dataset [Delmerico et al, ICRA'19]: http://rpg.ifi.uzh.ch/uzh-fpv.html"
 	@echo "================================================================================================================="
@@ -785,8 +806,26 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 	./build/bin/dataset-generator -d uzhfpv -i $< -o $@ -imu true --stereo false --event true -gt false
 
 
+#### ETH Illumination
+###############
+./datasets/ETHI/%.dir : ./datasets/ETHI/%.zip
+	mkdir $@
+	unzip $< -d $@
+#TODO: make sure .ply exists
+./datasets/ETHI/%.slam : ./datasets/ETHI/%.dir
+	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	echo "$$d"; \
+	touch "$$d"/accelerometer.txt; \
+	cp "$$d"/depth.txt "$$d"/depth/; \
+	cp "$$d"/rgb.txt "$$d"/rgb/; \
+	./build/bin/dataset-generator -d tum -i "$$d" -o $@ -grey true -rgb true -gt true -depth true -accelerometer false; \
+	done; fi;
+
+#if echo $(@F) | grep "syn" ; then make ./datasets/ICL_NUIM/living-room.ply.tar.gz; \
+#		./build/bin/dataset-generator -d iclnuim -i $</* -o $@ -ply  datasets/ICL_NUIM/living-room.ply -grey true -rgb true -gt true -depth true -pf true \
+
 #### ORBSLAM Voc
-#################
+###############
 
 ./benchmarks/orbslam2/src/original/Vocabulary/ORBvoc.txt : ./benchmarks/orbslam2/src/original/Vocabulary/ORBvoc.txt.tar.gz
 	cd ./benchmarks/orbslam2/src/original/Vocabulary/ && tar -xf ORBvoc.txt.tar.gz

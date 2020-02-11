@@ -17,6 +17,7 @@
 
 #include <sstream>
 #include <string>
+#include <ETHI.h>
 
 #include "include/BONN.h"
 #include "include/EUROCMAV.h"
@@ -83,6 +84,14 @@ class MainComponent : public ParameterComponent {
       config->reader = new BONNReader("");
     } else if (dataset_name == "uzhfpv") {
       config->reader = new UZHFPVReader("");
+    } else if (dataset_name == "ethi") {
+        auto eth_reader = new ETHIReader("");
+        if(eth_reader->dataset == "iclnuim")
+            config->reader =new ICLNUIMReader("");
+        else if(eth_reader->dataset == "tum")
+            config->reader = new TUMReader("");
+        else
+            std::cerr<<"The base dataset must be either iclnuim or tum"<<std::endl;
     }
 
   if (config->reader) {
