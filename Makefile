@@ -825,7 +825,7 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 	for d in $</*; do \
   		echo "$$d"; \
 		case "$(@F)" in \
-			(*real*) touch "$$d"/accelerometer.txt;
+			(*real*) touch "$$d"/accelerometer.txt; \
 			 		 cp "$$d"/depth.txt "$$d"/depth/; \
 			 		 cp "$$d"/rgb.txt "$$d"/rgb/; \
 			 		 ./build/bin/dataset-generator -d tum -i "$$d" -o $@ -grey true -rgb true -gt true -depth true -accelerometer false ;; \
