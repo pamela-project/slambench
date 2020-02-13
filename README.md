@@ -119,7 +119,13 @@ Although, by doing this, you only compile the libraries of SLAMBench.
 
 #### 3. Usecases
 
-To compile a specific use-case, you will need to specify identifiers:
+To download use-cases, there are specific target named after the type of algorithm you need to test:
+
+```bash
+make kfusion lsdslam
+```
+
+Then to compile these specific use-case, you will need to specify identifiers together with the slambench target:
 
 ```bash
 make slambench APPS=kfusion,lsdslam
