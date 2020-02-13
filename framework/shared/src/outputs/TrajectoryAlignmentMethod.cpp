@@ -20,73 +20,173 @@ using namespace slambench::outputs;
 
 // TODO: this is duplicated in ATEMetric.cpp
 static boost::optional<slambench::TimeStamp> select_closest_before (const TrajectoryAlignmentMethod::trajectory_t & GT , slambench::TimeStamp start_from , const slambench::TimeStamp& LO_TS) {
-	
-	if(GT.size() == 0) {
-		std::cerr << "**** Error: Empty GT." << std::endl;
-		return  boost::none;
-	}
 
-	auto gt_iterator = GT.begin();
-	while(gt_iterator->first < start_from) {
-		gt_iterator++;
-	}
-	
-	if(gt_iterator == GT.end()) {
-		std::cerr << "**** Error: No more GT to compare with." << std::endl;
-		return boost::none;
-	}
-	
-	/*
-	 *  We iterate over GT.
-	 *  If GT_TS happens after LO_TS we stop the loop.
-	 *  It can be that the first GT_TS we found happens after, this means we should not compare with this one (skip long gap of empty GT).
-	 *  Then closest is the first found, or the closest.
-	 * */
+    if(GT.size() == 0) {
+        std::cerr << "**** Error: Empty GT." << std::endl;
+        return  boost::none;
+    }
 
-	slambench::TimeStamp closest = gt_iterator->first;
-	for (; gt_iterator != GT.end(); ++gt_iterator) {
-		const slambench::TimeStamp & GT_TS  = gt_iterator->first;
-		if ( GT_TS > LO_TS ) {
-			break;
-		}
+    auto gt_iterator = GT.begin();
+    while(gt_iterator->first < start_from) {
+        gt_iterator++;
+    }
 
-		slambench::TimeStamp CL_TS  = gt_iterator->first;
-		if (LO_TS - CL_TS > LO_TS - GT_TS) {
-			closest = GT_TS;
-		}
-	}
-	
-	return closest;
+    if(gt_iterator == GT.end()) {
+        std::cerr << "**** Error: No more GT to compare with." << std::endl;
+        return boost::none;
+    }
+
+    /*
+     *  We iterate over GT.
+     *  If GT_TS happens after LO_TS we stop the loop.
+     *  It can be that the first GT_TS we found happens after, this means we should not compare with this one (skip long gap of empty GT).
+     *  Then closest is the first found, or the closest.
+     * */
+
+    slambench::TimeStamp closest = gt_iterator->first;
+    for (; gt_iterator != GT.end(); ++gt_iterator) {
+        const slambench::TimeStamp & GT_TS  = gt_iterator->first;
+        if ( GT_TS > LO_TS ) {
+            break;
+        }
+
+        slambench::TimeStamp CL_TS  = gt_iterator->first;
+        if (LO_TS - CL_TS > LO_TS - GT_TS) {
+            closest = GT_TS;
+        }
+    }
+
+    return closest;
 }
 
 Eigen::Matrix4f align_trajectories_original (const TrajectoryAlignmentMethod::trajectory_t & gt , const TrajectoryAlignmentMethod::trajectory_t & t) {
 
-	Eigen::Matrix4f res = Eigen::Matrix4f::Identity();
+    Eigen::Matrix4f res = Eigen::Matrix4f::Identity();
 
-	if (gt.size() != 0 and t.size() != 0){
+    if (gt.size() != 0 and t.size() != 0){
 
-		for (auto past_point : t) {
-			auto closest = select_closest_before(gt,{0,0},past_point.first);
-			if (closest) {
+        for (auto past_point : t) {
+            auto closest = select_closest_before(gt,{0,0},past_point.first);
+            if (closest) {
 
-				res = ((gt.at(closest.get()))).GetValue() * past_point.second.GetValue().inverse();
-				//std::cout << res << std::endl;
-				return res ;
-			}
-		}
+                res = ((gt.at(closest.get()))).GetValue() * past_point.second.GetValue().inverse();
+                //std::cout << res << std::endl;
+                return res ;
+            }
+        }
 
-	}
+    }
 
 
 
-	return res ;
+    return res ;
 }
 
+/**
+ *  @brief rigidly aligns two sets of poses using Umeyama's method: http://web.stanford.edu/class/cs273/refs/umeyama.pdf
+ *
+ *  Code adapted from https://stackoverflow.com/questions/13432805/finding-translation-and-scale-on-two-sets-of-points-to-get-least-square-error-in/32244818
+ *  This calculates such a relative pose <tt>R, t</tt>, such that:
+ *
+ *  @code
+ *  _TyVector v_pose = R * r_vertices[i] + t;
+ *  double f_error = (r_tar_vertices[i] - v_pose).squaredNorm();
+ *  @endcode
+ *
+ *  The sum of squared errors in <tt>f_error</tt> for each <tt>i</tt> is minimized.
+ *
+ *  @param[in] r_vertices is a set of vertices to be aligned
+ *  @param[in] r_tar_vertices is a set of vertices to align to
+ *
+ *  @return Returns a relative pose that rigidly aligns the two given sets of poses.
+ *
+ *  @note This requires the two sets of poses to have the corresponding vertices stored under the same index.
+ */
+Eigen::Matrix4f align_trajectories_umeyama(const TrajectoryAlignmentMethod::trajectory_t & gt,
+                                           const TrajectoryAlignmentMethod::trajectory_t & est) {
+    const size_t n = est.size();
+
+    Eigen::Vector3d v_center_gt = Eigen::Vector3d::Zero(), v_center_est = Eigen::Vector3d::Zero();
+    Eigen::Affine3d affine;
+    for(size_t i = 0; i < n; ++ i) {
+        affine.matrix() = gt.at(i).second.GetValue().cast<double>();
+        v_center_gt += affine.translation();
+
+        affine.matrix() = est.at(i).second.GetValue().cast<double>();
+        v_center_est += affine.translation();
+    }
+    v_center_gt /= double(n);
+    v_center_est /= double(n);
+    // calculate centers of positions, potentially extend to 3D
+
+    double f_sd2_gt = 0, f_sd2_est = 0; // only one of those is really needed
+    Eigen::Matrix3d t_cov = Eigen::Matrix3d::Zero();
+    for(size_t i = 0; i < n; ++ i) {
+        affine.matrix() = gt.at(i).second.GetValue().cast<double>();
+        Eigen::Vector3d v_vert_i_gt = affine.translation() - v_center_gt;
+
+        affine.matrix() = est.at(i).second.GetValue().cast<double>();
+        Eigen::Vector3d v_vert_i_est = affine.translation() - v_center_est;
+        // get both vertices
+
+        f_sd2_est += v_vert_i_est.squaredNorm();
+        f_sd2_gt += v_vert_i_gt.squaredNorm();
+        // accumulate squared standard deviation (only one of those is really needed)
+
+        t_cov.noalias() += v_vert_i_est * v_vert_i_gt.transpose();
+        // accumulate covariance
+    }
+    // calculate the covariance matrix
+
+    Eigen::JacobiSVD<Eigen::Matrix3d> svd(t_cov, Eigen::ComputeFullU | Eigen::ComputeFullV);
+    // calculate the SVD
+
+    Eigen::Matrix3d R = svd.matrixV() * svd.matrixU().transpose();
+    // compute the rotation
+
+    double f_det = R.determinant();
+    Eigen::Vector3d e(1, 1, (f_det < 0)? -1 : 1);
+    // calculate determinant of V*U^T to disambiguate rotation sign
+
+    if(f_det < 0)
+        R.noalias() = svd.matrixV() * e.asDiagonal() * svd.matrixU().transpose();
+    // recompute the rotation part if the determinant was negative
+
+    // renormalize the rotation (not needed but gives slightly more orthogonal transformations)
+    R = Eigen::Quaterniond(R).normalized().toRotationMatrix();
+
+    // calculate the scale
+    //double f_scale = svd.singularValues().dot(e) / f_sd2_gt;
+    double f_inv_scale = svd.singularValues().dot(e) / f_sd2_est; // only one of those is needed
+
+    // apply scale
+    R *= f_inv_scale;
+
+    // want to align center with ground truth
+    Eigen::Vector3d t = v_center_gt - (R * v_center_est); // R needs to contain scale here, otherwise the translation is wrong
+
+    Eigen::Matrix4d Mat = Eigen::Matrix4d::Identity();
+    Mat.block<3,3>(0,0) = R;
+    Mat.block<3,1>(0,3) = t;
+    return Mat.cast<float>();
+}
+Eigen::Matrix4f align_trajectories_umeyama_eigen(const TrajectoryAlignmentMethod::trajectory_t & gt,
+                                                 const TrajectoryAlignmentMethod::trajectory_t & est) {
+    const size_t n = est.size();
+    Eigen::MatrixXf gt_eigen(3,n);
+    Eigen::MatrixXf est_eigen(3,n);
+    for(size_t i = 0; i < n; i++)
+    {
+        gt_eigen.block<3,1>(0,i) = gt.at(i).second.GetTranslation();
+        est_eigen.block<3,1>(0,i) = est.at(i).second.GetTranslation();
+    }
+    return Eigen::umeyama(est_eigen, gt_eigen, true);
+}
 
 bool associate(const TrajectoryAlignmentMethod::trajectory_t & gt,
-          const TrajectoryAlignmentMethod::trajectory_t & t,
-          std::vector<Eigen::Matrix4f>& vGroundTruth,
-          std::vector<Eigen::Matrix4f>& vEstimate)
+               const TrajectoryAlignmentMethod::trajectory_t & t,
+               std::vector<Eigen::Matrix4f>& vGroundTruth,
+               std::vector<Eigen::Matrix4f>& vEstimate)
 {
 
     for(uint index = 0; index < t.size(); index++)  {
@@ -117,9 +217,8 @@ bool associate(const TrajectoryAlignmentMethod::trajectory_t & gt,
         gtPose = gt.at(closest_gt_Index).second.GetValue(); //<block-size>(start-i, start-j)
         vGroundTruth.push_back(gtPose);
     }
-   return (bool)(vGroundTruth.size() * vEstimate.size());
+    return (bool)(vGroundTruth.size() * vEstimate.size());
 }
-
 
 Eigen::MatrixXd ATERotation(Eigen::MatrixXd model, Eigen::MatrixXd data)
 {
@@ -152,8 +251,6 @@ Eigen::MatrixXd ATERotation(Eigen::MatrixXd model, Eigen::MatrixXd data)
     return rot;
 }
 
-
-
 double ATEScale(Eigen::MatrixXd model, Eigen::MatrixXd data, Eigen::MatrixXd rotation)
 {
     int cols = model.cols();
@@ -168,20 +265,19 @@ double ATEScale(Eigen::MatrixXd model, Eigen::MatrixXd data, Eigen::MatrixXd rot
     // W = M0.D0' + M1.D1' + ...  = \sum{Mi.Di}
     for (int i = 0; i < cols; i++)
     {
-    	Eigen::Vector3d v1 = data.col(i);
-    	Eigen::Vector3d v2 = rotatedModel.col(i);
-    	Eigen::Vector3d v3 = model.col(i);
+        Eigen::Vector3d v1 = data.col(i);
+        Eigen::Vector3d v2 = rotatedModel.col(i);
+        Eigen::Vector3d v3 = model.col(i);
 
-       dots = dots + v1.transpose()*v2;
-       normi = v3.norm();
-       norms = norms + normi*normi;
+        dots = dots + v1.transpose()*v2;
+        normi = v3.norm();
+        norms = norms + normi*normi;
     }
 
     // scale
     return  (dots/norms);
     //return 1;
 }
-
 
 Eigen::Vector3d ATETranslation(Eigen::MatrixXd model, Eigen::MatrixXd data, double scale, Eigen::MatrixXd rotation, float& ate)
 {
@@ -202,7 +298,6 @@ Eigen::Vector3d ATETranslation(Eigen::MatrixXd model, Eigen::MatrixXd data, doub
     return   translation;
 
 }
-
 
 Eigen::Matrix4d calculateATE(std::vector<Eigen::Matrix4f> gt, std::vector<Eigen::Matrix4f> es, float & ate)
 {
@@ -259,14 +354,9 @@ Eigen::Matrix4d calculateATE(std::vector<Eigen::Matrix4f> gt, std::vector<Eigen:
 
 Eigen::Matrix4f align_trajectories_new (const TrajectoryAlignmentMethod::trajectory_t & gt , const TrajectoryAlignmentMethod::trajectory_t & t) {
 
-	if (t.size() <= 100){ // do not align for the first 100 frames, because it will not be accurate
-		return align_trajectories_original(gt ,  t) ;
-	}
-
-
-
-
-
+    if (t.size() <= 100){ // do not align for the first 100 frames, because it will not be accurate
+        return align_trajectories_original(gt ,  t) ;
+    }
 
     if (t.size() > 100) // do not align for the first 100 frames, because it will not be accurate
     {
@@ -276,30 +366,40 @@ Eigen::Matrix4f align_trajectories_new (const TrajectoryAlignmentMethod::traject
         //if(associate(gt, t, vGroundTruth, vEstimate))
         //{
         associate(gt, t, vGroundTruth, vEstimate);
-		
+
         float error;
         Eigen::Matrix4d Mat = calculateATE(vGroundTruth, vEstimate, error);
 
         //std::cout << " ------ " << error << std::endl;
         //if (error < 0.1)
         //{
-            return Mat.cast<float>().inverse();
-            //return Mat.cast<float>();
+        return Mat.cast<float>().inverse();
+        //return Mat.cast<float>();
         //}
     }
     else
     {
-    	return align_trajectories_original(gt ,  t) ;
-   }
+        return align_trajectories_original(gt ,  t) ;
+    }
 }
 
-Eigen::Matrix4f NewTrajectoryAlignmentMethod::operator()(const TrajectoryAlignmentMethod::trajectory_t & ground_truth, const TrajectoryAlignmentMethod::trajectory_t & trajectory)
+Eigen::Matrix4f NewTrajectoryAlignmentMethod::operator()(const TrajectoryAlignmentMethod::trajectory_t & ground_truth,
+                                                         const TrajectoryAlignmentMethod::trajectory_t & trajectory)
 {
-	return align_trajectories_new(ground_truth, trajectory);
+    return align_trajectories_new(ground_truth, trajectory);
 }
 
-Eigen::Matrix4f OriginalTrajectoryAlignmentMethod::operator()(const TrajectoryAlignmentMethod::trajectory_t & ground_truth, const TrajectoryAlignmentMethod::trajectory_t & trajectory)
+Eigen::Matrix4f OriginalTrajectoryAlignmentMethod::operator()(const TrajectoryAlignmentMethod::trajectory_t & ground_truth,
+                                                              const TrajectoryAlignmentMethod::trajectory_t & trajectory)
 {
-	return align_trajectories_original(ground_truth, trajectory);
+    return align_trajectories_original(ground_truth, trajectory);
 }
 
+
+Eigen::Matrix4f UmeyamaTrajectoryAlignmentMethod::operator()(const TrajectoryAlignmentMethod::trajectory_t & ground_truth,
+                                                             const TrajectoryAlignmentMethod::trajectory_t & trajectory)
+{
+    if(trajectory.size() < 50)
+        return align_trajectories_original(ground_truth, trajectory);
+    return align_trajectories_umeyama_eigen(ground_truth, trajectory);
+}
