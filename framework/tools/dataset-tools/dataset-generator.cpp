@@ -17,6 +17,7 @@
 
 #include <sstream>
 #include <string>
+#include <ETHI.h>
 
 #include "include/BONN.h"
 #include "include/EUROCMAV.h"
@@ -86,7 +87,14 @@ class MainComponent : public ParameterComponent {
       config->reader = new UZHFPVReader("");
     } else if (dataset_name == "OpenLORIS") {
       config->reader = new OpenLORISReader("");
-    }
+    } else if (dataset_name == "ethi") {
+        auto eth_reader = new ETHIReader("");
+        if(eth_reader->dataset == "iclnuim")
+            config->reader =new ICLNUIMReader("");
+        else if(eth_reader->dataset == "tum")
+            config->reader = new TUMReader("");
+    } else
+        std::cerr<<"The base dataset must be either iclnuim or tum"<<std::endl;
 
   if (config->reader) {
       config->param_manager.AddComponent(config->reader);
@@ -121,7 +129,7 @@ class MainComponent : public ParameterComponent {
 
     this->addParameter(TypedParameter<std::string>("d", "dataset",
                                                    "Name of the input dataset type "
-                                                   "(iclnuim, tum, eurocmav, icl, svo, bonn, OpenLORIS)",
+                                                   "(iclnuim, tum, eurocmav, icl, svo, bonn, ethi, OpenLORIS)",
                                                    &this->dataset, nullptr, this->dataset_callback));
 
     this->addParameter(TypedParameter<std::string>("o",

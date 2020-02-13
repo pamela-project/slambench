@@ -114,7 +114,7 @@ Value *ATEMetric::GetValue(Phase* phase)
 		const Eigen::Matrix4f& gt_pose      = gt_iterator->second.GetValue();
 		const Eigen::Matrix4f& aligned_pose = es_iterator->second.GetValue();
 
-		Eigen::Vector3f 	diff =    {
+		Eigen::Vector3f diff = {
 					std::abs(gt_pose(0,3) - aligned_pose(0,3))  ,
 					std::abs(gt_pose(1,3) - aligned_pose(1,3))  ,
 					std::abs(gt_pose(2,3) - aligned_pose(2,3)) } ;

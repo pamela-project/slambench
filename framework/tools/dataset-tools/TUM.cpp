@@ -36,13 +36,17 @@ constexpr CameraSensor::intrinsics_t TUMReader::fr2_intrinsics_rgb;
 constexpr DepthSensor::intrinsics_t  TUMReader::fr2_intrinsics_depth;
 constexpr CameraSensor::intrinsics_t TUMReader::fr3_intrinsics_rgb;
 constexpr DepthSensor::intrinsics_t  TUMReader::fr3_intrinsics_depth;
+constexpr CameraSensor::intrinsics_t TUMReader::ethl_intrinsics_rgb;
+constexpr DepthSensor::intrinsics_t  TUMReader::ethl_intrinsics_depth;
 
 constexpr CameraSensor::distortion_coefficients_t TUMReader::fr1_distortion_rgb;
 constexpr CameraSensor::distortion_coefficients_t TUMReader::fr2_distortion_rgb;
 constexpr CameraSensor::distortion_coefficients_t TUMReader::fr3_distortion_rgb;
+constexpr CameraSensor::distortion_coefficients_t TUMReader::ethl_distortion_rgb;
 constexpr DepthSensor::distortion_coefficients_t  TUMReader::fr1_distortion_depth;
 constexpr DepthSensor::distortion_coefficients_t  TUMReader::fr2_distortion_depth;
 constexpr DepthSensor::distortion_coefficients_t  TUMReader::fr3_distortion_depth;
+constexpr DepthSensor::distortion_coefficients_t  TUMReader::ethl_distortion_depth;
 
 bool loadTUMDepthData(const std::string &dirname,
                       SLAMFile &file,
@@ -355,7 +359,7 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
     std::cerr << "No sensors defined\n";
     return nullptr;
   }
-
+  bool is_ethl = false;
   std::string dirname = input;
 
   const std::vector<std::string> requirements = {"accelerometer.txt",
@@ -417,10 +421,55 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
       distortion_depth[i] = fr3_distortion_depth[i];
     }
 
-  } else  {
+  } else if (dirname.find("ethl") != std::string::npos)
+  {
+      is_ethl = true;
+      for (int i = 0; i < 4; i++) {
+          intrinsics_rgb[i]   = ethl_intrinsics_rgb[i];
+          intrinsics_depth[i] = ethl_intrinsics_depth[i];
+          distortion_rgb[i]   = ethl_distortion_rgb[i];
+          distortion_depth[i] = ethl_distortion_depth[i];
+      }
+  }
+  else  {
     std::cout << "Camera calibration might be wrong !." << std::endl;
     delete slamfile_ptr;
     return nullptr;
+  }
+
+
+  // load GT
+  if (gt) {
+    auto gt_sensor = GTSensorBuilder()
+            .name("GroundTruth")
+            .description("GroundTruthSensor")
+            .build();
+
+    gt_sensor->Index = slamfile.Sensors.size();
+    slamfile.Sensors.AddSensor(gt_sensor);
+
+    if(!loadTUMGroundTruthData(dirname, slamfile, gt_sensor)) {
+      std::cerr << "Error while loading gt information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
+    }
+  }
+
+  // load Accelerometer
+  if (accelerometer) {
+    auto accelerometer_sensor = AccSensorBuilder()
+            .name("Accelerometer")
+            .description("AccelerometerSensor")
+            .build();
+
+    accelerometer_sensor->Index = slamfile.Sensors.size();
+    slamfile.Sensors.AddSensor(accelerometer_sensor);
+
+    if (!loadTUMAccelerometerData(dirname, slamfile, accelerometer_sensor)) {
+      std::cout << "Error while loading Accelerometer information." << std::endl;
+      delete slamfile_ptr;
+      return nullptr;
+    }
   }
 
   // load Depth
@@ -437,7 +486,8 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
 
     depth_sensor->Index = slamfile.Sensors.size();
     slamfile.Sensors.AddSensor(depth_sensor);
-
+    if (is_ethl)
+        dirname = input + "/depth";
     if (!loadTUMDepthData(dirname, slamfile, depth_sensor)) {
       std::cout << "Error while loading depth information." << std::endl;
       delete slamfile_ptr;
@@ -458,7 +508,8 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
 
     grey_sensor->Index = slamfile.Sensors.size();
     slamfile.Sensors.AddSensor(grey_sensor);
-
+      if (is_ethl)
+          dirname = input + "/rgb";
     if (!loadTUMGreyData(dirname, slamfile, grey_sensor)) {
       std::cerr << "Error while loading Grey information." << std::endl;
       delete slamfile_ptr;
@@ -482,40 +533,6 @@ SLAMFile *TUMReader::GenerateSLAMFile() {
 
     if (!loadTUMRGBData(dirname, slamfile, rgb_sensor)) {
       std::cerr << "Error while loading RGB information." << std::endl;
-      delete slamfile_ptr;
-      return nullptr;
-    }
-  }
-
-  // load GT
-  if (gt) {
-    auto gt_sensor = GTSensorBuilder()
-        .name("GroundTruth")
-        .description("GroundTruthSensor")
-        .build();
-
-    gt_sensor->Index = slamfile.Sensors.size();
-    slamfile.Sensors.AddSensor(gt_sensor);
-
-    if(!loadTUMGroundTruthData(dirname, slamfile, gt_sensor)) {
-      std::cerr << "Error while loading gt information." << std::endl;
-      delete slamfile_ptr;
-      return nullptr;
-    }
-  }
-
-  // load Accelerometer
-  if (accelerometer) {
-    auto accelerometer_sensor = AccSensorBuilder()
-        .name("Accelerometer")
-        .description("AccelerometerSensor")
-        .build();
-
-    accelerometer_sensor->Index = slamfile.Sensors.size();
-    slamfile.Sensors.AddSensor(accelerometer_sensor);
-
-    if (!loadTUMAccelerometerData(dirname, slamfile, accelerometer_sensor)) {
-      std::cout << "Error while loading Accelerometer information." << std::endl;
       delete slamfile_ptr;
       return nullptr;
     }

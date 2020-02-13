@@ -40,6 +40,7 @@ int main(int argc, char * argv[])
 		//***************************************************************************************
 
 		config->addParameter(file_output_parameter);
+		config->addParameter(alignment_type_parameter);
 		config->GetParameterManager().ReadArgumentsOrQuit(argc, argv, config);
 
 		//***************************************************************************************
@@ -63,7 +64,9 @@ int main(int argc, char * argv[])
 			alignment_method = new slambench::outputs::OriginalTrajectoryAlignmentMethod();
 		} else if(alignment_technique == "new") {
 			alignment_method = new slambench::outputs::NewTrajectoryAlignmentMethod();
-		} else {
+		} else if(alignment_technique == "umeyama") {
+            alignment_method = new slambench::outputs::UmeyamaTrajectoryAlignmentMethod();
+        } else {
 			std::cerr << "Unknown alignment method " << alignment_technique << std::endl;
 			return 1;
 		}
