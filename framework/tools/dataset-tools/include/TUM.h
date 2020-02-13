@@ -43,6 +43,8 @@ namespace slambench {
       static constexpr CameraSensor::intrinsics_t fr3_intrinsics_rgb   = { 0.8365625, 1.123333, 0.50015625, 0.5158333 };
       static constexpr DepthSensor::intrinsics_t  fr3_intrinsics_depth = { 0.886875,	1.1879166, 0.50734375, 0.521041 };
 
+      static constexpr CameraSensor::intrinsics_t ethl_intrinsics_rgb = {538.7 / 640, 540.7 / 480, 319.2 / 640, 233.6 / 480};
+      static constexpr DepthSensor::intrinsics_t  ethl_intrinsics_depth = {538.7 / 640, 540.7 / 480, 319.2 / 640, 233.6 / 480};
       // I took those numbers from ORBSLAM2 examples
 
       static constexpr float fr1_fps =  30.0 ;
@@ -58,10 +60,12 @@ namespace slambench {
       static constexpr CameraSensor::distortion_coefficients_t fr1_distortion_rgb   = { 0.262383, -0.953104, -0.005358, 0.002628, 1.163314 };
       static constexpr CameraSensor::distortion_coefficients_t fr2_distortion_rgb   = { 0.231222, -0.784899, -0.003257, -0.000105, 0.917205 };
       static constexpr CameraSensor::distortion_coefficients_t fr3_distortion_rgb   = { 0,0,0,0,0 };
+      static constexpr CameraSensor::distortion_coefficients_t ethl_distortion_rgb   = { 0,0,0,0,0 };
 
       static constexpr DepthSensor::distortion_coefficients_t  fr1_distortion_depth = { -0.0410, 0.3286, 0.0087, 0.0051, -0.5643 };
       static constexpr DepthSensor::distortion_coefficients_t  fr2_distortion_depth = { -0.2297, 1.4766, 0.0005, -0.0075, -3.4194 };
       static constexpr DepthSensor::distortion_coefficients_t  fr3_distortion_depth = { 0,0,0,0,0 };
+      static constexpr DepthSensor::distortion_coefficients_t  ethl_distortion_depth = { 0,0,0,0,0 };
 
      public:
       std::string input;
