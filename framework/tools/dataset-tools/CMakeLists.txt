@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 include_directories(./include)
 
+link_directories(/opt/ros/kinetic/lib/)
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}     -Wno-error=unused-parameter -Wno-error=unused-variable -Wno-error=unused-but-set-variable")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=unused-parameter -Wno-error=unused-variable -Wno-error=unused-but-set-variable")
 
@@ -37,7 +39,13 @@ if (Boost_FOUND)
     add_library(TUM TUM.cpp)
 	target_link_libraries(TUM slambench-io ${Boost_LIBRARIES})
 	target_include_directories(TUM PRIVATE ${Boost_INCLUDE_DIRS})
-	
+	target_include_directories(TUM PRIVATE /opt/ros/kinetic/include/)
+	target_link_libraries(TUM cpp_common)
+	target_link_libraries(TUM roscpp_serialization)
+	target_link_libraries(TUM rostime)
+	target_link_libraries(TUM rosbag_storage)
+	target_link_libraries(TUM tf)
+
     add_library(ICLNUIM ICLNUIM.cpp)
 	target_link_libraries(ICLNUIM slambench-io)
 	target_include_directories(ICLNUIM PRIVATE ${Boost_INCLUDE_DIRS})
