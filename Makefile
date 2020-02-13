@@ -839,10 +839,24 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 						  mv "$$file" "scene_00_$$base"; \
 					done;\
 					cd -; \
-					./build/bin/dataset-generator -d iclnuim -i "$$d" -o $@ -ply  datasets/ICL_NUIM/living-room.ply -grey true -rgb true -gt true -depth true -pf true ;;\
+					./build/bin/dataset-generator -d iclnuim -i "$$d" -o $@ -ply  datasets/ICL_NUIM/living-room.ply -grey true -rgb true -gt true -depth true -pf false ;;\
 		esac \
 	done;
 
+./datasets/ETHI/all :./datasets/ICL_NUIM/living-room.ply.tar.gz \
+					./datasets/ETHI/ethl_real_flash.slam \
+					./datasets/ETHI/ethl_real_local.slam \
+					./datasets/ETHI/ethl_real_global.slam \
+					./datasets/ETHI/ethl_syn1.slam \
+					./datasets/ETHI/ethl_syn1_local.slam \
+					./datasets/ETHI/ethl_syn1_global.slam \
+					./datasets/ETHI/ethl_syn1_loc_glo.slam \
+					./datasets/ETHI/ethl_syn1_flash.slam \
+					./datasets/ETHI/ethl_syn2.slam \
+					./datasets/ETHI/ethl_syn2_local.slam \
+					./datasets/ETHI/ethl_syn2_global.slam \
+					./datasets/ETHI/ethl_syn2_loc_glo.slam \
+					./datasets/ETHI/ethl_syn2_flash.slam
 #if echo $(@F) | grep "syn" ; then make ./datasets/ICL_NUIM/living-room.ply.tar.gz; \
 #		./build/bin/dataset-generator -d iclnuim -i $</* -o $@ -ply  datasets/ICL_NUIM/living-room.ply -grey true -rgb true -gt true -depth true -pf true \
 
