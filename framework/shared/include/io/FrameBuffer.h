@@ -30,6 +30,9 @@ namespace slambench {
 			bool Reserve(size_t size);
 			
 			void *Data();
+			void resetLock() {
+				_lock.exchange(false);
+			}
 		
 		private:
 			std::atomic<bool> _lock;

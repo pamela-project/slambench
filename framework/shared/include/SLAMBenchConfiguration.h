@@ -53,10 +53,12 @@ typedef  std::chrono::time_point<std::chrono::high_resolution_clock> stl_time;
 class SLAMBenchConfiguration : public ParameterComponent {
 public:
     SLAMBenchConfiguration ();
+    SLAMBenchConfiguration  (void (*input_callback)(Parameter*, ParameterComponent*),void (*libs_callback)(Parameter*, ParameterComponent*));
 	virtual ~SLAMBenchConfiguration();
 
 	typedef std::vector<SLAMBenchLibraryHelper*> lib_container_t;
-private :
+
+protected :
 
     lib_container_t libs;
 
@@ -133,6 +135,10 @@ public :
 	void SetInputInterface(slambench::io::InputInterface *input_ref) {
 		input_interface = input_ref;
 	}
+    void reset_sensors()
+    {
+        GetParameterManager().ClearComponents();
+    }
 
     inline std::ostream& get_log_stream() {if (!log_stream)  update_log_stream(); return *log_stream;};
     inline void update_log_stream() {
@@ -155,7 +161,6 @@ public :
 
 
 };
-
 
 
 

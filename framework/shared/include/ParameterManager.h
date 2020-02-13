@@ -21,6 +21,7 @@ namespace slambench {
 	class ParameterManager {
 	public:
 		void AddComponent(ParameterComponent *component);
+		void ClearComponents() { components_.clear(); };
 		
 		void PrintValues(std::ostream &str) const;
 		void PrintArguments(std::ostream &str) const;

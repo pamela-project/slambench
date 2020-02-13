@@ -470,7 +470,7 @@ void* ImageFileFrame::LoadPng() {
 					size_t index = y * width * 2 + x * 2;
 
 					int r = pixels[index + 0] * 256 + pixels[index + 1];
-					((uint16_t*)outdata)[k++] = r / 5;
+					((uint16_t*)outdata)[k++] = r;// / 5;
 				}
 			}
 

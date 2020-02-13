@@ -84,6 +84,10 @@ public :
 	const slambench::io::SensorCollection &get_sensors() {
 		return this->get_input_interface()->GetSensors();
 	}
+    inline void updateInputInterface(slambench::io::InputInterface* i)
+    {
+        _input_interface = i;
+    }
 
 
 

@@ -1,3 +1,73 @@
+# QUICK START FOR LIFELONG ROBOTIC VISION COMPETITION #
+
+SLAMBench 2.0 is modified to support Lifelong SLAM Challenge, IROS 2019.
+There are mainly two parts modified:
+1. OpenLORIS-Scene dataset is supported in dataset-generator
+2. lifelong_loader newly added as an extension of benchmark_loader
+
+In order to run your algorithm in SLAMBench successfully with OpenLORIS dataset, the following steps should be followed:
+1. OpenLORIS Dataset Transformation
+2. Implement your APIs
+3. Run lifelong_loader
+
+The setup procedure remains the same. For more detailed information about SLAMBench2, please refer to the original part, starting from **README**.
+
+## Dataset Transformation ##
+This OpenLORIS-Scene Dataset is now supported in SLAMBench2, but the data need to be download manually. After downloading the package data, please put the tar files into datasets/OpenLORIS, and build all data sequences of one scene with e.g.
+
+```
+make ./datasets/OpenLORIS/office1.all
+```
+
+Or just one sequence, e.g.
+
+```
+make ./datasets/OpenLORIS/office1/office1-1.slam
+```
+
+In  OpenLORIS-Scene dataset transformation, 12 parameters are set to decide which sensors to be included, and the default value is ```true```. If you want only part of the sensors, e.g. rgbd and ground-truth, you can run:
+```
+./build/bin/dataset-generator -d OpenLORIS -i ./datasets/OpenLORIS/office1/office1-1/ -o ./datasets/OpenLORIS/office1/office1-1_rgbd.slam -color true -aligned_depth true -grey false -depth false -d400_accel false -d400_gyro false -fisheye1 false -fisheye2 false -t265_accel false -t265_gyro false -odom false -gt true
+```
+At least one camera-type sensor must be choosed.
+
+## Implement your APIs ##
+
+The following APIs for SLAM algorithms should be implemented.
+
+```
+bool sb_new_slam_configuration(SLAMBenchLibraryHelper * slam_settings) ;
+bool sb_init_slam_system(SLAMBenchLibraryHelper * slam_settings) ;
+bool sb_update_frame (SLAMBenchLibraryHelper * slam_settings, slambench::io::SLAMFrame * type) ;
+bool sb_relocalize (SLAMBenchLibraryHelper * slam_settings) ;
+bool sb_process_once (SLAMBenchLibraryHelper * slam_settings) ;
+bool sb_update_outputs(SLAMBenchLibraryHelper *lib, const slambench::TimeStamp *latest_output);
+bool sb_clean_slam_system();
+``` 
+Particularly, ```bool sb_relocalize (SLAMBenchLibraryHelper *slam_settings)``` is newly added to supported Lifelong SLAM Challenge. After the input sequence is switched to the next one, the relocalize function of the algorithm should be test. The return value is formulated as the result of relocalization from the perspective of the algorithm. If success, return ```true``` and vice versa. The result will be saved in the output file if ```-fo``` is assigned a nonempty value.
+
+If the algorithm does have a relocalize procedure, the relocalize API should be implemented under the assumption that all sensors' data has updated correctly. Otherwise the relocalize API will use ```bool sb_process_once ()``` as default.
+
+For more detailed information about other APIs, please refer to **How to run an existing algorithm with SLAMBench ?** and **How to add a new benchmark in SLAMBench ?**
+
+## Run lifelong_loader ##
+### Input ###
+Compared to ```benchmark_loader```, ```lifelong_loader``` can load more than one input sequence once. Different inputs are split by ```,``` e.g.
+```
+./build/bin/lifelong_loader -i ./datasets/OpenLORIS/office-1/office-1-1_rgbd.slam,./datasets/OpenLORIS/office-1/office-1-2_rgbd.slam -load ./build/lib/liborbslam2-original-library.so
+```
+### Output ###
+The metric statistics are computed independently for different input sequence except phase metrics e.g. Memory, Power etc. In addition, the outputs of the algorithm can be saved in a ```.txt``` file, specified by input parameter ```-fo```, e.g.
+```
+./build/bin/lifelong_loader -i ./datasets/OpenLORIS/office-1/office-1-1_rgbd.slam,./datasets/OpenLORIS/office-1/office-1-2_rgbd.slam  -load ./build/lib/liborbslam2-original-library.so -fo ./1_rgbd
+```
+then the outputs will be written to ```./1_rgbd_liborbslam2-original.txt```. 
+
+### Other Tips ###
+No UI tool available for Lifelong Robotic Vision Competition now. 
+
+```benchmark_loader``` and ```pangolin_loader``` can be used just as the original.
+
 # README #
 
 SLAMBench 2.0

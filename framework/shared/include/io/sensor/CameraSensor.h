@@ -27,7 +27,7 @@ namespace slambench {
 
 			// Distortion parameters :  radial and tangential factors = k1, k2, p1, p2, p3
 			// More infos: https://docs.opencv.org/2.4/doc/tutorials/calib3d/camera_calibration/camera_calibration.html
-			typedef enum {NoDistortion, RadialTangential, Equidistant} distortion_type_t;
+			typedef enum {NoDistortion, RadialTangential, Equidistant, KannalaBrandt} distortion_type_t;
 			typedef float distortion_coefficients_t[5];
 
 			const static sensor_type_t kCameraType;

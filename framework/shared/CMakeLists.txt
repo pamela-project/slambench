@@ -132,13 +132,13 @@ add_library(slambench-io
 	src/io/SLAMFrame.cpp 
 	src/io/PixelFormat.cpp
 	src/io/InputInterface.cpp
-        src/io/FrameSource.cpp
+	src/io/FrameSource.cpp
 
 	src/io/deserialisation/Deserialiser.cpp
 	src/io/deserialisation/SLAMFileDeserialiser.cpp
 	src/io/deserialisation/SLAMFileHeaderDeserialiser.cpp
-        src/io/deserialisation/SLAMFrameDeserialiser.cpp
-        src/io/deserialisation/SensorCollectionDeserialiser.cpp
+	src/io/deserialisation/SLAMFrameDeserialiser.cpp
+	src/io/deserialisation/SensorCollectionDeserialiser.cpp
 	
 	src/io/format/DataFormatter.cpp
 	src/io/format/PointCloud.cpp
@@ -150,9 +150,10 @@ add_library(slambench-io
 )
 
 
-add_library(slambench-utils  
-	src/SLAMBenchConfiguration  
-	src/sb_malloc 
+add_library(slambench-utils
+	src/SLAMBenchConfigurationLifelong.cpp
+	src/SLAMBenchConfiguration
+	src/sb_malloc
 	src/ParameterComponent
     src/ParameterManager
 )

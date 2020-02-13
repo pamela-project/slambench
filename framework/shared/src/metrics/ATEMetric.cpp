@@ -79,9 +79,10 @@ Value *ATEMetric::GetValue(Phase* phase)
 		// Step 1 : ensure GT in the futre exists
 		//***************************************
 
-		while(gt_iterator->first < es_iterator->first ) {
+		while((gt_iterator->first < es_iterator->first) && gt_iterator != gt_traj.end() ) {
 			gt_iterator++;
 		}
+
 
 		if(gt_iterator == gt_traj.end()) {
 			std::cerr << "**** Error: No more groundtruth to compare with." << std::endl;
@@ -113,7 +114,7 @@ Value *ATEMetric::GetValue(Phase* phase)
 		const Eigen::Matrix4f& gt_pose      = gt_iterator->second.GetValue();
 		const Eigen::Matrix4f& aligned_pose = es_iterator->second.GetValue();
 
-		Eigen::Vector3f 	diff =    {
+		Eigen::Vector3f diff = {
 					std::abs(gt_pose(0,3) - aligned_pose(0,3))  ,
 					std::abs(gt_pose(1,3) - aligned_pose(1,3))  ,
 					std::abs(gt_pose(2,3) - aligned_pose(2,3)) } ;
