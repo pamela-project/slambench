@@ -30,6 +30,9 @@
 #include <rosbag/view.h>
 #include <tf/tf.h>
 #include <tf/tfMessage.h>
+#include <sensor_msgs/Image.h>
+#include <cv_bridge/cv_bridge.h>
+#include <opencv2/opencv.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -101,52 +104,63 @@ bool loadTUMDepthData(const std::string &dirname , SLAMFile &file, const Sensor:
 	depth_sensor->CopyRadialTangentialDistortion(distortion);
 	depth_sensor->Index = file.Sensors.size();
 	depth_sensor->Rate = 30.0;
-
 	file.Sensors.AddSensor(depth_sensor);
 
-	std::string line;
+    rosbag::Bag bag;
+    try {
+        bag.open(dirname + "/" + "rgbd_dataset_freiburg2_pioneer_slam.bag",
+                 rosbag::bagmode::Read);
+    }
+    catch (...) {
+        std::cout << "Error opening rosbag" << std::endl;
+        return false;
+    }
 
-	std::ifstream infile(dirname + "/" + "depth.txt");
+    std::vector<std::string> topics;
+    topics.push_back(std::string("/camera/depth/image"));
 
-	boost::smatch match;
+    rosbag::View view(bag, rosbag::TopicQuery(topics));
+    foreach(rosbag::MessageInstance const msg, view) {
+        sensor_msgs::Image::ConstPtr imgi = msg.instantiate<sensor_msgs::Image>();
+        cv_bridge::CvImageConstPtr imgo;
+        try {
+            imgo = cv_bridge::toCvShare(imgi, sensor_msgs::image_encodings::TYPE_32FC1);
+        }
+        catch (cv_bridge::Exception& e) {
+            std::cout << "Error creating depth image: " << e.what() << std::endl;
+            return false;
+        }
 
-	while (std::getline(infile, line)){
+        cv::Mat image = cv::Mat(imgi->height, imgi->width, CV_16UC1);
+        for (uint r = 0; r < imgi->height; r++) {
+            for (uint c = 0; c < imgi->width; c++) {
+                unsigned int dist16;
+                float dist = imgo->image.at<float>(r, c);
+                dist16 = (unsigned short) (5000 * dist);
+                image.at<short>(r, c) = dist16;
+            }
+        }
 
+        uint32_t timestampS = imgi->header.stamp.sec;
+        uint32_t timestampNS = (imgi->header.stamp.nsec + 500) / 1000;
+        if (timestampNS >= 1000000) {
+            timestampS++;
+            timestampNS = 0;
+        }
+        std::stringstream frame_name;
+        frame_name << dirname << "/depth/";
+        frame_name << timestampS << ".";
+        frame_name << std::setw(6) << std::setfill('0') << timestampNS << ".png";
+        cv::imwrite(frame_name.str(), image);
 
-		if (line.size() == 0) {
-			continue;
-		} else if (boost::regex_match(line,match,boost::regex("^\\s*#.*$"))) {
-			continue;
-		} else if (boost::regex_match(line,match,boost::regex("^([0-9]+)[.]([0-9]+)\\s+(.*)$"))) {
+        ImageFileFrame *depth_frame = new ImageFileFrame();
+        depth_frame->FrameSensor  = depth_sensor;
+        depth_frame->Timestamp.S  = timestampS;
+        depth_frame->Timestamp.Ns = timestampNS;
+        depth_frame->Filename     = frame_name.str();
 
-		  int timestampS = std::stoi(match[1]);
-		  int timestampNS = std::stoi(match[2]) *  std::pow ( 10, 9 - match[2].length());
-		  std::string depthfilename = match[3];
-
-		  ImageFileFrame *depth_frame = new ImageFileFrame();
-		  depth_frame->FrameSensor  = depth_sensor;
-		  depth_frame->Timestamp.S  = timestampS;
-		  depth_frame->Timestamp.Ns = timestampNS;
-
-		  std::stringstream frame_name;
-		  frame_name << dirname << "/" << depthfilename ;
-		  depth_frame->Filename = frame_name.str();
-
-		  if(access(depth_frame->Filename.c_str(), F_OK) < 0) {
-				printf("No depth image for frame (%s)\n", frame_name.str().c_str());
-				perror("");
-				return false;
-		  }
-
-		  file.AddFrame(depth_frame);
-
-
-
-		} else {
-		  std::cerr << "Unknown line:" << line << std::endl;
-		  return false;
-		}
-	}
+        file.AddFrame(depth_frame);
+    }
 	return true;
 }
 
@@ -329,71 +343,69 @@ bool loadTUMGroundTruthData(const std::string &dirname , SLAMFile &file) {
     uint32_t sec, nsec;
 
     foreach(rosbag::MessageInstance const msg, view) {
-        if (msg.isType<tf::tfMessage>()) {
-            tf::tfMessage::ConstPtr msgi = msg.instantiate<tf::tfMessage>();
+        tf::tfMessage::ConstPtr msgi = msg.instantiate<tf::tfMessage>();
 
-            if (msgi != NULL) {
-                for (unsigned long i = 0; i < msgi->transforms.size(); i++) {
-                    geometry_msgs::TransformStamped msgii = msgi->transforms[i];
-                    if (!r_o_rdy && msgii.child_frame_id.compare(opt_str) == 0) {
-                        // record once the /openni_rgb_frame to /openni_rgb_optical_frame transformation
-                        if ((msgii.header.frame_id.compare(rgb_str) == 0)) {
-                            r_o_rdy = true;
-                            all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
-                            tf::transformMsgToTF(msgii.transform, r_o_trans);
-                        }
-                    } else if (!c_r_rdy && msgii.child_frame_id.compare(rgb_str) == 0) {
-                        // record once the /openni_camera to /openni_rgb_frame transformation
-                        if ((msgii.header.frame_id.compare(camera_str) == 0)) {
-                            c_r_rdy = true;
-                            all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
-                            tf::transformMsgToTF(msgii.transform, c_r_trans);
-                        }
-                    } else if (!k_c_rdy && msgii.child_frame_id.compare(camera_str) == 0) {
-                        // record once the /kinect to /openni_camera transformation
-                        if ((msgii.header.frame_id.compare(kinect_str) == 0)) {
-                            k_c_rdy = true;
-                            all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
-                            tf::transformMsgToTF(msgii.transform, k_c_trans);
-                        }
-                    } else if (msgii.child_frame_id.compare(kinect_str) == 0) {
-                        // track continuously the /world to /kinect transformation
-                        if (msgii.header.frame_id.compare(world_str) == 0) {
-                            w_k_new = true;
-                            w_k_stamp = msgii.header.stamp;
-                            sec = w_k_stamp.sec;
-                            nsec = w_k_stamp.nsec;
-                            tf::transformMsgToTF(msgii.transform, w_k_trans);
-                        }
+        if (msgi != NULL) {
+            for (unsigned long i = 0; i < msgi->transforms.size(); i++) {
+                geometry_msgs::TransformStamped msgii = msgi->transforms[i];
+                if (!r_o_rdy && msgii.child_frame_id.compare(opt_str) == 0) {
+                    // record once the /openni_rgb_frame to /openni_rgb_optical_frame transformation
+                    if ((msgii.header.frame_id.compare(rgb_str) == 0)) {
+                        r_o_rdy = true;
+                        all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
+                        tf::transformMsgToTF(msgii.transform, r_o_trans);
                     }
-                    if (all_rdy && w_k_new) {
-                        w_k_new = false;
-                        Eigen::Matrix4f pose = Eigen::Matrix4f::Identity();
-                        tf::Transform w_o_trans = w_k_trans * k_c_trans * c_r_trans * r_o_trans;
-
-                        tf::Vector3   tr = w_o_trans.getOrigin();
-                        tf::Matrix3x3 rt = w_o_trans.getBasis();
-
-                        // NOTE: implicit float64 (double) to float casts
-                        pose.block(0,0,3,3) <<
-                                               rt[0][0] , rt[0][1] , rt[0][2] ,
-                                               rt[1][0] , rt[1][1] , rt[1][2] ,
-                                               rt[2][0] , rt[2][1] , rt[2][2];
-                        pose.block(0,3,3,1) <<
-                                               tr.x() , tr.y() , tr.z();
-
-                        SLAMInMemoryFrame *gt_frame = new SLAMInMemoryFrame();
-                        gt_frame->FrameSensor = gt_sensor;
-                        gt_frame->Timestamp.S  = sec;
-                        gt_frame->Timestamp.Ns = nsec;
-                        gt_frame->Data = malloc(gt_frame->GetSize());
-
-                        memcpy(gt_frame->Data,pose.data(),gt_frame->GetSize());
-
-                        file.AddFrame(gt_frame);
-
-                        break;
+                } else if (!c_r_rdy && msgii.child_frame_id.compare(rgb_str) == 0) {
+                    // record once the /openni_camera to /openni_rgb_frame transformation
+                    if ((msgii.header.frame_id.compare(camera_str) == 0)) {
+                        c_r_rdy = true;
+                        all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
+                        tf::transformMsgToTF(msgii.transform, c_r_trans);
                     }
+                } else if (!k_c_rdy && msgii.child_frame_id.compare(camera_str) == 0) {
+                    // record once the /kinect to /openni_camera transformation
+                    if ((msgii.header.frame_id.compare(kinect_str) == 0)) {
+                        k_c_rdy = true;
+                        all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
+                        tf::transformMsgToTF(msgii.transform, k_c_trans);
+                    }
+                } else if (msgii.child_frame_id.compare(kinect_str) == 0) {
+                    // track continuously the /world to /kinect transformation
+                    if (msgii.header.frame_id.compare(world_str) == 0) {
+                        w_k_new = true;
+                        w_k_stamp = msgii.header.stamp;
+                        sec = w_k_stamp.sec;
+                        nsec = w_k_stamp.nsec;
+                        tf::transformMsgToTF(msgii.transform, w_k_trans);
+                    }
+                }
+                if (all_rdy && w_k_new) {
+                    w_k_new = false;
+                    Eigen::Matrix4f pose = Eigen::Matrix4f::Identity();
+                    tf::Transform w_o_trans = w_k_trans * k_c_trans * c_r_trans * r_o_trans;
+
+                    tf::Vector3 tr = w_o_trans.getOrigin();
+                    tf::Matrix3x3 rt = w_o_trans.getBasis();
+
+                    // NOTE: implicit float64 (double) to float casts
+                    pose.block(0, 0, 3, 3) <<
+                                           rt[0][0], rt[0][1], rt[0][2],
+                            rt[1][0], rt[1][1], rt[1][2],
+                            rt[2][0], rt[2][1], rt[2][2];
+                    pose.block(0, 3, 3, 1) <<
+                                           tr.x(), tr.y(), tr.z();
+
+                    SLAMInMemoryFrame *gt_frame = new SLAMInMemoryFrame();
+                    gt_frame->FrameSensor = gt_sensor;
+                    gt_frame->Timestamp.S = sec;
+                    gt_frame->Timestamp.Ns = nsec;
+                    gt_frame->Data = malloc(gt_frame->GetSize());
+
+                    memcpy(gt_frame->Data, pose.data(), gt_frame->GetSize());
+
+                    file.AddFrame(gt_frame);
+
+                    break;
                 }
             }
         }

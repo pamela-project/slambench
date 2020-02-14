@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 
-include_directories(./include)
+include_directories(./include /home/plana/devel/slambench2/deps/opencv/include/)
 
-link_directories(/opt/ros/kinetic/lib/)
+link_directories(/opt/ros/kinetic/lib/ /opt/ros/kinetic/lib/x86_64-linux-gnu)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}     -Wno-error=unused-parameter -Wno-error=unused-variable -Wno-error=unused-but-set-variable")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=unused-parameter -Wno-error=unused-variable -Wno-error=unused-but-set-variable")
@@ -10,13 +10,14 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=unused-parameter -Wno-error=u
 
 find_package(Boost 1.54 REQUIRED COMPONENTS system filesystem program_options regex)
 find_package(LIBYAML REQUIRED)
+find_package(OpenCV REQUIRED)
 
 add_executable(io-readply io-readply.cpp)
 target_link_libraries(io-readply slambench-io)
 
 add_executable(io-inspect-file io-inspect.cpp)
 target_link_libraries(io-inspect-file PRIVATE -Wl,--whole-archive slambench-io -Wl,--no-whole-archive)
-	
+
 if (Boost_FOUND)
 
 
@@ -45,6 +46,10 @@ if (Boost_FOUND)
 	target_link_libraries(TUM rostime)
 	target_link_libraries(TUM rosbag_storage)
 	target_link_libraries(TUM tf)
+	target_link_libraries(TUM cv_bridge)
+	if(OpenCV_FOUND)
+		target_link_libraries(TUM ${OpenCV_LIBS} )
+	endif()
 
     add_library(ICLNUIM ICLNUIM.cpp)
 	target_link_libraries(ICLNUIM slambench-io)
