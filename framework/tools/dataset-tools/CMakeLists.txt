@@ -1,12 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
-include_directories(./include /home/plana/devel/slambench2/deps/opencv/include/)
-
-link_directories(/opt/ros/kinetic/lib/ /opt/ros/kinetic/lib/x86_64-linux-gnu)
-
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}     -Wno-error=unused-parameter -Wno-error=unused-variable -Wno-error=unused-but-set-variable")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=unused-parameter -Wno-error=unused-variable -Wno-error=unused-but-set-variable")
-
 
 find_package(Boost 1.54 REQUIRED COMPONENTS system filesystem program_options regex)
 find_package(LIBYAML REQUIRED)
@@ -35,26 +30,32 @@ if (Boost_FOUND)
 	add_library(ICL ICL.cpp)
 	target_link_libraries(ICL slambench-io ${Boost_LIBRARIES})
 	target_include_directories(ICL PRIVATE ${Boost_INCLUDE_DIRS})
-	
-	
-    add_library(TUM TUM.cpp)
+
+
+	add_library(TUM TUM.cpp)
 	target_link_libraries(TUM slambench-io ${Boost_LIBRARIES})
 	target_include_directories(TUM PRIVATE ${Boost_INCLUDE_DIRS})
-	target_include_directories(TUM PRIVATE /opt/ros/kinetic/include/)
-	target_link_libraries(TUM cpp_common)
-	target_link_libraries(TUM roscpp_serialization)
-	target_link_libraries(TUM rostime)
-	target_link_libraries(TUM rosbag_storage)
-	target_link_libraries(TUM tf)
-	target_link_libraries(TUM cv_bridge)
+
+
+	add_library(TUM-ROS TUM-ROS.cpp)
+	set(ROS_INCLUDE_DIRS /opt/ros/kinetic/include)
+	set(ROS_LIBS cpp_common roscpp_serialization rostime rosbag_storage)
+	set(ROS_LINK_DIRS /opt/ros/kinetic/lib)
+	link_directories(TUM-ROS PRIVATE ${ROS_LINK_DIRS})
+	target_include_directories(TUM-ROS PRIVATE ${Boost_INCLUDE_DIRS})
+	target_include_directories(TUM-ROS PRIVATE ${ROS_INCLUDE_DIRS})
+	target_link_libraries(TUM-ROS slambench-io ${Boost_LIBRARIES})
 	if(OpenCV_FOUND)
-		target_link_libraries(TUM ${OpenCV_LIBS} )
+		target_link_libraries(TUM-ROS ${OpenCV_LIBS})
 	endif()
+	target_link_libraries(TUM-ROS ${ROS_LIBS})
+
 
     add_library(ICLNUIM ICLNUIM.cpp)
 	target_link_libraries(ICLNUIM slambench-io)
 	target_include_directories(ICLNUIM PRIVATE ${Boost_INCLUDE_DIRS})
-    
+
+
 	add_executable(dataset-generator dataset-generator.cpp)
 	target_link_libraries(dataset-generator TUM ICLNUIM ICL EUROCMAV SVO)
 		

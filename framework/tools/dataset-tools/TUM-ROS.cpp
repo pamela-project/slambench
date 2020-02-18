@@ -8,7 +8,7 @@
  */
 
 
-#include "../dataset-tools/include/TUM.h"
+#include "../dataset-tools/include/TUM-ROS.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
@@ -24,8 +24,6 @@
 #include <boost/regex.hpp>
 
 #include <boost/foreach.hpp>
-#define foreach BOOST_FOREACH
-
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
 #include <tf/tf.h>
@@ -36,6 +34,8 @@
 
 #include <iostream>
 #include <fstream>
+
+#define foreach BOOST_FOREACH
 
 using namespace slambench::io ;
 
@@ -478,7 +478,7 @@ bool loadTUMAccelerometerData(const std::string &dirname , SLAMFile &file) {
 
 
 
-SLAMFile* TUMReader::GenerateSLAMFile () {
+SLAMFile* TUMROSReader::GenerateSLAMFile () {
 
 	if(!(grey || rgb || depth)) {
 		std::cerr <<  "No sensors defined\n";
