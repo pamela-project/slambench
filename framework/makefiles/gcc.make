@@ -13,7 +13,7 @@ ${REPOS_DIR}/${GCC_REPOS} :
 
 
 ${DEPS_DIR}/gcc5 : ${REPOS_DIR}/${GCC_REPOS}
-	cd $^ && git checkout gcc-5_3_0-release
+	cd $^ && git checkout releases/gcc-5.3.0
 	cd $^ && git cherry-pick ec1cc0263f156f70693a62cf17b254a0029f4852 || true
 	cd $^ && ./contrib/download_prerequisites
 	mkdir -p ${GCC_BUILD_DIR}/objdir
@@ -24,7 +24,7 @@ ${DEPS_DIR}/gcc5 : ${REPOS_DIR}/${GCC_REPOS}
 	cd ${GCC_BUILD_DIR}/objdir && make install
 
 ${DEPS_DIR}/gcc7 : ${REPOS_DIR}/${GCC_REPOS}
-	cd $^ && git checkout gcc-7_2_0-release
+	cd $^ && git checkout releases/gcc-7.2.0
 	cd $^ && ./contrib/download_prerequisites
 	mkdir -p ${GCC_BUILD_DIR}/objdir
 	rm -rf ${GCC_BUILD_DIR}/objdir/*
