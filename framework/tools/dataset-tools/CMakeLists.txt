@@ -57,7 +57,7 @@ if (Boost_FOUND)
 
 
 	add_executable(dataset-generator dataset-generator.cpp)
-	target_link_libraries(dataset-generator TUM ICLNUIM ICL EUROCMAV SVO)
+	target_link_libraries(dataset-generator TUM ICLNUIM ICL EUROCMAV SVO TUM-ROS)
 		
 	
 else (Boost_FOUND)

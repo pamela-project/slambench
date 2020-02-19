@@ -89,6 +89,7 @@ bool analyseTUMFolder(const std::string &dirname) {
 
 bool loadTUMDepthData(const std::string &dirname , SLAMFile &file, const Sensor::pose_t &pose, const DepthSensor::intrinsics_t &intrinsics,const CameraSensor::distortion_coefficients_t &distortion,  const DepthSensor::disparity_params_t &disparity_params, const DepthSensor::disparity_type_t &disparity_type) {
 
+    // populate sensor data
 	DepthSensor *depth_sensor = new DepthSensor("Depth");
 	depth_sensor->Index = 0;
 	depth_sensor->Width = 640;
@@ -106,6 +107,7 @@ bool loadTUMDepthData(const std::string &dirname , SLAMFile &file, const Sensor:
 	depth_sensor->Rate = 30.0;
 	file.Sensors.AddSensor(depth_sensor);
 
+	// open rosbag file
     rosbag::Bag bag;
     try {
         bag.open(dirname + "/" + "rgbd_dataset_freiburg2_pioneer_slam.bag",
@@ -116,49 +118,36 @@ bool loadTUMDepthData(const std::string &dirname , SLAMFile &file, const Sensor:
         return false;
     }
 
+    // create query to fetch depth topic messages
     std::vector<std::string> topics;
     topics.push_back(std::string("/camera/depth/image"));
-
     rosbag::View view(bag, rosbag::TopicQuery(topics));
+
+    // produce png image for every depth message
     foreach(rosbag::MessageInstance const msg, view) {
         sensor_msgs::Image::ConstPtr imgi = msg.instantiate<sensor_msgs::Image>();
-        cv_bridge::CvImageConstPtr imgo;
-        try {
-            imgo = cv_bridge::toCvShare(imgi, sensor_msgs::image_encodings::TYPE_32FC1);
-        }
-        catch (cv_bridge::Exception& e) {
-            std::cout << "Error creating depth image: " << e.what() << std::endl;
-            return false;
-        }
-
+        cv::Mat imgo = cv::Mat(imgi->height, imgi->width, CV_32FC1,
+                                const_cast<uchar*>(&imgi->data[0]), imgi->step);
         cv::Mat image = cv::Mat(imgi->height, imgi->width, CV_16UC1);
         for (uint r = 0; r < imgi->height; r++) {
             for (uint c = 0; c < imgi->width; c++) {
-                unsigned int dist16;
-                float dist = imgo->image.at<float>(r, c);
-                dist16 = (unsigned short) (5000 * dist);
+                float dist = imgo.at<float>(r * imgi->width + c);
+                unsigned short dist16 = (unsigned short) (5000 * dist);
                 image.at<short>(r, c) = dist16;
             }
         }
-
-        uint32_t timestampS = imgi->header.stamp.sec;
-        uint32_t timestampNS = (imgi->header.stamp.nsec + 500) / 1000;
-        if (timestampNS >= 1000000) {
-            timestampS++;
-            timestampNS = 0;
-        }
         std::stringstream frame_name;
         frame_name << dirname << "/depth/";
-        frame_name << timestampS << ".";
-        frame_name << std::setw(6) << std::setfill('0') << timestampNS << ".png";
+        frame_name << imgi->header.stamp.sec << ".";
+        frame_name << std::setw(6) << std::setfill('0') << imgi->header.stamp.nsec << ".png";
         cv::imwrite(frame_name.str(), image);
 
+        // update slambench file with new frame
         ImageFileFrame *depth_frame = new ImageFileFrame();
         depth_frame->FrameSensor  = depth_sensor;
-        depth_frame->Timestamp.S  = timestampS;
-        depth_frame->Timestamp.Ns = timestampNS;
+        depth_frame->Timestamp.S  = imgi->header.stamp.sec;
+        depth_frame->Timestamp.Ns = imgi->header.stamp.nsec;
         depth_frame->Filename     = frame_name.str();
-
         file.AddFrame(depth_frame);
     }
 	return true;
@@ -167,6 +156,7 @@ bool loadTUMDepthData(const std::string &dirname , SLAMFile &file, const Sensor:
 
 bool loadTUMRGBData(const std::string &dirname , SLAMFile &file, const Sensor::pose_t &pose, const CameraSensor::intrinsics_t &intrinsics, const CameraSensor::distortion_coefficients_t &distortion) {
 
+    // populate sensor data
 	CameraSensor *rgb_sensor = new CameraSensor("RGB", CameraSensor::kCameraType);
 	rgb_sensor->Index = 0;
 	rgb_sensor->Width = 640;
@@ -180,51 +170,53 @@ bool loadTUMRGBData(const std::string &dirname , SLAMFile &file, const Sensor::p
 	rgb_sensor->CopyRadialTangentialDistortion(distortion);
 	rgb_sensor->Index =file.Sensors.size();
 	rgb_sensor->Rate = 30.0;
-
 	file.Sensors.AddSensor(rgb_sensor);
 
-	std::string line;
+    // open rosbag file
+    rosbag::Bag bag;
+    try {
+        bag.open(dirname + "/" + "rgbd_dataset_freiburg2_pioneer_slam.bag",
+                 rosbag::bagmode::Read);
+    }
+    catch (...) {
+        std::cout << "Error opening rosbag" << std::endl;
+        return false;
+    }
 
-	std::ifstream infile(dirname + "/" + "rgb.txt");
+    // create query to fetch depth topic messages
+    std::vector<std::string> topics;
+    topics.push_back(std::string("/camera/rgb/image_color"));
+    rosbag::View view(bag, rosbag::TopicQuery(topics));
 
-	boost::smatch match;
+    // produce png image for every rgb message
+    foreach(rosbag::MessageInstance const msg, view) {
+        sensor_msgs::Image::ConstPtr imgi = msg.instantiate<sensor_msgs::Image>();
+        cv::Mat imgo = cv::Mat(imgi->height, imgi->width, CV_8UC3,
+                               const_cast<uchar *>(&imgi->data[0]), imgi->step);
+        cv::Mat image = cv::Mat(imgi->height, imgi->width, CV_8UC3);
+        for (uint r = 0; r < imgi->height; r++) {
+            for (uint c = 0; c < imgi->width; c++) {
+                // NOTE: OpenCV defaults to BGR8 encoding!
+                image.at<cv::Vec3b>(r, c)[0] = imgo.at<cv::Vec3b>(r, c)[2];
+                image.at<cv::Vec3b>(r, c)[1] = imgo.at<cv::Vec3b>(r, c)[1];
+                image.at<cv::Vec3b>(r, c)[2] = imgo.at<cv::Vec3b>(r, c)[0];
+            }
+        }
+        std::stringstream frame_name;
+        frame_name << dirname << "/rgb/";
+        frame_name << imgi->header.stamp.sec << ".";
+        frame_name << std::setw(6) << std::setfill('0') << imgi->header.stamp.nsec << ".png";
+        cv::imwrite(frame_name.str(), image);
 
-	while (std::getline(infile, line)){
+        // update slambench file with new frame
+        ImageFileFrame *rgb_frame = new ImageFileFrame();
+        rgb_frame->FrameSensor = rgb_sensor;
+        rgb_frame->Timestamp.S = imgi->header.stamp.sec;
+        rgb_frame->Timestamp.Ns = imgi->header.stamp.nsec;
+        rgb_frame->Filename = frame_name.str();
+        file.AddFrame(rgb_frame);
+    }
 
-
-		if (line.size() == 0) {
-			continue;
-		} else if (boost::regex_match(line,match,boost::regex("^\\s*#.*$"))) {
-			continue;
-		} else if (boost::regex_match(line,match,boost::regex("^([0-9]+)[.]([0-9]+)\\s+(.*)$"))) {
-
-		  int timestampS = std::stoi(match[1]);
-		  int timestampNS = std::stoi(match[2]) *  std::pow ( 10, 9 - match[2].length());
-		  std::string rgbfilename = match[3];
-
-		  ImageFileFrame *rgb_frame = new ImageFileFrame();
-		  rgb_frame->FrameSensor = rgb_sensor;
-		  rgb_frame->Timestamp.S  = timestampS;
-		  rgb_frame->Timestamp.Ns = timestampNS;
-
-		  std::stringstream frame_name;
-		  frame_name << dirname << "/" << rgbfilename ;
-		  rgb_frame->Filename = frame_name.str();
-
-		  if(access(rgb_frame->Filename.c_str(), F_OK) < 0) {
-		    printf("No RGB image for frame (%s)\n", frame_name.str().c_str());
-		    perror("");
-		    return false;
-		  }
-
-		  file.AddFrame(rgb_frame);
-
-		} else {
-		  std::cerr << "Unknown line:" << line << std::endl;
-		  return false;
-		}
-
-	}
 	return true;
 }
 
@@ -237,58 +229,47 @@ bool loadTUMGreyData(const std::string &dirname , SLAMFile &file, const Sensor::
 	grey_sensor->FrameFormat = frameformat::Raster;
 	grey_sensor->PixelFormat = pixelformat::G_I_8;
 	grey_sensor->Description = "Grey";
-
 	grey_sensor->CopyPose(pose);
 	grey_sensor->CopyIntrinsics(intrinsics);
 	grey_sensor->CopyRadialTangentialDistortion(distortion);
 	grey_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
 	grey_sensor->Index =file.Sensors.size();
 	grey_sensor->Rate = 30.0;
+    file.Sensors.AddSensor(grey_sensor);
 
-	file.Sensors.AddSensor(grey_sensor);
+    // open rosbag file
+    rosbag::Bag bag;
+    try {
+        bag.open(dirname + "/" + "rgbd_dataset_freiburg2_pioneer_slam.bag",
+                 rosbag::bagmode::Read);
+    }
+    catch (...) {
+        std::cout << "Error opening rosbag" << std::endl;
+        return false;
+    }
 
-	std::string line;
+    // create query to fetch depth topic messages
+    std::vector<std::string> topics;
+    topics.push_back(std::string("/camera/rgb/image_color"));
+    rosbag::View view(bag, rosbag::TopicQuery(topics));
 
-	std::ifstream infile(dirname + "/" + "rgb.txt");
+    // track png image for every message
+    foreach(rosbag::MessageInstance const msg, view) {
+        sensor_msgs::Image::ConstPtr imgi = msg.instantiate<sensor_msgs::Image>();
+        std::stringstream frame_name;
+        frame_name << dirname << "/rgb/";
+        frame_name << imgi->header.stamp.sec << ".";
+        frame_name << std::setw(6) << std::setfill('0') << imgi->header.stamp.nsec << ".png";
 
-	boost::smatch match;
+        // update slambench file with new frame
+        ImageFileFrame *grey_frame = new ImageFileFrame();
+        grey_frame->FrameSensor = grey_sensor;
+        grey_frame->Timestamp.S = imgi->header.stamp.sec;
+        grey_frame->Timestamp.Ns = imgi->header.stamp.nsec;
+        grey_frame->Filename = frame_name.str();
+        file.AddFrame(grey_frame);
+    }
 
-	while (std::getline(infile, line)){
-
-
-		if (line.size() == 0) {
-			continue;
-		} else if (boost::regex_match(line,match,boost::regex("^\\s*#.*$"))) {
-			continue;
-		} else if (boost::regex_match(line,match,boost::regex("^([0-9]+)[.]([0-9]+)\\s+(.*)$"))) {
-
-		  int timestampS = std::stoi(match[1]);
-		  int timestampNS = std::stoi(match[2]) *  std::pow ( 10, 9 - match[2].length());
-		  std::string rgbfilename = match[3];
-
-		  ImageFileFrame *grey_frame = new ImageFileFrame();
-		  grey_frame->FrameSensor = grey_sensor;
-		  grey_frame->Timestamp.S  = timestampS;
-		  grey_frame->Timestamp.Ns = timestampNS;
-
-		  std::stringstream frame_name;
-		  frame_name << dirname << "/" << rgbfilename ;
-		  grey_frame->Filename = frame_name.str();
-
-		  if(access(grey_frame->Filename.c_str(), F_OK) < 0) {
-		    printf("No RGB image for frame (%s)\n", frame_name.str().c_str());
-		    perror("");
-		    return false;
-		  }
-
-		  file.AddFrame(grey_frame);
-
-		} else {
-		  std::cerr << "Unknown line:" << line << std::endl;
-		  return false;
-		}
-
-	}
 	return true;
 }
 
@@ -346,7 +327,7 @@ bool loadTUMGroundTruthData(const std::string &dirname , SLAMFile &file) {
         tf::tfMessage::ConstPtr msgi = msg.instantiate<tf::tfMessage>();
 
         if (msgi != NULL) {
-            for (unsigned long i = 0; i < msgi->transforms.size(); i++) {
+            for (unsigned int i = 0; i < msgi->transforms.size(); i++) {
                 geometry_msgs::TransformStamped msgii = msgi->transforms[i];
                 if (!r_o_rdy && msgii.child_frame_id.compare(opt_str) == 0) {
                     // record once the /openni_rgb_frame to /openni_rgb_optical_frame transformation
