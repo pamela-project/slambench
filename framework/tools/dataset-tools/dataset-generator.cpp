@@ -89,7 +89,7 @@ public :
 		if (dataset_name == "iclnuim") {
 			config->reader = new ICLNUIMReader("");
 		} else if (dataset_name == "tum") {
-			config->reader = new TUMROSReader("");
+			config->reader = new TUMReader("");
 		} else if (dataset_name == "eurocmav") {
 			config->reader = new EUROCMAVReader("");
 		} else if (dataset_name == "icl") {
