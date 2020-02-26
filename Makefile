@@ -384,8 +384,8 @@ check_generator:=if [ ! -e ./build/bin/dataset-generator ] ; then make slambench
 	cd $(@D)  &&  ${WGET} "http://vision.in.tum.de/rgbd/dataset/$*.bag"
 
 ./datasets/TUM-ROSBAG/%.dir : ./datasets/TUM-ROSBAG/%.bag
-	mkdir $@
-	mkdir $@/'$(*F)'
+	mkdir -p $@
+	mkdir -p $@/'$(*F)'
 
 ./datasets/TUM-ROSBAG/%.slam :  ./datasets/TUM-ROSBAG/%.dir
 	${check_generator}
@@ -448,7 +448,7 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 ./benchmarks/orbslam2/src/original/Vocabulary/ORBvoc.txt : ./benchmarks/orbslam2/src/original/Vocabulary/ORBvoc.txt.tar.gz
 	cd ./benchmarks/orbslam2/src/original/Vocabulary/ && tar -xf ORBvoc.txt.tar.gz
 
-.PRECIOUS: ./datasets/TUM/%.tgz ./datasets/TUM/%.dir ./datasets/TUM/%.raw datasets/ICL_NUIM/living_room_traj%_loop.tgz ./datasets/TUM/%.raw datasets/ICL_NUIM/living_room_traj%_loop.dir datasets/ICL_NUIM/livingRoom%.gt.freiburg datasets/ICL_NUIM/living_room_traj%_loop.raw
+.PRECIOUS: ./datasets/TUM/%.tgz ./datasets/TUM/%.dir ./datasets/TUM/%.raw datasets/ICL_NUIM/living_room_traj%_loop.tgz ./datasets/TUM/%.raw datasets/ICL_NUIM/living_room_traj%_loop.dir datasets/ICL_NUIM/livingRoom%.gt.freiburg datasets/ICL_NUIM/living_room_traj%_loop.raw ./datasets/TUM-ROSBAG/%.bag ./datasets/TUM-ROSBAG/%.dir
 
 ####################################
 ####    BUILD/CLEAN TOOL        ####
