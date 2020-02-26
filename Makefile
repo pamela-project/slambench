@@ -278,6 +278,29 @@ datasetslist:
 	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam2.slam"
 	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam3.slam"
 	@echo ""
+	@echo "### TUM-ROSBAG Handheld SLAM"
+	@echo ""
+	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_360.slam"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_floor.slam"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_desk.slam"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_desk2.slam"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_room.slam"
+	@echo ""
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_360_hemisphere.slam"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_360_kidnap.slam"
+	@echo ""
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_desk.slam"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_desk_with_person.slam"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_large_no_loop.slam"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_large_with_loop.slam"
+	@echo ""
+	@echo "### TUM-ROSBAG Robot SLAM"
+	@echo ""
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_pioneer_360.slam"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_pioneer_slam.slam"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_pioneer_slam2.slam"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_pioneer_slam3.slam"
+	@echo ""
 	@echo "##### TUM Extra dataset"
 	@echo ""
 	@echo "## https://vision.in.tum.de/rgbd/dataset/freiburg3/rgbd_dataset_freiburg3_long_office_household.tgz"
@@ -353,7 +376,22 @@ check_generator:=if [ ! -e ./build/bin/dataset-generator ] ; then make slambench
 	${check_generator}
 	./build/bin/dataset-generator -d tum -i $</* -o $@ -grey true -rgb true -gt true -depth true -accelerometer true 
 
-#### ICL-NUIM      
+#### TUM-ROSBAG
+###############
+
+./datasets/TUM-ROSBAG/%.bag :  # Example : $* = freiburg2/rgbd_dataset_freiburg2_desk
+	mkdir -p $(@D)
+	cd $(@D)  &&  ${WGET} "http://vision.in.tum.de/rgbd/dataset/$*.bag"
+
+./datasets/TUM-ROSBAG/%.dir : ./datasets/TUM-ROSBAG/%.bag
+	mkdir $@
+	mkdir $@/'$(*F)'
+
+./datasets/TUM-ROSBAG/%.slam :  ./datasets/TUM-ROSBAG/%.dir
+	${check_generator}
+	./build/bin/dataset-generator -d tum-rosbag -i $</* -o $@ -grey true -rgb true -gt true -depth true -accelerometer true
+
+#### ICL-NUIM
 ###############
 datasets/ICL_NUIM/living-room.ply :  datasets/ICL_NUIM/living-room.ply.tar.gz
 	cd datasets/ICL_NUIM  && tar xzf living-room.ply.tar.gz

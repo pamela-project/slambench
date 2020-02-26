@@ -20,16 +20,15 @@
 
 
 #include <boost/filesystem.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
-
 #include <boost/foreach.hpp>
+
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
 #include <tf/tf.h>
 #include <tf/tfMessage.h>
 #include <sensor_msgs/Image.h>
-#include <cv_bridge/cv_bridge.h>
+
 #include <opencv2/opencv.hpp>
 
 #include <iostream>
@@ -48,46 +47,46 @@ using namespace slambench::io ;
  *
  */
 
-bool analyseTUMFolder(const std::string &dirname) {
+//bool analyseTUMROSFolder(const std::string &dirname) {
+//
+//	static const std::vector<std::string> requirements = {
+//			"accelerometer.txt",
+//			"rgb.txt",
+//			"rgb",
+//			"depth.txt",
+//			"depth",
+//			"groundtruth.txt"
+//	};
+//
+//	try {
+//		if ( !boost::filesystem::exists( dirname ) ) return false;
+//
+//		boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
+//		for ( auto requirement : requirements ) {
+//			bool seen = false;
+//
+//			for ( boost::filesystem::directory_iterator itr( dirname ); itr != end_itr; ++itr ) {
+//				if (requirement == itr->path().filename()) {
+//					seen = true;
+//				}
+//			}
+//
+//			if (!seen) {
+//				std::cout << "File not found: <dataset_dir>/" << requirement << std::endl;
+//				return false;
+//			}
+//		}
+//	} catch (boost::filesystem::filesystem_error& e)  {
+//		std::cerr << "I/O Error with directory " << dirname << std::endl;
+//		std::cerr << e.what() << std::endl;
+//		return false;
+//	}
+//
+//	return true;
+//}
 
-	static const std::vector<std::string> requirements = {
-			"accelerometer.txt",
-			"rgb.txt",
-			"rgb",
-			"depth.txt",
-			"depth",
-			"groundtruth.txt"
-	};
 
-	try {
-		if ( !boost::filesystem::exists( dirname ) ) return false;
-
-		boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
-		for ( auto requirement : requirements ) {
-			bool seen = false;
-
-			for ( boost::filesystem::directory_iterator itr( dirname ); itr != end_itr; ++itr ) {
-				if (requirement == itr->path().filename()) {
-					seen = true;
-				}
-			}
-
-			if (!seen) {
-				std::cout << "File not found: <dataset_dir>/" << requirement << std::endl;
-				return false;
-			}
-		}
-	} catch (boost::filesystem::filesystem_error& e)  {
-		std::cerr << "I/O Error with directory " << dirname << std::endl;
-		std::cerr << e.what() << std::endl;
-		return false;
-	}
-
-	return true;
-}
-
-
-bool loadTUMDepthData(const std::string &dirname , SLAMFile &file, const Sensor::pose_t &pose, const DepthSensor::intrinsics_t &intrinsics,const CameraSensor::distortion_coefficients_t &distortion,  const DepthSensor::disparity_params_t &disparity_params, const DepthSensor::disparity_type_t &disparity_type) {
+bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname, SLAMFile &file, const Sensor::pose_t &pose, const DepthSensor::intrinsics_t &intrinsics,const CameraSensor::distortion_coefficients_t &distortion,  const DepthSensor::disparity_params_t &disparity_params, const DepthSensor::disparity_type_t &disparity_type) {
 
     // populate sensor data
 	DepthSensor *depth_sensor = new DepthSensor("Depth");
@@ -110,12 +109,20 @@ bool loadTUMDepthData(const std::string &dirname , SLAMFile &file, const Sensor:
 	// open rosbag file
     rosbag::Bag bag;
     try {
-        bag.open(dirname + "/" + "rgbd_dataset_freiburg2_pioneer_slam.bag",
-                 rosbag::bagmode::Read);
+        bag.open(bagname,rosbag::bagmode::Read);
     }
     catch (...) {
-        std::cout << "Error opening rosbag" << std::endl;
+        std::cout << "Error opening depth rosbag: " << bagname << std::endl;
         return false;
+    }
+
+    // create directory for depth images
+    std::string depthdir = dirname + "/depth/";
+    if (!boost::filesystem::exists(depthdir)) {
+        if (!boost::filesystem::create_directory(depthdir)) {
+            std::cout << "Error creating depth directory: " << depthdir << std::endl;
+            return false;
+        }
     }
 
     // create query to fetch depth topic messages
@@ -137,10 +144,13 @@ bool loadTUMDepthData(const std::string &dirname , SLAMFile &file, const Sensor:
             }
         }
         std::stringstream frame_name;
-        frame_name << dirname << "/depth/";
+        frame_name << depthdir;
         frame_name << imgi->header.stamp.sec << ".";
         frame_name << std::setw(6) << std::setfill('0') << imgi->header.stamp.nsec << ".png";
-        cv::imwrite(frame_name.str(), image);
+        if (cv::imwrite(frame_name.str(), image) == false) {
+            std::cout << "Error writing depth image: " << frame_name.str() << std::endl;
+            return false;
+        };
 
         // update slambench file with new frame
         ImageFileFrame *depth_frame = new ImageFileFrame();
@@ -150,11 +160,14 @@ bool loadTUMDepthData(const std::string &dirname , SLAMFile &file, const Sensor:
         depth_frame->Filename     = frame_name.str();
         file.AddFrame(depth_frame);
     }
-	return true;
+
+    bag.close();
+
+    return true;
 }
 
 
-bool loadTUMRGBData(const std::string &dirname , SLAMFile &file, const Sensor::pose_t &pose, const CameraSensor::intrinsics_t &intrinsics, const CameraSensor::distortion_coefficients_t &distortion) {
+bool loadTUMROSRGBData(const std::string &dirname, const std::string &bagname, SLAMFile &file, const Sensor::pose_t &pose, const CameraSensor::intrinsics_t &intrinsics, const CameraSensor::distortion_coefficients_t &distortion) {
 
     // populate sensor data
 	CameraSensor *rgb_sensor = new CameraSensor("RGB", CameraSensor::kCameraType);
@@ -175,12 +188,20 @@ bool loadTUMRGBData(const std::string &dirname , SLAMFile &file, const Sensor::p
     // open rosbag file
     rosbag::Bag bag;
     try {
-        bag.open(dirname + "/" + "rgbd_dataset_freiburg2_pioneer_slam.bag",
-                 rosbag::bagmode::Read);
+        bag.open(bagname, rosbag::bagmode::Read);
     }
     catch (...) {
-        std::cout << "Error opening rosbag" << std::endl;
+        std::cout << "Error opening rgb rosbag: " << bagname << std::endl;
         return false;
+    }
+
+    // create directory for rgb images
+    std::string rgbdir = dirname + "/rgb/";
+    if (!boost::filesystem::exists(rgbdir)) {
+        if (!boost::filesystem::create_directory(rgbdir)) {
+            std::cout << "Error creating rgb directory: " << rgbdir << std::endl;
+            return false;
+        }
     }
 
     // create query to fetch depth topic messages
@@ -203,10 +224,13 @@ bool loadTUMRGBData(const std::string &dirname , SLAMFile &file, const Sensor::p
             }
         }
         std::stringstream frame_name;
-        frame_name << dirname << "/rgb/";
+        frame_name << rgbdir;
         frame_name << imgi->header.stamp.sec << ".";
         frame_name << std::setw(6) << std::setfill('0') << imgi->header.stamp.nsec << ".png";
-        cv::imwrite(frame_name.str(), image);
+        if (cv::imwrite(frame_name.str(), image) == false) {
+            std::cout << "Error writing rgb image: " << frame_name.str() << std::endl;
+            return false;
+        };
 
         // update slambench file with new frame
         ImageFileFrame *rgb_frame = new ImageFileFrame();
@@ -217,10 +241,13 @@ bool loadTUMRGBData(const std::string &dirname , SLAMFile &file, const Sensor::p
         file.AddFrame(rgb_frame);
     }
 
-	return true;
+    bag.close();
+
+    return true;
 }
 
-bool loadTUMGreyData(const std::string &dirname , SLAMFile &file, const Sensor::pose_t &pose, const CameraSensor::intrinsics_t &intrinsics, const CameraSensor::distortion_coefficients_t &distortion) {
+
+bool loadTUMROSGreyData(const std::string &dirname, const std::string &bagname, SLAMFile &file, const Sensor::pose_t &pose, const CameraSensor::intrinsics_t &intrinsics, const CameraSensor::distortion_coefficients_t &distortion) {
 
 	CameraSensor *grey_sensor = new CameraSensor("Grey", CameraSensor::kCameraType);
 	grey_sensor->Index = 0;
@@ -240,15 +267,15 @@ bool loadTUMGreyData(const std::string &dirname , SLAMFile &file, const Sensor::
     // open rosbag file
     rosbag::Bag bag;
     try {
-        bag.open(dirname + "/" + "rgbd_dataset_freiburg2_pioneer_slam.bag",
-                 rosbag::bagmode::Read);
+        bag.open(bagname,rosbag::bagmode::Read);
     }
     catch (...) {
-        std::cout << "Error opening rosbag" << std::endl;
+        std::cout << "Error opening rgb/(grey)rosbag: " << bagname << std::endl;
         return false;
     }
 
-    // create query to fetch depth topic messages
+    // create query to fetch rgb topic messages
+    // NOTE: TUM rosbag files do not contain grey images - use rgb ones!
     std::vector<std::string> topics;
     topics.push_back(std::string("/camera/rgb/image_color"));
     rosbag::View view(bag, rosbag::TopicQuery(topics));
@@ -270,11 +297,13 @@ bool loadTUMGreyData(const std::string &dirname , SLAMFile &file, const Sensor::
         file.AddFrame(grey_frame);
     }
 
-	return true;
+    bag.close();
+
+    return true;
 }
 
 
-bool loadTUMGroundTruthData(const std::string &dirname , SLAMFile &file) {
+bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
 
 	GroundTruthSensor *gt_sensor = new GroundTruthSensor("GroundTruth");
 	gt_sensor->Index = file.Sensors.size();
@@ -288,13 +317,13 @@ bool loadTUMGroundTruthData(const std::string &dirname , SLAMFile &file) {
 		std::cout << "gt sensor created..." << std::endl;
 	}
 
+    // open rosbag
     rosbag::Bag bag;
 	try {
-        bag.open(dirname + "/" + "rgbd_dataset_freiburg2_pioneer_slam.bag",
-                 rosbag::bagmode::Read);
+        bag.open(bagname,rosbag::bagmode::Read);
     }
 	catch (...) {
-        std::cout << "Error opening rosbag" << std::endl;
+        std::cout << "Error opening gt rosbag: " << bagname << std::endl;
         return false;
 	}
 
@@ -310,10 +339,11 @@ bool loadTUMGroundTruthData(const std::string &dirname , SLAMFile &file) {
     std::string rgb_str ("/openni_rgb_frame");
     std::string opt_str ("/openni_rgb_optical_frame");
 
-    tf::Transform w_k_trans;  // constant transformation
-    tf::Transform k_c_trans;  // constant transformation
-    tf::Transform c_r_trans;  // constant transformation
-    tf::Transform r_o_trans;  // constant transformation
+    // initialised to avoid warnings!
+    tf::Transform w_k_trans = tf::Transform::getIdentity();
+    tf::Transform k_c_trans = tf::Transform::getIdentity();
+    tf::Transform c_r_trans = tf::Transform::getIdentity();
+    tf::Transform r_o_trans = tf::Transform::getIdentity();
 
     bool w_k_new = false;
     bool k_c_rdy = false;
@@ -321,7 +351,9 @@ bool loadTUMGroundTruthData(const std::string &dirname , SLAMFile &file) {
     bool r_o_rdy = false;
     bool all_rdy = false;
 
-    uint32_t sec, nsec;
+    // initialised to avoid warnnings!
+    uint32_t sec  = 0;
+    uint32_t nsec = 0;
 
     foreach(rosbag::MessageInstance const msg, view) {
         tf::tfMessage::ConstPtr msgi = msg.instantiate<tf::tfMessage>();
@@ -398,7 +430,7 @@ bool loadTUMGroundTruthData(const std::string &dirname , SLAMFile &file) {
 }
 
 
-bool loadTUMAccelerometerData(const std::string &dirname , SLAMFile &file) {
+bool loadTUMROSAccelerometerData(const std::string &dirname, SLAMFile &file) {
 
 	AccelerometerSensor *accelerometer_sensor = new AccelerometerSensor("Accelerometer");
 	accelerometer_sensor->Index = file.Sensors.size();
@@ -455,23 +487,26 @@ bool loadTUMAccelerometerData(const std::string &dirname , SLAMFile &file) {
 }
 
 
-
-
-
-
 SLAMFile* TUMROSReader::GenerateSLAMFile () {
 
 	if(!(grey || rgb || depth)) {
-		std::cerr <<  "No sensors defined\n";
+		std::cerr <<  "No sensors defined" << std::endl;
 		return nullptr;
 	}
 
 	std::string dirname = input;
 
-	if (!analyseTUMFolder(dirname))	{
-		std::cerr << "Invalid folder." << std::endl;
-		return nullptr;
-	}
+    // rosbag file
+    auto pos = dirname.rfind("/");
+    if (pos == std::string::npos) {
+        pos = 0;
+    }
+    std::string bagname = dirname + "/../../" + dirname.substr(pos) + ".bag";
+
+//	if (!analyseTUMROSFolder(dirname))	{
+//		std::cerr << "Invalid folder." << std::endl;
+//		return nullptr;
+//	}
 
 
 	SLAMFile * slamfilep = new SLAMFile();
@@ -512,7 +547,6 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
 	}
 
 
-
 	DepthSensor::disparity_params_t disparity_params =  {0.001,0.0};
 	DepthSensor::disparity_type_t disparity_type = DepthSensor::affine_disparity;
 
@@ -520,66 +554,51 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
 	/**
 	 * load Depth
 	 */
-
-	if(depth && !loadTUMDepthData(dirname, slamfile,pose,intrinsics_depth,distortion_depth,disparity_params,disparity_type)) {
+	if(depth && !loadTUMROSDepthData(dirname, bagname, slamfile, pose, intrinsics_depth, distortion_depth, disparity_params, disparity_type)) {
 		std::cout << "Error while loading depth information." << std::endl;
 		delete slamfilep;
 		return nullptr;
-
 	}
 
 
 	/**
 	 * load Grey
 	 */
-
-	if(grey && !loadTUMGreyData(dirname, slamfile,pose,intrinsics_rgb,distortion_rgb)) {
+	if(grey && !loadTUMROSGreyData(dirname, bagname, slamfile, pose, intrinsics_rgb, distortion_rgb)) {
 		std::cout << "Error while loading Grey information." << std::endl;
 		delete slamfilep;
 		return nullptr;
-
 	}
 
 
 	/**
 	 * load RGB
 	 */
-
-	if(rgb && !loadTUMRGBData(dirname, slamfile,pose,intrinsics_rgb,distortion_rgb)) {
+	if(rgb && !loadTUMROSRGBData(dirname, bagname, slamfile, pose, intrinsics_rgb, distortion_rgb)) {
 		std::cout << "Error while loading RGB information." << std::endl;
 		delete slamfilep;
 		return nullptr;
-
 	}
 
 
 	/**
 	 * load GT
 	 */
-	if(gt && !loadTUMGroundTruthData(dirname, slamfile)) {
+	if(gt && !loadTUMROSGroundTruthData(bagname, slamfile)) {
 		std::cout << "Error while loading gt information." << std::endl;
 		delete slamfilep;
 		return nullptr;
-
 	}
 
 
 	/**
 	 * load Accelerometer: This one failed
 	 */
-	if(accelerometer && !loadTUMAccelerometerData(dirname, slamfile)) {
+	if(accelerometer && !loadTUMROSAccelerometerData(dirname, slamfile)) {
 		std::cout << "Error while loading Accelerometer information." << std::endl;
 		delete slamfilep;
 		return nullptr;
-
 	}
-
 
 	return slamfilep;
 	}
-
-
-
-
-
-

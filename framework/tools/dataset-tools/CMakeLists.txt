@@ -5,6 +5,7 @@ include_directories(./include)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}     -Wno-error=unused-parameter -Wno-error=unused-variable -Wno-error=unused-but-set-variable")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=unused-parameter -Wno-error=unused-variable -Wno-error=unused-but-set-variable")
 
+
 find_package(Boost 1.54 REQUIRED COMPONENTS system filesystem program_options regex)
 find_package(LIBYAML REQUIRED)
 find_package(OpenCV REQUIRED)
@@ -56,7 +57,6 @@ if (Boost_FOUND)
     add_library(ICLNUIM ICLNUIM.cpp)
 	target_link_libraries(ICLNUIM slambench-io)
 	target_include_directories(ICLNUIM PRIVATE ${Boost_INCLUDE_DIRS})
-
 
 	add_executable(dataset-generator dataset-generator.cpp)
 	target_link_libraries(dataset-generator TUM ICLNUIM ICL EUROCMAV SVO TUM-ROS)
