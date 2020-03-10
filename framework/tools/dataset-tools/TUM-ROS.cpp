@@ -40,52 +40,6 @@ using namespace slambench::io ;
 
 
 
-/*
- *
- * The dataset folder contains :
- * > accelerometer.txt  depth  depth.txt  groundtruth.txt  rgb  rgb.txt
- *
- */
-
-//bool analyseTUMROSFolder(const std::string &dirname) {
-//
-//	static const std::vector<std::string> requirements = {
-//			"accelerometer.txt",
-//			"rgb.txt",
-//			"rgb",
-//			"depth.txt",
-//			"depth",
-//			"groundtruth.txt"
-//	};
-//
-//	try {
-//		if ( !boost::filesystem::exists( dirname ) ) return false;
-//
-//		boost::filesystem::directory_iterator end_itr; // default construction yields past-the-end
-//		for ( auto requirement : requirements ) {
-//			bool seen = false;
-//
-//			for ( boost::filesystem::directory_iterator itr( dirname ); itr != end_itr; ++itr ) {
-//				if (requirement == itr->path().filename()) {
-//					seen = true;
-//				}
-//			}
-//
-//			if (!seen) {
-//				std::cout << "File not found: <dataset_dir>/" << requirement << std::endl;
-//				return false;
-//			}
-//		}
-//	} catch (boost::filesystem::filesystem_error& e)  {
-//		std::cerr << "I/O Error with directory " << dirname << std::endl;
-//		std::cerr << e.what() << std::endl;
-//		return false;
-//	}
-//
-//	return true;
-//}
-
-
 bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname, SLAMFile &file, const Sensor::pose_t &pose, const DepthSensor::intrinsics_t &intrinsics,const CameraSensor::distortion_coefficients_t &distortion,  const DepthSensor::disparity_params_t &disparity_params, const DepthSensor::disparity_type_t &disparity_type) {
 
     // populate sensor data
@@ -130,6 +84,10 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
     topics.push_back(std::string("/camera/depth/image"));
     rosbag::View view(bag, rosbag::TopicQuery(topics));
 
+    // initialised to avoid warnings!
+    uint32_t sec  = 0;
+    uint32_t nsec = 0;
+
     // produce png image for every depth message
     foreach(rosbag::MessageInstance const msg, view) {
         sensor_msgs::Image::ConstPtr imgi = msg.instantiate<sensor_msgs::Image>();
@@ -143,10 +101,19 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
                 image.at<short>(r, c) = dist16;
             }
         }
+
+        // record time stamp with adjusted precision
+        sec = imgi->header.stamp.sec;
+        nsec = (imgi->header.stamp.nsec + 500)/1000;
+        if (nsec >= 1000000) {
+            sec++;
+            nsec = 0;
+        }
+
         std::stringstream frame_name;
         frame_name << depthdir;
-        frame_name << imgi->header.stamp.sec << ".";
-        frame_name << std::setw(6) << std::setfill('0') << imgi->header.stamp.nsec << ".png";
+        frame_name << sec << ".";
+        frame_name << std::setw(6) << std::setfill('0') << nsec << ".png";
         if (cv::imwrite(frame_name.str(), image) == false) {
             std::cout << "Error writing depth image: " << frame_name.str() << std::endl;
             return false;
@@ -155,8 +122,8 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
         // update slambench file with new frame
         ImageFileFrame *depth_frame = new ImageFileFrame();
         depth_frame->FrameSensor  = depth_sensor;
-        depth_frame->Timestamp.S  = imgi->header.stamp.sec;
-        depth_frame->Timestamp.Ns = imgi->header.stamp.nsec;
+        depth_frame->Timestamp.S  = sec;
+        depth_frame->Timestamp.Ns = nsec;
         depth_frame->Filename     = frame_name.str();
         file.AddFrame(depth_frame);
     }
@@ -209,6 +176,10 @@ bool loadTUMROSRGBData(const std::string &dirname, const std::string &bagname, S
     topics.push_back(std::string("/camera/rgb/image_color"));
     rosbag::View view(bag, rosbag::TopicQuery(topics));
 
+    // initialised to avoid warnings!
+    uint32_t sec  = 0;
+    uint32_t nsec = 0;
+
     // produce png image for every rgb message
     foreach(rosbag::MessageInstance const msg, view) {
         sensor_msgs::Image::ConstPtr imgi = msg.instantiate<sensor_msgs::Image>();
@@ -223,10 +194,19 @@ bool loadTUMROSRGBData(const std::string &dirname, const std::string &bagname, S
                 image.at<cv::Vec3b>(r, c)[2] = imgo.at<cv::Vec3b>(r, c)[0];
             }
         }
+
+        // record time stamp with adjusted precision
+        sec = imgi->header.stamp.sec;
+        nsec = (imgi->header.stamp.nsec + 500)/1000;
+        if (nsec >= 1000000) {
+            sec++;
+            nsec = 0;
+        }
+
         std::stringstream frame_name;
         frame_name << rgbdir;
-        frame_name << imgi->header.stamp.sec << ".";
-        frame_name << std::setw(6) << std::setfill('0') << imgi->header.stamp.nsec << ".png";
+        frame_name << sec << ".";
+        frame_name << std::setw(6) << std::setfill('0') << nsec << ".png";
         if (cv::imwrite(frame_name.str(), image) == false) {
             std::cout << "Error writing rgb image: " << frame_name.str() << std::endl;
             return false;
@@ -235,8 +215,8 @@ bool loadTUMROSRGBData(const std::string &dirname, const std::string &bagname, S
         // update slambench file with new frame
         ImageFileFrame *rgb_frame = new ImageFileFrame();
         rgb_frame->FrameSensor = rgb_sensor;
-        rgb_frame->Timestamp.S = imgi->header.stamp.sec;
-        rgb_frame->Timestamp.Ns = imgi->header.stamp.nsec;
+        rgb_frame->Timestamp.S = sec;
+        rgb_frame->Timestamp.Ns = nsec;
         rgb_frame->Filename = frame_name.str();
         file.AddFrame(rgb_frame);
     }
@@ -280,19 +260,32 @@ bool loadTUMROSGreyData(const std::string &dirname, const std::string &bagname, 
     topics.push_back(std::string("/camera/rgb/image_color"));
     rosbag::View view(bag, rosbag::TopicQuery(topics));
 
+    // initialised to avoid warnings!
+    uint32_t sec  = 0;
+    uint32_t nsec = 0;
+
     // track png image for every message
     foreach(rosbag::MessageInstance const msg, view) {
         sensor_msgs::Image::ConstPtr imgi = msg.instantiate<sensor_msgs::Image>();
         std::stringstream frame_name;
+
+        // record time stamp with adjusted precision
+        sec = imgi->header.stamp.sec;
+        nsec = (imgi->header.stamp.nsec + 500)/1000;
+        if (nsec >= 1000000) {
+            sec++;
+            nsec = 0;
+        }
+
         frame_name << dirname << "/rgb/";
-        frame_name << imgi->header.stamp.sec << ".";
-        frame_name << std::setw(6) << std::setfill('0') << imgi->header.stamp.nsec << ".png";
+        frame_name << sec << ".";
+        frame_name << std::setw(6) << std::setfill('0') << nsec << ".png";
 
         // update slambench file with new frame
         ImageFileFrame *grey_frame = new ImageFileFrame();
         grey_frame->FrameSensor = grey_sensor;
-        grey_frame->Timestamp.S = imgi->header.stamp.sec;
-        grey_frame->Timestamp.Ns = imgi->header.stamp.nsec;
+        grey_frame->Timestamp.S = sec;
+        grey_frame->Timestamp.Ns = nsec;
         grey_frame->Filename = frame_name.str();
         file.AddFrame(grey_frame);
     }
@@ -331,7 +324,6 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
     topics.push_back(std::string("/tf"));
 
     rosbag::View view(bag, rosbag::TopicQuery(topics));
-    ros::Time w_k_stamp;
 
     std::string world_str ("/world");
     std::string kinect_str ("/kinect");
@@ -351,7 +343,7 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
     bool r_o_rdy = false;
     bool all_rdy = false;
 
-    // initialised to avoid warnnings!
+    // initialised to avoid warnings!
     uint32_t sec  = 0;
     uint32_t nsec = 0;
 
@@ -386,9 +378,13 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
                     // track continuously the /world to /kinect transformation
                     if (msgii.header.frame_id.compare(world_str) == 0) {
                         w_k_new = true;
-                        w_k_stamp = msgii.header.stamp;
-                        sec = w_k_stamp.sec;
-                        nsec = w_k_stamp.nsec;
+                        // record time stamp with adjusted precision
+                        sec = msgii.header.stamp.sec;
+                        nsec = (msgii.header.stamp.nsec + 50000)/100000;
+                        if (nsec >= 10000) {
+                            sec++;
+                            nsec = 0;
+                        }
                         tf::transformMsgToTF(msgii.transform, w_k_trans);
                     }
                 }
@@ -402,11 +398,11 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
 
                     // NOTE: implicit float64 (double) to float casts
                     pose.block(0, 0, 3, 3) <<
-                                           rt[0][0], rt[0][1], rt[0][2],
+                            rt[0][0], rt[0][1], rt[0][2],
                             rt[1][0], rt[1][1], rt[1][2],
                             rt[2][0], rt[2][1], rt[2][2];
                     pose.block(0, 3, 3, 1) <<
-                                           tr.x(), tr.y(), tr.z();
+                            tr.x(), tr.y(), tr.z();
 
                     SLAMInMemoryFrame *gt_frame = new SLAMInMemoryFrame();
                     gt_frame->FrameSensor = gt_sensor;
@@ -502,12 +498,6 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
         pos = 0;
     }
     std::string bagname = dirname + "/../../" + dirname.substr(pos) + ".bag";
-
-//	if (!analyseTUMROSFolder(dirname))	{
-//		std::cerr << "Invalid folder." << std::endl;
-//		return nullptr;
-//	}
-
 
 	SLAMFile * slamfilep = new SLAMFile();
 	SLAMFile & slamfile  = *slamfilep;
