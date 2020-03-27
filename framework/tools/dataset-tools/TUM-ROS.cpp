@@ -14,7 +14,6 @@
 #include <io/SLAMFrame.h>
 #include <io/sensor/AccelerometerSensor.h>
 #include <io/sensor/GroundTruthSensor.h>
-#include <io/sensor/PointCloudSensor.h>
 #include <io/format/PointCloud.h>
 #include <Eigen/Eigen>
 
@@ -43,7 +42,7 @@ using namespace slambench::io ;
 bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname, SLAMFile &file, const Sensor::pose_t &pose, const DepthSensor::intrinsics_t &intrinsics,const CameraSensor::distortion_coefficients_t &distortion,  const DepthSensor::disparity_params_t &disparity_params, const DepthSensor::disparity_type_t &disparity_type) {
 
     // populate sensor data
-	DepthSensor *depth_sensor = new DepthSensor("Depth");
+	auto *depth_sensor = new DepthSensor("Depth");
 	depth_sensor->Index = 0;
 	depth_sensor->Width = 640;
 	depth_sensor->Height = 480;
@@ -97,12 +96,13 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
         for (uint r = 0; r < imgi->height; r++) {
             for (uint c = 0; c < imgi->width; c++) {
                 float dist = imgo.at<float>(r * imgi->width + c);
-                unsigned short dist16 = (unsigned short) (5000 * dist);
+                auto dist16 = (unsigned short) (5000 * dist);
                 image.at<short>(r, c) = dist16;
             }
         }
 
         // record time stamp with adjusted precision
+        // TUM RGB-D datasets use 6-digit nanosec timestamps
         sec = imgi->header.stamp.sec;
         nsec = (imgi->header.stamp.nsec + 500)/1000;
         if (nsec >= 1000000) {
@@ -114,13 +114,13 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
         frame_name << depthdir;
         frame_name << sec << ".";
         frame_name << std::setw(6) << std::setfill('0') << nsec << ".png";
-        if (cv::imwrite(frame_name.str(), image) == false) {
+        if (!cv::imwrite(frame_name.str(), image)) {
             std::cout << "Error writing depth image: " << frame_name.str() << std::endl;
             return false;
-        };
+        }
 
         // update slambench file with new frame
-        ImageFileFrame *depth_frame = new ImageFileFrame();
+        auto *depth_frame = new ImageFileFrame();
         depth_frame->FrameSensor  = depth_sensor;
         depth_frame->Timestamp.S  = sec;
         depth_frame->Timestamp.Ns = nsec;
@@ -137,7 +137,7 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
 bool loadTUMROSRGBData(const std::string &dirname, const std::string &bagname, SLAMFile &file, const Sensor::pose_t &pose, const CameraSensor::intrinsics_t &intrinsics, const CameraSensor::distortion_coefficients_t &distortion) {
 
     // populate sensor data
-	CameraSensor *rgb_sensor = new CameraSensor("RGB", CameraSensor::kCameraType);
+	auto *rgb_sensor = new CameraSensor("RGB", CameraSensor::kCameraType);
 	rgb_sensor->Index = 0;
 	rgb_sensor->Width = 640;
 	rgb_sensor->Height = 480;
@@ -171,7 +171,7 @@ bool loadTUMROSRGBData(const std::string &dirname, const std::string &bagname, S
         }
     }
 
-    // create query to fetch depth topic messages
+    // create query to fetch rgb images topic messages
     std::vector<std::string> topics;
     topics.push_back(std::string("/camera/rgb/image_color"));
     rosbag::View view(bag, rosbag::TopicQuery(topics));
@@ -196,6 +196,7 @@ bool loadTUMROSRGBData(const std::string &dirname, const std::string &bagname, S
         }
 
         // record time stamp with adjusted precision
+        // TUM RGB-D datasets use 6-digit nanosec timestamps
         sec = imgi->header.stamp.sec;
         nsec = (imgi->header.stamp.nsec + 500)/1000;
         if (nsec >= 1000000) {
@@ -207,13 +208,13 @@ bool loadTUMROSRGBData(const std::string &dirname, const std::string &bagname, S
         frame_name << rgbdir;
         frame_name << sec << ".";
         frame_name << std::setw(6) << std::setfill('0') << nsec << ".png";
-        if (cv::imwrite(frame_name.str(), image) == false) {
+        if (!cv::imwrite(frame_name.str(), image)) {
             std::cout << "Error writing rgb image: " << frame_name.str() << std::endl;
             return false;
-        };
+        }
 
         // update slambench file with new frame
-        ImageFileFrame *rgb_frame = new ImageFileFrame();
+        auto *rgb_frame = new ImageFileFrame();
         rgb_frame->FrameSensor = rgb_sensor;
         rgb_frame->Timestamp.S = sec;
         rgb_frame->Timestamp.Ns = nsec;
@@ -229,7 +230,7 @@ bool loadTUMROSRGBData(const std::string &dirname, const std::string &bagname, S
 
 bool loadTUMROSGreyData(const std::string &dirname, const std::string &bagname, SLAMFile &file, const Sensor::pose_t &pose, const CameraSensor::intrinsics_t &intrinsics, const CameraSensor::distortion_coefficients_t &distortion) {
 
-	CameraSensor *grey_sensor = new CameraSensor("Grey", CameraSensor::kCameraType);
+	auto *grey_sensor = new CameraSensor("Grey", CameraSensor::kCameraType);
 	grey_sensor->Index = 0;
 	grey_sensor->Width = 640;
 	grey_sensor->Height = 480;
@@ -254,7 +255,7 @@ bool loadTUMROSGreyData(const std::string &dirname, const std::string &bagname, 
         return false;
     }
 
-    // create query to fetch rgb topic messages
+    // create query to fetch rgb images topic messages
     // NOTE: TUM rosbag files do not contain grey images - use rgb ones!
     std::vector<std::string> topics;
     topics.push_back(std::string("/camera/rgb/image_color"));
@@ -270,6 +271,7 @@ bool loadTUMROSGreyData(const std::string &dirname, const std::string &bagname, 
         std::stringstream frame_name;
 
         // record time stamp with adjusted precision
+        // TUM RGB-D datasets use 6-digit nanosec timestamps
         sec = imgi->header.stamp.sec;
         nsec = (imgi->header.stamp.nsec + 500)/1000;
         if (nsec >= 1000000) {
@@ -282,7 +284,7 @@ bool loadTUMROSGreyData(const std::string &dirname, const std::string &bagname, 
         frame_name << std::setw(6) << std::setfill('0') << nsec << ".png";
 
         // update slambench file with new frame
-        ImageFileFrame *grey_frame = new ImageFileFrame();
+        auto *grey_frame = new ImageFileFrame();
         grey_frame->FrameSensor = grey_sensor;
         grey_frame->Timestamp.S = sec;
         grey_frame->Timestamp.Ns = nsec;
@@ -298,7 +300,7 @@ bool loadTUMROSGreyData(const std::string &dirname, const std::string &bagname, 
 
 bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
 
-	GroundTruthSensor *gt_sensor = new GroundTruthSensor("GroundTruth");
+	auto *gt_sensor = new GroundTruthSensor("GroundTruth");
 	gt_sensor->Index = file.Sensors.size();
 	gt_sensor->Description = "GroundTruthSensor";
 	file.Sensors.AddSensor(gt_sensor);
@@ -320,9 +322,9 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
         return false;
 	}
 
+    // create query to fetch ground truth topic messages
     std::vector<std::string> topics;
     topics.push_back(std::string("/tf"));
-
     rosbag::View view(bag, rosbag::TopicQuery(topics));
 
     std::string world_str ("/world");
@@ -350,36 +352,39 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
     foreach(rosbag::MessageInstance const msg, view) {
         tf::tfMessage::ConstPtr msgi = msg.instantiate<tf::tfMessage>();
 
-        if (msgi != NULL) {
-            for (unsigned int i = 0; i < msgi->transforms.size(); i++) {
+        if (msgi != nullptr) {
+            for (unsigned long i = 0; i < msgi->transforms.size(); i++) {
                 geometry_msgs::TransformStamped msgii = msgi->transforms[i];
-                if (!r_o_rdy && msgii.child_frame_id.compare(opt_str) == 0) {
+                if (!r_o_rdy && msgii.child_frame_id == opt_str) {
                     // record once the /openni_rgb_frame to /openni_rgb_optical_frame transformation
-                    if ((msgii.header.frame_id.compare(rgb_str) == 0)) {
+                    if ((msgii.header.frame_id == rgb_str)) {
                         r_o_rdy = true;
                         all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
                         tf::transformMsgToTF(msgii.transform, r_o_trans);
                     }
-                } else if (!c_r_rdy && msgii.child_frame_id.compare(rgb_str) == 0) {
+                } else if (!c_r_rdy && msgii.child_frame_id == rgb_str) {
                     // record once the /openni_camera to /openni_rgb_frame transformation
-                    if ((msgii.header.frame_id.compare(camera_str) == 0)) {
+                    if ((msgii.header.frame_id == camera_str)) {
                         c_r_rdy = true;
                         all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
                         tf::transformMsgToTF(msgii.transform, c_r_trans);
                     }
-                } else if (!k_c_rdy && msgii.child_frame_id.compare(camera_str) == 0) {
+                } else if (!k_c_rdy && msgii.child_frame_id == camera_str) {
                     // record once the /kinect to /openni_camera transformation
-                    if ((msgii.header.frame_id.compare(kinect_str) == 0)) {
+                    if ((msgii.header.frame_id == kinect_str)) {
                         k_c_rdy = true;
                         all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
                         tf::transformMsgToTF(msgii.transform, k_c_trans);
                     }
-                } else if (msgii.child_frame_id.compare(kinect_str) == 0) {
+                } else if (msgii.child_frame_id == kinect_str) {
                     // track continuously the /world to /kinect transformation
-                    if (msgii.header.frame_id.compare(world_str) == 0) {
+                    if (msgii.header.frame_id == world_str) {
                         w_k_new = true;
                         // record time stamp with adjusted precision
                         sec = msgii.header.stamp.sec;
+
+                        // record time stamp with adjusted precision
+                        // TUM RGB-D datasets use 4-digit ground truth nanosec timestamps
                         nsec = (msgii.header.stamp.nsec + 50000)/100000;
                         if (nsec >= 10000) {
                             sec++;
@@ -404,7 +409,7 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
                     pose.block(0, 3, 3, 1) <<
                             tr.x(), tr.y(), tr.z();
 
-                    SLAMInMemoryFrame *gt_frame = new SLAMInMemoryFrame();
+                    auto *gt_frame = new SLAMInMemoryFrame();
                     gt_frame->FrameSensor = gt_sensor;
                     gt_frame->Timestamp.S = sec;
                     gt_frame->Timestamp.Ns = nsec;
@@ -428,7 +433,7 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
 
 bool loadTUMROSAccelerometerData(const std::string &dirname, SLAMFile &file) {
 
-	AccelerometerSensor *accelerometer_sensor = new AccelerometerSensor("Accelerometer");
+	auto *accelerometer_sensor = new AccelerometerSensor("Accelerometer");
 	accelerometer_sensor->Index = file.Sensors.size();
 	accelerometer_sensor->Description = "AccelerometerSensor";
 	file.Sensors.AddSensor(accelerometer_sensor);
@@ -448,7 +453,7 @@ bool loadTUMROSAccelerometerData(const std::string &dirname, SLAMFile &file) {
 
 	while (std::getline(infile, line)){
 
-		if (line.size() == 0) {
+		if (line.empty()) {
 			continue;
 		} else if (boost::regex_match(line,match,boost::regex("^\\s*#.*$"))) {
 			continue;
@@ -460,7 +465,7 @@ bool loadTUMROSAccelerometerData(const std::string &dirname, SLAMFile &file) {
 		  float ay =  std::stof(match[4]);
 		  float az =  std::stof(match[5]);
 
-		  SLAMInMemoryFrame *accelerometer_frame = new SLAMInMemoryFrame();
+		  auto *accelerometer_frame = new SLAMInMemoryFrame();
 		  accelerometer_frame->FrameSensor = accelerometer_sensor;
 		  accelerometer_frame->Timestamp.S  = timestampS;
 		  accelerometer_frame->Timestamp.Ns = timestampNS;
@@ -493,13 +498,13 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
 	std::string dirname = input;
 
     // rosbag file
-    auto pos = dirname.rfind("/");
+    auto pos = dirname.rfind('/');
     if (pos == std::string::npos) {
         pos = 0;
     }
     std::string bagname = dirname + "/../../" + dirname.substr(pos) + ".bag";
 
-	SLAMFile * slamfilep = new SLAMFile();
+	auto * slamfilep = new SLAMFile();
 	SLAMFile & slamfile  = *slamfilep;
 
 	Sensor::pose_t pose = Eigen::Matrix4f::Identity();
@@ -537,7 +542,7 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
 	}
 
 
-	DepthSensor::disparity_params_t disparity_params =  {0.001,0.0};
+	DepthSensor::disparity_params_t disparity_params =  {0.001, 0.0};
 	DepthSensor::disparity_type_t disparity_type = DepthSensor::affine_disparity;
 
 
