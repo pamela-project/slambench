@@ -1,7 +1,11 @@
 /*
 
- Copyright (c) 2017 University of Edinburgh, Imperial College, University of Manchester.
+ Copyright (c) 2017-2020 University of Edinburgh, Imperial College, University of Manchester.
  Developed in the PAMELA project, EPSRC Programme Grant EP/K008730/1
+
+ The interface with ROS datasets (rosbags) is supported by the RAIN Hub, which is funded by
+ the Industrial Strategy Challenge Fund, part of the government’s modern Industrial Strategy.
+ The fund is delivered by UK Research and Innovation and managed by EPSRC [EP/R026084/1].
 
  This code is licensed under the MIT License.
 
