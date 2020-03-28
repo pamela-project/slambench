@@ -66,29 +66,29 @@ namespace slambench {
             std::string input;
             bool grey = true, rgb = true, depth = true, gt = true, accelerometer = false;
 
-            TUMROSReader(std::string name) : DatasetReader(name) {
-                this->addParameter(
-                        TypedParameter<std::string>("i", "input-directory", "path of the TUM dataset directory",
-                                                    &this->input, NULL));
+            explicit TUMROSReader(std::string name) : DatasetReader(name) {
+                this->addParameter(TypedParameter<std::string>("i", "input-directory",
+                                                               "path of the TUM dataset directory", &this->input,
+                                                               nullptr));
                 this->addParameter(TypedParameter<bool>("grey", "grey",
                                                         "set to true or false to specify if the GREY stream need to be include in the slam file.",
-                                                        &this->grey, NULL));
+                                                        &this->grey, nullptr));
                 this->addParameter(TypedParameter<bool>("rgb", "rgb",
                                                         "set to true or false to specify if the RGB stream need to be include in the slam file.",
-                                                        &this->rgb, NULL));
+                                                        &this->rgb, nullptr));
                 this->addParameter(TypedParameter<bool>("depth", "depth",
                                                         "set to true or false to specify if the DEPTH stream need to be include in the slam file.",
-                                                        &this->depth, NULL));
+                                                        &this->depth, nullptr));
                 this->addParameter(TypedParameter<bool>("gt", "gt",
                                                         "set to true or false to specify if the GROUNDTRUTH POSE stream need to be include in the slam file.",
-                                                        &this->gt, NULL));
+                                                        &this->gt, nullptr));
                 this->addParameter(TypedParameter<bool>("acc", "accelerometer",
                                                         "set to true or false to specify if the ACCELEROMETER stream need to be include in the slam file.",
-                                                        &this->accelerometer, NULL));
+                                                        &this->accelerometer, nullptr));
             }
 
             SLAMFile *GenerateSLAMFile();
-        }
+        };
     }
 }
 

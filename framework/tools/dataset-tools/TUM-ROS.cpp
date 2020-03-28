@@ -43,7 +43,7 @@ using namespace slambench::io ;
 
 
 
-bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname, SLAMFile &file, const Sensor::pose_t &pose, const DepthSensor::intrinsics_t &intrinsics,const CameraSensor::distortion_coefficients_t &distortion,  const DepthSensor::disparity_params_t &disparity_params, const DepthSensor::disparity_type_t &disparity_type) {
+bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname, SLAMFile &file, const float depthMapFactor, const Sensor::pose_t &pose, const DepthSensor::intrinsics_t &intrinsics,const CameraSensor::distortion_coefficients_t &distortion,  const DepthSensor::disparity_params_t &disparity_params, const DepthSensor::disparity_type_t &disparity_type) {
 
     // populate sensor data
 	auto *depth_sensor = new DepthSensor("Depth");
@@ -100,7 +100,7 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
         for (uint r = 0; r < imgi->height; r++) {
             for (uint c = 0; c < imgi->width; c++) {
                 float dist = imgo.at<float>(r * imgi->width + c);
-                auto dist16 = (unsigned short) (5000 * dist);
+                auto dist16 = (unsigned short) (depthMapFactor * dist);
                 image.at<short>(r, c) = dist16;
             }
         }
@@ -513,13 +513,13 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
 
 	Sensor::pose_t pose = Eigen::Matrix4f::Identity();
 
-	//////  Default are freiburg1
-
 	CameraSensor::intrinsics_t intrinsics_rgb;
 	DepthSensor::intrinsics_t intrinsics_depth;
 
 	CameraSensor::distortion_coefficients_t distortion_rgb;
 	DepthSensor::distortion_coefficients_t distortion_depth;
+
+    float depthMapFactor;
 
 
 	if (dirname.find("freiburg1") != std::string::npos) {
@@ -532,6 +532,8 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
 			distortion_depth[i] = fr1_distortion_depth[i];
 		}
 
+		depthMapFactor = fr1_DepthMapFactor;
+
 	} else if (dirname.find("freiburg2") != std::string::npos) {
 		std::cout << "This dataset is assumed to be using freiburg2." << std::endl;
 		for (int i = 0; i < 4; i++) {
@@ -541,8 +543,12 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
 			distortion_depth[i] = fr2_distortion_depth[i];
 		}
 
+        depthMapFactor = fr2_DepthMapFactor;
+
 	} else  {
 		std::cout << "Camera calibration might be wrong !." << std::endl;
+
+        depthMapFactor = fr1_DepthMapFactor;
 	}
 
 
@@ -553,7 +559,8 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
 	/**
 	 * load Depth
 	 */
-	if(depth && !loadTUMROSDepthData(dirname, bagname, slamfile, pose, intrinsics_depth, distortion_depth, disparity_params, disparity_type)) {
+	if(depth && !loadTUMROSDepthData(dirname, bagname, slamfile, depthMapFactor, pose,
+	        intrinsics_depth, distortion_depth, disparity_params, disparity_type)) {
 		std::cout << "Error while loading depth information." << std::endl;
 		delete slamfilep;
 		return nullptr;
