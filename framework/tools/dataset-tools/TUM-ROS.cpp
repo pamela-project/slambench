@@ -35,10 +35,8 @@
 
 #include <iostream>
 
-#define foreach BOOST_FOREACH
 
 using namespace slambench::io ;
-
 
 
 bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
