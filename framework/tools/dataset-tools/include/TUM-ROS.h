@@ -50,7 +50,7 @@ namespace slambench {
             static constexpr float fr2_fps = 30.0;
             static constexpr float fr2_bf = 40.0;
             static constexpr float fr2_ThDepth = 40.0;
-            static constexpr float fr2_DepthMapFactor = 5208.0;
+            static constexpr float fr2_DepthMapFactor = 5000.0;  // Note: 5208.0 in TUM.h
 
             static constexpr CameraSensor::distortion_coefficients_t fr1_distortion_rgb =
                     {0.262383, -0.953104, -0.005358, 0.002628, 1.163314};
@@ -67,24 +67,24 @@ namespace slambench {
             bool grey = true, rgb = true, depth = true, gt = true, accelerometer = false;
 
             explicit TUMROSReader(std::string name) : DatasetReader(name) {
-                this->addParameter(TypedParameter<std::string>("i", "input-directory",
-                                                               "path of the TUM dataset directory", &this->input,
-                                                               nullptr));
+                this->addParameter(TypedParameter<std::string>("i",
+                        "input-directory", "path of the TUM dataset directory",
+                        &this->input, nullptr));
                 this->addParameter(TypedParameter<bool>("grey", "grey",
-                                                        "set to true or false to specify if the GREY stream need to be include in the slam file.",
-                                                        &this->grey, nullptr));
+                        "set to true or false to specify if the GREY stream need to be include in the slam file.",
+                        &this->grey, nullptr));
                 this->addParameter(TypedParameter<bool>("rgb", "rgb",
-                                                        "set to true or false to specify if the RGB stream need to be include in the slam file.",
-                                                        &this->rgb, nullptr));
+                        "set to true or false to specify if the RGB stream need to be include in the slam file.",
+                        &this->rgb, nullptr));
                 this->addParameter(TypedParameter<bool>("depth", "depth",
-                                                        "set to true or false to specify if the DEPTH stream need to be include in the slam file.",
-                                                        &this->depth, nullptr));
+                        "set to true or false to specify if the DEPTH stream need to be include in the slam file.",
+                        &this->depth, nullptr));
                 this->addParameter(TypedParameter<bool>("gt", "gt",
-                                                        "set to true or false to specify if the GROUNDTRUTH POSE stream need to be include in the slam file.",
-                                                        &this->gt, nullptr));
+                        "set to true or false to specify if the GROUNDTRUTH POSE stream need to be include in the slam file.",
+                        &this->gt, nullptr));
                 this->addParameter(TypedParameter<bool>("acc", "accelerometer",
-                                                        "set to true or false to specify if the ACCELEROMETER stream need to be include in the slam file.",
-                                                        &this->accelerometer, nullptr));
+                        "set to true or false to specify if the ACCELEROMETER stream need to be include in the slam file.",
+                        &this->accelerometer, nullptr));
             }
 
             SLAMFile *GenerateSLAMFile();

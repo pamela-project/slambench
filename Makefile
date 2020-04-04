@@ -389,7 +389,7 @@ check_generator:=if [ ! -e ./build/bin/dataset-generator ] ; then make slambench
 
 ./datasets/TUM-ROSBAG/%.slam :  ./datasets/TUM-ROSBAG/%.dir
 	${check_generator}
-	./build/bin/dataset-generator -d tum-rosbag -i $</* -o $@ -grey true -rgb true -gt true -depth true -accelerometer true
+	./build/bin/dataset-generator -d tum-rosbag -i $</* -o $@ -grey true -rgb true -gt true -depth true -acc true
 
 #### ICL-NUIM
 ###############
