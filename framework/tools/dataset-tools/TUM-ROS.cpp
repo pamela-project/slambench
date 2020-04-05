@@ -78,7 +78,8 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
     std::string depthdir = dirname + "/depth/";
     if (!boost::filesystem::exists(depthdir)) {
         if (!boost::filesystem::create_directory(depthdir)) {
-            std::cerr << "error creating depth directory: " << depthdir << std::endl;
+            std::cerr << "error creating depth directory: " <<
+                    depthdir << std::endl;
             return false;
         }
     }
@@ -104,7 +105,7 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
         }
 
         cv::Mat imgo = cv::Mat(imgi->height, imgi->width, CV_32FC1,
-                                const_cast<uchar*>(&imgi->data[0]), imgi->step);
+                const_cast<uchar*>(&imgi->data[0]), imgi->step);
         cv::Mat image = cv::Mat(imgi->height, imgi->width, CV_16UC1);
         for (uint r = 0; r < imgi->height; r++) {
             for (uint c = 0; c < imgi->width; c++) {
@@ -128,7 +129,8 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
         frame_name << sec << ".";
         frame_name << std::setw(6) << std::setfill('0') << nsec << ".png";
         if (!cv::imwrite(frame_name.str(), image)) {
-            std::cerr << "error writing depth image: " << frame_name.str() << std::endl;
+            std::cerr << "error writing depth image: " <<
+                    frame_name.str() << std::endl;
             return false;
         }
 
@@ -265,7 +267,8 @@ bool loadTUMROSRGBGreyData(bool doRGB, bool doGrey, const std::string &dirname,
         frame_name << sec << ".";
         frame_name << std::setw(6) << std::setfill('0') << nsec << ".png";
         if (!cv::imwrite(frame_name.str(), image)) {
-            std::cerr << "error writing rgb image: " << frame_name.str() << std::endl;
+            std::cerr << "error writing rgb image: " <<
+                    frame_name.str() << std::endl;
             return false;
         }
 
@@ -393,7 +396,7 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
                     sec = msgii.header.stamp.sec;
 
                     // record time stamp with adjusted precision
-                    // TUM RGB-D datasets use 4-digit ground truth nanosec timestamps
+                    // TUM RGB-D datasets use 4-digit gt nanosec timestamps
                     nsec = (msgii.header.stamp.nsec + 50000)/100000;
                     if (nsec >= 10000) {
                         sec++;
@@ -405,7 +408,8 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
             if (all_rdy && w_k_new) {
                 w_k_new = false;
                 Eigen::Matrix4f pose = Eigen::Matrix4f::Identity();
-                tf::Transform w_o_trans = w_k_trans * k_c_trans * c_r_trans * r_o_trans;
+                tf::Transform w_o_trans = w_k_trans * k_c_trans *
+                        c_r_trans * r_o_trans;
 
                 tf::Vector3 tr = w_o_trans.getOrigin();
                 tf::Matrix3x3 rt = w_o_trans.getBasis();
@@ -471,7 +475,8 @@ bool loadTUMROSAccelerometerData(const std::string &bagname, SLAMFile &file) {
         bag.open(bagname,rosbag::bagmode::Read);
     }
     catch (...) {
-        std::cerr << "error opening accelerometer rosbag: " << bagname << std::endl;
+        std::cerr << "error opening accelerometer rosbag: " <<
+                bagname << std::endl;
         return false;
     }
 
@@ -526,7 +531,7 @@ bool loadTUMROSAccelerometerData(const std::string &bagname, SLAMFile &file) {
 
 SLAMFile* TUMROSReader::GenerateSLAMFile () {
 
-    if(!(grey || rgb || depth)) {
+    if (!(grey || rgb || depth)) {
         std::cerr <<  "error: no sensors defined" << std::endl;
         return nullptr;
     }
@@ -590,8 +595,9 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
     /**
      * load Depth
      */
-    if(depth && !loadTUMROSDepthData(dirname, bagname, slamfile, depthMapFactor, pose,
-            intrinsics_depth, distortion_depth, disparity_params, disparity_type)) {
+    if (depth && !loadTUMROSDepthData(dirname, bagname, slamfile,
+            depthMapFactor, pose, intrinsics_depth, distortion_depth,
+            disparity_params, disparity_type)) {
         std::cerr << "error while loading depth information." << std::endl;
         delete slamfilep;
         return nullptr;
@@ -602,7 +608,7 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
      * load RGB and/or Grey
      * NOTE: TUM rosbag files do not contain grey images - use rgb ones!
      */
-    if((rgb || grey) && !loadTUMROSRGBGreyData(rgb, grey, dirname, bagname,
+    if ((rgb || grey) && !loadTUMROSRGBGreyData(rgb, grey, dirname, bagname,
             slamfile, pose, intrinsics_rgb, distortion_rgb)) {
         std::cerr << "error while loading RGB/Grey information." << std::endl;
         delete slamfilep;
@@ -613,7 +619,7 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
     /**
      * load GT
      */
-    if(gt && !loadTUMROSGroundTruthData(bagname, slamfile)) {
+    if (gt && !loadTUMROSGroundTruthData(bagname, slamfile)) {
         std::cerr << "error while loading gt information." << std::endl;
         delete slamfilep;
         return nullptr;
@@ -623,7 +629,7 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
     /**
      * load Accelerometer: This one failed
      */
-    if(accelerometer && !loadTUMROSAccelerometerData(bagname, slamfile)) {
+    if (accelerometer && !loadTUMROSAccelerometerData(bagname, slamfile)) {
         std::cerr << "error while loading Accelerometer information." << std::endl;
         delete slamfilep;
         return nullptr;
