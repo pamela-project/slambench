@@ -3,9 +3,10 @@
  Copyright (c) 2017-2020 University of Edinburgh, Imperial College, University of Manchester.
  Developed in the PAMELA project, EPSRC Programme Grant EP/K008730/1
 
- The interface with ROS datasets (rosbags) is supported by the RAIN Hub, which is funded by
- the Industrial Strategy Challenge Fund, part of the government’s modern Industrial Strategy.
- The fund is delivered by UK Research and Innovation and managed by EPSRC [EP/R026084/1].
+ The interface with ROS datasets (rosbags) is supported by the RAIN Hub,
+ which is funded by the Industrial Strategy Challenge Fund, part of the
+ UK government’s modern Industrial Strategy. The fund is delivered by
+ UK Research and Innovation and managed by EPSRC [EP/R026084/1].
 
  This code is licensed under the MIT License.
 
@@ -98,6 +99,10 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
     // produce png image for every depth message
     for (const auto& msg : view) {
         sensor_msgs::Image::ConstPtr imgi = msg.instantiate<sensor_msgs::Image>();
+        if (imgi == nullptr) {
+            continue;
+        }
+
         cv::Mat imgo = cv::Mat(imgi->height, imgi->width, CV_32FC1,
                                 const_cast<uchar*>(&imgi->data[0]), imgi->step);
         cv::Mat image = cv::Mat(imgi->height, imgi->width, CV_16UC1);
@@ -230,6 +235,10 @@ bool loadTUMROSRGBGreyData(bool doRGB, bool doGrey, const std::string &dirname,
     // produce png image for every rgb message
     for (const auto& msg : view) {
         sensor_msgs::Image::ConstPtr imgi = msg.instantiate<sensor_msgs::Image>();
+        if (imgi == nullptr) {
+            continue;
+        }
+
         cv::Mat imgo = cv::Mat(imgi->height, imgi->width, CV_8UC3,
                                const_cast<uchar *>(&imgi->data[0]), imgi->step);
         cv::Mat image = cv::Mat(imgi->height, imgi->width, CV_8UC3);
@@ -347,84 +356,88 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
 
     for (const auto& msg : view) {
         tf::tfMessage::ConstPtr msgi = msg.instantiate<tf::tfMessage>();
+        if (msgi == nullptr) {
+            continue;
+        }
 
-        if (msgi != nullptr) {
-            for (const auto& msgii : msgi->transforms) {
-                if (!r_o_rdy && msgii.child_frame_id == opt_str) {
-                    // record once the /openni_rgb_frame to /openni_rgb_optical_frame transformation
-                    if ((msgii.header.frame_id == rgb_str)) {
-                        r_o_rdy = true;
-                        all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
-                        tf::transformMsgToTF(msgii.transform, r_o_trans);
-                    }
-                } else if (!c_r_rdy && msgii.child_frame_id == rgb_str) {
-                    // record once the /openni_camera to /openni_rgb_frame transformation
-                    if ((msgii.header.frame_id == camera_str)) {
-                        c_r_rdy = true;
-                        all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
-                        tf::transformMsgToTF(msgii.transform, c_r_trans);
-                    }
-                } else if (!k_c_rdy && msgii.child_frame_id == camera_str) {
-                    // record once the /kinect to /openni_camera transformation
-                    if ((msgii.header.frame_id == kinect_str)) {
-                        k_c_rdy = true;
-                        all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
-                        tf::transformMsgToTF(msgii.transform, k_c_trans);
-                    }
-                } else if (msgii.child_frame_id == kinect_str) {
-                    // track continuously the /world to /kinect transformation
-                    if (msgii.header.frame_id == world_str) {
-                        w_k_new = true;
-                        // record time stamp with adjusted precision
-                        sec = msgii.header.stamp.sec;
-
-                        // record time stamp with adjusted precision
-                        // TUM RGB-D datasets use 4-digit ground truth nanosec timestamps
-                        nsec = (msgii.header.stamp.nsec + 50000)/100000;
-                        if (nsec >= 10000) {
-                            sec++;
-                            nsec = 0;
-                        }
-                        tf::transformMsgToTF(msgii.transform, w_k_trans);
-                    }
+        for (const auto& msgii : msgi->transforms) {
+            if (!r_o_rdy && msgii.child_frame_id == opt_str) {
+                // record the /openni_rgb_frame to /openni_rgb_optical_frame
+                // transformation only once
+                if ((msgii.header.frame_id == rgb_str)) {
+                    r_o_rdy = true;
+                    all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
+                    tf::transformMsgToTF(msgii.transform, r_o_trans);
                 }
-                if (all_rdy && w_k_new) {
-                    w_k_new = false;
-                    Eigen::Matrix4f pose = Eigen::Matrix4f::Identity();
-                    tf::Transform w_o_trans = w_k_trans * k_c_trans * c_r_trans * r_o_trans;
-
-                    tf::Vector3 tr = w_o_trans.getOrigin();
-                    tf::Matrix3x3 rt = w_o_trans.getBasis();
-
-                    // NOTE: implicit float64 (double) to float casts
-                    pose.block(0, 0, 3, 3) <<
-                                           rt[0][0], rt[0][1], rt[0][2],
-                            rt[1][0], rt[1][1], rt[1][2],
-                            rt[2][0], rt[2][1], rt[2][2];
-                    pose.block(0, 3, 3, 1) <<
-                                           tr.x(), tr.y(), tr.z();
-
-                    auto *gt_frame = new SLAMInMemoryFrame();
-                    if (gt_frame == nullptr) {
-                        std::cerr << "error creating gt in-memory frame" << std::endl;
-                        return false;
-                    }
-
-                    gt_frame->FrameSensor = gt_sensor;
-                    gt_frame->Timestamp.S = sec;
-                    gt_frame->Timestamp.Ns = nsec;
-                    gt_frame->Data = malloc(gt_frame->GetSize());
-                    if (gt_frame->Data == nullptr) {
-                        std::cerr << "error allocating memory for gt frame" << std::endl;
-                        return false;
-                    }
-
-                    memcpy(gt_frame->Data, pose.data(), gt_frame->GetSize());
-
-                    file.AddFrame(gt_frame);
-
-                    break;
+            } else if (!c_r_rdy && msgii.child_frame_id == rgb_str) {
+                // record the /openni_camera to /openni_rgb_frame
+                // transformation only once
+                if ((msgii.header.frame_id == camera_str)) {
+                    c_r_rdy = true;
+                    all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
+                    tf::transformMsgToTF(msgii.transform, c_r_trans);
                 }
+            } else if (!k_c_rdy && msgii.child_frame_id == camera_str) {
+                // record the /kinect to /openni_camera
+                // transformation only once
+                if ((msgii.header.frame_id == kinect_str)) {
+                    k_c_rdy = true;
+                    all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
+                    tf::transformMsgToTF(msgii.transform, k_c_trans);
+                }
+            } else if (msgii.child_frame_id == kinect_str) {
+                // track continuously the /world to /kinect transformation
+                if (msgii.header.frame_id == world_str) {
+                    w_k_new = true;
+                    // record time stamp with adjusted precision
+                    sec = msgii.header.stamp.sec;
+
+                    // record time stamp with adjusted precision
+                    // TUM RGB-D datasets use 4-digit ground truth nanosec timestamps
+                    nsec = (msgii.header.stamp.nsec + 50000)/100000;
+                    if (nsec >= 10000) {
+                        sec++;
+                        nsec = 0;
+                    }
+                    tf::transformMsgToTF(msgii.transform, w_k_trans);
+                }
+            }
+            if (all_rdy && w_k_new) {
+                w_k_new = false;
+                Eigen::Matrix4f pose = Eigen::Matrix4f::Identity();
+                tf::Transform w_o_trans = w_k_trans * k_c_trans * c_r_trans * r_o_trans;
+
+                tf::Vector3 tr = w_o_trans.getOrigin();
+                tf::Matrix3x3 rt = w_o_trans.getBasis();
+
+                // NOTE: implicit float64 (double) to float casts
+                pose.block(0, 0, 3, 3) <<
+                        rt[0][0], rt[0][1], rt[0][2],
+                        rt[1][0], rt[1][1], rt[1][2],
+                        rt[2][0], rt[2][1], rt[2][2];
+                pose.block(0, 3, 3, 1) <<
+                        tr.x(), tr.y(), tr.z();
+
+                auto *gt_frame = new SLAMInMemoryFrame();
+                if (gt_frame == nullptr) {
+                    std::cerr << "error creating gt in-memory frame" << std::endl;
+                    return false;
+                }
+
+                gt_frame->FrameSensor = gt_sensor;
+                gt_frame->Timestamp.S = sec;
+                gt_frame->Timestamp.Ns = nsec;
+                gt_frame->Data = malloc(gt_frame->GetSize());
+                if (gt_frame->Data == nullptr) {
+                    std::cerr << "error allocating memory for gt frame" << std::endl;
+                    return false;
+                }
+
+                memcpy(gt_frame->Data, pose.data(), gt_frame->GetSize());
+
+                file.AddFrame(gt_frame);
+
+                break;
             }
         }
     }
@@ -467,6 +480,9 @@ bool loadTUMROSAccelerometerData(const std::string &bagname, SLAMFile &file) {
 
     for (const auto& msg : view) {
         sensor_msgs::Imu::ConstPtr msgi = msg.instantiate<sensor_msgs::Imu>();
+        if (msgi == nullptr) {
+            continue;
+        }
 
         // record time stamp with adjusted precision
         // TUM RGB-D datasets use 6-digit accelerometer nanosec timestamps
