@@ -47,7 +47,7 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
         const DepthSensor::disparity_type_t &disparity_type) {
 
     // populate sensor data
-	auto *depth_sensor = new DepthSensor("Depth");
+    auto *depth_sensor = new DepthSensor("Depth");
     if (depth_sensor != nullptr) {
         std::cout << "depth sensor created" << std::endl;
     } else {
@@ -56,22 +56,22 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
     }
 
     depth_sensor->Index = 0;
-	depth_sensor->Width = 640;
-	depth_sensor->Height = 480;
-	depth_sensor->FrameFormat = frameformat::Raster;
-	depth_sensor->PixelFormat = pixelformat::D_I_16;
-	depth_sensor->DisparityType = disparity_type;
-	depth_sensor->Description = "Depth";
-	depth_sensor->CopyPose(pose);
-	depth_sensor->CopyIntrinsics(intrinsics);
-	depth_sensor->CopyDisparityParams(disparity_params);
-	depth_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
-	depth_sensor->CopyRadialTangentialDistortion(distortion);
-	depth_sensor->Index = file.Sensors.size();
-	depth_sensor->Rate = 30.0;
-	file.Sensors.AddSensor(depth_sensor);
+    depth_sensor->Width = 640;
+    depth_sensor->Height = 480;
+    depth_sensor->FrameFormat = frameformat::Raster;
+    depth_sensor->PixelFormat = pixelformat::D_I_16;
+    depth_sensor->DisparityType = disparity_type;
+    depth_sensor->Description = "Depth";
+    depth_sensor->CopyPose(pose);
+    depth_sensor->CopyIntrinsics(intrinsics);
+    depth_sensor->CopyDisparityParams(disparity_params);
+    depth_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
+    depth_sensor->CopyRadialTangentialDistortion(distortion);
+    depth_sensor->Index = file.Sensors.size();
+    depth_sensor->Rate = 30.0;
+    file.Sensors.AddSensor(depth_sensor);
 
-	// open rosbag file
+    // open rosbag file
     rosbag::Bag bag;
     try {
         bag.open(bagname,rosbag::bagmode::Read);
@@ -288,7 +288,7 @@ bool loadTUMROSRGBGreyData(bool doRGB, bool doGrey, const std::string &dirname,
 
 bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
 
-	auto *gt_sensor = new GroundTruthSensor("GroundTruth");
+    auto *gt_sensor = new GroundTruthSensor("GroundTruth");
     if (gt_sensor != nullptr) {
         std::cout << "gt sensor created" << std::endl;
     } else {
@@ -419,7 +419,7 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
 
 bool loadTUMROSAccelerometerData(const std::string &bagname, SLAMFile &file) {
 
-	auto *accelerometer_sensor = new AccelerometerSensor("Accelerometer");
+    auto *accelerometer_sensor = new AccelerometerSensor("Accelerometer");
     if (accelerometer_sensor != nullptr) {
         std::cout << "accelerometer_sensor created" << std::endl;
     } else {
@@ -484,12 +484,12 @@ bool loadTUMROSAccelerometerData(const std::string &bagname, SLAMFile &file) {
 
 SLAMFile* TUMROSReader::GenerateSLAMFile () {
 
-	if(!(grey || rgb || depth)) {
-		std::cerr <<  "No sensors defined" << std::endl;
-		return nullptr;
-	}
+    if(!(grey || rgb || depth)) {
+        std::cerr <<  "No sensors defined" << std::endl;
+        return nullptr;
+    }
 
-	std::string dirname = input;
+    std::string dirname = input;
 
     // rosbag file
     auto pos = dirname.rfind('/');
@@ -498,57 +498,57 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
     }
     std::string bagname = dirname + "/../../" + dirname.substr(pos) + ".bag";
 
-	auto * slamfilep = new SLAMFile();
-	SLAMFile & slamfile  = *slamfilep;
+    auto * slamfilep = new SLAMFile();
+    SLAMFile & slamfile  = *slamfilep;
 
-	Sensor::pose_t pose = Eigen::Matrix4f::Identity();
+    Sensor::pose_t pose = Eigen::Matrix4f::Identity();
 
     float depthMapFactor = 1.0;  // default but probably wrong!
 
-	CameraSensor::intrinsics_t intrinsics_rgb;
-	DepthSensor::intrinsics_t intrinsics_depth;
+    CameraSensor::intrinsics_t intrinsics_rgb;
+    DepthSensor::intrinsics_t intrinsics_depth;
 
-	CameraSensor::distortion_coefficients_t distortion_rgb;
-	DepthSensor::distortion_coefficients_t distortion_depth;
+    CameraSensor::distortion_coefficients_t distortion_rgb;
+    DepthSensor::distortion_coefficients_t distortion_depth;
 
 
-	if (dirname.find("freiburg1") != std::string::npos) {
-		std::cout << "This dataset is assumed to be using freiburg1." << std::endl;
-		for (int i = 0; i < 4; i++) {
-			intrinsics_rgb[i]   = fr1_intrinsics_rgb[i];
-			intrinsics_depth[i] = fr1_intrinsics_depth[i];
-			distortion_rgb[i]   = fr1_distortion_rgb[i];
-			distortion_depth[i] = fr1_distortion_depth[i];
+    if (dirname.find("freiburg1") != std::string::npos) {
+        std::cout << "This dataset is assumed to be using freiburg1." << std::endl;
+        for (int i = 0; i < 4; i++) {
+            intrinsics_rgb[i]   = fr1_intrinsics_rgb[i];
+            intrinsics_depth[i] = fr1_intrinsics_depth[i];
+            distortion_rgb[i]   = fr1_distortion_rgb[i];
+            distortion_depth[i] = fr1_distortion_depth[i];
 
-			depthMapFactor = fr1_DepthMapFactor;
-		}
-	} else if (dirname.find("freiburg2") != std::string::npos) {
-		std::cout << "This dataset is assumed to be using freiburg2." << std::endl;
-		for (int i = 0; i < 4; i++) {
-			intrinsics_rgb[i]   = fr2_intrinsics_rgb[i];
-			intrinsics_depth[i] = fr2_intrinsics_depth[i];
-			distortion_rgb[i]   = fr2_distortion_rgb[i];
-			distortion_depth[i] = fr2_distortion_depth[i];
+            depthMapFactor = fr1_DepthMapFactor;
+        }
+    } else if (dirname.find("freiburg2") != std::string::npos) {
+        std::cout << "This dataset is assumed to be using freiburg2." << std::endl;
+        for (int i = 0; i < 4; i++) {
+            intrinsics_rgb[i]   = fr2_intrinsics_rgb[i];
+            intrinsics_depth[i] = fr2_intrinsics_depth[i];
+            distortion_rgb[i]   = fr2_distortion_rgb[i];
+            distortion_depth[i] = fr2_distortion_depth[i];
 
             depthMapFactor = fr2_DepthMapFactor;
-		}
-	} else  {
-		std::cout << "Camera calibration might be wrong!" << std::endl;
+        }
+    } else  {
+        std::cout << "Camera calibration might be wrong!" << std::endl;
     }
 
-	DepthSensor::disparity_params_t disparity_params =  {0.001, 0.0};
-	DepthSensor::disparity_type_t disparity_type = DepthSensor::affine_disparity;
+    DepthSensor::disparity_params_t disparity_params =  {0.001, 0.0};
+    DepthSensor::disparity_type_t disparity_type = DepthSensor::affine_disparity;
 
 
-	/**
-	 * load Depth
-	 */
-	if(depth && !loadTUMROSDepthData(dirname, bagname, slamfile, depthMapFactor, pose,
-	        intrinsics_depth, distortion_depth, disparity_params, disparity_type)) {
-		std::cerr << "error while loading depth information." << std::endl;
-		delete slamfilep;
-		return nullptr;
-	}
+    /**
+     * load Depth
+     */
+    if(depth && !loadTUMROSDepthData(dirname, bagname, slamfile, depthMapFactor, pose,
+            intrinsics_depth, distortion_depth, disparity_params, disparity_type)) {
+        std::cerr << "error while loading depth information." << std::endl;
+        delete slamfilep;
+        return nullptr;
+    }
 
 
     /**
@@ -563,24 +563,24 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
     }
 
 
-	/**
-	 * load GT
-	 */
-	if(gt && !loadTUMROSGroundTruthData(bagname, slamfile)) {
-		std::cerr << "error while loading gt information." << std::endl;
-		delete slamfilep;
-		return nullptr;
-	}
+    /**
+     * load GT
+     */
+    if(gt && !loadTUMROSGroundTruthData(bagname, slamfile)) {
+        std::cerr << "error while loading gt information." << std::endl;
+        delete slamfilep;
+        return nullptr;
+    }
 
 
-	/**
-	 * load Accelerometer: This one failed
-	 */
-	if(accelerometer && !loadTUMROSAccelerometerData(bagname, slamfile)) {
-		std::cerr << "error while loading Accelerometer information." << std::endl;
-		delete slamfilep;
-		return nullptr;
-	}
+    /**
+     * load Accelerometer: This one failed
+     */
+    if(accelerometer && !loadTUMROSAccelerometerData(bagname, slamfile)) {
+        std::cerr << "error while loading Accelerometer information." << std::endl;
+        delete slamfilep;
+        return nullptr;
+    }
 
-	return slamfilep;
-	}
+    return slamfilep;
+}
