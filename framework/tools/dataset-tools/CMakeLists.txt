@@ -40,18 +40,18 @@ if (Boost_FOUND)
 	target_include_directories(TUM PRIVATE ${Boost_INCLUDE_DIRS})
 
 
-	add_library(TUM-ROS TUM-ROS.cpp)
+	add_library(TUM-ROSBAG TUM-ROSBAG.cpp)
 	set(ROS_INCLUDE_DIRS /opt/ros/kinetic/include)
 	set(ROS_LIBS cpp_common roscpp_serialization rostime rosbag_storage)
 	set(ROS_LINK_DIRS /opt/ros/kinetic/lib)
-	link_directories(TUM-ROS PRIVATE ${ROS_LINK_DIRS})
-	target_include_directories(TUM-ROS PRIVATE ${Boost_INCLUDE_DIRS})
-	target_include_directories(TUM-ROS PRIVATE ${ROS_INCLUDE_DIRS})
-	target_link_libraries(TUM-ROS slambench-io ${Boost_LIBRARIES})
+	link_directories(TUM-ROSBAG PRIVATE ${ROS_LINK_DIRS})
+	target_include_directories(TUM-ROSBAG PRIVATE ${Boost_INCLUDE_DIRS})
+	target_include_directories(TUM-ROSBAG PRIVATE ${ROS_INCLUDE_DIRS})
+	target_link_libraries(TUM-ROSBAG slambench-io ${Boost_LIBRARIES})
 	if(OpenCV_FOUND)
-		target_link_libraries(TUM-ROS ${OpenCV_LIBS})
+		target_link_libraries(TUM-ROSBAG ${OpenCV_LIBS})
 	endif()
-	target_link_libraries(TUM-ROS ${ROS_LIBS})
+	target_link_libraries(TUM-ROSBAG ${ROS_LIBS})
 
 
     add_library(ICLNUIM ICLNUIM.cpp)
@@ -59,7 +59,7 @@ if (Boost_FOUND)
 	target_include_directories(ICLNUIM PRIVATE ${Boost_INCLUDE_DIRS})
 
 	add_executable(dataset-generator dataset-generator.cpp)
-	target_link_libraries(dataset-generator TUM ICLNUIM ICL EUROCMAV SVO TUM-ROS)
+	target_link_libraries(dataset-generator TUM ICLNUIM ICL EUROCMAV SVO TUM-ROSBAG)
 		
 	
 else (Boost_FOUND)

@@ -33,7 +33,7 @@
 #include <io/sensor/GroundTruthSensor.h>
 #include <io/sensor/AccelerometerSensor.h>
 
-#include "../dataset-tools/include/TUM-ROS.h"
+#include "../dataset-tools/include/TUM-ROSBAG.h"
 
 
 using namespace slambench::io ;

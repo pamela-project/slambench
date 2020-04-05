@@ -38,7 +38,7 @@
 #include "./include/ICLNUIM.h"
 #include "./include/TUM.h"
 #include "./include/SVO.h"
-#include "./include/TUM-ROS.h"
+#include "./include/TUM-ROSBAG.h"
 
 using namespace slambench::io;
 
@@ -89,8 +89,8 @@ public :
 			config->reader = new ICLNUIMReader("");
 		} else if (dataset_name == "tum") {
 			config->reader = new TUMReader("");
-        } else if (dataset_name == "tum-rosbag") {
-            config->reader = new TUMROSReader("");
+		} else if (dataset_name == "tum-rosbag") {
+			config->reader = new TUMROSReader("");
 		} else if (dataset_name == "eurocmav") {
 			config->reader = new EUROCMAVReader("");
 		} else if (dataset_name == "icl") {
