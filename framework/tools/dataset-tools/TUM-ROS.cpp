@@ -131,6 +131,11 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
 
         // update slambench file with new frame
         auto *depth_frame = new ImageFileFrame();
+        if (depth_frame == nullptr) {
+            std::cerr << "error creating depth image frame" << std::endl;
+            return false;
+        }
+
         depth_frame->FrameSensor  = depth_sensor;
         depth_frame->Timestamp.S  = sec;
         depth_frame->Timestamp.Ns = nsec;
@@ -262,6 +267,11 @@ bool loadTUMROSRGBGreyData(bool doRGB, bool doGrey, const std::string &dirname,
         // update slambench file with new rgb frame
         if (doRGB) {
             auto *rgb_frame = new ImageFileFrame();
+            if (rgb_frame == nullptr) {
+                std::cerr << "error creating rgb image frame" << std::endl;
+                return false;
+            }
+
             rgb_frame->FrameSensor = rgb_sensor;
             rgb_frame->Timestamp.S = sec;
             rgb_frame->Timestamp.Ns = nsec;
@@ -272,6 +282,11 @@ bool loadTUMROSRGBGreyData(bool doRGB, bool doGrey, const std::string &dirname,
         // update slambench file with new grey frame
         if (doGrey) {
             auto *grey_frame = new ImageFileFrame();
+            if (grey_frame == nullptr) {
+                std::cerr << "error creating grey image frame" << std::endl;
+                return false;
+            }
+
             grey_frame->FrameSensor = grey_sensor;
             grey_frame->Timestamp.S = sec;
             grey_frame->Timestamp.Ns = nsec;
@@ -339,8 +354,7 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
         tf::tfMessage::ConstPtr msgi = msg.instantiate<tf::tfMessage>();
 
         if (msgi != nullptr) {
-            for (unsigned long i = 0; i < msgi->transforms.size(); i++) {
-                geometry_msgs::TransformStamped msgii = msgi->transforms[i];
+            for (const auto& msgii : msgi->transforms) {
                 if (!r_o_rdy && msgii.child_frame_id == opt_str) {
                     // record once the /openni_rgb_frame to /openni_rgb_optical_frame transformation
                     if ((msgii.header.frame_id == rgb_str)) {
@@ -396,10 +410,19 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
                                            tr.x(), tr.y(), tr.z();
 
                     auto *gt_frame = new SLAMInMemoryFrame();
+                    if (gt_frame == nullptr) {
+                        std::cerr << "error creating gt in-memory frame" << std::endl;
+                        return false;
+                    }
+
                     gt_frame->FrameSensor = gt_sensor;
                     gt_frame->Timestamp.S = sec;
                     gt_frame->Timestamp.Ns = nsec;
                     gt_frame->Data = malloc(gt_frame->GetSize());
+                    if (gt_frame->Data == nullptr) {
+                        std::cerr << "error allocating memory for gt frame" << std::endl;
+                        return false;
+                    }
 
                     memcpy(gt_frame->Data, pose.data(), gt_frame->GetSize());
 
@@ -463,10 +486,19 @@ bool loadTUMROSAccelerometerData(const std::string &bagname, SLAMFile &file) {
         geometry_msgs::Vector3 lacc = msgi->linear_acceleration;
 
         auto *accelerometer_frame = new SLAMInMemoryFrame();
+        if (accelerometer_frame == nullptr) {
+            std::cerr << "error creating acc in-memory frame" << std::endl;
+            return false;
+        }
+
         accelerometer_frame->FrameSensor = accelerometer_sensor;
         accelerometer_frame->Timestamp.S = sec;
         accelerometer_frame->Timestamp.Ns = nsec;
         accelerometer_frame->Data = malloc(accelerometer_frame->GetSize());
+        if (accelerometer_frame->Data == nullptr) {
+            std::cerr << "error allocating memory for acc frame" << std::endl;
+            return false;
+        }
 
         // NOTE: float64 (double) to float casts
         ((float *) accelerometer_frame->Data)[0] = (float) lacc.x;
@@ -485,7 +517,7 @@ bool loadTUMROSAccelerometerData(const std::string &bagname, SLAMFile &file) {
 SLAMFile* TUMROSReader::GenerateSLAMFile () {
 
     if(!(grey || rgb || depth)) {
-        std::cerr <<  "No sensors defined" << std::endl;
+        std::cerr <<  "error: no sensors defined" << std::endl;
         return nullptr;
     }
 
@@ -499,6 +531,11 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
     std::string bagname = dirname + "/../../" + dirname.substr(pos) + ".bag";
 
     auto * slamfilep = new SLAMFile();
+    if (slamfilep == nullptr) {
+        std::cerr << "error creating slamfile handle" << std::endl;
+        return nullptr;
+    }
+
     SLAMFile & slamfile  = *slamfilep;
 
     Sensor::pose_t pose = Eigen::Matrix4f::Identity();
