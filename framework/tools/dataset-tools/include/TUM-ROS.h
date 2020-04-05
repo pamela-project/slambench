@@ -23,8 +23,9 @@
 #include <io/sensor/Sensor.h>
 #include <io/sensor/CameraSensor.h>
 #include <io/sensor/DepthSensor.h>
-#include <io/sensor/GroundTruthSensor.h>
+
 #include "../../dataset-tools/include/DatasetReader.h"
+
 
 namespace slambench {
     namespace io {

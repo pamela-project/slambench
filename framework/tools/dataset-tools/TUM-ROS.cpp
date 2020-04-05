@@ -12,17 +12,11 @@
  */
 
 
-#include "../dataset-tools/include/TUM-ROS.h"
+#include <iostream>
 
-#include <io/SLAMFile.h>
-#include <io/SLAMFrame.h>
-#include <io/sensor/AccelerometerSensor.h>
-#include <io/sensor/GroundTruthSensor.h>
 #include <Eigen/Eigen>
-
-
 #include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
+#include <opencv2/opencv.hpp>
 
 #include <rosbag/bag.h>
 #include <rosbag/view.h>
@@ -31,9 +25,14 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/Imu.h>
 
-#include <opencv2/opencv.hpp>
+#include <io/SLAMFile.h>
+#include <io/SLAMFrame.h>
+#include <io/sensor/DepthSensor.h>
+#include <io/sensor/CameraSensor.h>
+#include <io/sensor/GroundTruthSensor.h>
+#include <io/sensor/AccelerometerSensor.h>
 
-#include <iostream>
+#include "../dataset-tools/include/TUM-ROS.h"
 
 
 using namespace slambench::io ;
@@ -48,12 +47,11 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
 
     // populate sensor data
     auto *depth_sensor = new DepthSensor("Depth");
-    if (depth_sensor != nullptr) {
-        std::cout << "depth sensor created" << std::endl;
-    } else {
+    if (depth_sensor == nullptr) {
         std::cerr << "error: depth sensor not found" << std::endl;
         return false;
     }
+    std::cout << "depth sensor created" << std::endl;
 
     depth_sensor->Index = 0;
     depth_sensor->Width = 640;
@@ -71,15 +69,9 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
     depth_sensor->Rate = 30.0;
     file.Sensors.AddSensor(depth_sensor);
 
-    // open rosbag file
-    rosbag::Bag bag;
-    try {
-        bag.open(bagname,rosbag::bagmode::Read);
-    }
-    catch (...) {
-        std::cerr << "error opening depth rosbag: " << bagname << std::endl;
-        return false;
-    }
+    // initialised to avoid warnings!
+    uint32_t sec  = 0;
+    uint32_t nsec = 0;
 
     // create directory for depth images
     std::string depthdir = dirname + "/depth/";
@@ -90,15 +82,21 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
         }
     }
 
+    // open rosbag file
+    rosbag::Bag bag;
+    try {
+        bag.open(bagname,rosbag::bagmode::Read);
+    }
+    catch (...) {
+        std::cerr << "error opening depth rosbag: " << bagname << std::endl;
+        return false;
+    }
+
     // create query to fetch depth topic messages
     rosbag::View view(bag, rosbag::TopicQuery("/camera/depth/image"));
 
-    // initialised to avoid warnings!
-    uint32_t sec  = 0;
-    uint32_t nsec = 0;
-
     // produce png image for every depth message
-    BOOST_FOREACH (rosbag::MessageInstance const msg, view) {
+    for (const auto& msg : view) {
         sensor_msgs::Image::ConstPtr imgi = msg.instantiate<sensor_msgs::Image>();
         cv::Mat imgo = cv::Mat(imgi->height, imgi->width, CV_32FC1,
                                 const_cast<uchar*>(&imgi->data[0]), imgi->step);
@@ -155,20 +153,18 @@ bool loadTUMROSRGBGreyData(bool doRGB, bool doGrey, const std::string &dirname,
         const CameraSensor::distortion_coefficients_t &distortion) {
 
     auto *rgb_sensor = new CameraSensor("RGB", CameraSensor::kCameraType);
-    if (rgb_sensor != nullptr) {
-        std::cout << "rgb sensor created" << std::endl;
-    } else {
+    if (rgb_sensor == nullptr) {
         std::cerr << "error: rgb sensor not found" << std::endl;
         return false;
     }
+    std::cout << "rgb sensor created" << std::endl;
 
     auto *grey_sensor = new CameraSensor("Grey", CameraSensor::kCameraType);
-    if (grey_sensor != nullptr) {
-        std::cout << "grey sensor created" << std::endl;
-    } else {
+    if (grey_sensor == nullptr) {
         std::cerr << "error: grey sensor not found" << std::endl;
         return false;
     }
+    std::cout << "grey sensor created" << std::endl;
 
     // populate rgb sensor data
     if (doRGB) {
@@ -204,15 +200,9 @@ bool loadTUMROSRGBGreyData(bool doRGB, bool doGrey, const std::string &dirname,
         file.Sensors.AddSensor(grey_sensor);
     }
 
-    // open rosbag file
-    rosbag::Bag bag;
-    try {
-        bag.open(bagname, rosbag::bagmode::Read);
-    }
-    catch (...) {
-        std::cerr << "error opening rgb rosbag: " << bagname << std::endl;
-        return false;
-    }
+    // initialised to avoid warnings!
+    uint32_t sec  = 0;
+    uint32_t nsec = 0;
 
     // create directory for rgb images
     std::string rgbdir = dirname + "/rgb/";
@@ -223,16 +213,22 @@ bool loadTUMROSRGBGreyData(bool doRGB, bool doGrey, const std::string &dirname,
         }
     }
 
+    // open rosbag file
+    rosbag::Bag bag;
+    try {
+        bag.open(bagname, rosbag::bagmode::Read);
+    }
+    catch (...) {
+        std::cerr << "error opening rgb rosbag: " << bagname << std::endl;
+        return false;
+    }
+
     // create query to fetch rgb images topic messages
     // NOTE: TUM rosbag files do not contain grey images - use rgb ones!
     rosbag::View view(bag, rosbag::TopicQuery("/camera/rgb/image_color"));
 
-    // initialised to avoid warnings!
-    uint32_t sec  = 0;
-    uint32_t nsec = 0;
-
     // produce png image for every rgb message
-    BOOST_FOREACH (rosbag::MessageInstance const msg, view) {
+    for (const auto& msg : view) {
         sensor_msgs::Image::ConstPtr imgi = msg.instantiate<sensor_msgs::Image>();
         cv::Mat imgo = cv::Mat(imgi->height, imgi->width, CV_8UC3,
                                const_cast<uchar *>(&imgi->data[0]), imgi->step);
@@ -304,29 +300,15 @@ bool loadTUMROSRGBGreyData(bool doRGB, bool doGrey, const std::string &dirname,
 bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
 
     auto *gt_sensor = new GroundTruthSensor("GroundTruth");
-    if (gt_sensor != nullptr) {
-        std::cout << "gt sensor created" << std::endl;
-    } else {
+    if (gt_sensor == nullptr) {
         std::cerr << "error: gt sensor not found" << std::endl;
         return false;
     }
+    std::cout << "gt sensor created" << std::endl;
 
     gt_sensor->Index = file.Sensors.size();
     gt_sensor->Description = "GroundTruthSensor";
     file.Sensors.AddSensor(gt_sensor);
-
-    // open rosbag
-    rosbag::Bag bag;
-    try {
-        bag.open(bagname,rosbag::bagmode::Read);
-    }
-    catch (...) {
-        std::cerr << "error opening gt rosbag: " << bagname << std::endl;
-        return false;
-    }
-
-    // create query to fetch ground truth topic messages
-    rosbag::View view(bag, rosbag::TopicQuery("/tf"));
 
     std::string world_str ("/world");
     std::string kinect_str ("/kinect");
@@ -350,7 +332,20 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
     uint32_t sec  = 0;
     uint32_t nsec = 0;
 
-    BOOST_FOREACH (rosbag::MessageInstance const msg, view) {
+    // open rosbag
+    rosbag::Bag bag;
+    try {
+        bag.open(bagname,rosbag::bagmode::Read);
+    }
+    catch (...) {
+        std::cerr << "error opening gt rosbag: " << bagname << std::endl;
+        return false;
+    }
+
+    // create query to fetch ground truth topic messages
+    rosbag::View view(bag, rosbag::TopicQuery("/tf"));
+
+    for (const auto& msg : view) {
         tf::tfMessage::ConstPtr msgi = msg.instantiate<tf::tfMessage>();
 
         if (msgi != nullptr) {
@@ -443,16 +438,19 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
 bool loadTUMROSAccelerometerData(const std::string &bagname, SLAMFile &file) {
 
     auto *accelerometer_sensor = new AccelerometerSensor("Accelerometer");
-    if (accelerometer_sensor != nullptr) {
-        std::cout << "accelerometer_sensor created" << std::endl;
-    } else {
+    if (accelerometer_sensor == nullptr) {
         std::cerr << "error: accelerometer_sensor not found" << std::endl;
         return false;
     }
+    std::cout << "accelerometer sensor created" << std::endl;
 
     accelerometer_sensor->Index = file.Sensors.size();
     accelerometer_sensor->Description = "AccelerometerSensor";
     file.Sensors.AddSensor(accelerometer_sensor);
+
+    // initialised to avoid warnings!
+    uint32_t sec = 0;
+    uint32_t nsec = 0;
 
     // open rosbag
     rosbag::Bag bag;
@@ -467,11 +465,7 @@ bool loadTUMROSAccelerometerData(const std::string &bagname, SLAMFile &file) {
     // create query to fetch ground truth topic messages
     rosbag::View view(bag, rosbag::TopicQuery("/imu"));
 
-    // initialised to avoid warnings!
-    uint32_t sec = 0;
-    uint32_t nsec = 0;
-
-    BOOST_FOREACH (rosbag::MessageInstance const msg, view) {
+    for (const auto& msg : view) {
         sensor_msgs::Imu::ConstPtr msgi = msg.instantiate<sensor_msgs::Imu>();
 
         // record time stamp with adjusted precision
