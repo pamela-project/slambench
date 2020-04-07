@@ -90,7 +90,7 @@ public :
 		} else if (dataset_name == "tum") {
 			config->reader = new TUMReader("");
 		} else if (dataset_name == "tum-rosbag") {
-			config->reader = new TUMROSReader("");
+			config->reader = new TUMROSBAGReader("");
 		} else if (dataset_name == "eurocmav") {
 			config->reader = new EUROCMAVReader("");
 		} else if (dataset_name == "icl") {

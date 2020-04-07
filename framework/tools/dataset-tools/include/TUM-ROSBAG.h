@@ -30,7 +30,7 @@
 
 namespace slambench {
     namespace io {
-        class TUMROSReader : public DatasetReader {
+        class TUMROSBAGReader : public DatasetReader {
 
         private :
             // these numbers were taken from TUM.h (originally from the TUM dataset paper)
@@ -68,7 +68,7 @@ namespace slambench {
             std::string input;
             bool grey = true, rgb = true, depth = true, gt = true, accelerometer = false;
 
-            explicit TUMROSReader(std::string name) : DatasetReader(name) {
+            explicit TUMROSBAGReader(std::string name) : DatasetReader(name) {
                 this->addParameter(TypedParameter<std::string>("i",
                         "input-directory", "path of the TUM dataset directory",
                         &this->input, nullptr));

@@ -39,7 +39,7 @@
 using namespace slambench::io ;
 
 
-bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
+bool loadTUMROSBAG_DepthData(const std::string &dirname, const std::string &bagname,
         SLAMFile &file, const float depthMapFactor, const Sensor::pose_t &pose,
         const DepthSensor::intrinsics_t &intrinsics,
         const CameraSensor::distortion_coefficients_t &distortion,
@@ -154,7 +154,7 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
 }
 
 
-bool loadTUMROSRGBGreyData(bool doRGB, bool doGrey, const std::string &dirname,
+bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirname,
         const std::string &bagname, SLAMFile &file, const Sensor::pose_t &pose,
         const CameraSensor::intrinsics_t &intrinsics,
         const CameraSensor::distortion_coefficients_t &distortion) {
@@ -310,7 +310,7 @@ bool loadTUMROSRGBGreyData(bool doRGB, bool doGrey, const std::string &dirname,
 }
 
 
-bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
+bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
 
     auto *gt_sensor = new GroundTruthSensor("GroundTruth");
     if (gt_sensor == nullptr) {
@@ -455,7 +455,7 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
 }
 
 
-bool loadTUMROSAccelerometerData(const std::string &bagname, SLAMFile &file) {
+bool loadTUMROSBAG_AccelerometerData(const std::string &bagname, SLAMFile &file) {
 
     auto *accelerometer_sensor = new AccelerometerSensor("Accelerometer");
     if (accelerometer_sensor == nullptr) {
@@ -532,7 +532,7 @@ bool loadTUMROSAccelerometerData(const std::string &bagname, SLAMFile &file) {
 }
 
 
-SLAMFile* TUMROSReader::GenerateSLAMFile () {
+SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
 
     if (!(grey || rgb || depth)) {
         std::cerr <<  "error: no sensors defined" << std::endl;
@@ -602,7 +602,7 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
     /**
      * load Depth
      */
-    if (depth && !loadTUMROSDepthData(dirname, bagname, slamfile,
+    if (depth && !loadTUMROSBAG_DepthData(dirname, bagname, slamfile,
             depthMapFactor, pose, intrinsics_depth, distortion_depth,
             disparity_params, disparity_type)) {
         std::cerr << "error while loading depth information." << std::endl;
@@ -615,7 +615,7 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
      * load RGB and/or Grey
      * NOTE: TUM rosbag files do not contain grey images - use rgb ones!
      */
-    if ((rgb || grey) && !loadTUMROSRGBGreyData(rgb, grey, dirname, bagname,
+    if ((rgb || grey) && !loadTUMROSBAG_RGBGreyData(rgb, grey, dirname, bagname,
             slamfile, pose, intrinsics_rgb, distortion_rgb)) {
         std::cerr << "error while loading RGB/Grey information." << std::endl;
         delete slamfilep;
@@ -626,7 +626,7 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
     /**
      * load GT
      */
-    if (gt && !loadTUMROSGroundTruthData(bagname, slamfile)) {
+    if (gt && !loadTUMROSBAG_GroundTruthData(bagname, slamfile)) {
         std::cerr << "error while loading gt information." << std::endl;
         delete slamfilep;
         return nullptr;
@@ -636,7 +636,7 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
     /**
      * load Accelerometer: This one failed
      */
-    if (accelerometer && !loadTUMROSAccelerometerData(bagname, slamfile)) {
+    if (accelerometer && !loadTUMROSBAG_AccelerometerData(bagname, slamfile)) {
         std::cerr << "error while loading Accelerometer information."
                 << std::endl;
         delete slamfilep;
