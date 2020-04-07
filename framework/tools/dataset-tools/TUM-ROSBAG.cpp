@@ -78,8 +78,8 @@ bool loadTUMROSDepthData(const std::string &dirname, const std::string &bagname,
     std::string depthdir = dirname + "/depth/";
     if (!boost::filesystem::exists(depthdir)) {
         if (!boost::filesystem::create_directory(depthdir)) {
-            std::cerr << "error creating depth directory: " <<
-                    depthdir << std::endl;
+            std::cerr << "error creating depth directory: "
+                    << depthdir << std::endl;
             return false;
         }
     }
@@ -215,7 +215,8 @@ bool loadTUMROSRGBGreyData(bool doRGB, bool doGrey, const std::string &dirname,
     std::string rgbdir = dirname + "/rgb/";
     if (!boost::filesystem::exists(rgbdir)) {
         if (!boost::filesystem::create_directory(rgbdir)) {
-            std::cerr << "error creating rgb directory: " << rgbdir << std::endl;
+            std::cerr << "error creating rgb directory: "
+                    << rgbdir << std::endl;
             return false;
         }
     }
@@ -267,8 +268,8 @@ bool loadTUMROSRGBGreyData(bool doRGB, bool doGrey, const std::string &dirname,
         frame_name << sec << ".";
         frame_name << std::setw(6) << std::setfill('0') << nsec << ".png";
         if (!cv::imwrite(frame_name.str(), image)) {
-            std::cerr << "error writing rgb image: " <<
-                    frame_name.str() << std::endl;
+            std::cerr << "error writing rgb image: "
+                    << frame_name.str() << std::endl;
             return false;
         }
 
@@ -414,17 +415,18 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
                 tf::Vector3 tr = w_o_trans.getOrigin();
                 tf::Matrix3x3 rt = w_o_trans.getBasis();
 
-                // NOTE: implicit float64 (double) to float casts
-                pose.block(0, 0, 3, 3) <<
-                        rt[0][0], rt[0][1], rt[0][2],
-                        rt[1][0], rt[1][1], rt[1][2],
-                        rt[2][0], rt[2][1], rt[2][2];
-                pose.block(0, 3, 3, 1) <<
-                        tr.x(), tr.y(), tr.z();
+                // NOTE: float64 (double) to float casts
+                pose.block(0, 0, 3, 3)
+                        << (float) rt[0][0], (float) rt[0][1], (float) rt[0][2],
+                           (float) rt[1][0], (float) rt[1][1], (float) rt[1][2],
+                           (float) rt[2][0], (float) rt[2][1], (float) rt[2][2];
+                pose.block(0, 3, 3, 1)
+                        << (float) tr.x(), (float) tr.y(), (float) tr.z();
 
                 auto *gt_frame = new SLAMInMemoryFrame();
                 if (gt_frame == nullptr) {
-                    std::cerr << "error creating gt in-memory frame" << std::endl;
+                    std::cerr << "error creating gt in-memory frame"
+                            << std::endl;
                     return false;
                 }
 
@@ -433,7 +435,8 @@ bool loadTUMROSGroundTruthData(const std::string &bagname, SLAMFile &file) {
                 gt_frame->Timestamp.Ns = nsec;
                 gt_frame->Data = malloc(gt_frame->GetSize());
                 if (gt_frame->Data == nullptr) {
-                    std::cerr << "error allocating memory for gt frame" << std::endl;
+                    std::cerr << "error allocating memory for gt frame"
+                            << std::endl;
                     return false;
                 }
 
@@ -565,7 +568,8 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
 
 
     if (dirname.find("freiburg1") != std::string::npos) {
-        std::cout << "This dataset is assumed to be using freiburg1." << std::endl;
+        std::cout << "using freiburg1 camera calibration parameters"
+                << std::endl;
         for (int i = 0; i < 4; i++) {
             intrinsics_rgb[i]   = fr1_intrinsics_rgb[i];
             intrinsics_depth[i] = fr1_intrinsics_depth[i];
@@ -575,7 +579,8 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
             depthMapFactor = fr1_DepthMapFactor;
         }
     } else if (dirname.find("freiburg2") != std::string::npos) {
-        std::cout << "This dataset is assumed to be using freiburg2." << std::endl;
+        std::cout << "using freiburg2 camera calibration parameters"
+                << std::endl;
         for (int i = 0; i < 4; i++) {
             intrinsics_rgb[i]   = fr2_intrinsics_rgb[i];
             intrinsics_depth[i] = fr2_intrinsics_depth[i];
@@ -585,11 +590,13 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
             depthMapFactor = fr2_DepthMapFactor;
         }
     } else  {
-        std::cout << "Camera calibration might be wrong!" << std::endl;
+        std::cout << "warning: camera calibration might be wrong!"
+                << std::endl;
     }
 
     DepthSensor::disparity_params_t disparity_params =  {0.001, 0.0};
-    DepthSensor::disparity_type_t disparity_type = DepthSensor::affine_disparity;
+    DepthSensor::disparity_type_t disparity_type =
+                    DepthSensor::affine_disparity;
 
 
     /**
@@ -630,7 +637,8 @@ SLAMFile* TUMROSReader::GenerateSLAMFile () {
      * load Accelerometer: This one failed
      */
     if (accelerometer && !loadTUMROSAccelerometerData(bagname, slamfile)) {
-        std::cerr << "error while loading Accelerometer information." << std::endl;
+        std::cerr << "error while loading Accelerometer information."
+                << std::endl;
         delete slamfilep;
         return nullptr;
     }
