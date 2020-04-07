@@ -39,14 +39,16 @@
 using namespace slambench::io ;
 
 
-bool loadTUMROSBAG_DepthData(const std::string &dirname, const std::string &bagname,
-        SLAMFile &file, const float depthMapFactor, const Sensor::pose_t &pose,
+bool loadTUMROSBAG_DepthData(const std::string &dirname,
+        const std::string &bagname,
+        SLAMFile &file, const Sensor::pose_t &pose,
+        const TUMROSBAGReader::image_params_t image_params,
         const DepthSensor::intrinsics_t &intrinsics,
         const CameraSensor::distortion_coefficients_t &distortion,
         const DepthSensor::disparity_params_t &disparity_params,
         const DepthSensor::disparity_type_t &disparity_type) {
 
-    // populate sensor data
+    // allocate new sensor
     auto *depth_sensor = new DepthSensor("Depth");
     if (depth_sensor == nullptr) {
         std::cerr << "error: depth sensor not found" << std::endl;
@@ -54,9 +56,10 @@ bool loadTUMROSBAG_DepthData(const std::string &dirname, const std::string &bagn
     }
     std::cout << "depth sensor created" << std::endl;
 
-    depth_sensor->Index = 0;
-    depth_sensor->Width = 640;
-    depth_sensor->Height = 480;
+    // populate sensor data
+    depth_sensor->Index = file.Sensors.size();
+    depth_sensor->Width = image_params.width;
+    depth_sensor->Height = image_params.height;
     depth_sensor->FrameFormat = frameformat::Raster;
     depth_sensor->PixelFormat = pixelformat::D_I_16;
     depth_sensor->DisparityType = disparity_type;
@@ -66,13 +69,8 @@ bool loadTUMROSBAG_DepthData(const std::string &dirname, const std::string &bagn
     depth_sensor->CopyDisparityParams(disparity_params);
     depth_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
     depth_sensor->CopyRadialTangentialDistortion(distortion);
-    depth_sensor->Index = file.Sensors.size();
-    depth_sensor->Rate = 30.0;
+    depth_sensor->Rate = image_params.rate;
     file.Sensors.AddSensor(depth_sensor);
-
-    // initialised to avoid warnings!
-    uint32_t sec  = 0;
-    uint32_t nsec = 0;
 
     // create directory for depth images
     std::string depthdir = dirname + "/depth/";
@@ -110,40 +108,34 @@ bool loadTUMROSBAG_DepthData(const std::string &dirname, const std::string &bagn
         for (uint r = 0; r < imgi->height; r++) {
             for (uint c = 0; c < imgi->width; c++) {
                 float dist = imgo.at<float>(r * imgi->width + c);
-                auto dist16 = (unsigned short) (depthMapFactor * dist);
+                auto dist16 = (unsigned short)
+                        (image_params.depthMapFactor * dist);
                 image.at<short>(r, c) = dist16;
             }
         }
 
-        // record time stamp with adjusted precision
-        // TUM RGB-D datasets use 6-digit nanosec timestamps
-        sec = imgi->header.stamp.sec;
-        nsec = (imgi->header.stamp.nsec + 500)/1000;
-        if (nsec >= 1000000) {
-            sec++;
-            nsec = 0;
-        }
-
         std::stringstream frame_name;
         frame_name << depthdir;
-        frame_name << sec << ".";
-        frame_name << std::setw(6) << std::setfill('0') << nsec << ".png";
+        frame_name << imgi->header.stamp.sec << "."
+                << imgi->header.stamp.nsec << ".png";
+
         if (!cv::imwrite(frame_name.str(), image)) {
             std::cerr << "error writing depth image: " <<
                     frame_name.str() << std::endl;
             return false;
         }
 
-        // update slambench file with new frame
+        // allocate new depth frame
         auto *depth_frame = new ImageFileFrame();
         if (depth_frame == nullptr) {
             std::cerr << "error creating depth image frame" << std::endl;
             return false;
         }
 
+        // populate frame and update slambench file
         depth_frame->FrameSensor  = depth_sensor;
-        depth_frame->Timestamp.S  = sec;
-        depth_frame->Timestamp.Ns = nsec;
+        depth_frame->Timestamp.S  = imgi->header.stamp.sec;
+        depth_frame->Timestamp.Ns = imgi->header.stamp.nsec;
         depth_frame->Filename     = frame_name.str();
         file.AddFrame(depth_frame);
     }
@@ -156,6 +148,7 @@ bool loadTUMROSBAG_DepthData(const std::string &dirname, const std::string &bagn
 
 bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirname,
         const std::string &bagname, SLAMFile &file, const Sensor::pose_t &pose,
+        const TUMROSBAGReader::image_params_t image_params,
         const CameraSensor::intrinsics_t &intrinsics,
         const CameraSensor::distortion_coefficients_t &distortion) {
 
@@ -175,9 +168,9 @@ bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirna
 
     // populate rgb sensor data
     if (doRGB) {
-        rgb_sensor->Index = 0;
-        rgb_sensor->Width = 640;
-        rgb_sensor->Height = 480;
+        rgb_sensor->Index = file.Sensors.size();
+        rgb_sensor->Width = image_params.width;
+        rgb_sensor->Height = image_params.height;
         rgb_sensor->FrameFormat = frameformat::Raster;
         rgb_sensor->PixelFormat = pixelformat::RGB_III_888;
         rgb_sensor->Description = "RGB";
@@ -185,16 +178,15 @@ bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirna
         rgb_sensor->CopyIntrinsics(intrinsics);
         rgb_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
         rgb_sensor->CopyRadialTangentialDistortion(distortion);
-        rgb_sensor->Index = file.Sensors.size();
-        rgb_sensor->Rate = 30.0;
+        rgb_sensor->Rate = image_params.rate;
         file.Sensors.AddSensor(rgb_sensor);
     }
 
     // populate grey sensor data
     if (doGrey) {
-        grey_sensor->Index = 0;
-        grey_sensor->Width = 640;
-        grey_sensor->Height = 480;
+        grey_sensor->Index = file.Sensors.size();
+        grey_sensor->Width = image_params.width;
+        grey_sensor->Height = image_params.height;
         grey_sensor->FrameFormat = frameformat::Raster;
         grey_sensor->PixelFormat = pixelformat::G_I_8;
         grey_sensor->Description = "Grey";
@@ -202,14 +194,9 @@ bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirna
         grey_sensor->CopyIntrinsics(intrinsics);
         grey_sensor->CopyRadialTangentialDistortion(distortion);
         grey_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
-        grey_sensor->Index = file.Sensors.size();
-        grey_sensor->Rate = 30.0;
+        grey_sensor->Rate = image_params.rate;
         file.Sensors.AddSensor(grey_sensor);
     }
-
-    // initialised to avoid warnings!
-    uint32_t sec  = 0;
-    uint32_t nsec = 0;
 
     // create directory for rgb images
     std::string rgbdir = dirname + "/rgb/";
@@ -254,51 +241,45 @@ bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirna
             }
         }
 
-        // record time stamp with adjusted precision
-        // TUM RGB-D datasets use 6-digit nanosec image timestamps
-        sec = imgi->header.stamp.sec;
-        nsec = (imgi->header.stamp.nsec + 500)/1000;
-        if (nsec >= 1000000) {
-            sec++;
-            nsec = 0;
-        }
-
         std::stringstream frame_name;
         frame_name << rgbdir;
-        frame_name << sec << ".";
-        frame_name << std::setw(6) << std::setfill('0') << nsec << ".png";
+        frame_name << imgi->header.stamp.sec << "."
+                << imgi->header.stamp.nsec << ".png";
+
         if (!cv::imwrite(frame_name.str(), image)) {
             std::cerr << "error writing rgb image: "
                     << frame_name.str() << std::endl;
             return false;
         }
 
-        // update slambench file with new rgb frame
         if (doRGB) {
+            // allocate new rgb frame
             auto *rgb_frame = new ImageFileFrame();
             if (rgb_frame == nullptr) {
                 std::cerr << "error creating rgb image frame" << std::endl;
                 return false;
             }
 
+            // populate frame and update slambench file
             rgb_frame->FrameSensor = rgb_sensor;
-            rgb_frame->Timestamp.S = sec;
-            rgb_frame->Timestamp.Ns = nsec;
+            rgb_frame->Timestamp.S = imgi->header.stamp.sec;
+            rgb_frame->Timestamp.Ns = imgi->header.stamp.nsec;
             rgb_frame->Filename = frame_name.str();
             file.AddFrame(rgb_frame);
         }
 
-        // update slambench file with new grey frame
         if (doGrey) {
+            // allocate new grey frame
             auto *grey_frame = new ImageFileFrame();
             if (grey_frame == nullptr) {
                 std::cerr << "error creating grey image frame" << std::endl;
                 return false;
             }
 
+            // populate frame and update slambench file
             grey_frame->FrameSensor = grey_sensor;
-            grey_frame->Timestamp.S = sec;
-            grey_frame->Timestamp.Ns = nsec;
+            grey_frame->Timestamp.S = imgi->header.stamp.sec;
+            grey_frame->Timestamp.Ns = imgi->header.stamp.nsec;
             grey_frame->Filename = frame_name.str();
             file.AddFrame(grey_frame);
         }
@@ -341,10 +322,6 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
     bool r_o_rdy = false;
     bool all_rdy = false;
 
-    // initialised to avoid warnings!
-    uint32_t sec  = 0;
-    uint32_t nsec = 0;
-
     // open rosbag
     rosbag::Bag bag;
     try {
@@ -362,6 +339,14 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
         tf::tfMessage::ConstPtr msgi = msg.instantiate<tf::tfMessage>();
         if (msgi == nullptr) {
             continue;
+        }
+
+        // allocate new gt frame
+        auto *gt_frame = new SLAMInMemoryFrame();
+        if (gt_frame == nullptr) {
+            std::cerr << "error creating gt in-memory frame"
+                      << std::endl;
+            return false;
         }
 
         for (const auto& msgii : msgi->transforms) {
@@ -393,17 +378,12 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
                 // track continuously the /world to /kinect transformation
                 if (msgii.header.frame_id == world_str) {
                     w_k_new = true;
-                    // record time stamp with adjusted precision
-                    sec = msgii.header.stamp.sec;
 
-                    // record time stamp with adjusted precision
-                    // TUM RGB-D datasets use 4-digit gt nanosec timestamps
-                    nsec = (msgii.header.stamp.nsec + 50000)/100000;
-                    if (nsec >= 10000) {
-                        sec++;
-                        nsec = 0;
-                    }
                     tf::transformMsgToTF(msgii.transform, w_k_trans);
+
+                    // record time stamp in frame
+                    gt_frame->Timestamp.S = msgii.header.stamp.sec;
+                    gt_frame->Timestamp.Ns = msgii.header.stamp.nsec;
                 }
             }
             if (all_rdy && w_k_new) {
@@ -423,16 +403,8 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
                 pose.block(0, 3, 3, 1)
                         << (float) tr.x(), (float) tr.y(), (float) tr.z();
 
-                auto *gt_frame = new SLAMInMemoryFrame();
-                if (gt_frame == nullptr) {
-                    std::cerr << "error creating gt in-memory frame"
-                            << std::endl;
-                    return false;
-                }
-
+                // populate frame and update slambench file
                 gt_frame->FrameSensor = gt_sensor;
-                gt_frame->Timestamp.S = sec;
-                gt_frame->Timestamp.Ns = nsec;
                 gt_frame->Data = malloc(gt_frame->GetSize());
                 if (gt_frame->Data == nullptr) {
                     std::cerr << "error allocating memory for gt frame"
@@ -468,10 +440,6 @@ bool loadTUMROSBAG_AccelerometerData(const std::string &bagname, SLAMFile &file)
     accelerometer_sensor->Description = "AccelerometerSensor";
     file.Sensors.AddSensor(accelerometer_sensor);
 
-    // initialised to avoid warnings!
-    uint32_t sec = 0;
-    uint32_t nsec = 0;
-
     // open rosbag
     rosbag::Bag bag;
     try {
@@ -492,26 +460,17 @@ bool loadTUMROSBAG_AccelerometerData(const std::string &bagname, SLAMFile &file)
             continue;
         }
 
-        // record time stamp with adjusted precision
-        // TUM RGB-D datasets use 6-digit accelerometer nanosec timestamps
-        sec = msgi->header.stamp.sec;
-        nsec = (msgi->header.stamp.nsec + 500) / 1000;
-        if (nsec >= 1000000) {
-            sec++;
-            nsec = 0;
-        }
-
-        geometry_msgs::Vector3 lacc = msgi->linear_acceleration;
-
+        // allocate new accelerometer frame
         auto *accelerometer_frame = new SLAMInMemoryFrame();
         if (accelerometer_frame == nullptr) {
             std::cerr << "error creating acc in-memory frame" << std::endl;
             return false;
         }
 
+        // populate frame and update slambench file
         accelerometer_frame->FrameSensor = accelerometer_sensor;
-        accelerometer_frame->Timestamp.S = sec;
-        accelerometer_frame->Timestamp.Ns = nsec;
+        accelerometer_frame->Timestamp.S = msgi->header.stamp.sec;
+        accelerometer_frame->Timestamp.Ns = msgi->header.stamp.nsec;
         accelerometer_frame->Data = malloc(accelerometer_frame->GetSize());
         if (accelerometer_frame->Data == nullptr) {
             std::cerr << "error allocating memory for acc frame" << std::endl;
@@ -519,9 +478,14 @@ bool loadTUMROSBAG_AccelerometerData(const std::string &bagname, SLAMFile &file)
         }
 
         // NOTE: float64 (double) to float casts
-        ((float *) accelerometer_frame->Data)[0] = (float) lacc.x;
-        ((float *) accelerometer_frame->Data)[1] = (float) lacc.y;
-        ((float *) accelerometer_frame->Data)[2] = (float) lacc.z;
+        ((float *) accelerometer_frame->Data)[0] =
+                (float) (msgi->linear_acceleration).x;
+
+        ((float *) accelerometer_frame->Data)[1] =
+                (float) (msgi->linear_acceleration).y;
+
+        ((float *) accelerometer_frame->Data)[2] =
+                (float) (msgi->linear_acceleration).z;
 
         file.AddFrame(accelerometer_frame);
     }
@@ -534,6 +498,7 @@ bool loadTUMROSBAG_AccelerometerData(const std::string &bagname, SLAMFile &file)
 
 SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
 
+    // can accelerometer be used on its own? -- if so, include here.
     if (!(grey || rgb || depth)) {
         std::cerr <<  "error: no sensors defined" << std::endl;
         return nullptr;
@@ -558,7 +523,14 @@ SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
 
     Sensor::pose_t pose = Eigen::Matrix4f::Identity();
 
-    float depthMapFactor = 1.0;  // default but probably wrong!
+    image_params_t image_params = fr_image_params;
+
+    /**
+     * set sensor parameters
+     */
+    DepthSensor::disparity_params_t disparity_params =  {0.001, 0.0};
+    DepthSensor::disparity_type_t disparity_type =
+            DepthSensor::affine_disparity;
 
     CameraSensor::intrinsics_t intrinsics_rgb;
     DepthSensor::intrinsics_t intrinsics_depth;
@@ -566,17 +538,16 @@ SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
     CameraSensor::distortion_coefficients_t distortion_rgb;
     DepthSensor::distortion_coefficients_t distortion_depth;
 
-
+    // these parameters depend on the particular kinect sensor used
     if (dirname.find("freiburg1") != std::string::npos) {
         std::cout << "using freiburg1 camera calibration parameters"
                 << std::endl;
         for (int i = 0; i < 4; i++) {
             intrinsics_rgb[i]   = fr1_intrinsics_rgb[i];
             intrinsics_depth[i] = fr1_intrinsics_depth[i];
+
             distortion_rgb[i]   = fr1_distortion_rgb[i];
             distortion_depth[i] = fr1_distortion_depth[i];
-
-            depthMapFactor = fr1_DepthMapFactor;
         }
     } else if (dirname.find("freiburg2") != std::string::npos) {
         std::cout << "using freiburg2 camera calibration parameters"
@@ -584,28 +555,41 @@ SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
         for (int i = 0; i < 4; i++) {
             intrinsics_rgb[i]   = fr2_intrinsics_rgb[i];
             intrinsics_depth[i] = fr2_intrinsics_depth[i];
+
             distortion_rgb[i]   = fr2_distortion_rgb[i];
             distortion_depth[i] = fr2_distortion_depth[i];
+        }
+    } else if (dirname.find("freiburg3") != std::string::npos) {
+        std::cout << "using freiburg3 camera calibration parameters"
+                  << std::endl;
+        for (int i = 0; i < 4; i++) {
+            intrinsics_rgb[i]   = fr3_intrinsics_rgb[i];
+            intrinsics_depth[i] = fr3_intrinsics_depth[i];
 
-            depthMapFactor = fr2_DepthMapFactor;
+            distortion_rgb[i]   = fr3_distortion_rgb[i];
+            distortion_depth[i] = fr3_distortion_depth[i];
         }
     } else  {
+        std::cout << "using default camera calibration parameters";
         std::cout << "warning: camera calibration might be wrong!"
                 << std::endl;
-    }
+        for (int i = 0; i < 4; i++) {
+            intrinsics_rgb[i]   = default_intrinsics_rgb[i];
+            intrinsics_depth[i] = default_intrinsics_depth[i];
 
-    DepthSensor::disparity_params_t disparity_params =  {0.001, 0.0};
-    DepthSensor::disparity_type_t disparity_type =
-                    DepthSensor::affine_disparity;
+            distortion_rgb[i]   = default_distortion_rgb[i];
+            distortion_depth[i] = default_distortion_depth[i];
+        }
+    }
 
 
     /**
      * load Depth
      */
     if (depth && !loadTUMROSBAG_DepthData(dirname, bagname, slamfile,
-            depthMapFactor, pose, intrinsics_depth, distortion_depth,
+            pose, image_params, intrinsics_depth, distortion_depth,
             disparity_params, disparity_type)) {
-        std::cerr << "error while loading depth information." << std::endl;
+        std::cerr << "error loading depth data." << std::endl;
         delete slamfilep;
         return nullptr;
     }
@@ -616,8 +600,8 @@ SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
      * NOTE: TUM rosbag files do not contain grey images - use rgb ones!
      */
     if ((rgb || grey) && !loadTUMROSBAG_RGBGreyData(rgb, grey, dirname, bagname,
-            slamfile, pose, intrinsics_rgb, distortion_rgb)) {
-        std::cerr << "error while loading RGB/Grey information." << std::endl;
+            slamfile, pose, image_params, intrinsics_rgb, distortion_rgb)) {
+        std::cerr << "error loading RGB/Grey data." << std::endl;
         delete slamfilep;
         return nullptr;
     }
@@ -627,7 +611,7 @@ SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
      * load GT
      */
     if (gt && !loadTUMROSBAG_GroundTruthData(bagname, slamfile)) {
-        std::cerr << "error while loading gt information." << std::endl;
+        std::cerr << "error loading gt data." << std::endl;
         delete slamfilep;
         return nullptr;
     }
@@ -637,7 +621,7 @@ SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
      * load Accelerometer: This one failed
      */
     if (accelerometer && !loadTUMROSBAG_AccelerometerData(bagname, slamfile)) {
-        std::cerr << "error while loading Accelerometer information."
+        std::cerr << "error loading Accelerometer data."
                 << std::endl;
         delete slamfilep;
         return nullptr;
