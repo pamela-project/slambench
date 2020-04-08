@@ -319,11 +319,11 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
     gt_sensor->Description = "GroundTruthSensor";
     file.Sensors.AddSensor(gt_sensor);
 
-    std::string const world_str ("/world");
-    std::string const kinect_str ("/kinect");
-    std::string const camera_str ("/openni_camera");
-    std::string const rgb_str ("/openni_rgb_frame");
-    std::string const opt_str ("/openni_rgb_optical_frame");
+    std::string world_str ("/world");
+    std::string kinect_str ("/kinect");
+    std::string camera_str ("/openni_camera");
+    std::string rgb_str ("/openni_rgb_frame");
+    std::string opt_str ("/openni_rgb_optical_frame");
 
     // initialised to avoid warnings!
     tf::Transform w_k_trans = tf::Transform::getIdentity();
@@ -336,6 +336,10 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
     bool c_r_rdy = false;
     bool r_o_rdy = false;
     bool all_rdy = false;
+
+    // NOTE: initialised to avoid warning
+    uint32_t ts_sec = 0;
+    uint32_t ts_nsec = 0;
 
     // open rosbag
     rosbag::Bag bag;
@@ -355,24 +359,6 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
         tf::tfMessage::ConstPtr msgi = msg.instantiate<tf::tfMessage>();
         if (msgi == nullptr) {
             continue;
-        }
-
-        // allocate new gt frame
-        auto *gt_frame = new SLAMInMemoryFrame();
-        if (gt_frame == nullptr) {
-            std::cerr << "error creating gt frame"
-                      << std::endl;
-            delete gt_sensor;
-            return false;
-        }
-
-        // allocate memory for gt data
-        gt_frame->Data = malloc(gt_frame->GetSize());
-        if (gt_frame->Data == nullptr) {
-            std::cerr << "error allocating memory for gt frame"
-                      << std::endl;
-            delete gt_sensor;
-            return false;
         }
 
         for (const auto& msgii : msgi->transforms) {
@@ -407,11 +393,12 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
 
                     tf::transformMsgToTF(msgii.transform, w_k_trans);
 
-                    // record time stamp in frame
-                    gt_frame->Timestamp.S = msgii.header.stamp.sec;
-                    gt_frame->Timestamp.Ns = msgii.header.stamp.nsec;
+                    // record time stamp to use later in frame
+                    ts_sec  = msgii.header.stamp.sec;
+                    ts_nsec = msgii.header.stamp.nsec;
                 }
             }
+
             if (all_rdy && w_k_new) {
                 w_k_new = false;
                 Eigen::Matrix4f pose = Eigen::Matrix4f::Identity();
@@ -429,10 +416,29 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
                 pose.block(0, 3, 3, 1)
                         << (float) tr.x(), (float) tr.y(), (float) tr.z();
 
-                // populate frame data and update slambench file
-                gt_frame->FrameSensor = gt_sensor;
-                memcpy(gt_frame->Data, pose.data(), gt_frame->GetSize());
+                // allocate new gt frame
+                auto *gt_frame = new SLAMInMemoryFrame();
+                if (gt_frame == nullptr) {
+                    std::cerr << "error creating gt frame" << std::endl;
+                    delete gt_sensor;
+                    return false;
+                }
 
+                gt_frame->FrameSensor = gt_sensor;
+
+                // allocate memory for gt data
+                gt_frame->Data = malloc(gt_frame->GetSize());
+                if (gt_frame->Data == nullptr) {
+                    std::cerr << "error allocating memory for gt frame"
+                            << std::endl;
+                    delete gt_sensor;
+                    return false;
+                }
+
+                // populate frame data and update slambench file
+                gt_frame->Timestamp.S = ts_sec;
+                gt_frame->Timestamp.Ns = ts_nsec;
+                memcpy(gt_frame->Data, pose.data(), gt_frame->GetSize());
                 file.AddFrame(gt_frame);
 
                 // move on to next gt message (skip rest of transformations)
@@ -489,6 +495,8 @@ bool loadTUMROSBAG_AccelerometerData(const std::string &bagname, SLAMFile &file)
             return false;
         }
 
+        acc_frame->FrameSensor = acc_sensor;
+
         // allocate memory for accelerometer data
         acc_frame->Data = malloc(acc_frame->GetSize());
         if (acc_frame->Data == nullptr) {
@@ -498,7 +506,6 @@ bool loadTUMROSBAG_AccelerometerData(const std::string &bagname, SLAMFile &file)
         }
 
         // populate frame and update slambench file
-        acc_frame->FrameSensor = acc_sensor;
         acc_frame->Timestamp.S = msgi->header.stamp.sec;
         acc_frame->Timestamp.Ns = msgi->header.stamp.nsec;
 
