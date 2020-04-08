@@ -51,7 +51,7 @@ bool loadTUMROSBAG_DepthData(const std::string &dirname,
     // allocate new sensor
     auto *depth_sensor = new DepthSensor("Depth");
     if (depth_sensor == nullptr) {
-        std::cerr << "error: depth sensor not found" << std::endl;
+        std::cerr << "error allocating depth sensor" << std::endl;
         return false;
     }
     std::cout << "depth sensor created" << std::endl;
@@ -78,6 +78,7 @@ bool loadTUMROSBAG_DepthData(const std::string &dirname,
         if (!boost::filesystem::create_directory(depthdir)) {
             std::cerr << "error creating depth directory: "
                     << depthdir << std::endl;
+            delete depth_sensor;
             return false;
         }
     }
@@ -89,6 +90,7 @@ bool loadTUMROSBAG_DepthData(const std::string &dirname,
     }
     catch (...) {
         std::cerr << "error opening depth rosbag: " << bagname << std::endl;
+        delete depth_sensor;
         return false;
     }
 
@@ -108,8 +110,7 @@ bool loadTUMROSBAG_DepthData(const std::string &dirname,
         for (uint r = 0; r < imgi->height; r++) {
             for (uint c = 0; c < imgi->width; c++) {
                 float dist = imgo.at<float>(r * imgi->width + c);
-                auto dist16 = (unsigned short)
-                        (image_params.depthMapFactor * dist);
+                auto dist16 = (ushort) (image_params.depthMapFactor * dist);
                 image.at<short>(r, c) = dist16;
             }
         }
@@ -122,13 +123,15 @@ bool loadTUMROSBAG_DepthData(const std::string &dirname,
         if (!cv::imwrite(frame_name.str(), image)) {
             std::cerr << "error writing depth image: " <<
                     frame_name.str() << std::endl;
+            delete depth_sensor;
             return false;
         }
 
         // allocate new depth frame
         auto *depth_frame = new ImageFileFrame();
         if (depth_frame == nullptr) {
-            std::cerr << "error creating depth image frame" << std::endl;
+            std::cerr << "error creating depth frame" << std::endl;
+            delete depth_sensor;
             return false;
         }
 
@@ -154,14 +157,15 @@ bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirna
 
     auto *rgb_sensor = new CameraSensor("RGB", CameraSensor::kCameraType);
     if (rgb_sensor == nullptr) {
-        std::cerr << "error: rgb sensor not found" << std::endl;
+        std::cerr << "error allocating rgb sensor" << std::endl;
         return false;
     }
     std::cout << "rgb sensor created" << std::endl;
 
     auto *grey_sensor = new CameraSensor("Grey", CameraSensor::kCameraType);
     if (grey_sensor == nullptr) {
-        std::cerr << "error: grey sensor not found" << std::endl;
+        std::cerr << "error allocating grey sensor" << std::endl;
+        delete rgb_sensor;
         return false;
     }
     std::cout << "grey sensor created" << std::endl;
@@ -204,6 +208,8 @@ bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirna
         if (!boost::filesystem::create_directory(rgbdir)) {
             std::cerr << "error creating rgb directory: "
                     << rgbdir << std::endl;
+            delete rgb_sensor;
+            delete grey_sensor;
             return false;
         }
     }
@@ -215,6 +221,8 @@ bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirna
     }
     catch (...) {
         std::cerr << "error opening rgb rosbag: " << bagname << std::endl;
+        delete rgb_sensor;
+        delete grey_sensor;
         return false;
     }
 
@@ -249,6 +257,8 @@ bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirna
         if (!cv::imwrite(frame_name.str(), image)) {
             std::cerr << "error writing rgb image: "
                     << frame_name.str() << std::endl;
+            delete rgb_sensor;
+            delete grey_sensor;
             return false;
         }
 
@@ -256,7 +266,9 @@ bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirna
             // allocate new rgb frame
             auto *rgb_frame = new ImageFileFrame();
             if (rgb_frame == nullptr) {
-                std::cerr << "error creating rgb image frame" << std::endl;
+                std::cerr << "error creating rgb frame" << std::endl;
+                delete rgb_sensor;
+                delete grey_sensor;
                 return false;
             }
 
@@ -272,7 +284,9 @@ bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirna
             // allocate new grey frame
             auto *grey_frame = new ImageFileFrame();
             if (grey_frame == nullptr) {
-                std::cerr << "error creating grey image frame" << std::endl;
+                std::cerr << "error creating grey frame" << std::endl;
+                delete rgb_sensor;
+                delete grey_sensor;
                 return false;
             }
 
@@ -295,20 +309,21 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
 
     auto *gt_sensor = new GroundTruthSensor("GroundTruth");
     if (gt_sensor == nullptr) {
-        std::cerr << "error: gt sensor not found" << std::endl;
+        std::cerr << "error allocating ground truth sensor" << std::endl;
         return false;
     }
     std::cout << "gt sensor created" << std::endl;
 
+    // populate sensor data
     gt_sensor->Index = file.Sensors.size();
     gt_sensor->Description = "GroundTruthSensor";
     file.Sensors.AddSensor(gt_sensor);
 
-    std::string world_str ("/world");
-    std::string kinect_str ("/kinect");
-    std::string camera_str ("/openni_camera");
-    std::string rgb_str ("/openni_rgb_frame");
-    std::string opt_str ("/openni_rgb_optical_frame");
+    std::string const world_str ("/world");
+    std::string const kinect_str ("/kinect");
+    std::string const camera_str ("/openni_camera");
+    std::string const rgb_str ("/openni_rgb_frame");
+    std::string const opt_str ("/openni_rgb_optical_frame");
 
     // initialised to avoid warnings!
     tf::Transform w_k_trans = tf::Transform::getIdentity();
@@ -329,6 +344,7 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
     }
     catch (...) {
         std::cerr << "error opening gt rosbag: " << bagname << std::endl;
+        delete gt_sensor;
         return false;
     }
 
@@ -344,8 +360,18 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
         // allocate new gt frame
         auto *gt_frame = new SLAMInMemoryFrame();
         if (gt_frame == nullptr) {
-            std::cerr << "error creating gt in-memory frame"
+            std::cerr << "error creating gt frame"
                       << std::endl;
+            delete gt_sensor;
+            return false;
+        }
+
+        // allocate memory for gt data
+        gt_frame->Data = malloc(gt_frame->GetSize());
+        if (gt_frame->Data == nullptr) {
+            std::cerr << "error allocating memory for gt frame"
+                      << std::endl;
+            delete gt_sensor;
             return false;
         }
 
@@ -403,19 +429,13 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
                 pose.block(0, 3, 3, 1)
                         << (float) tr.x(), (float) tr.y(), (float) tr.z();
 
-                // populate frame and update slambench file
+                // populate frame data and update slambench file
                 gt_frame->FrameSensor = gt_sensor;
-                gt_frame->Data = malloc(gt_frame->GetSize());
-                if (gt_frame->Data == nullptr) {
-                    std::cerr << "error allocating memory for gt frame"
-                            << std::endl;
-                    return false;
-                }
-
                 memcpy(gt_frame->Data, pose.data(), gt_frame->GetSize());
 
                 file.AddFrame(gt_frame);
 
+                // move on to next gt message (skip rest of transformations)
                 break;
             }
         }
@@ -429,16 +449,17 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
 
 bool loadTUMROSBAG_AccelerometerData(const std::string &bagname, SLAMFile &file) {
 
-    auto *accelerometer_sensor = new AccelerometerSensor("Accelerometer");
-    if (accelerometer_sensor == nullptr) {
-        std::cerr << "error: accelerometer_sensor not found" << std::endl;
+    auto *acc_sensor = new AccelerometerSensor("Accelerometer");
+    if (acc_sensor == nullptr) {
+        std::cerr << "error allocating accelerometer sensor" << std::endl;
         return false;
     }
     std::cout << "accelerometer sensor created" << std::endl;
 
-    accelerometer_sensor->Index = file.Sensors.size();
-    accelerometer_sensor->Description = "AccelerometerSensor";
-    file.Sensors.AddSensor(accelerometer_sensor);
+    // populate sensor data
+    acc_sensor->Index = file.Sensors.size();
+    acc_sensor->Description = "AccelerometerSensor";
+    file.Sensors.AddSensor(acc_sensor);
 
     // open rosbag
     rosbag::Bag bag;
@@ -461,33 +482,32 @@ bool loadTUMROSBAG_AccelerometerData(const std::string &bagname, SLAMFile &file)
         }
 
         // allocate new accelerometer frame
-        auto *accelerometer_frame = new SLAMInMemoryFrame();
-        if (accelerometer_frame == nullptr) {
-            std::cerr << "error creating acc in-memory frame" << std::endl;
+        auto *acc_frame = new SLAMInMemoryFrame();
+        if (acc_frame == nullptr) {
+            std::cerr << "error creating acc frame" << std::endl;
+            delete acc_sensor;
+            return false;
+        }
+
+        // allocate memory for accelerometer data
+        acc_frame->Data = malloc(acc_frame->GetSize());
+        if (acc_frame->Data == nullptr) {
+            std::cerr << "error allocating memory for acc frame" << std::endl;
+            delete acc_sensor;
             return false;
         }
 
         // populate frame and update slambench file
-        accelerometer_frame->FrameSensor = accelerometer_sensor;
-        accelerometer_frame->Timestamp.S = msgi->header.stamp.sec;
-        accelerometer_frame->Timestamp.Ns = msgi->header.stamp.nsec;
-        accelerometer_frame->Data = malloc(accelerometer_frame->GetSize());
-        if (accelerometer_frame->Data == nullptr) {
-            std::cerr << "error allocating memory for acc frame" << std::endl;
-            return false;
-        }
+        acc_frame->FrameSensor = acc_sensor;
+        acc_frame->Timestamp.S = msgi->header.stamp.sec;
+        acc_frame->Timestamp.Ns = msgi->header.stamp.nsec;
 
         // NOTE: float64 (double) to float casts
-        ((float *) accelerometer_frame->Data)[0] =
-                (float) (msgi->linear_acceleration).x;
+        ((float *) acc_frame->Data)[0] = (float) (msgi->linear_acceleration).x;
+        ((float *) acc_frame->Data)[1] = (float) (msgi->linear_acceleration).y;
+        ((float *) acc_frame->Data)[2] = (float) (msgi->linear_acceleration).z;
 
-        ((float *) accelerometer_frame->Data)[1] =
-                (float) (msgi->linear_acceleration).y;
-
-        ((float *) accelerometer_frame->Data)[2] =
-                (float) (msgi->linear_acceleration).z;
-
-        file.AddFrame(accelerometer_frame);
+        file.AddFrame(acc_frame);
     }
 
     bag.close();
@@ -618,7 +638,7 @@ SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
 
 
     /**
-     * load Accelerometer: This one failed
+     * load Accelerometer
      */
     if (accelerometer && !loadTUMROSBAG_AccelerometerData(bagname, slamfile)) {
         std::cerr << "error loading Accelerometer data."
