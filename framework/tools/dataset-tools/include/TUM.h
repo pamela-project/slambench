@@ -40,10 +40,7 @@ namespace slambench {
                 float    const depthMapFactor;
             } image_params_t;
 
-            const uint disparity_param_elems = 2;
-            const uint intrinsic_param_elems = 4;
-
-        protected :
+        protected:
             /****
              * Taken from:
              * https://vision.in.tum.de/_media/spezial/bib/sturm12iros.pdf
@@ -184,7 +181,7 @@ namespace slambench {
 
             // these parameters depend on the particular kinect sensor used
             // return the kinect number (0 for default values)
-            uint32_t get_params(DepthSensor::disparity_params_t & ddp,
+            uint32_t get_sensor_params(DepthSensor::disparity_params_t & ddp,
                                 DepthSensor::disparity_type_t & ddt,
                                 CameraSensor::intrinsics_t & ci,
                                 DepthSensor::intrinsics_t & di,
@@ -192,7 +189,7 @@ namespace slambench {
                                 DepthSensor::distortion_coefficients_t & dd,
                                 CameraSensor::distortion_type_t & cdt
             ) {
-                for (uint i = 0; i < disparity_param_elems; i++) {
+                for (uint32_t i = 0; i < 2; i++) {
                     ddp[i] = fr_disparity_params[i];
                 }
                 ddt = fr_disparity_type;
@@ -200,7 +197,7 @@ namespace slambench {
                 cdt = camera_distortion_type;
 
                 if (input.find("freiburg1") != std::string::npos) {
-                    for (uint i = 0; i < intrinsic_param_elems; i++) {
+                    for (uint32_t i = 0; i < 4; i++) {
                         ci[i] = fr1_intrinsics_rgb[i];
                         di[i] = fr1_intrinsics_depth[i];
                         cd[i] = fr1_distortion_rgb[i];
@@ -210,7 +207,7 @@ namespace slambench {
                 }
 
                 if (input.find("freiburg2") != std::string::npos) {
-                    for (uint i = 0; i < intrinsic_param_elems; i++) {
+                    for (uint32_t i = 0; i < 4; i++) {
                         ci[i] = fr2_intrinsics_rgb[i];
                         di[i] = fr2_intrinsics_depth[i];
                         cd[i] = fr2_distortion_rgb[i];
@@ -220,7 +217,7 @@ namespace slambench {
                 }
 
                 if (input.find("freiburg3") != std::string::npos) {
-                    for (uint i = 0; i < intrinsic_param_elems; i++) {
+                    for (uint32_t i = 0; i < 4; i++) {
                         ci[i] = fr3_intrinsics_rgb[i];
                         di[i] = fr3_intrinsics_depth[i];
                         cd[i] = fr3_distortion_rgb[i];
@@ -230,7 +227,7 @@ namespace slambench {
                 }
 
                 // use default parameters
-                for (uint i = 0; i < intrinsic_param_elems; i++) {
+                for (uint32_t i = 0; i < 4; i++) {
                     ci[i] = default_intrinsics_rgb[i];
                     di[i] = default_intrinsics_depth[i];
                     cd[i] = default_distortion_rgb[i];

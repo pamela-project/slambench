@@ -39,14 +39,15 @@
 using namespace slambench::io ;
 
 
-bool loadTUMROSBAG_DepthData(const std::string &dirname,
+bool loadTUMROSBAG_DepthData(const std::string & dirname,
         const std::string &bagname,
-        SLAMFile &file, const Sensor::pose_t &pose,
-        const TUMROSBAGReader::image_params_t image_params,
-        const DepthSensor::intrinsics_t &intrinsics,
-        const CameraSensor::distortion_coefficients_t &distortion,
-        const DepthSensor::disparity_params_t &disparity_params,
-        const DepthSensor::disparity_type_t disparity_type) {
+        SLAMFile &file, const Sensor::pose_t  & pose,
+        const TUMROSBAGReader::image_params_t & image_params,
+        const DepthSensor::intrinsics_t       & intrinsics,
+        const CameraSensor::distortion_coefficients_t & distortion,
+        const CameraSensor::distortion_type_t & distortion_type,
+        const DepthSensor::disparity_params_t & disparity_params,
+        const DepthSensor::disparity_type_t   & disparity_type) {
 
     // allocate new sensor
     auto *depth_sensor = new DepthSensor("Depth");
@@ -67,7 +68,7 @@ bool loadTUMROSBAG_DepthData(const std::string &dirname,
     depth_sensor->CopyPose(pose);
     depth_sensor->CopyIntrinsics(intrinsics);
     depth_sensor->CopyDisparityParams(disparity_params);
-    depth_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
+    depth_sensor->DistortionType = distortion_type;
     depth_sensor->CopyRadialTangentialDistortion(distortion);
     depth_sensor->Rate = image_params.rate;
     file.Sensors.AddSensor(depth_sensor);
@@ -153,7 +154,8 @@ bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirna
         const std::string &bagname, SLAMFile &file, const Sensor::pose_t &pose,
         const TUMROSBAGReader::image_params_t image_params,
         const CameraSensor::intrinsics_t &intrinsics,
-        const CameraSensor::distortion_coefficients_t &distortion) {
+        const CameraSensor::distortion_coefficients_t &distortion,
+        const CameraSensor::distortion_type_t & distortion_type) {
 
     auto *rgb_sensor = new CameraSensor("RGB", CameraSensor::kCameraType);
     if (rgb_sensor == nullptr) {
@@ -180,7 +182,7 @@ bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirna
         rgb_sensor->Description = "RGB";
         rgb_sensor->CopyPose(pose);
         rgb_sensor->CopyIntrinsics(intrinsics);
-        rgb_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
+        rgb_sensor->DistortionType = distortion_type;
         rgb_sensor->CopyRadialTangentialDistortion(distortion);
         rgb_sensor->Rate = image_params.rate;
         file.Sensors.AddSensor(rgb_sensor);
@@ -197,7 +199,7 @@ bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirna
         grey_sensor->CopyPose(pose);
         grey_sensor->CopyIntrinsics(intrinsics);
         grey_sensor->CopyRadialTangentialDistortion(distortion);
-        grey_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
+        grey_sensor->DistortionType = distortion_type;
         grey_sensor->Rate = image_params.rate;
         file.Sensors.AddSensor(grey_sensor);
     }
@@ -553,7 +555,9 @@ SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
     image_params_t image_params = get_image_params();
 
     /**
-     * set sensor disparity parameters
+     * get sensor parameters
+     *
+     * some of these parameters depend on the actual kinect device used
      *
      */
     DepthSensor::disparity_params_t         disparity_params;
@@ -564,7 +568,7 @@ SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
     DepthSensor::distortion_coefficients_t  distortion_depth;
     CameraSensor::distortion_type_t         distortion_type;
 
-    uint32_t kin = get_params(disparity_params, disparity_type,
+    uint32_t kin = get_sensor_params(disparity_params, disparity_type,
                               intrinsics_rgb, intrinsics_depth,
                               distortion_rgb, distortion_depth,
                               distortion_type);
@@ -584,7 +588,7 @@ SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
      */
     if (depth && !loadTUMROSBAG_DepthData(dirname, bagname, slamfile,
             pose, image_params, intrinsics_depth, distortion_depth,
-            disparity_params, disparity_type)) {
+            distortion_type, disparity_params, disparity_type)) {
         std::cerr << "error loading depth data." << std::endl;
         delete slamfilep;
         return nullptr;
@@ -596,7 +600,8 @@ SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
      * NOTE: TUM rosbag files do not contain grey images - use rgb ones!
      */
     if ((rgb || grey) && !loadTUMROSBAG_RGBGreyData(rgb, grey, dirname, bagname,
-            slamfile, pose, image_params, intrinsics_rgb, distortion_rgb)) {
+            slamfile, pose, image_params, intrinsics_rgb, distortion_rgb,
+            distortion_type)) {
         std::cerr << "error loading RGB/Grey data." << std::endl;
         delete slamfilep;
         return nullptr;
