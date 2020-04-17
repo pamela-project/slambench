@@ -33,7 +33,7 @@
 #include <io/sensor/GroundTruthSensor.h>
 #include <io/sensor/AccelerometerSensor.h>
 
-#include "../dataset-tools/include/TUM-ROSBAG.h"
+#include "TUM-ROSBAG.h"
 
 
 using namespace slambench::io ;
@@ -46,7 +46,7 @@ bool loadTUMROSBAG_DepthData(const std::string &dirname,
         const DepthSensor::intrinsics_t &intrinsics,
         const CameraSensor::distortion_coefficients_t &distortion,
         const DepthSensor::disparity_params_t &disparity_params,
-        const DepthSensor::disparity_type_t &disparity_type) {
+        const DepthSensor::disparity_type_t disparity_type) {
 
     // allocate new sensor
     auto *depth_sensor = new DepthSensor("Depth");
@@ -550,63 +550,32 @@ SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
 
     Sensor::pose_t pose = Eigen::Matrix4f::Identity();
 
-    image_params_t image_params = fr_image_params;
+    image_params_t image_params = get_image_params();
 
     /**
-     * set sensor parameters
+     * set sensor disparity parameters
+     *
      */
-    DepthSensor::disparity_params_t disparity_params =  {0.001, 0.0};
-    DepthSensor::disparity_type_t disparity_type =
-            DepthSensor::affine_disparity;
-
-    CameraSensor::intrinsics_t intrinsics_rgb;
-    DepthSensor::intrinsics_t intrinsics_depth;
-
+    DepthSensor::disparity_params_t         disparity_params;
+    DepthSensor::disparity_type_t           disparity_type;
+    CameraSensor::intrinsics_t              intrinsics_rgb;
+    DepthSensor::intrinsics_t               intrinsics_depth;
     CameraSensor::distortion_coefficients_t distortion_rgb;
-    DepthSensor::distortion_coefficients_t distortion_depth;
+    DepthSensor::distortion_coefficients_t  distortion_depth;
+    CameraSensor::distortion_type_t         distortion_type;
 
-    // these parameters depend on the particular kinect sensor used
-    if (dirname.find("freiburg1") != std::string::npos) {
-        std::cout << "using freiburg1 camera calibration parameters"
-                << std::endl;
-        for (int i = 0; i < 4; i++) {
-            intrinsics_rgb[i]   = fr1_intrinsics_rgb[i];
-            intrinsics_depth[i] = fr1_intrinsics_depth[i];
+    uint32_t kin = get_params(disparity_params, disparity_type,
+                              intrinsics_rgb, intrinsics_depth,
+                              distortion_rgb, distortion_depth,
+                              distortion_type);
 
-            distortion_rgb[i]   = fr1_distortion_rgb[i];
-            distortion_depth[i] = fr1_distortion_depth[i];
-        }
-    } else if (dirname.find("freiburg2") != std::string::npos) {
-        std::cout << "using freiburg2 camera calibration parameters"
-                << std::endl;
-        for (int i = 0; i < 4; i++) {
-            intrinsics_rgb[i]   = fr2_intrinsics_rgb[i];
-            intrinsics_depth[i] = fr2_intrinsics_depth[i];
-
-            distortion_rgb[i]   = fr2_distortion_rgb[i];
-            distortion_depth[i] = fr2_distortion_depth[i];
-        }
-    } else if (dirname.find("freiburg3") != std::string::npos) {
-        std::cout << "using freiburg3 camera calibration parameters"
-                  << std::endl;
-        for (int i = 0; i < 4; i++) {
-            intrinsics_rgb[i]   = fr3_intrinsics_rgb[i];
-            intrinsics_depth[i] = fr3_intrinsics_depth[i];
-
-            distortion_rgb[i]   = fr3_distortion_rgb[i];
-            distortion_depth[i] = fr3_distortion_depth[i];
-        }
-    } else  {
+    if (kin) {
+        std::cout << "using freiburg" << kin
+                << " camera calibration parameters" << std::endl;
+    } else {
         std::cout << "using default camera calibration parameters";
         std::cout << "warning: camera calibration might be wrong!"
-                << std::endl;
-        for (int i = 0; i < 4; i++) {
-            intrinsics_rgb[i]   = default_intrinsics_rgb[i];
-            intrinsics_depth[i] = default_intrinsics_depth[i];
-
-            distortion_rgb[i]   = default_distortion_rgb[i];
-            distortion_depth[i] = default_distortion_depth[i];
-        }
+                  << std::endl;
     }
 
 
