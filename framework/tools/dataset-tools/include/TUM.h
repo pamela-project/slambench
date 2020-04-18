@@ -34,10 +34,10 @@ namespace slambench {
 
         public:
             typedef struct {
-                uint32_t const width;
-                uint32_t const height;
-                float    const rate;
-                float    const depthMapFactor;
+                const uint32_t width;
+                const uint32_t height;
+                const float    rate;
+                const float    depthMapFactor;
             } image_params_t;
 
         private:

@@ -23,6 +23,28 @@
 namespace slambench {
     namespace io {
         class TUMROSBAGReader : public TUMReader {
+        public:
+            typedef struct {
+                const std::string world;
+                const std::string kinect;
+                const std::string camera;
+                const std::string rgb;
+                const std::string optical;
+            } gt_frame_ids_t;
+
+        private:
+            const std::string depth_topic = "/camera/depth/image";
+            const std::string rgb_topic   = "/camera/rgb/image_color";
+            const std::string gt_topic    = "/tf";
+            const std::string acc_topic   = "/imu";
+
+            const gt_frame_ids_t gt_frame_ids = {
+                    "/world",
+                    "/kinect",
+                    "/openni_camera",
+                    "/openni_rgb_frame",
+                    "/openni_rgb_optical_frame"
+            };
 
         public :
             explicit TUMROSBAGReader(std::string name) : TUMReader(std::move(name)) {

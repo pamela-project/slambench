@@ -40,8 +40,9 @@ using namespace slambench::io ;
 
 
 bool loadTUMROSBAG_DepthData(const std::string & dirname,
-        const std::string &bagname,
-        SLAMFile &file, const Sensor::pose_t  & pose,
+        const std::string & bagname,
+        const std::string & topic,
+        SLAMFile & file, const Sensor::pose_t  & pose,
         const TUMROSBAGReader::image_params_t & image_params,
         const DepthSensor::intrinsics_t       & intrinsics,
         const CameraSensor::distortion_coefficients_t & distortion,
@@ -96,7 +97,7 @@ bool loadTUMROSBAG_DepthData(const std::string & dirname,
     }
 
     // create query to fetch depth topic messages
-    rosbag::View view(bag, rosbag::TopicQuery("/camera/depth/image"));
+    rosbag::View view(bag, rosbag::TopicQuery(topic));
 
     // produce png image for every depth message
     for (const auto& msg : view) {
@@ -150,8 +151,10 @@ bool loadTUMROSBAG_DepthData(const std::string & dirname,
 }
 
 
-bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirname,
-        const std::string &bagname, SLAMFile &file, const Sensor::pose_t &pose,
+bool loadTUMROSBAG_RGBGreyData(
+        bool doRGB, bool doGrey, const std::string & dirname,
+        const std::string & bagname, const std::string & topic,
+        SLAMFile & file, const Sensor::pose_t & pose,
         const TUMROSBAGReader::image_params_t image_params,
         const CameraSensor::intrinsics_t &intrinsics,
         const CameraSensor::distortion_coefficients_t &distortion,
@@ -230,7 +233,7 @@ bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirna
 
     // create query to fetch rgb images topic messages
     // NOTE: TUM rosbag files do not contain grey images - use rgb ones!
-    rosbag::View view(bag, rosbag::TopicQuery("/camera/rgb/image_color"));
+    rosbag::View view(bag, rosbag::TopicQuery(topic));
 
     // produce png image for every rgb message
     for (const auto& msg : view) {
@@ -307,7 +310,10 @@ bool loadTUMROSBAG_RGBGreyData(bool doRGB, bool doGrey, const std::string &dirna
 }
 
 
-bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
+bool loadTUMROSBAG_GroundTruthData(const std::string & bagname,
+        const std::string & topic,
+        const TUMROSBAGReader::gt_frame_ids_t & gt_ids,
+        SLAMFile & file) {
 
     auto *gt_sensor = new GroundTruthSensor("GroundTruth");
     if (gt_sensor == nullptr) {
@@ -320,12 +326,6 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
     gt_sensor->Index = file.Sensors.size();
     gt_sensor->Description = "GroundTruthSensor";
     file.Sensors.AddSensor(gt_sensor);
-
-    std::string world_str ("/world");
-    std::string kinect_str ("/kinect");
-    std::string camera_str ("/openni_camera");
-    std::string rgb_str ("/openni_rgb_frame");
-    std::string opt_str ("/openni_rgb_optical_frame");
 
     // initialised to avoid warnings!
     tf::Transform w_k_trans = tf::Transform::getIdentity();
@@ -355,7 +355,7 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
     }
 
     // create query to fetch ground truth topic messages
-    rosbag::View view(bag, rosbag::TopicQuery("/tf"));
+    rosbag::View view(bag, rosbag::TopicQuery(topic));
 
     for (const auto& msg : view) {
         tf::tfMessage::ConstPtr msgi = msg.instantiate<tf::tfMessage>();
@@ -364,33 +364,33 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
         }
 
         for (const auto& msgii : msgi->transforms) {
-            if (!r_o_rdy && msgii.child_frame_id == opt_str) {
+            if (!r_o_rdy && msgii.child_frame_id == gt_ids.optical) {
                 // record the /openni_rgb_frame to /openni_rgb_optical_frame
                 // transformation only once
-                if ((msgii.header.frame_id == rgb_str)) {
+                if ((msgii.header.frame_id == gt_ids.rgb)) {
                     r_o_rdy = true;
                     all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
                     tf::transformMsgToTF(msgii.transform, r_o_trans);
                 }
-            } else if (!c_r_rdy && msgii.child_frame_id == rgb_str) {
+            } else if (!c_r_rdy && msgii.child_frame_id == gt_ids.rgb) {
                 // record the /openni_camera to /openni_rgb_frame
                 // transformation only once
-                if ((msgii.header.frame_id == camera_str)) {
+                if ((msgii.header.frame_id == gt_ids.camera)) {
                     c_r_rdy = true;
                     all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
                     tf::transformMsgToTF(msgii.transform, c_r_trans);
                 }
-            } else if (!k_c_rdy && msgii.child_frame_id == camera_str) {
+            } else if (!k_c_rdy && msgii.child_frame_id == gt_ids.camera) {
                 // record the /kinect to /openni_camera
                 // transformation only once
-                if ((msgii.header.frame_id == kinect_str)) {
+                if ((msgii.header.frame_id == gt_ids.kinect)) {
                     k_c_rdy = true;
                     all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
                     tf::transformMsgToTF(msgii.transform, k_c_trans);
                 }
-            } else if (msgii.child_frame_id == kinect_str) {
+            } else if (msgii.child_frame_id == gt_ids.kinect) {
                 // track continuously the /world to /kinect transformation
-                if (msgii.header.frame_id == world_str) {
+                if (msgii.header.frame_id == gt_ids.world) {
                     w_k_new = true;
 
                     tf::transformMsgToTF(msgii.transform, w_k_trans);
@@ -455,7 +455,8 @@ bool loadTUMROSBAG_GroundTruthData(const std::string &bagname, SLAMFile &file) {
 }
 
 
-bool loadTUMROSBAG_AccelerometerData(const std::string &bagname, SLAMFile &file) {
+bool loadTUMROSBAG_AccelerometerData(const std::string & bagname,
+        const std::string & topic, SLAMFile & file) {
 
     auto *acc_sensor = new AccelerometerSensor("Accelerometer");
     if (acc_sensor == nullptr) {
@@ -481,7 +482,7 @@ bool loadTUMROSBAG_AccelerometerData(const std::string &bagname, SLAMFile &file)
     }
 
     // create query to fetch ground truth topic messages
-    rosbag::View view(bag, rosbag::TopicQuery("/imu"));
+    rosbag::View view(bag, rosbag::TopicQuery(topic));
 
     for (const auto& msg : view) {
         sensor_msgs::Imu::ConstPtr msgi = msg.instantiate<sensor_msgs::Imu>();
@@ -586,8 +587,8 @@ SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
     /**
      * load Depth
      */
-    if (depth && !loadTUMROSBAG_DepthData(dirname, bagname, slamfile,
-            pose, image_params, intrinsics_depth, distortion_depth,
+    if (depth && !loadTUMROSBAG_DepthData(dirname, bagname, depth_topic,
+            slamfile, pose, image_params, intrinsics_depth, distortion_depth,
             distortion_type, disparity_params, disparity_type)) {
         std::cerr << "error loading depth data." << std::endl;
         delete slamfilep;
@@ -599,9 +600,9 @@ SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
      * load RGB and/or Grey
      * NOTE: TUM rosbag files do not contain grey images - use rgb ones!
      */
-    if ((rgb || grey) && !loadTUMROSBAG_RGBGreyData(rgb, grey, dirname, bagname,
-            slamfile, pose, image_params, intrinsics_rgb, distortion_rgb,
-            distortion_type)) {
+    if ((rgb || grey) && !loadTUMROSBAG_RGBGreyData(rgb, grey,
+            dirname, bagname, rgb_topic, slamfile, pose, image_params,
+            intrinsics_rgb, distortion_rgb, distortion_type)) {
         std::cerr << "error loading RGB/Grey data." << std::endl;
         delete slamfilep;
         return nullptr;
@@ -611,7 +612,8 @@ SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
     /**
      * load GT
      */
-    if (gt && !loadTUMROSBAG_GroundTruthData(bagname, slamfile)) {
+    if (gt && !loadTUMROSBAG_GroundTruthData(bagname, gt_topic,
+            gt_frame_ids, slamfile)) {
         std::cerr << "error loading gt data." << std::endl;
         delete slamfilep;
         return nullptr;
@@ -621,7 +623,8 @@ SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
     /**
      * load Accelerometer
      */
-    if (accelerometer && !loadTUMROSBAG_AccelerometerData(bagname, slamfile)) {
+    if (accelerometer && !loadTUMROSBAG_AccelerometerData(bagname,
+            acc_topic, slamfile)) {
         std::cerr << "error loading Accelerometer data."
                 << std::endl;
         delete slamfilep;
