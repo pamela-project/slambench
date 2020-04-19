@@ -38,7 +38,6 @@
 #include "./include/ICLNUIM.h"
 #include "./include/TUM.h"
 #include "./include/SVO.h"
-#include "./include/TUM-ROSBAG.h"
 
 using namespace slambench::io;
 

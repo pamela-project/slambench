@@ -33,7 +33,7 @@
 #include <io/sensor/GroundTruthSensor.h>
 #include <io/sensor/AccelerometerSensor.h>
 
-#include "TUM-ROSBAG.h"
+#include "TUM.h"
 
 
 using namespace slambench::io ;
@@ -42,13 +42,13 @@ using namespace slambench::io ;
 bool loadTUMROSBAG_DepthData(const std::string & dirname,
         const std::string & bagname,
         const std::string & topic,
-        SLAMFile & file, const Sensor::pose_t  & pose,
+        SLAMFile & file, const Sensor::pose_t & pose,
         const TUMROSBAGReader::image_params_t & image_params,
-        const DepthSensor::intrinsics_t       & intrinsics,
+        const DepthSensor::intrinsics_t & intrinsics,
         const CameraSensor::distortion_coefficients_t & distortion,
         const CameraSensor::distortion_type_t & distortion_type,
         const DepthSensor::disparity_params_t & disparity_params,
-        const DepthSensor::disparity_type_t   & disparity_type) {
+        const DepthSensor::disparity_type_t & disparity_type) {
 
     // allocate new sensor
     auto *depth_sensor = new DepthSensor("Depth");
@@ -155,9 +155,9 @@ bool loadTUMROSBAG_RGBGreyData(
         bool doRGB, bool doGrey, const std::string & dirname,
         const std::string & bagname, const std::string & topic,
         SLAMFile & file, const Sensor::pose_t & pose,
-        const TUMROSBAGReader::image_params_t image_params,
-        const CameraSensor::intrinsics_t &intrinsics,
-        const CameraSensor::distortion_coefficients_t &distortion,
+        const TUMROSBAGReader::image_params_t & image_params,
+        const CameraSensor::intrinsics_t & intrinsics,
+        const CameraSensor::distortion_coefficients_t & distortion,
         const CameraSensor::distortion_type_t & distortion_type) {
 
     auto *rgb_sensor = new CameraSensor("RGB", CameraSensor::kCameraType);
@@ -344,6 +344,9 @@ bool loadTUMROSBAG_GroundTruthData(const std::string & bagname,
     uint32_t ts_nsec = 0;
 
     // open rosbag
+    // the ground truth topic (/tf) contains several transformations
+    // ground truth is built from the following composition:
+    // optical frame -> rgb frame -> camera -> kinect -> world
     rosbag::Bag bag;
     try {
         bag.open(bagname,rosbag::bagmode::Read);
@@ -528,8 +531,8 @@ bool loadTUMROSBAG_AccelerometerData(const std::string & bagname,
 
 SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
 
-    // can accelerometer be used on its own? -- if so, include here.
-    if (!(grey || rgb || depth)) {
+    // NOTE: can accelerometer be used on its own?
+    if (!(grey || rgb || depth || accelerometer)) {
         std::cerr <<  "error: no sensors defined" << std::endl;
         return nullptr;
     }

@@ -139,7 +139,7 @@ namespace slambench {
                     = CameraSensor::RadialTangential;
 
             // these numbers taken from ORBSLAM2 examples
-            // (higher precision than table above)
+            // (appear to have higher precision than table above)
             static constexpr CameraSensor::distortion_coefficients_t fr1_distortion_rgb
                     = { 0.262383, -0.953104, -0.005358, 0.002628 , 1.163314 };
 
@@ -256,6 +256,46 @@ namespace slambench {
             }
 
             virtual SLAMFile *GenerateSLAMFile();
+        };
+
+        /****
+         * reader used to process TUM rosbags
+         * image and sensor parameters derived from TUMReader
+         */
+        class TUMROSBAGReader : public TUMReader {
+        public:
+            typedef struct {
+                const std::string world;
+                const std::string kinect;
+                const std::string camera;
+                const std::string rgb;
+                const std::string optical;
+            } gt_frame_ids_t;
+
+        private:
+            // ROS topic associated with each sensor
+            const std::string depth_topic = "/camera/depth/image";
+            const std::string rgb_topic   = "/camera/rgb/image_color";
+            const std::string gt_topic    = "/tf";
+            const std::string acc_topic   = "/imu";
+
+            // the ground truth topic (/tf) contains several transformations
+            // ground truth is built from the following composition:
+            // optical frame -> rgb frame -> camera -> kinect -> world
+            const gt_frame_ids_t gt_frame_ids = {
+                    "/world",
+                    "/kinect",
+                    "/openni_camera",
+                    "/openni_rgb_frame",
+                    "/openni_rgb_optical_frame"
+            };
+
+        public :
+            explicit TUMROSBAGReader(std::string name) : TUMReader(std::move(name)) {
+                accelerometer = true;
+            }
+
+            SLAMFile * GenerateSLAMFile() override;
         };
     }
 }

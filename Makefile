@@ -283,33 +283,28 @@ datasetslist:
 	@echo "## https://vision.in.tum.de/rgbd/dataset/freiburg3/rgbd_dataset_freiburg3_long_office_household.tgz"
 	@echo ""
 	@echo ""
-	@echo "### TUM-ROSBAG Handheld SLAM"
+	@echo "### TUM Handheld SLAM (using rosbag)"
 	@echo ""
-	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_360.slam"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_floor.slam"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_desk.slam"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_desk2.slam"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_room.slam"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_360.slam use_rosbag"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_floor.slam use_rosbag"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_desk.slam use_rosbag"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_desk2.slam use_rosbag"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_room.slam use_rosbag"
 	@echo ""
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_360_hemisphere.slam"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_360_kidnap.slam"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_360_hemisphere.slam use_rosbag"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_360_kidnap.slam use_rosbag"
 	@echo ""
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_desk.slam"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_desk_with_person.slam"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_large_no_loop.slam"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_large_with_loop.slam"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_desk.slam use_rosbag"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_desk_with_person.slam use_rosbag"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_large_no_loop.slam use_rosbag"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_large_with_loop.slam use_rosbag"
 	@echo ""
-	@echo "### TUM-ROSBAG Robot SLAM"
+	@echo "### TUM Robot SLAM (using rosbag)"
 	@echo ""
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_pioneer_360.slam"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_pioneer_slam.slam"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_pioneer_slam2.slam"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_pioneer_slam3.slam"
-	@echo ""
-	@echo "##### TUM-ROSBAG Extra dataset"
-	@echo ""
-	@echo "## https://vision.in.tum.de/rgbd/dataset/freiburg3/rgbd_dataset_freiburg3_long_office_household.bag"
-	@echo ""
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_pioneer_360.slam use_rosbag"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_pioneer_slam.slam use_rosbag"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_pioneer_slam2.slam use_rosbag"
+	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_pioneer_slam3.slam use_rosbag"
 	@echo ""
 	@echo "### EuRoC MAV Machine Hall"
 	@echo ""
@@ -368,33 +363,34 @@ check_generator:=if [ ! -e ./build/bin/dataset-generator ] ; then make slambench
 
 #### TUM      
 ###############
+# check if using rosbag or tgz file
+ifeq (TUM, $(findstring TUM, $(MAKECMDGOALS)))
+  ifeq (use_rosbag, $(filter use_rosbag, $(MAKECMDGOALS)))
+FILETYPE = bag
+DATASET = tum-rosbag
+use_rosbag:
+	@:
+  else
+FILETYPE = tgz
+DATASET = tum
+  endif
+endif
 
-./datasets/TUM/%.tgz :  # Example : $* = freiburg2/rgbd_dataset_freiburg2_desk 
+./datasets/TUM/%.$(FILETYPE) :  # Example : $* = freiburg2/rgbd_dataset_freiburg2_desk
 	mkdir -p $(@D)
-	cd $(@D)  &&  ${WGET} "http://vision.in.tum.de/rgbd/dataset/$*.tgz"
+	cd $(@D)  &&  ${WGET} "http://vision.in.tum.de/rgbd/dataset/$*.$(FILETYPE)"
 
-./datasets/TUM/%.dir : ./datasets/TUM/%.tgz
+./datasets/TUM/%.dir : ./datasets/TUM/%.$(FILETYPE)
 	mkdir $@
+ifeq (tgz, $(FILETYPE))
 	tar xzf $< -C $@
-
-./datasets/TUM/%.slam :  ./datasets/TUM/%.dir 
-	${check_generator}
-	./build/bin/dataset-generator -d tum -i $</* -o $@ -grey true -rgb true -gt true -depth true -accelerometer true 
-
-#### TUM-ROSBAG
-###############
-
-./datasets/TUM-ROSBAG/%.bag :  # Example : $* = freiburg2/rgbd_dataset_freiburg2_desk
-	mkdir -p $(@D)
-	cd $(@D)  &&  ${WGET} "http://vision.in.tum.de/rgbd/dataset/$*.bag"
-
-./datasets/TUM-ROSBAG/%.dir : ./datasets/TUM-ROSBAG/%.bag
-	mkdir -p $@
+else
 	mkdir -p $@/'$(*F)'
+endif
 
-./datasets/TUM-ROSBAG/%.slam :  ./datasets/TUM-ROSBAG/%.dir
+./datasets/TUM/%.slam :  ./datasets/TUM/%.dir ./datasets/TUM/%.$(FILETYPE)
 	${check_generator}
-	./build/bin/dataset-generator -d tum-rosbag -i $</* -o $@ -grey true -rgb true -gt true -depth true -acc true
+	./build/bin/dataset-generator -d $(DATASET) -i $</* -o $@ -grey true -rgb true -gt true -depth true
 
 #### ICL-NUIM
 ###############
@@ -453,7 +449,7 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 ./benchmarks/orbslam2/src/original/Vocabulary/ORBvoc.txt : ./benchmarks/orbslam2/src/original/Vocabulary/ORBvoc.txt.tar.gz
 	cd ./benchmarks/orbslam2/src/original/Vocabulary/ && tar -xf ORBvoc.txt.tar.gz
 
-.PRECIOUS: ./datasets/TUM/%.tgz ./datasets/TUM/%.dir ./datasets/TUM/%.raw datasets/ICL_NUIM/living_room_traj%_loop.tgz ./datasets/TUM/%.raw datasets/ICL_NUIM/living_room_traj%_loop.dir datasets/ICL_NUIM/livingRoom%.gt.freiburg datasets/ICL_NUIM/living_room_traj%_loop.raw ./datasets/TUM-ROSBAG/%.bag ./datasets/TUM-ROSBAG/%.dir
+.PRECIOUS: ./datasets/TUM/%.tgz ./datasets/TUM/%.bag ./datasets/TUM/%.dir ./datasets/TUM/%.raw datasets/ICL_NUIM/living_room_traj%_loop.tgz ./datasets/TUM/%.raw datasets/ICL_NUIM/living_room_traj%_loop.dir datasets/ICL_NUIM/livingRoom%.gt.freiburg datasets/ICL_NUIM/living_room_traj%_loop.raw
 
 ####################################
 ####    BUILD/CLEAN TOOL        ####
