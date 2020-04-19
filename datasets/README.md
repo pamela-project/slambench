@@ -1,6 +1,21 @@
-Here is a list of the datasets available.
-If you are using any of the following datasets, please refer to their respective publications:
-   - TUM RGB-D SLAM dataset [Sturm et al, IROS'12]: https://vision.in.tum.de/data/datasets/rgbd-dataset
-   - ICL-NUIM dataset [Handa et al, ICRA'14]: https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html
-   - EuRoC MAV Dataset [Burri et al, IJJR'16]: https://projects.asl.ethz.ch/datasets/doku.php
-   - SVO sample dataset [Forster et al, ICRA 2014]: https://github.com/uzh-rpg/rpg_svo
+Here is a list of the datasets available:
+   - TUM RGB-D SLAM dataset [Sturm et al., IROS 2012]: https://vision.in.tum.de/data/datasets/rgbd-dataset
+   - ICL-NUIM dataset [Handa et al., ICRA 2014]: https://www.doc.ic.ac.uk/~ahanda/VaFRIC/iclnuim.html
+   - EuRoC MAV Dataset [Burri et al., IJJR 2016]: https://projects.asl.ethz.ch/datasets/doku.php
+   - SVO sample dataset [Forster et al., ICRA 2014]: https://github.com/uzh-rpg/rpg_svo
+
+If you use any of these datasets, please refer to their respective publication.
+
+We are progressively adding support for __rosbag__-based datasets.
+In addition to their __native__ format, the following datasets
+are also supported as __rosbag__ files:
+   - TUM RGB-D SLAM dataset [https://vision.in.tum.de/data/datasets/rgbd-dataset/file_formats]
+
+Rosbag support requires the following ROS packages:
+   - cpp_common
+   - roscpp_serialization
+   - rostime
+   - rosbag_storage
+
+The following versions of the packages have been tested:
+   - ROS kinetic / Linux Ubuntu 16.04
