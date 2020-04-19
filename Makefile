@@ -390,7 +390,7 @@ endif
 
 ./datasets/TUM/%.slam :  ./datasets/TUM/%.dir ./datasets/TUM/%.$(FILETYPE)
 	${check_generator}
-	./build/bin/dataset-generator -d $(DATASET) -i $</* -o $@ -grey true -rgb true -gt true -depth true
+	./build/bin/dataset-generator -d $(DATASET) -i $</* -o $@ -grey true -rgb true -gt true -depth true -acc true
 
 #### ICL-NUIM
 ###############
