@@ -93,8 +93,10 @@ public :
 			config->reader = new ICLNUIMReader("");
 		} else if (dataset_name == "tum") {
 			config->reader = new TUMReader("");
+#ifdef ROSBAG_SUPPORT
 		} else if (dataset_name == "tum-rosbag") {
 			config->reader = new TUMROSBAGReader("");
+#endif
 		} else if (dataset_name == "eurocmav") {
 			config->reader = new EUROCMAVReader("");
 		} else if (dataset_name == "icl") {
@@ -133,9 +135,13 @@ public :
 		fflush(stdout);
 	}
 	MainComponent (int argc, char * argv[]) : ParameterComponent("") , binary_name(argv[0]) {
-		
 
-		this->addParameter(TypedParameter<std::string>("d",     "dataset",       "Name of the input dataset type (iclnuim, tum, tum-rosbag, eurocmav, icl, svo)",   &this->dataset, NULL, this->dataset_callback));
+
+#ifdef ROSBAG_SUPPORT
+        this->addParameter(TypedParameter<std::string>("d",     "dataset",       "Name of the input dataset type (iclnuim, tum, tum-rosbag, eurocmav, icl, svo)",   &this->dataset, NULL, this->dataset_callback));
+#else
+        this->addParameter(TypedParameter<std::string>("d",     "dataset",       "Name of the input dataset type (iclnuim, tum, eurocmav, icl, svo)",   &this->dataset, NULL, this->dataset_callback));
+#endif
 		this->addParameter(TypedParameter<std::string>("o",     "log-file",      "Output slam file",            &this->output, NULL));
 		this->addParameter(TypedParameter<bool>       ("q",     "quiet",         "Hide the progress bar",            &this->quiet, NULL));
 		this->addParameter(TriggeredParameter         ("h",     "help",          "Print the help.",             this->help_callback));
@@ -167,7 +173,11 @@ int main(int argc, char * argv[]) {
 
 	if ( main->dataset == "" ) {
 		std::cout << " Please define the dataset type using the -d argument. " << std::endl;
+#ifdef ROSBAG_SUPPORT
 		std::cout << " Possible values are: iclnuim tum tum-rosbag eurocmav icl svo" << std::endl;
+#else
+		std::cout << " Possible values are: iclnuim tum eurocmav icl svo" << std::endl;
+#endif
 		std::cout << " To have details of arguments for any type of dataset you are interested by," << std::endl;
 		std::cout << " Please run the help mode for this dataset (e.g "  << argv[0] << "-d tum" << std::endl;
 		return EXIT_FAILURE;

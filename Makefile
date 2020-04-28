@@ -285,26 +285,26 @@ datasetslist:
 	@echo ""
 	@echo "### TUM Handheld SLAM (using rosbag)"
 	@echo ""
-	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_360.slam use_rosbag"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_floor.slam use_rosbag"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_desk.slam use_rosbag"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_desk2.slam use_rosbag"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg1/rgbd_dataset_freiburg1_room.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_360.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_floor.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_desk.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_desk2.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_room.slam use_rosbag"
 	@echo ""
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_360_hemisphere.slam use_rosbag"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_360_kidnap.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_360_hemisphere.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_360_kidnap.slam use_rosbag"
 	@echo ""
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_desk.slam use_rosbag"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_desk_with_person.slam use_rosbag"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_large_no_loop.slam use_rosbag"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_large_with_loop.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_desk.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_desk_with_person.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_large_no_loop.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_large_with_loop.slam use_rosbag"
 	@echo ""
 	@echo "### TUM Robot SLAM (using rosbag)"
 	@echo ""
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_pioneer_360.slam use_rosbag"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_pioneer_slam.slam use_rosbag"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_pioneer_slam2.slam use_rosbag"
-	@echo "make ./datasets/TUM-ROSBAG/freiburg2/rgbd_dataset_freiburg2_pioneer_slam3.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_360.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam2.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam3.slam use_rosbag"
 	@echo ""
 	@echo "### EuRoC MAV Machine Hall"
 	@echo ""
@@ -363,34 +363,33 @@ check_generator:=if [ ! -e ./build/bin/dataset-generator ] ; then make slambench
 
 #### TUM      
 ###############
-# check if using rosbag or tgz file
+# check if using tgz file or rosbag
 ifeq (TUM, $(findstring TUM, $(MAKECMDGOALS)))
   ifeq (use_rosbag, $(filter use_rosbag, $(MAKECMDGOALS)))
-FILETYPE = bag
-DATASET = tum-rosbag
-use_rosbag:
-	@:
+    FILETYPE = bag
+    DATASET = tum-rosbag
   else
-FILETYPE = tgz
-DATASET = tum
+    FILETYPE = tgz
+    DATASET = tum
   endif
 endif
 
+use_rosbag:
+	@:
+
 ./datasets/TUM/%.$(FILETYPE) :  # Example : $* = freiburg2/rgbd_dataset_freiburg2_desk
 	mkdir -p $(@D)
-	cd $(@D)  &&  ${WGET} "http://vision.in.tum.de/rgbd/dataset/$*.$(FILETYPE)"
+	cd $(@D)  &&  ${WGET} "https://vision.in.tum.de/rgbd/dataset/$*.$(FILETYPE)"
 
-./datasets/TUM/%.dir : ./datasets/TUM/%.$(FILETYPE)
-	mkdir $@
-ifeq (tgz, $(FILETYPE))
-	tar xzf $< -C $@
-else
-	mkdir -p $@/'$(*F)'
-endif
-
-./datasets/TUM/%.slam :  ./datasets/TUM/%.dir ./datasets/TUM/%.$(FILETYPE)
+./datasets/TUM/%.slam : ./datasets/TUM/%.$(FILETYPE)
 	${check_generator}
-	./build/bin/dataset-generator -d $(DATASET) -i $</* -o $@ -grey true -rgb true -gt true -depth true -acc true
+	mkdir -p $(@D)/$(*F).dir
+ifeq (tgz, $(FILETYPE))
+	tar xzf $(@D)/$(*F).tgz -C $(@D)/$(*F).dir
+else
+	mkdir -p $(@D)/$(*F).dir/$(*F)
+endif
+	./build/bin/dataset-generator -d $(DATASET) -i $(@D)/$(*F).dir/$(*F) -o $@ -grey true -rgb true -gt true -depth true -acc true
 
 #### ICL-NUIM
 ###############
