@@ -274,6 +274,11 @@ usecases:
 	@echo    "    available targets are : refusion"
 	@echo ""
 
+	@echo -n "  - KinectFusion [Newcombe et al. ISMAR'11] (Christian Diller's implementation): " ; if [ -d benchmarks/kinectfusion/src/original ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make kfusion)\033[0m" ; fi
+	@echo    "    repository: https://github.com/mihaibujanca/KinectFusion"
+	@echo    "    available targets are : kinectfusion"
+	@echo    ""
+
 	@echo "If you want to test SLAMBench with existing SLAM algorithms, once you have download it please run \"make slambench APPS=slam1,slam2,...\""
 	@echo "   e.g. make slambench APPS=kfusion,orbslam2"
 	@echo "   You can also use \"make slambench APPS=all\" to compile them all."
@@ -403,7 +408,7 @@ svo:
 
 kfusion:
 	@echo "================================================================================================================="
-	@echo    "  - KFusion [Newcombe et al. ISMAR'11]: " 
+	@echo    "  - KFusion [Newcombe et al. ISMAR'11] (original SLAMBench paper version)  "
 	@echo    "    repository: https://github.com/GerhardR/kfusion"
 	@echo    "    Used repository: https://github.com/pamela-project/kfusion"  
 	@echo "================================================================================================================="
@@ -457,9 +462,22 @@ open_vins:
 	@echo "cmake_minimum_required(VERSION 2.8)"      > benchmarks/open_vins/src/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
+kinectfusion:
+	@echo "================================================================================================================="
+	@echo    "  - KinectFusion [Newcombe et al. ISMAR'11] (Christian Diller's implementation)"
+	@echo    "    Original repository: https://github.com/chrdiller/KinectFusionApp"
+	@echo    "    Used repository: https://github.com/mihaibujanca/KinectFusion"
+	@echo "================================================================================================================="
+	@echo ""
+	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
+	mkdir -p benchmarks/kinectfusion/src/original
+	rm benchmarks/kinectfusion/src/original -rf
+	git clone --recursive https://github.com/mihaibujanca/KinectFusion benchmarks/kinectfusion/src/original
+	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/$@/CMakeLists.txt
+	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
-.PHONY: efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame open_vins refusion
-algorithms : efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame open_vins refusion
+.PHONY: efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame open_vins refusion kinectfusion
+algorithms : efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame open_vins refusion kinectfusion
 
 
 datasets :

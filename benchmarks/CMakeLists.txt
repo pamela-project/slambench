@@ -129,7 +129,7 @@ endfunction()
 
 if ("${APPS}" STREQUAL "all")
     message(STATUS "Select all applications...")
-    set(APPS_MOD "efusion;kfusion;lsdslam;monoslam;infinitam;ptam;okvis;orbslam2;svo;flame,refusion")
+    set(APPS_MOD "efusion;kfusion;lsdslam;monoslam;infinitam;ptam;okvis;orbslam2;svo;flame,refusion,kinectfusion")
 else()
     message(STATUS "Select only ${APPS} applications...")
     string(REPLACE "," ";" APPS_MOD "${APPS}")     
