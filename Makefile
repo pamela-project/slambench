@@ -409,8 +409,8 @@ svo:
 kfusion:
 	@echo "================================================================================================================="
 	@echo    "  - KFusion [Newcombe et al. ISMAR'11] (original SLAMBench paper version)  "
-	@echo    "    repository: https://github.com/GerhardR/kfusion"
-	@echo    "    Used repository: https://github.com/pamela-project/kfusion"  
+	@echo    "    Original repository: https://github.com/GerhardR/kfusion"
+	@echo    "    Used repository: https://github.com/pamela-project/kfusion"
 	@echo "================================================================================================================="
 	@echo ""
 	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
@@ -423,7 +423,7 @@ kfusion:
 flame:
 	@echo "================================================================================================================="
 	@echo    "  - FLAME [Greene et al. ICCV'17]: "
-	@echo    "    repository: https://github.com/robustrobotics/flame"
+	@echo    "    Original repository: https://github.com/robustrobotics/flame"
 	@echo    "    Used repository: https://github.com/mihaibujanca/flame"
 	@echo "================================================================================================================="
 	@echo ""
@@ -437,7 +437,7 @@ flame:
 refusion:
 	@echo "================================================================================================================="
 	@echo    "  - ReFusion [Palazollo et al. IROS'19]: "
-	@echo    "    repository: https://github.com/PRBonn/refusion"
+	@echo    "    Original repository: https://github.com/PRBonn/refusion"
 	@echo    "    Used repository: https://github.com/mihaibujanca/refusion"
 	@echo "================================================================================================================="
 	@echo ""
@@ -451,7 +451,7 @@ refusion:
 open_vins:
 	@echo "================================================================================================================="
 	@echo    "  - OpenVINS [Geneva et al. IROS'19]: "
-	@echo    "    repository: https://github.com/rpng/open_vins"
+	@echo    "    Original repository: https://github.com/rpng/open_vins"
 	@echo    "    Used repository: https://github.com/mihaibujanca/open_vins"
 	@echo "================================================================================================================="
 	@echo ""
@@ -475,9 +475,23 @@ kinectfusion:
 	git clone --recursive https://github.com/mihaibujanca/KinectFusion benchmarks/kinectfusion/src/original
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/$@/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
+dso:
+	@echo "================================================================================================================="
+	@echo    "  - DSO [Engel et al. ARXIV'16]: "
+	@echo    "    Original repository: https://github.com/JakobEngel/dso"
+	@echo    "    Used repository: https://github.com/mihaibujanca/dso"
+	@echo "================================================================================================================="
+	@echo ""
+	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
+	mkdir benchmarks/dso/src/original -p
+	rm benchmarks/dso/src/original -rf
+	git clone   https://github.com/mihaibujanca/dso   benchmarks/dso/src/original
+	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
-.PHONY: efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame open_vins refusion kinectfusion
-algorithms : efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame open_vins refusion kinectfusion
+
+.PHONY: efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame open_vins refusion kinectfusion dso
+algorithms : efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame open_vins refusion kinectfusion dso
+
 
 
 datasets :

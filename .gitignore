@@ -24,17 +24,7 @@
 
 # Ignore benchmarks folders
 
-benchmarks/efusion/
-benchmarks/infinitam/
-benchmarks/lsdslam/
-benchmarks/okvis/
-benchmarks/orbslam2/
-benchmarks/ptam/
-benchmarks/svo/
-benchmarks/monoslam/
-benchmarks/kfusion/
-benchmarks/flame/
-
+benchmarks/*/*
 
 # Exotic builds
 
@@ -58,3 +48,6 @@ paper/*.tex
 # Datasets
 
 /datasets
+/venv
+/iros2020_results_backup
+/iros2020_results
