@@ -171,7 +171,7 @@ namespace slambench {
 
         public :
             std::string input;
-            bool grey = true, rgb = true, depth = true, gt = true, accelerometer = false;
+            bool grey = true, rgb = true, depth = true, gt = true, accelerometer = true;
 
             explicit TUMReader(std::string name) : DatasetReader(name) {
                 this->addParameter(TypedParameter<std::string>("i",
@@ -292,7 +292,6 @@ namespace slambench {
 
         public :
             explicit TUMROSBAGReader(std::string name) : TUMReader(std::move(name)) {
-                accelerometer = true;
             }
 
             SLAMFile * GenerateSLAMFile() override;
