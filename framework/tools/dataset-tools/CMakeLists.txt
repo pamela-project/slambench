@@ -15,8 +15,8 @@ endif ()
 find_package(LIBYAML REQUIRED)
 
 # TUM rosbag datasets support requirements
-# OpenCV should be looked for before catkin to find
-# the version used in SLAMBench, not the one in the ROS environment
+# OpenCV should be looked for before ROS packages in order  to find
+# the OpenCV version used in SLAMBench, not any in the ROS environment
 find_package(OpenCV REQUIRED)
 find_package(cpp_common QUIET)
 find_package(roscpp_serialization QUIET)
