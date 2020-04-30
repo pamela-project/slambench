@@ -60,6 +60,7 @@ paper/*.tex
 # Datasets
 
 /datasets
+!/datasets/README.md
 
 # macOS
 .DS_Store

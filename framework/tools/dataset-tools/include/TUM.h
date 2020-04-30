@@ -173,7 +173,7 @@ namespace slambench {
             std::string input;
             bool grey = true, rgb = true, depth = true, gt = true, accelerometer = true;
 
-            explicit TUMReader(std::string name) : DatasetReader(name) {
+            explicit TUMReader(std::string name) : DatasetReader(std::move(name)) {
                 this->addParameter(TypedParameter<std::string>("i",
                         "input-directory", "path of the TUM dataset directory",
                         &this->input, nullptr));
@@ -194,7 +194,7 @@ namespace slambench {
                         &this->accelerometer, nullptr));
             }
 
-            image_params_t get_image_params () {
+            static image_params_t get_image_params () {
                 return fr_image_params;
             }
 
@@ -255,7 +255,7 @@ namespace slambench {
                 return 0;
             }
 
-            virtual SLAMFile *GenerateSLAMFile();
+            SLAMFile *GenerateSLAMFile() override;
         };
 
         /****

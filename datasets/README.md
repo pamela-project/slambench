@@ -22,3 +22,5 @@ Rosbag support requires the following ROS packages:
 
 The following versions of the ROS packages have been tested:
    - ROS kinetic / Linux Ubuntu 16.04
+
+If you require rosbag support make sure to setup the ROS environment before building SLAMBench.
