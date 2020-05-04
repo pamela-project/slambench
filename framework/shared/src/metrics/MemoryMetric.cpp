@@ -30,16 +30,16 @@ MemoryMetric::MemoryMetric() : Metric("Memory") , desc({})
 {
 	slambench::memory::MemoryProfile::singleton.StartAlgorithm();
 
-	if (cuda_monitor.IsActive()) {
-		desc = slambench::values::ValueDescription({
-						{"CPU_Memory",  slambench::values::VT_U64},
-						{"GPU_Memory",  slambench::values::VT_U64},
-						{"CUDA_Memory", slambench::values::VT_U64}});
-	} else {
+//	if (cuda_monitor.IsActive()) {
+//		desc = slambench::values::ValueDescription({
+//						{"CPU_Memory",  slambench::values::VT_U64},
+//						{"GPU_Memory",  slambench::values::VT_U64},
+//						{"CUDA_Memory", slambench::values::VT_U64}});
+//	} else {
 		desc = slambench::values::ValueDescription({
 						{"CPU_Memory",  slambench::values::VT_U64},
 						{"GPU_Memory",  slambench::values::VT_U64}});
-	}
+//	}
 }
 
 
@@ -75,19 +75,19 @@ Value *MemoryMetric::GetValue(Phase* phase)
 	CPU_Usage_.erase(phase);
 	GPU_Usage_.erase(phase);
 
-	if (cuda_monitor.IsActive()) {
-		auto cuda_mem = new slambench::values::TypeForVT<slambench::values::VT_U64>::type(cuda_monitor.getUsedBytes());
-		return new slambench::values::TypeForVT<slambench::values::VT_COLLECTION>::type({
-			{"CPU_Memory",cpu_mem},
-			{"GPU_Memory",gpu_mem},
-			{"CUDA_Memory",cuda_mem}
-		});
-	} else {
+//	if (cuda_monitor.IsActive()) {
+//		auto cuda_mem = new slambench::values::TypeForVT<slambench::values::VT_U64>::type(cuda_monitor.getUsedBytes());
+//		return new slambench::values::TypeForVT<slambench::values::VT_COLLECTION>::type({
+//			{"CPU_Memory",cpu_mem},
+//			{"GPU_Memory",gpu_mem},
+//			{"CUDA_Memory",cuda_mem}
+//		});
+//	} else {
 		return new slambench::values::TypeForVT<slambench::values::VT_COLLECTION>::type({
 			{"CPU_Memory",cpu_mem},
 			{"GPU_Memory",gpu_mem}
 		});
-	}
+//	}
 
 }
 

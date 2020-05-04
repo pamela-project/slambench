@@ -39,7 +39,7 @@ namespace slambench {
 		//private:
 			
 			slambench::values::ValueDescription desc;
-			CUDAMonitor cuda_monitor;
+//			CUDAMonitor cuda_monitor;
 
 		private:
 			std::unordered_map<Phase *, size_t> CPU_Usage_;

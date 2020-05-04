@@ -482,7 +482,7 @@ void SLAMBenchConfigurationLifelong::init_cw() {
 	cw->AddColumn(&(this->row_number));
     bool have_timestamp = false;
     slambench::metrics::MemoryMetric* memory_metric = new slambench::metrics::MemoryMetric();
-    gpuInfo = memory_metric->cuda_monitor.IsActive() ? memory_metric->cuda_monitor.device_name : "";
+//    gpuInfo = memory_metric->cuda_monitor.IsActive() ? memory_metric->cuda_monitor.device_name : "";
     if (!cw_initialised_) {
 	    duration_metric = new slambench::metrics::DurationMetric();
 	    power_metric    = new slambench::metrics::PowerMetric();
@@ -590,7 +590,7 @@ void SLAMBenchConfigurationLifelong::OutputToTxt()
             OutFile << "topics: " << std::endl;
             OutFile << "frame: " << std::endl;
             OutFile << "CPU: " << cpuInfo << std::endl;
-            OutFile << "GPU: " << gpuInfo << std::endl;
+//            OutFile << "GPU: " << gpuInfo << std::endl;
             OutFile << "memory: " << memInfo / 1024 / 1024 << " GB"<< std::endl << std::endl;
             OutFile.close();
         }
