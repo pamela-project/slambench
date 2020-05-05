@@ -5,23 +5,14 @@ include_directories(./include)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}     -Wno-error=unused-parameter -Wno-error=unused-variable -Wno-error=unused-but-set-variable")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=unused-parameter -Wno-error=unused-variable -Wno-error=unused-but-set-variable")
 
+# use colour to highlight messages
+string(ASCII 27 Esc)
+set(BoldRed     "${Esc}[1;31m")
+set(BoldGreen   "${Esc}[1;32m")
+set(ColourReset "${Esc}[m")
+
+# Boost is required - abort if not found
 find_package(Boost 1.54 REQUIRED COMPONENTS system filesystem program_options regex)
-IF (NOT Boost_FOUND)
-	message(FATAL_ERROR "Dataset generators requirement not found (Boost) - Abort.")
-	return()
-endif ()
-
-# EUROCMAV datasets support requirements
-find_package(LIBYAML REQUIRED)
-
-# TUM rosbag datasets support requirements
-# OpenCV should be looked for before ROS packages in order  to find
-# the OpenCV version used in SLAMBench, not any in the ROS environment
-find_package(OpenCV REQUIRED)
-find_package(cpp_common QUIET)
-find_package(roscpp_serialization QUIET)
-find_package(rostime QUIET)
-find_package(rosbag_storage QUIET)
 
 add_executable(io-readply io-readply.cpp)
 target_link_libraries(io-readply slambench-io)
@@ -29,12 +20,15 @@ target_link_libraries(io-readply slambench-io)
 add_executable(io-inspect-file io-inspect.cpp)
 target_link_libraries(io-inspect-file PRIVATE -Wl,--whole-archive slambench-io -Wl,--no-whole-archive)
 
+# EUROCMAV datasets support requirements - skip if not found
+find_package(LIBYAML QUIET)
 IF (LIBYAML_FOUND)
 	add_library(EUROCMAV EUROCMAV.cpp)
 	target_link_libraries(EUROCMAV slambench-io ${Boost_LIBRARIES} ${LIBYAML_LIBRARY})
 	target_include_directories(EUROCMAV PRIVATE ${Boost_INCLUDE_DIRS}  ${LIBYAML_INCLUDE_DIR})
+	set(EUROCMAV_LIB "EUROCMAV")
 ELSE ()
-	message(WARNING "EUROCMAV datasets support not found (LibYAML) - Skipped.")
+	message(STATUS "${BoldRed}LibYAML dependency for EUROCMAV datasets not found - Skipped${ColourReset}")
 ENDIF ()
 
 add_library(SVO SVO.cpp)
@@ -49,6 +43,25 @@ add_library(TUM TUM.cpp)
 target_link_libraries(TUM slambench-io ${Boost_LIBRARIES})
 target_include_directories(TUM PRIVATE ${Boost_INCLUDE_DIRS})
 
+# TUM rosbag datasets support requirements - skip if not found
+# OpenCV should be looked for before ROS packages in order to find
+# the OpenCV version used in SLAMBench, not any in the ROS environment
+find_package(OpenCV REQUIRED)
+# check if ROS environment has been setup
+if ( "x$ENV{ROS_DISTRO}" STREQUAL "x")
+	# if not setup try standard place
+	if (EXISTS "/opt/ros/")
+		# get ROS distribution name
+		execute_process(COMMAND "ls" WORKING_DIRECTORY "/opt/ros/" OUTPUT_VARIABLE DIST)
+		string(STRIP ${DIST} ROSDIST)
+		list (APPEND CMAKE_PREFIX_PATH "/opt/ros/${ROSDIST}")
+		message (STATUS "${BoldGreen}Setting CMAKE_PREFIX_PATH to ${CMAKE_PREFIX_PATH}${ColourReset}")
+	endif ()
+endif ()
+find_package(cpp_common QUIET)
+find_package(roscpp_serialization QUIET)
+find_package(rostime QUIET)
+find_package(rosbag_storage QUIET)
 IF (cpp_common_FOUND AND roscpp_serialization_FOUND AND rostime_FOUND
 		AND rosbag_storage_FOUND)
 	add_library(TUM-ROSBAG TUM-ROSBAG.cpp)
@@ -66,10 +79,7 @@ IF (cpp_common_FOUND AND roscpp_serialization_FOUND AND rostime_FOUND
 	add_definitions(-DROSBAG_SUPPORT=1)
 	set(TUM-ROSBAG_LIB "TUM-ROSBAG")
 else ()
-	string(ASCII 27 Esc)
-	set(BoldRed     "${Esc}[1;31m")
-	set(ColourReset "${Esc}[m")
-	message(STATUS "${BoldRed}ROS dependencies for TUM rosbag datasets not found - skipped.${ColourReset}")
+	message(STATUS "${BoldRed}ROS dependencies for TUM rosbag datasets not found - skipped${ColourReset}")
 endif ()
 
 add_library(ICLNUIM ICLNUIM.cpp)
@@ -77,4 +87,4 @@ target_link_libraries(ICLNUIM slambench-io)
 target_include_directories(ICLNUIM PRIVATE ${Boost_INCLUDE_DIRS})
 
 add_executable(dataset-generator dataset-generator.cpp)
-target_link_libraries(dataset-generator TUM ICLNUIM ICL EUROCMAV SVO ${TUM-ROSBAG_LIB})
+target_link_libraries(dataset-generator TUM ICLNUIM ICL ${EUROCMAV_LIB} SVO ${TUM-ROSBAG_LIB})
