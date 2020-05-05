@@ -344,7 +344,7 @@ bool loadTUMROSBAG_GroundTruthData(const std::string & bagname,
     uint32_t ts_nsec = 0;
 
     // open rosbag
-    // the ground truth topic (/tf) contains several transformations
+    // the ground truth topic contains several transformations
     // ground truth is built from the following composition:
     // optical frame -> rgb frame -> camera -> kinect -> world
     rosbag::Bag bag;

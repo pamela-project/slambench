@@ -93,9 +93,15 @@ public :
 			config->reader = new ICLNUIMReader("");
 		} else if (dataset_name == "tum") {
 			config->reader = new TUMReader("");
-#ifdef ROSBAG_SUPPORT
 		} else if (dataset_name == "tum-rosbag") {
+#ifdef ROSBAG_SUPPORT
 			config->reader = new TUMROSBAGReader("");
+#else
+            std::cerr << "=====================================" << std::endl;
+			std::cerr << "\033[1;31mError\033[0m: ROS support not enabled for this dataset. ";
+            std::cerr << "Please rebuild SLAMBench with ROS dependencies." << std::endl;
+            std::cerr << "=====================================" << std::endl;
+			exit(1);
 #endif
 		} else if (dataset_name == "eurocmav") {
 			config->reader = new EUROCMAVReader("");
