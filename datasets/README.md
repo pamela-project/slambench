@@ -19,6 +19,7 @@ Rosbag support requires the following ROS packages:
    - roscpp_serialization
    - rostime
    - rosbag_storage
+   - tf
 
 The following versions of the ROS packages have been tested:
    - ROS kinetic / Linux Ubuntu 16.04
