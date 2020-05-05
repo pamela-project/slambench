@@ -66,7 +66,10 @@ IF (cpp_common_FOUND AND roscpp_serialization_FOUND AND rostime_FOUND
 	add_definitions(-DROSBAG_SUPPORT=1)
 	set(TUM-ROSBAG_LIB "TUM-ROSBAG")
 else ()
-	message(STATUS "TUM rosbag support not found - skipped.")
+	string(ASCII 27 Esc)
+	set(BoldRed     "${Esc}[1;31m")
+	set(ColourReset "${Esc}[m")
+	message(STATUS "${BoldRed}ROS dependencies for TUM rosbag datasets not found - skipped.${ColourReset}")
 endif ()
 
 add_library(ICLNUIM ICLNUIM.cpp)
