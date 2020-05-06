@@ -97,10 +97,7 @@ public :
 #ifdef ROSBAG_SUPPORT
 			config->reader = new TUMROSBAGReader("");
 #else
-            std::cerr << "=====================================" << std::endl;
-			std::cerr << "\033[1;31mError\033[0m: ROS support not enabled for this dataset. ";
-            std::cerr << "Please rebuild SLAMBench with ROS dependencies." << std::endl;
-            std::cerr << "=====================================" << std::endl;
+			std::cerr << "\033[1;31mError: ROS support not enabled for this dataset. Please rebuild SLAMBench with ROS dependencies.\033[0m" << std::endl;
 			exit(1);
 #endif
 		} else if (dataset_name == "eurocmav") {
