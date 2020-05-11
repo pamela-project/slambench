@@ -28,10 +28,6 @@ class GyroSerialiser : public SensorSerialiser {
 	bool SerialiseSensorSpecific(Serialiser* serialiser, const Sensor* s) override {
 		GyroSensor *sensor = (GyroSensor*)s;
 
-		// serialiser->Write(&sensor->GyroscopeNoiseDensity, sizeof(sensor->GyroscopeNoiseDensity));
-		// serialiser->Write(&sensor->GyroscopeDriftNoiseDensity, sizeof(sensor->GyroscopeDriftNoiseDensity));
-		// serialiser->Write(&sensor->GyroscopeBiasDiffusion, sizeof(sensor->GyroscopeBiasDiffusion));
-		// serialiser->Write(&sensor->GyroscopeSaturation          , sizeof(sensor->GyroscopeSaturation));
 		serialiser->Write(&sensor->Intrinsic , sizeof(sensor->Intrinsic));
 		serialiser->Write(&sensor->NoiseVariances, sizeof(sensor->NoiseVariances));
 		serialiser->Write(&sensor->BiasVariances, sizeof(sensor->BiasVariances));
@@ -54,10 +50,6 @@ class GyroDeserialiser : public SensorDeserialiser {
 	bool DeserialiseSensorSpecific(Deserialiser* d, Sensor* s) override {
 		GyroSensor *sensor = (GyroSensor*)s;
 
-		// d->Read(&sensor->GyroscopeNoiseDensity, sizeof(sensor->GyroscopeNoiseDensity));
-		// d->Read(&sensor->GyroscopeDriftNoiseDensity, sizeof(sensor->GyroscopeDriftNoiseDensity));
-		// d->Read(&sensor->GyroscopeBiasDiffusion, sizeof(sensor->GyroscopeBiasDiffusion));
-		// d->Read(&sensor->GyroscopeSaturation          , sizeof(sensor->GyroscopeSaturation));
 		d->Read(&sensor->Intrinsic , sizeof(sensor->Intrinsic));
 		d->Read(&sensor->NoiseVariances, sizeof(sensor->NoiseVariances));
 		d->Read(&sensor->BiasVariances, sizeof(sensor->BiasVariances));

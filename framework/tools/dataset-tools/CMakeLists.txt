@@ -9,10 +9,10 @@ find_package(Boost 1.54 REQUIRED COMPONENTS system filesystem program_options re
 find_package(LIBYAML REQUIRED)
 
 add_executable(io-readply io-readply.cpp)
-target_link_libraries(io-readply slambench-io)
+target_link_libraries(io-readply slambench-io slambench-metrics)
 
 add_executable(io-inspect-file io-inspect.cpp)
-target_link_libraries(io-inspect-file PRIVATE -Wl,--whole-archive slambench-io -Wl,--no-whole-archive)
+target_link_libraries(io-inspect-file PRIVATE -Wl,--whole-archive slambench-io slambench-metrics -Wl,--no-whole-archive)
 	
 if (Boost_FOUND)
 
@@ -55,7 +55,7 @@ if (Boost_FOUND)
 	target_include_directories(ETHI PRIVATE ${Boost_INCLUDE_DIRS})
 
 	add_executable(dataset-generator dataset-generator.cpp)
-	target_link_libraries(dataset-generator TUM ICLNUIM ICL EUROCMAV SVO BONN UZHFPV ETHI OpenLORIS)
+	target_link_libraries(dataset-generator TUM ICLNUIM ICL EUROCMAV SVO BONN UZHFPV ETHI OpenLORIS slambench-metrics slambench-utils)
 
 else (Boost_FOUND)
     message(STATUS "Dataset generators require Boost.")

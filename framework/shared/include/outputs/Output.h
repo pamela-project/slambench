@@ -19,6 +19,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <functional>
 
 namespace slambench {
 	namespace outputs {
@@ -118,7 +119,10 @@ namespace slambench {
 			Eigen::Matrix4f& getTransformation() {
 				return transformation;
 			}
+			/* When freezed, the alignment will stop updating in recalculate() */
+			void SetFreeze(bool freeze) { freeze_ = freeze; }
 		private:
+			bool freeze_;
 			TrajectoryInterface *gt_trajectory_;
 			BaseOutput *trajectory_;
 			TrajectoryAlignmentMethod *method_;
@@ -150,7 +154,38 @@ namespace slambench {
 			AlignmentOutput *alignment_;
 			BaseOutput *pointcloud_;
 		};
+
+		/**
+		 * An output which returns an aligned trajectory
+		 */
+		class AlignedTrajectoryOutput : public DerivedOutput {
+			public:
+				AlignedTrajectoryOutput(const std::string &name, AlignmentOutput *, BaseOutput *trajectory_output);
+				virtual ~AlignedTrajectoryOutput();
+
+				void Recalculate() override;
+			private:
+				AlignmentOutput *alignment_;
+				BaseOutput *trajectory_;
+		};
 		
+		/**
+		 * An output which shows the quality of the reconstruction
+		 */
+		class PointCloudHeatMap : public DerivedOutput {
+		public:
+			PointCloudHeatMap(const std::string &name,
+							  BaseOutput *gt_pointcloud, BaseOutput *pointcloud,
+							  const std::function<values::ColoredPoint3DF(const values::HeatMapPoint3DF&, double, double)> &convert);
+			virtual ~PointCloudHeatMap();
+
+			void Recalculate() override;
+			std::function<values::ColoredPoint3DF(const values::HeatMapPoint3DF&, double, double)> convert;
+		private:
+			BaseOutput *gt_pointcloud;
+			BaseOutput *pointcloud;
+		};
+
 		class PoseToXYZOutput : public BaseOutput {
 		public:
 			PoseToXYZOutput(BaseOutput *pose_output);

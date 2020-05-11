@@ -655,7 +655,7 @@ SLAMFile* ICLReader::GenerateSLAMFile () {
     }
 
 
-    DepthSensor::disparity_params_t disparity_params =  {0.005,0.0};
+    DepthSensor::disparity_params_t disparity_params =  {0.001,0.0};
     DepthSensor::disparity_type_t disparity_type = DepthSensor::affine_disparity;
 
 

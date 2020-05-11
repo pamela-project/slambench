@@ -38,6 +38,7 @@ namespace slambench {
 			VT_POSE, // A matrix which specifically represents a pose (position + orientation)
 			VT_POINTCLOUD, // A list of point positions
 			VT_COLOUREDPOINTCLOUD, // A list of point positions with colours
+			VT_HEATMAPPOINTCLOUD, // A pointcloud for visualising values
 			VT_FEATURE, // A tracked feature
 			VT_FEATURELIST,
 			VT_FRAME,
@@ -55,6 +56,7 @@ namespace slambench {
 			case VT_POSE        : return "VT_POSE        ";
 			case VT_POINTCLOUD  : return "VT_POINTCLOUD  ";
 			case VT_COLOUREDPOINTCLOUD  : return "VT_COLOUREDPOINTCLOUD  ";
+			case VT_HEATMAPPOINTCLOUD   : return "VT_HEATMAPPOINTCLOUD  ";
 			case VT_FEATURE     : return "VT_FEATURE     ";
 			case VT_FEATURELIST : return "VT_FEATURELIST ";
 			case VT_FRAME       : return "VT_FRAME       ";
@@ -195,7 +197,7 @@ namespace slambench {
 
 			TrajectoryValue() : Value(VT_TRAJECTORY) {}
 			TrajectoryValue(const pose_container_t &trajectory) : Value(VT_TRAJECTORY), poses_(trajectory) {}
-			const pose_container_t &GetPoints() { return poses_; }
+			const pose_container_t &GetPoints() const { return poses_; }
 		private:
 			pose_container_t poses_;
 		};
@@ -211,8 +213,17 @@ namespace slambench {
 		public:
 			ColoredPoint3DF() : X(0), Y(0), Z(0) , R(0), G(0), B(0) {}
 			ColoredPoint3DF(float x, float y, float z) : X(x), Y(y), Z(z), R(0), G(0), B(0) {}
+			ColoredPoint3DF(float x, float y, float z, uint8_t r, uint8_t g, uint8_t b) : X(x), Y(y), Z(z), R(r), G(g), B(b) {}
 			float X, Y, Z;
-			uint8_t   R, G, B;
+			uint8_t R, G, B;
+		};
+
+		class HeatMapPoint3DF {
+		public:
+			HeatMapPoint3DF() : X(0), Y(0), Z(0) , value(0) {}
+			HeatMapPoint3DF(float x, float y, float z, double value) : X(x), Y(y), Z(z), value(value) {}
+			float X, Y, Z;
+			double value;
 		};
 
 
@@ -242,12 +253,50 @@ namespace slambench {
 
 
 
+		class HeatMapPointCloudValue : public Value {
+		public:
+			typedef std::vector<HeatMapPoint3DF> point_container_t;
+
+			HeatMapPointCloudValue() : Value(VT_HEATMAPPOINTCLOUD), points_(std::make_shared<point_container_t>()), transform_(Eigen::Matrix4f::Identity()) { }
+			HeatMapPointCloudValue(const HeatMapPointCloudValue &other) : Value(VT_HEATMAPPOINTCLOUD), points_(other.points_), transform_(other.transform_) { }
+			virtual ~HeatMapPointCloudValue() { }
+
+			void AddPoint(const HeatMapPoint3DF &point) { makeUnique(); points_->push_back(point);  }
+			void Clear() { makeUnique(); points_->clear(); }
+
+			const point_container_t &GetPoints() const { assert(points_); return *points_; }
+
+			const Eigen::Matrix4f &GetTransform() const { return transform_; }
+			void SetTransform(const Eigen::Matrix4f &new_txfm) { transform_ = new_txfm; }
+
+		private:
+			void makeUnique() { if(!points_.unique()) { points_ = std::make_shared<point_container_t>(*points_); } }
+
+			std::shared_ptr<point_container_t> points_;
+			Eigen::Matrix4f transform_;
+		};
+
+
 		class ColoredPointCloudValue : public Value {
 		public:
 			typedef std::vector<ColoredPoint3DF> point_container_t;
 
 			ColoredPointCloudValue() : Value(VT_COLOUREDPOINTCLOUD), points_(std::make_shared<point_container_t>()), transform_(Eigen::Matrix4f::Identity()) { }
 			ColoredPointCloudValue(const ColoredPointCloudValue &other) : Value(VT_COLOUREDPOINTCLOUD), points_(other.points_), transform_(other.transform_) { }
+			ColoredPointCloudValue(const HeatMapPointCloudValue &other, std::function<ColoredPoint3DF(const HeatMapPoint3DF&, double, double)> convert) :
+						Value(VT_HEATMAPPOINTCLOUD),
+						points_(std::make_shared<point_container_t>()),
+						transform_(Eigen::Matrix4f::Identity()) {
+				const auto otherValues = other.GetPoints();
+				points_->reserve(otherValues.size());
+				double max = 0, min = std::numeric_limits<double>::max();
+				for (const auto &otherValue : otherValues) {
+					min = std::min(otherValue.value, min);
+					max = std::max(otherValue.value, max);
+				}
+				for (const auto &otherValue : otherValues)
+					points_->push_back(convert(otherValue, min, max));
+			}
 			virtual ~ColoredPointCloudValue() { }
 
 			void AddPoint(const ColoredPoint3DF &point) { makeUnique(); points_->push_back(point);  }

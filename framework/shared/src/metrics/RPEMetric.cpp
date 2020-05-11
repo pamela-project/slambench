@@ -91,8 +91,8 @@ Value *RPEMetric::GetValue(Phase* phase)
 		}
 
 		if(gt_iterator == gt_traj.end()) {
-			std::cerr << "**** Error: No more groundtruth to compare with." << std::endl;
-			return new values::TypedValue<double>((double(std::nan(""))));
+			std::cerr << "**** RPE Error: No more groundtruth to compare with." << std::endl;
+			break;
 		}
 
 

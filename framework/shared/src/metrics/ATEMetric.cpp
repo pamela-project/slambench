@@ -24,6 +24,7 @@ ATEMetric::ATEMetric(const slambench::outputs::TrajectoryInterface* tested_traje
 const slambench::values::ValueDescription &ATEMetric::GetValueDescription() const {
 	static const slambench::values::ValueDescription desc = slambench::values::ValueDescription({
 		{"AbsoluteError",  slambench::values::VT_DOUBLE},
+		{"OrientationError",  slambench::values::VT_DOUBLE},
 		{"MeanATE",  slambench::values::VT_DOUBLE},
 		{"MaxATE",  slambench::values::VT_DOUBLE}});
 
@@ -66,6 +67,7 @@ Value *ATEMetric::GetValue(Phase* phase)
 	double MaxATE   = 0.0;
 	double SumATE   = 0.0;
 	double CountATE = 0.0;
+	double LastAOE   = 0.0;
 
 
 	for (es_iterator = es_traj.begin() ; es_iterator != es_traj.end() ; es_iterator ++) {
@@ -85,8 +87,9 @@ Value *ATEMetric::GetValue(Phase* phase)
 
 
 		if(gt_iterator == gt_traj.end()) {
-			std::cerr << "**** Error: No more groundtruth to compare with." << std::endl;
-			return new values::TypedValue<double>((double(std::nan(""))));
+			std::cerr << "**** ATE Error: No more groundtruth to compare with." << std::endl;
+			LastATE = double(std::nan(""));
+			break;
 		}
 
 
@@ -122,6 +125,16 @@ Value *ATEMetric::GetValue(Phase* phase)
 		LastATE = std::sqrt( diff[0] * diff[0] +  diff[1] * diff[1] +  diff[2] * diff[2]);
 
 
+		// compute Orientation Error for this point
+		//****************************************************************************************
+
+		Eigen::Matrix3f gt_rot = gt_pose.block<3,3>(0,0);
+		Eigen::Matrix3f aligned_rot = aligned_pose.block<3,3>(0,0);
+		// the rotation matrix in aligned pose has a scale factor, need be de-scaled to be a valid rotation matrix
+		aligned_rot /= aligned_rot.block<3,1>(0,0).norm();
+		Eigen::AngleAxisf diff_angle(gt_rot.transpose() * aligned_rot);
+		LastAOE = diff_angle.angle() / M_PI * 180.;
+
 		// cumul values
 		//****************************************************************************************
 
@@ -134,14 +147,16 @@ Value *ATEMetric::GetValue(Phase* phase)
 
 	double MeanATE = SumATE / CountATE;
 
-	auto current = new slambench::values::TypeForVT<slambench::values::VT_DOUBLE>::type(LastATE);
+	auto absolute_error = new slambench::values::TypeForVT<slambench::values::VT_DOUBLE>::type(LastATE);
+	auto orientation_error = new slambench::values::TypeForVT<slambench::values::VT_DOUBLE>::type(LastAOE);
 	auto mean_ate = new slambench::values::TypeForVT<slambench::values::VT_DOUBLE>::type(MeanATE);
 	auto max_ate  = new slambench::values::TypeForVT<slambench::values::VT_DOUBLE>::type(MaxATE);
 
 	return new slambench::values::TypeForVT<slambench::values::VT_COLLECTION>::type({
-			{"AbsoluteError",current},
+				{"AbsoluteError",absolute_error},
+				{"OrientationError",orientation_error},
 				{"MeanATE",mean_ate},
-				{"MaxATE",max_ate}
+				{"MaxATE",max_ate},
 			});
 
 

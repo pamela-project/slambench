@@ -63,6 +63,7 @@ namespace slambench {
 				
 				unsigned int GetFrameCount() override;
 				SLAMFrame* GetFrame(unsigned int index) override;
+				SLAMFrame* GetClosestFrameToTime(slambench::TimeStamp t);
 				private:
 					GTBufferingFrameStream &gt_stream_;
 			};
@@ -73,7 +74,7 @@ namespace slambench {
 			SLAMFrame* GetNextFrame() override;
 			bool HasNextFrame() override;
 
-			FrameCollection *GetGTFrames();
+			GTFrameCollection *GetGTFrames();
 		private:
 			void fastForward();
 			

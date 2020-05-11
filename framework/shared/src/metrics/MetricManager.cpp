@@ -25,21 +25,18 @@ MetricManager::MetricManager() : init_phase_(this,"Initialisation"), frame_phase
 }
 
 MetricManager::~MetricManager() {
-	for(auto i : all_metrics_) {
-		delete i;
-	}
 	for(auto i : frame_data_) {
 		delete i;
 	}
 }
 
-void MetricManager::AddPhaseMetric(Metric* m)
+void MetricManager::AddPhaseMetric(MetricPtr m)
 {
 	phase_metrics_.push_back(m);
 	all_metrics_.insert(m);
 }
 
-void MetricManager::AddFrameMetric(Metric* m)
+void MetricManager::AddFrameMetric(MetricPtr m)
 {
 	frame_metrics_.push_back(m);
 	all_metrics_.insert(m);
@@ -68,7 +65,7 @@ void MetricManager::EndInit()
 	}
 
 	for(auto i : frame_metrics_) {
-		init_data_.insert({i, i->GetValue(&init_phase_)});
+		init_data_.insert({&*i, i->GetValue(&init_phase_)});
 	}
 
 }
@@ -96,9 +93,9 @@ void MetricManager::EndFrame()
 	auto &frame = *GetFrame(frame_counter_);
 	auto &frame_data = frame.GetFrameData();
 	for(auto i : frame_metrics_) {
-		frame_data.insert({i, i->GetValue(&frame_phase_)});
+		frame_data.insert({&*i, i->GetValue(&frame_phase_)});
         if (!strcmp(duration_metric_typeid,typeid(*i).name())) {
-            frame_phase_duration.push_back(dynamic_cast<slambench::values::TypedValue<double>*>(frame_data[i])->GetValue());
+            frame_phase_duration.push_back(dynamic_cast<slambench::values::TypedValue<double>*>(frame_data[&*i])->GetValue());
         }
 	}
 	// yeaaaahhhhh
@@ -106,7 +103,7 @@ void MetricManager::EndFrame()
 	
 	for(auto i : phase_metrics_) {
 		for(auto j : phases_) {
-			frame.GetPhaseData(j).insert({i, i->GetValue(j)});
+			frame.GetPhaseData(j).insert({&*i, i->GetValue(j)});
 		}
 	}
 	

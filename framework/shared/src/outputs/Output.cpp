@@ -9,12 +9,18 @@
 
 
 #include "outputs/Output.h"
+#include "values/Value.h"
 #include "outputs/TrajectoryAlignmentMethod.h"
 #include "outputs/TrajectoryInterface.h"
+
+#include <pcl/registration/icp.h>
+#include <pcl/io/ply_io.h>
 
 #include <iostream>
 
 using namespace slambench::outputs;
+using slambench::values::PointCloudValue;
+typedef pcl::PointXYZ point_t;
 
 BaseOutput::BaseOutput(const std::string& name, const values::ValueDescription &type, bool main_output) : name_(name), type_(type), only_keep_most_recent_(false), active_(false), main_(main_output)
 {
@@ -145,7 +151,7 @@ BaseOutput::value_map_t& DerivedOutput::GetCachedValueMap()
 }
 
 
-AlignmentOutput::AlignmentOutput(const std::string& name, TrajectoryInterface* gt_trajectory, BaseOutput* trajectory, TrajectoryAlignmentMethod *method) : DerivedOutput(name, values::VT_MATRIX, {trajectory}), gt_trajectory_(gt_trajectory), trajectory_(trajectory), method_(method)
+AlignmentOutput::AlignmentOutput(const std::string& name, TrajectoryInterface* gt_trajectory, BaseOutput* trajectory, TrajectoryAlignmentMethod *method) : DerivedOutput(name, values::VT_MATRIX, {trajectory}), freeze_(false), gt_trajectory_(gt_trajectory), trajectory_(trajectory), method_(method)
 {
 
 }
@@ -158,6 +164,7 @@ AlignmentOutput::~AlignmentOutput()
 
 void AlignmentOutput::Recalculate()
 {
+	if (freeze_) return;
 	assert(GetKeepOnlyMostRecent());
 	auto &target = GetCachedValueMap();
 	
@@ -165,7 +172,7 @@ void AlignmentOutput::Recalculate()
 		delete i.second;
 	}
 	target.clear();
-	
+
 	if(trajectory_->Empty()) {
 		return;
 	}
@@ -247,6 +254,123 @@ void AlignedPointCloudOutput::Recalculate()
 	new_pc->SetTransform(latest_alignment);
 	target.insert({latest_ts, new_pc});
 }
+
+AlignedTrajectoryOutput::AlignedTrajectoryOutput(const std::string &name, AlignmentOutput *alignment, BaseOutput *trajectory_output) : DerivedOutput(name, values::VT_TRAJECTORY, {alignment, trajectory_output}), alignment_(alignment), trajectory_(trajectory_output)
+{
+	SetKeepOnlyMostRecent(true);
+}
+
+AlignedTrajectoryOutput::~AlignedTrajectoryOutput()
+{
+
+}
+
+void AlignedTrajectoryOutput::Recalculate()
+{
+	assert(GetKeepOnlyMostRecent());
+	auto &target = GetCachedValueMap();
+
+	for(auto i : target) {
+		delete i.second;
+	}
+	target.clear();
+
+	if(!trajectory_->IsActive() || trajectory_->GetValues().empty() || !alignment_->IsActive() || alignment_->GetValues().empty()) {
+		return;
+	}
+
+	auto latest_data_point = trajectory_->GetMostRecentValue();
+	auto latest_trajectory = (values::TrajectoryValue*)latest_data_point.second;
+	auto latest_ts = latest_data_point.first;
+
+	auto latest_alignment = ((values::TypedValue<Eigen::Matrix4f>*)alignment_->GetMostRecentValue().second)->GetValue();
+
+	values::Trajectory *t = new values::Trajectory();
+	for (auto &point : latest_trajectory->GetPoints()) {
+		auto &pose = point.second.GetValue();
+
+		if ((pose.array().abs() == std::numeric_limits<float>::infinity()).any())
+			continue;
+
+		Eigen::Matrix4f transformed_pose = latest_alignment * pose;
+
+		t->push_back(point.first, transformed_pose);
+	}
+
+	auto new_trajectory = new values::TrajectoryValue(*t);
+	target.insert({latest_ts, new_trajectory});
+}
+
+
+PointCloudHeatMap::PointCloudHeatMap(const std::string &name,
+				     BaseOutput *gt_pointcloud, BaseOutput *pointcloud,
+				     const std::function<values::ColoredPoint3DF(const values::HeatMapPoint3DF&, double, double)> &convert) :
+    DerivedOutput(name, values::VT_HEATMAPPOINTCLOUD, {gt_pointcloud, pointcloud}, false),
+    gt_pointcloud(gt_pointcloud), pointcloud(pointcloud), convert(convert)
+{ }
+
+slambench::values::HeatMapPointCloudValue *getValue(const pcl::PointCloud<point_t>::Ptr &gt,
+						    const pcl::PointCloud<point_t>::Ptr &test) {
+
+	auto value = new slambench::values::HeatMapPointCloudValue();
+
+	pcl::search::KdTree<point_t>::Ptr tree (new pcl::search::KdTree<point_t>);
+	tree->setInputCloud(gt);
+
+	std::vector<int> pointIdxNKNSearch(1);
+	std::vector<float> pointNKNSquaredDistance(1);
+
+	for(size_t i = 0; i < test->size(); i++) {
+		const auto &point = test->at(i);
+		tree->nearestKSearch(point, 1, pointIdxNKNSearch, pointNKNSquaredDistance);
+		const double distance = sqrt(pointNKNSquaredDistance.at(0));
+		value->AddPoint(slambench::values::HeatMapPoint3DF(point.x, point.y, point.z, distance));
+	}
+
+	return value;
+}
+
+void PointCloudHeatMap::Recalculate()
+{
+	assert(GetKeepOnlyMostRecent());
+	BaseOutput::value_map_t &target = GetCachedValueMap();
+
+	for(auto i : target) {
+		delete i.second;
+	}
+	target.clear();
+	
+	if (pointcloud->Empty()) {
+		return;
+	}
+
+	const BaseOutput::value_map_t::value_type &tested_frame = pointcloud->GetMostRecentValue();
+	const BaseOutput::value_map_t::value_type &gt_frame = gt_pointcloud->GetMostRecentValue();
+
+	const PointCloudValue *tested_pointcloud = reinterpret_cast<const PointCloudValue*>(tested_frame.second);
+	const PointCloudValue *gt_pointcloud = reinterpret_cast<const PointCloudValue*>(gt_frame.second);
+
+	pcl::PointCloud<point_t>::Ptr tested_cloud = pcl::PointCloud<point_t>::Ptr(new pcl::PointCloud<point_t>);
+
+	for (const auto &point : tested_pointcloud->GetPoints()) {
+		const Eigen::Matrix4f &transform = tested_pointcloud->GetTransform();
+		const Eigen::Vector4f eigenPoint(point.X, point.Y, point.Z, 1);
+		const Eigen::Vector4f transformedPoint = transform * eigenPoint;
+
+		tested_cloud->push_back({transformedPoint(0), transformedPoint(1), transformedPoint(2)});
+	}
+
+	pcl::PointCloud<point_t>::Ptr gt_cloud = pcl::PointCloud<point_t>::Ptr(new pcl::PointCloud<point_t>);
+	for (const auto &point : gt_pointcloud->GetPoints()) {
+		gt_cloud->push_back({point.X, point.Y, point.Z});
+	}
+
+	target.insert({tested_frame.first, getValue(gt_cloud, tested_cloud)});
+}
+
+PointCloudHeatMap::~PointCloudHeatMap() { };
+
+
 
 PoseToXYZOutput::PoseToXYZOutput(BaseOutput* pose_output) : BaseOutput(pose_output->GetName() + " (XYZ)", values::ValueDescription({{"X", values::VT_DOUBLE}, {"Y", values::VT_DOUBLE}, {"Z", values::VT_DOUBLE}})), pose_output_(pose_output)
 {

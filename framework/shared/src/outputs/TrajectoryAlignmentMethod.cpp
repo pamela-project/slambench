@@ -188,34 +188,41 @@ bool associate(const TrajectoryAlignmentMethod::trajectory_t & gt,
                std::vector<Eigen::Matrix4f>& vGroundTruth,
                std::vector<Eigen::Matrix4f>& vEstimate)
 {
+    uint gid = 0;
+    auto gt_time = [gt](uint id) { return gt.at(id).first.ToS(); };
+    for (uint tid = 0; tid < t.size(); tid++) {
 
-    for(uint index = 0; index < t.size(); index++)  {
+        vEstimate.push_back(t.at(tid).second.GetValue());
 
-        vEstimate.push_back(t.at(index).second.GetValue());
+        double time = t.at(tid).first.ToS();
+        // assume that gt is sorted wrt time
+        while (gid < gt.size() && gt_time(gid) < time) gid++;
 
-        double time = t.at(index).first.S + (t.at(index).first.Ns)*std::pow(10,-9);
-        //std::cout << t[index].second.S + (t[index].second.Ns)*std::pow(10,-9)  << std::endl;
-
-        uint    closest_gt_Index = index;
-
-        double bestTimeDiff = 100000000000.0;
-        for(uint index2 = index; index2 < gt.size(); index2++)
-        {
-            double gt_time = gt.at(index2).first.ToS();
-            double timeDiff =  gt_time - time;
-            if(fabs(timeDiff) < bestTimeDiff)
-            {
-                closest_gt_Index = index2;
-                bestTimeDiff = fabs(timeDiff);
-            }
+        // find the two closest points' indices in gt
+        uint gid_a, gid_b;
+        if (gid == 0) {
+            gid_a = gid_b = 0;
+        } else if (gid == gt.size()) {
+            gid_a = gid_b = gid - 1;
+        } else {
+            gid_a = gt_time(gid) == time ? gid : gid - 1;
+            gid_b = gid;
         }
-
-        //std::cout <<  index << " " << closest_gt_Index <<  " " << bestTimeDiff << std::endl;
-        //std::cout <<  t[index].second.S << " " << (t[index].second.Ns) << " " << gt[closest_gt_Index].second.S << " " << (gt[closest_gt_Index].second.Ns) << std::endl;
-
-        Eigen::Matrix4f gtPose;
-        gtPose = gt.at(closest_gt_Index).second.GetValue(); //<block-size>(start-i, start-j)
-        vGroundTruth.push_back(gtPose);
+        Eigen::Matrix4f gt_pose;
+        if (gid_a == gid_b) {
+            gt_pose = gt.at(gid_a).second.GetValue();
+        } else {
+            // interpolate between two gt poses
+            double t = (time - gt_time(gid_a)) / (gt_time(gid_b) - gt_time(gid_a));
+            Eigen::Matrix4f pose_a = gt.at(gid_a).second.GetValue();
+            Eigen::Matrix4f pose_b = gt.at(gid_b).second.GetValue();
+            Eigen::Quaternion<float> q_a(pose_a.block<3, 3>(0, 0));
+            Eigen::Quaternion<float> q_b(pose_b.block<3, 3>(0, 0));
+            auto q = q_a.slerp(t, q_b);
+            gt_pose = pose_a * (1 - t) + pose_b * t;
+            gt_pose.block<3, 3>(0, 0) = q.toRotationMatrix();
+        }
+        vGroundTruth.push_back(gt_pose);
     }
     return (bool)(vGroundTruth.size() * vEstimate.size());
 }

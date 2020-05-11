@@ -2,5 +2,5 @@
 BasedOnStyle: Google
 NamespaceIndentation: All
 ColumnLimit: 120
-
+IndentWidth: 4
 ...

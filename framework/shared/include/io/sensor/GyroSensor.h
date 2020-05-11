@@ -20,10 +20,6 @@ namespace slambench {
 			typedef float gyro_bias_variances_t[3];
 			const static sensor_type_t kGyroType;
 
-			// float GyroscopeNoiseDensity;
-			// float GyroscopeDriftNoiseDensity;
-			// float GyroscopeBiasDiffusion;
-			// float GyroscopeSaturation;
 			gyro_intrinsic_t Intrinsic;
 			gyro_noise_variances_t NoiseVariances;
 			gyro_bias_variances_t BiasVariances;

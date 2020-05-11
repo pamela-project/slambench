@@ -20,9 +20,9 @@
 #include <cstdlib>
 
 
-std::string alignment_technique = "original";
-std::string default_alignment_technique = "original";
-TypedParameter<std::string> alignment_type_parameter("a",     "alignment-technique",      "Select an alignment technique by name, if not found, default used (default,new).", &alignment_technique, &default_alignment_technique);
+std::string alignment_technique = "new";
+std::string default_alignment_technique = "new";
+TypedParameter<std::string> alignment_type_parameter("a",     "alignment-technique",      "Select an alignment technique by name, if not found, \"new alignment\" used (original,new,umeyama).", &alignment_technique, &default_alignment_technique);
 
 void run_pangolin(bool *stay_on, SLAMBenchConfiguration *config);
 static SLAMBenchUI * volatile ui = nullptr;

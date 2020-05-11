@@ -420,6 +420,22 @@ kfusion:
 	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/kfusion/CMakeLists.txt
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
+bundlefusion:
+	@echo "================================================================================================================="
+	@echo    "  - BundleFusion [Dai et al. ACM TOG'17]: "
+	@echo    "    repository: https://github.com/niessner/BundleFusion"
+	@echo    "    Used repository: https://github.com/Paul92/BundleFusion"
+	@echo "================================================================================================================="
+	@echo ""
+	@echo "Are you sure you want to download this use-case (y/n) ?" && ${GET_REPLY} && echo REPLY=$$REPLY && if [ ! "$$REPLY" == "y" ] ; then echo -e "\nExit."; false; else echo -e "\nDownload starts."; fi
+	mkdir benchmarks/bundlefusion/src/ -p
+	rm benchmarks/bundlefusion/src/original -rf
+	git clone   https://github.com/Paul92/BundleFusion.git  benchmarks/bundlefusion/src/original
+	@echo "cmake_minimum_required(VERSION 2.8)"   > benchmarks/bundlefusion/CMakeLists.txt
+	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
+	cd benchmarks/bundlefusion/src/original; git submodule init && git submodule update
+	cd benchmarks/bundlefusion/src/original/external/mLib; git apply ../../mlibPatch.patch
+
 flame:
 	@echo "================================================================================================================="
 	@echo    "  - FLAME [Greene et al. ICCV'17]: "
@@ -489,9 +505,8 @@ dso:
 	@echo "explore_implementations ( $@ src/* )"     >> benchmarks/$@/CMakeLists.txt
 
 
-.PHONY: efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame open_vins refusion kinectfusion dso
-algorithms : efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame open_vins refusion kinectfusion dso
-
+.PHONY: efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame open_vins refusion bundlefusion kinectfusion dso
+algorithms : efusion infinitam kfusion lsdslam monoslam okvis orbslam2 ptam svo flame open_vins refusion bundlefusion kinectfusion dso
 
 
 datasets :
@@ -755,7 +770,7 @@ datasetslist:
 
 datasets/OpenLORIS/%.7z :  # Example : $* = office1/office1-3
 	# extract 7z from the tar file of the scene, e.g. office1-1_7-package.tar
-	for f in $(@D)*-package.tar; do echo $$f && mkdir -p $(@D) && tar xvf $$f -C $(@D); done
+	for f in $(@D)/*-package.tar; do echo $$f && mkdir -p $(@D) && tar xvf $$f -C $(@D); done
 	if [ ! -f $@ ]; then echo "Could not find $(@D)*-package.tar or $@. Please download the data first."; fi
 
 datasets/OpenLORIS/%.dir : ./datasets/OpenLORIS/%.7z
@@ -765,7 +780,7 @@ datasets/OpenLORIS/%.dir : ./datasets/OpenLORIS/%.7z
 
 datasets/OpenLORIS/%.slam : ./datasets/OpenLORIS/%.dir
 	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
-	./build/bin/dataset-generator -d OpenLORIS -i $</ -o $@
+	./build/bin/dataset-generator -d OpenLORIS -i $</ -o $@ $(DATASET_OPTIONS)
 	echo "Generated $@"
 
 datasets/OpenLORIS/%.all :
@@ -827,7 +842,7 @@ datasets/ICL_NUIM/living-room.ply.tar.gz :
 	mkdir -p  datasets/ICL_NUIM
 	cd datasets/ICL_NUIM  && ${WGET} "http://www.doc.ic.ac.uk/~ahanda/living-room.ply.tar.gz"
 
-datasets/ICL_NUIM/%_loop.tgz : 
+datasets/ICL_NUIM/%_loop.tgz :
 	mkdir -p  datasets/ICL_NUIM
 	cd datasets/ICL_NUIM  && ${WGET} "http://www.doc.ic.ac.uk/~ahanda/$*_loop.tgz"
 
@@ -838,6 +853,10 @@ datasets/ICL_NUIM/%_loop.dir :  datasets/ICL_NUIM/%_loop.tgz
 datasets/ICL_NUIM/living_room_traj%_loop.slam : datasets/ICL_NUIM/living_room_traj%_loop.dir datasets/ICL_NUIM/living-room.ply
 	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
 	./build/bin/dataset-generator -d iclnuim -i $< -o $@ -ply  datasets/ICL_NUIM/living-room.ply -grey true -rgb true -gt true -depth true -pf true 
+
+datasets/ICL_NUIM/office_room_traj%_loop.slam : datasets/ICL_NUIM/office_room_traj%_loop.dir
+	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
+	./build/bin/dataset-generator -d iclnuim -i $< -o $@ -grey true -rgb true -gt true -depth true -pf true
 
 datasets/ICL_NUIM/living_room_traj%_loop_neg.slam : datasets/ICL_NUIM/living_room_traj%_loop.dir datasets/ICL_NUIM/living-room.ply
 	if [ ! -e ./build/bin/dataset-generator ] ; then make slambench ; fi
@@ -995,7 +1014,9 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 ./datasets/UZHFPV/%.dir \
 ./datasets/UZHFPV/%.zip \
 ./datasets/ETHI/%.dir \
-./datasets/ETHI/%.zip
+./datasets/ETHI/%.zip \
+./datasets/OpenLORIS/%.dir \
+./datasets/OpenLORIS/%-package.tar
 
 ####################################
 ####    BUILD/CLEAN TOOL        ####

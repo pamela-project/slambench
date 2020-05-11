@@ -54,6 +54,18 @@ SLAMFrame* GTBufferingFrameStream::GTFrameCollection::GetFrame(unsigned int inde
 	return gt_stream_.gt_frames_.at(index);
 }
 
+SLAMFrame* GTBufferingFrameStream::GTFrameCollection::GetClosestFrameToTime(slambench::TimeStamp t)
+{
+	auto frame = std::lower_bound(gt_stream_.gt_frames_.begin(), gt_stream_.gt_frames_.end(), t,
+		[](SLAMFrame *frame, slambench::TimeStamp t){ return frame->Timestamp < t; });
+	if (frame == gt_stream_.gt_frames_.end()) {
+		frame--;
+	} else if (frame != gt_stream_.gt_frames_.begin() && (*frame)->Timestamp - t > t - (*(frame - 1))->Timestamp) {
+		frame--;
+	}
+	return *frame;
+}
+
 unsigned int GTBufferingFrameStream::GTFrameCollection::GetFrameCount()
 {
 	return gt_stream_.gt_frames_.size();
@@ -86,7 +98,7 @@ bool GTBufferingFrameStream::HasNextFrame()
 	return base_stream_.HasNextFrame() || buffered_frame_ != nullptr;
 }
 
-FrameCollection* GTBufferingFrameStream::GetGTFrames()
+GTBufferingFrameStream::GTFrameCollection* GTBufferingFrameStream::GetGTFrames()
 {
 	return new GTFrameCollection(*this);
 }

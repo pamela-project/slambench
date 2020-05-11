@@ -44,7 +44,30 @@ namespace slambench {
 			mutable TimeStamp newest_point_;
 			mutable values::TrajectoryValue::pose_container_t cached_traj_;
 		};
-		
+
+		/**
+		 *  Wrapper for TrajectoryValue to implement the TrajectoryInterface
+		 **/
+		class TrajectoryValueWrapper : public TrajectoryInterface {
+			private:
+				const values::TrajectoryValue *trajectoryValue;
+
+			public:
+				TrajectoryValueWrapper(const values::TrajectoryValue *t);
+
+			values::PoseValue Get(const TimeStamp &when) const override;
+			values::TrajectoryValue::pose_container_t GetAll() const override;
+		};
+
+		class TrajectoryOutputInterface : public TrajectoryInterface {
+			private:
+				const BaseOutput *trajectory_output;
+			public:
+				TrajectoryOutputInterface(const BaseOutput *t);
+
+				values::PoseValue Get(const TimeStamp &when) const override; 
+				values::TrajectoryValue::pose_container_t GetAll() const override;
+		};
 	}
 }
 

@@ -57,6 +57,15 @@ IF(GLUT_FOUND)
 
 ENDIF(GLUT_FOUND)
 
+########## PCL Library ####################
+find_package(PCL)
+if (PCL_FOUND)
+    include_directories(${PCL_INCLUDE_DIRS})
+    link_directories(${PCL_LIBRARY_DIRS})
+    add_definitions(${PCL_DEFINITIONS})
+    set(common_libraries "${common_libraries}" "${PCL_LIBRARIES}")
+endif(PCL_FOUND)
+
 ########## Main Library ####################
 
 FILE(GLOB sensors_files src/io/sensor/*)
@@ -156,6 +165,7 @@ add_library(slambench-utils
 	src/sb_malloc
 	src/ParameterComponent
     src/ParameterManager
+    src/ResultWriter
 )
 
 

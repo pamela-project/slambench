@@ -113,8 +113,8 @@ public :
 	
     static void compute_loop_algorithm(SLAMBenchConfiguration * config, bool *stay_on, SLAMBenchUI *ui);
 
-    void add_library (std::string library_filename, std::string id = "");
-    bool add_input (std::string library_filename);
+    void AddLibrary (std::string library_filename, std::string id = "");
+    bool AddInput (const std::string& library_filename);
 
 
     void                 set_log_file      (std::string f);
@@ -135,13 +135,13 @@ public :
 	void SetInputInterface(slambench::io::InputInterface *input_ref) {
 		input_interface = input_ref;
 	}
-    void reset_sensors()
+    void ResetSensors()
     {
         GetParameterManager().ClearComponents();
     }
 
-    inline std::ostream& get_log_stream() {if (!log_stream)  update_log_stream(); return *log_stream;};
-    inline void update_log_stream() {
+    inline std::ostream& GetLogStream() {if (!log_stream)  UpdateLogStream(); return *log_stream;};
+    inline void UpdateLogStream() {
 
     if (this->log_file != "") {
     	this->log_filestream.open(this->log_file.c_str()); // TODO: potential memory leak ?!
@@ -153,11 +153,11 @@ public :
     };
 
 	void FireEndOfFrame() { for(auto i : frame_callbacks_) { i(); } }
-    void start_statistics   ();
+    void StartStatistics   ();
 
 
-    void print_arguments() ;
-    void print_dse();
+    void PrintArguments() ;
+    void PrintDse();
 
 
 };

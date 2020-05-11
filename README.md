@@ -1,73 +1,3 @@
-# QUICK START FOR LIFELONG ROBOTIC VISION COMPETITION #
-
-SLAMBench 2.0 is modified to support Lifelong SLAM Challenge, IROS 2019.
-There are mainly two parts modified:
-1. OpenLORIS-Scene dataset is supported in dataset-generator
-2. lifelong_loader newly added as an extension of benchmark_loader
-
-In order to run your algorithm in SLAMBench successfully with OpenLORIS dataset, the following steps should be followed:
-1. OpenLORIS Dataset Transformation
-2. Implement your APIs
-3. Run lifelong_loader
-
-The setup procedure remains the same. For more detailed information about SLAMBench2, please refer to the original part, starting from **README**.
-
-## Dataset Transformation ##
-This OpenLORIS-Scene Dataset is now supported in SLAMBench2, but the data need to be download manually. After downloading the package data, please put the tar files into datasets/OpenLORIS, and build all data sequences of one scene with e.g.
-
-```
-make ./datasets/OpenLORIS/office1.all
-```
-
-Or just one sequence, e.g.
-
-```
-make ./datasets/OpenLORIS/office1/office1-1.slam
-```
-
-In  OpenLORIS-Scene dataset transformation, 12 parameters are set to decide which sensors to be included, and the default value is ```true```. If you want only part of the sensors, e.g. rgbd and ground-truth, you can run:
-```
-./build/bin/dataset-generator -d OpenLORIS -i ./datasets/OpenLORIS/office1/office1-1/ -o ./datasets/OpenLORIS/office1/office1-1_rgbd.slam -color true -aligned_depth true -grey false -depth false -d400_accel false -d400_gyro false -fisheye1 false -fisheye2 false -t265_accel false -t265_gyro false -odom false -gt true
-```
-At least one camera-type sensor must be choosed.
-
-## Implement your APIs ##
-
-The following APIs for SLAM algorithms should be implemented.
-
-```
-bool sb_new_slam_configuration(SLAMBenchLibraryHelper * slam_settings) ;
-bool sb_init_slam_system(SLAMBenchLibraryHelper * slam_settings) ;
-bool sb_update_frame (SLAMBenchLibraryHelper * slam_settings, slambench::io::SLAMFrame * type) ;
-bool sb_relocalize (SLAMBenchLibraryHelper * slam_settings) ;
-bool sb_process_once (SLAMBenchLibraryHelper * slam_settings) ;
-bool sb_update_outputs(SLAMBenchLibraryHelper *lib, const slambench::TimeStamp *latest_output);
-bool sb_clean_slam_system();
-``` 
-Particularly, ```bool sb_relocalize (SLAMBenchLibraryHelper *slam_settings)``` is newly added to supported Lifelong SLAM Challenge. After the input sequence is switched to the next one, the relocalize function of the algorithm should be test. The return value is formulated as the result of relocalization from the perspective of the algorithm. If success, return ```true``` and vice versa. The result will be saved in the output file if ```-fo``` is assigned a nonempty value.
-
-If the algorithm does have a relocalize procedure, the relocalize API should be implemented under the assumption that all sensors' data has updated correctly. Otherwise the relocalize API will use ```bool sb_process_once ()``` as default.
-
-For more detailed information about other APIs, please refer to **How to run an existing algorithm with SLAMBench ?** and **How to add a new benchmark in SLAMBench ?**
-
-## Run lifelong_loader ##
-### Input ###
-Compared to ```benchmark_loader```, ```lifelong_loader``` can load more than one input sequence once. Different inputs are split by ```,``` e.g.
-```
-./build/bin/lifelong_loader -i ./datasets/OpenLORIS/office-1/office-1-1_rgbd.slam,./datasets/OpenLORIS/office-1/office-1-2_rgbd.slam -load ./build/lib/liborbslam2-original-library.so
-```
-### Output ###
-The metric statistics are computed independently for different input sequence except phase metrics e.g. Memory, Power etc. In addition, the outputs of the algorithm can be saved in a ```.txt``` file, specified by input parameter ```-fo```, e.g.
-```
-./build/bin/lifelong_loader -i ./datasets/OpenLORIS/office-1/office-1-1_rgbd.slam,./datasets/OpenLORIS/office-1/office-1-2_rgbd.slam  -load ./build/lib/liborbslam2-original-library.so -fo ./1_rgbd
-```
-then the outputs will be written to ```./1_rgbd_liborbslam2-original.txt```. 
-
-### Other Tips ###
-No UI tool available for Lifelong Robotic Vision Competition now. 
-
-```benchmark_loader``` and ```pangolin_loader``` can be used just as the original.
-
 # README #
 
 SLAMBench 2.0
@@ -254,8 +184,8 @@ We can see five different implementations (cpp, notoon, and openmp, cuda and ope
 ### Running a benchmark (e.g. KinectFusion) ###
 
 To run one algorithm you will need to use a **loader**. 
-There is currently two different loaders supported, **benchmark** and **pangolin**.
-Both loader are used the same way, except that **benchmark** is a command line application dedicated to measurements, while **pangolin** is a graphical user interface less precise in term of measurement but which provide a good interface for demonstrations.
+There is currently three different loaders supported, **benchmark**, **pangolin**, and **lifelong**.
+The first two loaders are used the same way, except that **benchmark** is a command line application dedicated to measurements, while **pangolin** is a graphical user interface less precise in term of measurement but which provide a good interface for demonstrations. The **lifelong** loader can take multiple input (multiple .slam files following the -i option, separated by ',') which will be sent to the benchmark one by one. Other than that it is similar to the **benchmark** loader. There is currently no loader both supporting loading multiple input and having a graphical user interface.
 
 
 Each loader has a series of parameters to specify such as the dataset location, or the libraries to run. 
@@ -327,7 +257,7 @@ In the next section we will explain how to use SLAMBench to evaluate the perform
 ### Evaluating a benchmark (eg. KinectFusion) ###
 
 SLAMBench works with Metrics and Outputs elements. 
-When you run the ```benchmark_loader``` or the ```pangolin_loader``` these are those elements that you can visualize.
+When you run the ```benchmark_loader``` or the ```pangolin_loader``` or the ```lifelong_loader``` these are those elements that you can visualize.
 Metrics are components generated by SLAMbench framework really, while Outputs are generated by the algorithm or may be elements post-processed by SLAMbench (such as the aligned trajectory with the ground truth).
 
 Les us run the benchmark loader. Its output is composed of two main parts, the ```Properties``` section, and the ```Statistics``` section. 
@@ -389,15 +319,16 @@ The main reason to provide a new version of SLAMBench is not only because of the
 a clear and specific API for SLAM algorithms to be implemented in order to add a new algorithm.
 
 ```
-void sb_new_slam_configuration(SLAMBenchConfiguration ** slam_settings) ;
-bool sb_init_slam_system(SLAMBenchConfiguration * slam_settings) ;
-bool sb_update_frame (Sensor * type) ;
-bool sb_process_once () ;
+bool sb_new_slam_configuration(SLAMBenchLibraryHelper * slam_settings);
+bool sb_init_slam_system(SLAMBenchLibraryHelper * slam_settings);
+bool sb_update_frame(SLAMBenchLibraryHelper * slam_settings, slambench::io::SLAMFrame * type);
+bool sb_process_once(SLAMBenchLibraryHelper * slam_settings);
+bool sb_relocalize(SLAMBenchLibraryHelper * slam_settings);
+bool sb_update_outputs(SLAMBenchLibraryHelper *lib, const slambench::TimeStamp *latest_output);
 bool sb_clean_slam_system();
-bool sb_update_outputs(SLAMBenchUI * );
 ```
 
-**If each of those functions are correctly implemented for a specific implementation of a specific algorithm, then this algorithm is compatible with SLAMBench and ben be evaluated as well.**
+**If each of those functions are correctly implemented for a specific implementation of a specific algorithm, then this algorithm is compatible with SLAMBench and can be evaluated as well.**
 
 In this section we will present those functions one by one.
 
@@ -450,6 +381,12 @@ When ```sb_update_frame``` return ```false```, then ```sb_update_frame``` will b
 ### bool sb_process_once (SLAMBenchLibraryHelper * slam_settings)   ###  
  
 should always return ``true`` or an exception will be raised.
+
+### bool sb_relocalize (SLAMBenchLibraryHelper * slam_settings)   ###
+
+This is newly introduced to supported lifelong SLAM evaluation. It will be called when the input sequence has been switched to the next one. The implementation is expected to explicitly trigger tracking lost and invoke the algorithm's re-localization procedure (if there be). It should return whether the relocalization is sucessful from the algorithm's perspective.
+
+For backward compatibility, this function is allowed to be unimplemented in a benchmark. In such cases, the ```sb_process_once``` function will be called in a re-localization situation.
 
 ### bool sb_clean_slam_system()  ###
 

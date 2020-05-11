@@ -52,7 +52,7 @@ SLAMBenchConfiguration::~SLAMBenchConfiguration()
 }
 
 
-void SLAMBenchConfiguration::add_library(std::string so_file, std::string identifier) {
+void SLAMBenchConfiguration::AddLibrary(std::string so_file, std::string identifier) {
 
     std::cerr << "new library name: " << so_file  << std::endl;
 
@@ -72,7 +72,7 @@ void SLAMBenchConfiguration::add_library(std::string so_file, std::string identi
     }
     std::string libName=std::string(start);
     libName=libName.substr(3, libName.length()-14);
-    SLAMBenchLibraryHelper * lib_ptr = new SLAMBenchLibraryHelper (identifier, libName, this->get_log_stream(),  this->GetInputInterface());
+    SLAMBenchLibraryHelper * lib_ptr = new SLAMBenchLibraryHelper (identifier, libName, this->GetLogStream(),  this->GetInputInterface());
     LOAD_FUNC(lib_ptr,c_sb_init_slam_system);
     LOAD_FUNC(lib_ptr,c_sb_new_slam_configuration);
     LOAD_FUNC(lib_ptr,c_sb_update_frame);
@@ -116,7 +116,7 @@ void Library_callback(Parameter* param, ParameterComponent* caller) {
         } else {
             library_filename = library_name;
         }
-        config->add_library(library_filename,library_identifier);
+        config->AddLibrary(library_filename,library_identifier);
     }
 }
 
@@ -133,11 +133,11 @@ void input_callback(Parameter* param, ParameterComponent* caller) {
     TypedParameter<std::vector<std::string>>* parameter =  dynamic_cast<TypedParameter<std::vector<std::string>>*>(param) ;
 
     for (std::string input_name : parameter->getTypedValue()) {
-        config->add_input(input_name);
+        config->AddInput(input_name);
     }
 }
 
-bool SLAMBenchConfiguration::add_input(std::string input_file) {
+bool SLAMBenchConfiguration::AddInput(const std::string& input_file) {
 
     // TODO: Handle other types of interface
     // TODO: Add a getFrameStream in Config to handle that
@@ -178,17 +178,17 @@ void help_callback(Parameter* , ParameterComponent* caller) {
 
 void dse_callback(Parameter* , ParameterComponent* caller) {
     SLAMBenchConfiguration* config = dynamic_cast<SLAMBenchConfiguration*> (caller);
-    config->print_dse();
+    config->PrintDse();
     exit(0);
 }
 
 void log_callback(Parameter* , ParameterComponent* caller) {
     SLAMBenchConfiguration* config = dynamic_cast<SLAMBenchConfiguration*> (caller);
-    config->update_log_stream();
+    config->UpdateLogStream();
 }
 
 
-void SLAMBenchConfiguration::print_dse () {
+void SLAMBenchConfiguration::PrintDse () {
 
     for (SLAMBenchLibraryHelper* lib : this->libs) {
 
@@ -251,10 +251,10 @@ SLAMBenchConfiguration::SLAMBenchConfiguration (void (*custom_input_callback)(Pa
 };
 
 
-void SLAMBenchConfiguration::start_statistics () {
+void SLAMBenchConfiguration::StartStatistics () {
 
-	get_log_stream().setf(std::ios::fixed, std::ios::floatfield);
-	get_log_stream().precision(10);
+	GetLogStream().setf(std::ios::fixed, std::ios::floatfield);
+	GetLogStream().precision(10);
 
 	time_t rawtime;
 	struct tm *timeinfo;
@@ -262,13 +262,13 @@ void SLAMBenchConfiguration::start_statistics () {
 	time(&rawtime);
 	timeinfo=localtime(&rawtime);
 	strftime(buffer,80,"%Y-%m-%d %I:%M:%S",timeinfo);
-	this->get_log_stream() << "SLAMBench Report run started:\t" << buffer << std::endl<< std::endl;
+	this->GetLogStream() << "SLAMBench Report run started:\t" << buffer << std::endl<< std::endl;
 
 	// Print arguments known so far
 
-	this->get_log_stream() << "Properties:" << std::endl<<"=================" << std::endl<< std::endl;
+	this->GetLogStream() << "Properties:" << std::endl<<"=================" << std::endl<< std::endl;
 
-	param_manager_.PrintValues(get_log_stream());
+	param_manager_.PrintValues(GetLogStream());
 	
 }
 
@@ -384,7 +384,6 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
             std::cerr << "Last frame processed." << std::endl;
             break;
         }
-        auto gt_frame = dynamic_cast<slambench::io::GTBufferingFrameStream*>(config->input_stream_)->GetGTFrames()->GetFrame(frame_count);
 
 		if(!*stay_on) {
 			std::cerr << "!*stay_on ==> break;" << std::endl;
@@ -400,6 +399,7 @@ void SLAMBenchConfiguration::compute_loop_algorithm(SLAMBenchConfiguration* conf
 			// ********* [[ SEND THE FRAME ]] *********
             if(!sent_gt)
             {
+                auto gt_frame = dynamic_cast<slambench::io::GTBufferingFrameStream*>(config->input_stream_)->GetGTFrames()->GetClosestFrameToTime(next_frame->Timestamp);
                 lib->c_sb_update_frame(lib,gt_frame);
                 sent_gt = true;
             }

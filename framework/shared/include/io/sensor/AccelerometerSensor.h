@@ -21,10 +21,6 @@ namespace slambench {
 			typedef float accel_bias_variances_t[3];
 			const static sensor_type_t kAccType;
 
-			// float AcceleratorNoiseDensity;
-			// float AcceleratorBiasDiffusion;
-			// float AcceleratorSaturation;
-			// float AcceleratorDriftNoiseDensity ;
 			accel_intrinsic_t Intrinsic;
 			accel_noise_variances_t NoiseVariances;
 			accel_bias_variances_t BiasVariances;

@@ -40,6 +40,7 @@ public:
     bool            (* c_sb_process_once) (SLAMBenchLibraryHelper *) ;
     bool            (* c_sb_clean_slam_system)();
     bool            (* c_sb_update_outputs)(SLAMBenchLibraryHelper *, const slambench::TimeStamp *ts);
+    bool            (* c_sb_relocalize)(SLAMBenchLibraryHelper * );
 	slambench::outputs::BaseOutput* gt_traj;    
 
 private:
@@ -84,12 +85,11 @@ public :
 	const slambench::io::SensorCollection &get_sensors() {
 		return this->get_input_interface()->GetSensors();
 	}
-    inline void updateInputInterface(slambench::io::InputInterface* i)
+
+    inline void update_input_interface(slambench::io::InputInterface* interface)
     {
-        _input_interface = i;
+        _input_interface = interface;
     }
-
-
 
 };
 

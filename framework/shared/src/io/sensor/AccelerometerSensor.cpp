@@ -29,10 +29,6 @@ class ACCSerialiser : public SensorSerialiser {
 	bool SerialiseSensorSpecific(Serialiser* serialiser, const Sensor* s) override {
 		AccelerometerSensor *sensor = (AccelerometerSensor*)s;
 
-		// serialiser->Write(&sensor->AcceleratorNoiseDensity, sizeof(sensor->AcceleratorNoiseDensity));
-		// serialiser->Write(&sensor->AcceleratorDriftNoiseDensity , sizeof(sensor->AcceleratorDriftNoiseDensity));
-		// serialiser->Write(&sensor->AcceleratorBiasDiffusion, sizeof(sensor->AcceleratorBiasDiffusion));
-		// serialiser->Write(&sensor->AcceleratorSaturation        , sizeof(sensor->AcceleratorSaturation));
 		serialiser->Write(&sensor->Intrinsic , sizeof(sensor->Intrinsic));
 		serialiser->Write(&sensor->NoiseVariances, sizeof(sensor->NoiseVariances));
 		serialiser->Write(&sensor->BiasVariances, sizeof(sensor->BiasVariances));
@@ -55,10 +51,6 @@ class ACCDeserialiser : public SensorDeserialiser {
 	bool DeserialiseSensorSpecific(Deserialiser* d, Sensor* s) override {
 		AccelerometerSensor *sensor = (AccelerometerSensor*)s;
 
-		// d->Read(&sensor->AcceleratorNoiseDensity, sizeof(sensor->AcceleratorNoiseDensity));
-		// d->Read(&sensor->AcceleratorDriftNoiseDensity , sizeof(sensor->AcceleratorDriftNoiseDensity));
-		// d->Read(&sensor->AcceleratorBiasDiffusion, sizeof(sensor->AcceleratorBiasDiffusion));
-		// d->Read(&sensor->AcceleratorSaturation        , sizeof(sensor->AcceleratorSaturation));
 		d->Read(&sensor->Intrinsic , sizeof(sensor->Intrinsic));
 		d->Read(&sensor->NoiseVariances, sizeof(sensor->NoiseVariances));
 		d->Read(&sensor->BiasVariances, sizeof(sensor->BiasVariances));

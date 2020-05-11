@@ -22,10 +22,10 @@
 std::string default_output_filename;
 std::string output_filename;
 
-std::string alignment_technique = "original";
-std::string default_alignment_technique = "original";
-TypedParameter<std::string> file_output_parameter ("fo", "file-output", "File to write slamfile containing outputs", &output_filename, &default_output_filename);
-TypedParameter<std::string> alignment_type_parameter("a",     "alignment-technique",      "Select an alignment technique by name, if not found, default used (default,new).", &alignment_technique, &default_alignment_technique);
+std::string alignment_technique = "new";
+std::string default_alignment_technique = "new";
+TypedParameter<std::string> file_output_parameter ("s", "save-results", "Folder or filename prefix to save the estimated poses. Ground-truth will also be saved into the same folder.", &output_filename, &default_output_filename);
+TypedParameter<std::string> alignment_type_parameter("a",     "alignment-technique",      "Select an alignment technique by name, if not found, \"new alignment\" used (original,new,umeyama).", &alignment_technique, &default_alignment_technique);
 
 int main(int argc, char * argv[])
 {
@@ -39,6 +39,7 @@ int main(int argc, char * argv[])
 		//***************************************************************************************
 
 		config->addParameter(file_output_parameter);
+		config->addParameter(alignment_type_parameter);
 		config->GetParameterManager().ReadArgumentsOrQuit(argc, argv, config);
 
 		//***************************************************************************************
@@ -59,7 +60,7 @@ int main(int argc, char * argv[])
 		// We prepare the logging and create the global metrics
 		//***************************************************************************************
 
-		config->start_statistics();
+		config->StartStatistics();
 
 		//***************************************************************************************
 		// We init the algos now because we need their output already
@@ -69,8 +70,7 @@ int main(int argc, char * argv[])
 
 		config->InitAlgorithms();
 
-		config->init_cw();
-
+		config->InitWriter();
 
 
 		//***************************************************************************************
@@ -79,17 +79,9 @@ int main(int argc, char * argv[])
 
 		SLAMBenchConfigurationLifelong::compute_loop_algorithm (config,NULL,NULL);
 
-		//***************************************************************************************
-		// End of experiment, we output the map
-		//***************************************************************************************
-
-		config->OutputToTxt();
-
-
 		std::cout << "End of program." << std::endl;
 
 		delete config;
-
 
 	} catch (const SLAMBenchException& e) {
 
