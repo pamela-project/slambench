@@ -13,7 +13,7 @@ set(BoldGreen   "${ESC}[1;32m")
 set(ColourReset "${ESC}[m")
 
 #------------------------------------------------
-### find requires external dependencies
+### find required external dependencies
 ### NOTE: dependencies vary according to dataset
 #------------------------------------------------
 # Boost is required - abort if not found
@@ -21,6 +21,9 @@ find_package(Boost 1.54 REQUIRED COMPONENTS system filesystem program_options re
 
 # EUROCMAV datasets support requirements - skip if not found
 find_package(LIBYAML QUIET)
+IF (NOT LIBYAML_FOUND)
+	message(STATUS "${BoldRed}LibYAML dependency for EUROCMAV datasets not found - dataset skipped${ColourReset}")
+ENDIF ()
 
 # TUM rosbag datasets support requirements - skip if not found
 # OpenCV should be looked for before ROS packages in order to find
@@ -99,8 +102,6 @@ IF (LIBYAML_FOUND)
 	target_link_libraries(EUROCMAV slambench-io ${Boost_LIBRARIES} ${LIBYAML_LIBRARY})
 	target_include_directories(EUROCMAV PRIVATE ${Boost_INCLUDE_DIRS}  ${LIBYAML_INCLUDE_DIR})
 	set(EUROCMAV_LIB "EUROCMAV")
-ELSE ()
-	message(STATUS "${BoldRed}LibYAML dependency for EUROCMAV datasets not found - dataset skipped${ColourReset}")
 ENDIF ()
 
 add_library(SVO SVO.cpp)
