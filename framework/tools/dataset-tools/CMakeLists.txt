@@ -87,6 +87,13 @@ if (NOT tf_FOUND)
 	message(STATUS "${BoldRed}tf dependency for TUM rosbag datasets not found${ColourReset}")
 endif ()
 
+# report success or failure in finding tum-rosbag dependencies
+IF (OpenCV_FOUND AND ROSPKGS_FOUND)
+	message (STATUS "${BoldGreen}Generation of tum-rosbag dataset support : Activated${ColourReset}")
+else ()
+	message(STATUS "${BoldRed}ROS dependencies for TUM rosbag datasets not found - dataset skipped${ColourReset}")
+endif ()
+
 #------------------------------------------------
 ### add executables and target libraries
 #------------------------------------------------
@@ -131,9 +138,6 @@ IF (OpenCV_FOUND AND ROSPKGS_FOUND)
 	endforeach (ROSPKG)
 	add_definitions(-DROSBAG_SUPPORT=1)
 	set(TUM-ROSBAG_LIB "TUM-ROSBAG")
-	message (STATUS "${BoldGreen}Generation of tum-rosbag dataset support : Activated${ColourReset}")
-else ()
-	message(STATUS "${BoldRed}ROS dependencies for TUM rosbag datasets not found - dataset skipped${ColourReset}")
 endif ()
 
 add_library(ICLNUIM ICLNUIM.cpp)
