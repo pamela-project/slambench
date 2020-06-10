@@ -25,6 +25,7 @@ IF (NOT LIBYAML_FOUND)
 	message(STATUS "${BoldRed}LibYAML dependency for EUROCMAV datasets not found - dataset skipped${ColourReset}")
 ENDIF ()
 
+#------------------------------------------------
 # TUM rosbag datasets support requirements - skip if not found
 # OpenCV should be looked for before ROS packages in order to find
 # the OpenCV version used in SLAMBench, not any in the ROS environment
@@ -36,22 +37,20 @@ ENDIF ()
 # Find ROS distribution - if one is installed
 # check if ROS environment has been setup
 if (NOT "x$ENV{ROS_DISTRO}" STREQUAL "x")
-	set(ROSDIST $ENV{ROS_DISTRO})
-	string(REPLACE "share" "lib" ROSLIBDIR $ENV{ROS_PACKAGE_PATH})
-	message (STATUS "Found ROS distribution: ${ROSDIST}")
+	set(ROS_DIST $ENV{ROS_DISTRO})
+	message (STATUS "Found ROS distribution: ${ROS_DIST}")
 else ()
-	# if not setup try standard place
+	# if ROS not setup, try standard location
 	if (EXISTS "/opt/ros/")
 		# get ROS distribution name
 		execute_process(COMMAND "ls" WORKING_DIRECTORY "/opt/ros/" OUTPUT_VARIABLE SDS)
 		string (STRIP ${SDS} SUBDIRS)
-		string(REPLACE ${LF} ";" ROSDISTS ${SUBDIRS})
-		list (LENGTH ROSDISTS LENSD)
+		string(REPLACE ${LF} ";" ROS_DISTS ${SUBDIRS})
+		list (LENGTH ROS_DISTS LENSD)
 		if (${LENSD} EQUAL 1)
-			list (GET ROSDISTS 0 ROSDIST)
-			list (APPEND CMAKE_PREFIX_PATH "/opt/ros/${ROSDIST}")
-			set (ROSLIBDIR "/opt/ros/${ROSDIST}/lib")
-			message (STATUS "Found ROS distribution: ${ROSDIST}")
+			list (GET ROS_DISTS 0 ROS_DIST)
+			list (APPEND CMAKE_PREFIX_PATH "/opt/ros/${ROS_DIST}")
+			message (STATUS "Found ROS distribution: ${ROS_DIST}")
 		elseif (${LENSD} GREATER 1)
 			message (STATUS "${BoldRed}Found more than one ROS distribution - please setup ROS environment before building SLAMBench${ColourReset}")
 		else ()
@@ -61,7 +60,7 @@ else ()
 endif ()
 
 # Find required ROS packages
-set(ROSPKGS cpp_common roscpp_serialization rostime rosbag_storage)
+set(ROSPKGS rosbag_storage roscpp_serialization)
 set(ROSPKGS_FOUND TRUE)
 foreach (ROSPKG ${ROSPKGS})
 	find_package(${ROSPKG} QUIET)
@@ -71,28 +70,13 @@ foreach (ROSPKG ${ROSPKGS})
 	endif ()
 endforeach (ROSPKG)
 
-# ROS package tf is treated differently to avoid a link library conflict
-# check for required tf include files only - no link libraries required
-# ROS packages have common include directories so use any of the above
-if (ROSPKGS_FOUND)
-	foreach (INCDIR ${cpp_common_INCLUDE_DIRS})
-		if (EXISTS "${INCDIR}/tf")
-			set(tf_FOUND TRUE)
-			break ()
-		endif ()
-	endforeach()
-endif ()
-if (NOT tf_FOUND)
-	set(ROSPKGS_FOUND FALSE)
-	message(STATUS "${BoldRed}tf dependency for TUM rosbag datasets not found${ColourReset}")
-endif ()
-
 # report success or failure in finding tum-rosbag dependencies
 IF (OpenCV_FOUND AND ROSPKGS_FOUND)
 	message (STATUS "${BoldGreen}Generation of tum-rosbag dataset support : Activated${ColourReset}")
 else ()
-	message(STATUS "${BoldRed}ROS dependencies for TUM rosbag datasets not found - dataset skipped${ColourReset}")
+	message(STATUS "${BoldRed}Dependencies for TUM rosbag datasets not found - dataset skipped${ColourReset}")
 endif ()
+#------------------------------------------------
 
 #------------------------------------------------
 ### add executables and target libraries
@@ -125,17 +109,18 @@ target_include_directories(TUM PRIVATE ${Boost_INCLUDE_DIRS})
 # if all dependencies found add TUM-ROSBAG target
 IF (OpenCV_FOUND AND ROSPKGS_FOUND)
 	add_library(TUM-ROSBAG TUM-ROSBAG.cpp)
-	if (NOT "x${ROSLIBDIR}" STREQUAL "x")
-		link_directories(${ROSLIBDIR})
-	endif()
-	target_include_directories(TUM-ROSBAG PRIVATE ${Boost_INCLUDE_DIRS})
+	# in some platforms, newer versions of the gnu linker
+	# changed the search PATHs for dependency libraries.
+	# This option uses old-style PATHs.
+	target_link_libraries(TUM-ROSBAG "-Wl,--disable-new-dtags")
 	target_link_libraries(TUM-ROSBAG slambench-io ${Boost_LIBRARIES})
-	target_include_directories(TUM-ROSBAG PRIVATE ${OpenCV_INCLUDE_DIRS})
-	target_link_libraries(TUM-ROSBAG ${OpenCV_LIBS})
+	target_link_libraries(TUM-ROSBAG ${OpenCV_LIBRARIES})
 	foreach (ROSPKG ${ROSPKGS})
-		target_include_directories(TUM-ROSBAG PRIVATE ${${ROSPKG}_INCLUDE_DIRS})
 		target_link_libraries(TUM-ROSBAG ${${ROSPKG}_LIBRARIES})
 	endforeach (ROSPKG)
+	target_include_directories(TUM-ROSBAG PRIVATE ${Boost_INCLUDE_DIRS})
+	target_include_directories(TUM-ROSBAG PRIVATE ${OpenCV_INCLUDE_DIRS})
+	target_include_directories(TUM-ROSBAG PRIVATE ${rosbag_storage_INCLUDE_DIRS})
 	add_definitions(-DROSBAG_SUPPORT=1)
 	set(TUM-ROSBAG_LIB "TUM-ROSBAG")
 endif ()

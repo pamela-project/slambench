@@ -22,6 +22,7 @@ Rosbag support requires the following ROS packages:
    - tf
 
 The following versions of the ROS packages have been tested:
-   - ROS kinetic / Linux Ubuntu 16.04
+   - ROS kinetic / Linux Ubuntu 16.04 (xenial)
+   - ROS melodic / Linux Ubuntu 18.04 (bionic)
 
-If you require rosbag support make sure to setup the ROS environment before building SLAMBench.
+If __rosbag__ support is required and ROS is not installed in the standard location (/opt/ros) make sure to setup the ROS environment before building SLAMBench.
