@@ -572,18 +572,16 @@ SLAMFile* TUMROSBAGReader::GenerateSLAMFile () {
     DepthSensor::distortion_coefficients_t  distortion_depth;
     CameraSensor::distortion_type_t         distortion_type;
 
-    uint32_t kin = get_sensor_params(disparity_params, disparity_type,
+    uint32_t kinect = get_sensor_params(disparity_params, disparity_type,
                               intrinsics_rgb, intrinsics_depth,
                               distortion_rgb, distortion_depth,
                               distortion_type);
 
-    if (kin) {
-        std::cout << "using freiburg" << kin
-                << " camera calibration parameters" << std::endl;
+    if (kinect) {
+        std::cout << "using freiburg" << kinect	<< " camera calibration parameters" << std::endl;
     } else {
-        std::cout << "using default camera calibration parameters";
-        std::cout << "warning: camera calibration might be wrong!"
-                  << std::endl;
+        std::cout << "using default camera calibration parameters" << std::endl;
+        std::cout << "warning: camera calibration might be wrong!" << std::endl;
     }
 
 

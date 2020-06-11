@@ -14,6 +14,10 @@ In addition to their _primary_ format, the following datasets
 are also supported as __rosbag__ files:
    - TUM RGB-D SLAM dataset [https://vision.in.tum.de/data/datasets/rgbd-dataset/file_formats]
 
+Please note that, as rosbags contain unprocessed sensor data,
+processing rosbag datasets can take considerably longer
+than processing datasets in their primary format.
+
 Rosbag support requires the following ROS packages:
    - cpp_common
    - roscpp_serialization
