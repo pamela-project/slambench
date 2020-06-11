@@ -283,6 +283,29 @@ datasetslist:
 	@echo "## https://vision.in.tum.de/rgbd/dataset/freiburg3/rgbd_dataset_freiburg3_long_office_household.tgz"
 	@echo ""
 	@echo ""
+	@echo "### TUM Handheld SLAM (using rosbag)"
+	@echo ""
+	@echo "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_360.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_floor.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_desk.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_desk2.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg1/rgbd_dataset_freiburg1_room.slam use_rosbag"
+	@echo ""
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_360_hemisphere.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_360_kidnap.slam use_rosbag"
+	@echo ""
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_desk.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_desk_with_person.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_large_no_loop.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_large_with_loop.slam use_rosbag"
+	@echo ""
+	@echo "### TUM Robot SLAM (using rosbag)"
+	@echo ""
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_360.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam2.slam use_rosbag"
+	@echo "make ./datasets/TUM/freiburg2/rgbd_dataset_freiburg2_pioneer_slam3.slam use_rosbag"
+	@echo ""
 	@echo "### EuRoC MAV Machine Hall"
 	@echo ""
 	@echo "make ./datasets/EuRoCMAV/machine_hall/MH_01_easy/MH_01_easy.slam"
@@ -340,20 +363,35 @@ check_generator:=if [ ! -e ./build/bin/dataset-generator ] ; then make slambench
 
 #### TUM      
 ###############
+# check if using tgz file or rosbag
+ifeq (TUM, $(findstring TUM, $(MAKECMDGOALS)))
+  ifeq (use_rosbag, $(filter use_rosbag, $(MAKECMDGOALS)))
+    FILETYPE = bag
+    DATASET = tum-rosbag
+  else
+    FILETYPE = tgz
+    DATASET = tum
+  endif
+endif
 
-./datasets/TUM/%.tgz :  # Example : $* = freiburg2/rgbd_dataset_freiburg2_desk 
+use_rosbag:
+	@:
+
+./datasets/TUM/%.$(FILETYPE) :  # Example : $* = freiburg2/rgbd_dataset_freiburg2_desk
 	mkdir -p $(@D)
-	cd $(@D)  &&  ${WGET} "http://vision.in.tum.de/rgbd/dataset/$*.tgz"
+	cd $(@D)  &&  ${WGET} "https://vision.in.tum.de/rgbd/dataset/$*.$(FILETYPE)"
 
-./datasets/TUM/%.dir : ./datasets/TUM/%.tgz
-	mkdir $@
-	tar xzf $< -C $@
-
-./datasets/TUM/%.slam :  ./datasets/TUM/%.dir 
+./datasets/TUM/%.slam : ./datasets/TUM/%.$(FILETYPE)
 	${check_generator}
-	./build/bin/dataset-generator -d tum -i $</* -o $@ -grey true -rgb true -gt true -depth true -accelerometer true 
+	mkdir -p $(@D)/$(*F).dir
+ifeq (tgz, $(FILETYPE))
+	tar xzf $(@D)/$(*F).tgz -C $(@D)/$(*F).dir
+else
+	mkdir -p $(@D)/$(*F).dir/$(*F)
+endif
+	./build/bin/dataset-generator -d $(DATASET) -i $(@D)/$(*F).dir/$(*F) -o $@ -grey true -rgb true -gt true -depth true -acc true
 
-#### ICL-NUIM      
+#### ICL-NUIM
 ###############
 datasets/ICL_NUIM/living-room.ply :  datasets/ICL_NUIM/living-room.ply.tar.gz
 	cd datasets/ICL_NUIM  && tar xzf living-room.ply.tar.gz
@@ -410,7 +448,7 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 ./benchmarks/orbslam2/src/original/Vocabulary/ORBvoc.txt : ./benchmarks/orbslam2/src/original/Vocabulary/ORBvoc.txt.tar.gz
 	cd ./benchmarks/orbslam2/src/original/Vocabulary/ && tar -xf ORBvoc.txt.tar.gz
 
-.PRECIOUS: ./datasets/TUM/%.tgz ./datasets/TUM/%.dir ./datasets/TUM/%.raw datasets/ICL_NUIM/living_room_traj%_loop.tgz ./datasets/TUM/%.raw datasets/ICL_NUIM/living_room_traj%_loop.dir datasets/ICL_NUIM/livingRoom%.gt.freiburg datasets/ICL_NUIM/living_room_traj%_loop.raw
+.PRECIOUS: ./datasets/TUM/%.tgz ./datasets/TUM/%.bag ./datasets/TUM/%.dir ./datasets/TUM/%.raw datasets/ICL_NUIM/living_room_traj%_loop.tgz ./datasets/TUM/%.raw datasets/ICL_NUIM/living_room_traj%_loop.dir datasets/ICL_NUIM/livingRoom%.gt.freiburg datasets/ICL_NUIM/living_room_traj%_loop.raw
 
 ####################################
 ####    BUILD/CLEAN TOOL        ####
