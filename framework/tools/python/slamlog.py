@@ -5,7 +5,7 @@ import math
 import numpy as np
 import pickle
 import deepdish
-from utils import *
+from .utils import *
 import gzip
 from progress.bar import Bar
 
