@@ -269,7 +269,7 @@ usecases:
 	@echo    "    available targets are : flame"
 	@echo ""
 
-	@echo -n "  - ReFusion [Palazollo et al, IROS '19]: "; if [ -f benchmarks/flame ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make refusion)\033[0m" ; fi
+	@echo -n "  - ReFusion [Palazollo et al, IROS '19]: "; if [ -f benchmarks/refusion ] ; then echo -e "\033[1;32mFound\033[0m" ; else echo -e "\033[1;31mNot found (make refusion)\033[0m" ; fi
 	@echo    "    repository: https://github.com/mihaibujanca/refusion"
 	@echo    "    available targets are : refusion"
 	@echo ""
