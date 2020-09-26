@@ -1,7 +1,12 @@
 /*
 
- Copyright (c) 2017 University of Edinburgh, Imperial College, University of Manchester.
+ Copyright (c) 2017-2020 University of Edinburgh, Imperial College, University of Manchester.
  Developed in the PAMELA project, EPSRC Programme Grant EP/K008730/1
+
+ The development of the interface with ROS datasets (rosbags) is supported
+ by the RAIN Hub, which is funded by the Industrial Strategy Challenge Fund,
+ part of the UK government’s modern Industrial Strategy. The fund is
+ delivered by UK Research and Innovation and managed by EPSRC [EP/R026084/1].
 
  This code is licensed under the MIT License.
 
@@ -88,6 +93,13 @@ public :
 			config->reader = new ICLNUIMReader("");
 		} else if (dataset_name == "tum") {
 			config->reader = new TUMReader("");
+		} else if (dataset_name == "tum-rosbag") {
+#ifdef ROSBAG_SUPPORT
+			config->reader = new TUMROSBAGReader("");
+#else
+			std::cerr << "\033[1;31mError: ROS support not enabled for this dataset. Please rebuild SLAMBench with ROS dependencies.\033[0m" << std::endl;
+			exit(1);
+#endif
 		} else if (dataset_name == "eurocmav") {
 			config->reader = new EUROCMAVReader("");
 		} else if (dataset_name == "icl") {
@@ -126,7 +138,7 @@ public :
 		fflush(stdout);
 	}
 	MainComponent (int argc, char * argv[]) : ParameterComponent("") , binary_name(argv[0]) {
-		
+
 
 		this->addParameter(TypedParameter<std::string>("d",     "dataset",       "Name of the input dataset type (iclnuim, tum, eurocmav, icl, svo)",   &this->dataset, NULL, this->dataset_callback));
 		this->addParameter(TypedParameter<std::string>("o",     "log-file",      "Output slam file",            &this->output, NULL));
@@ -160,7 +172,7 @@ int main(int argc, char * argv[]) {
 
 	if ( main->dataset == "" ) {
 		std::cout << " Please define the dataset type using the -d argument. " << std::endl;
-		std::cout << " Possible values are: iclnuim tum  eurocmav icl svo" << std::endl;
+		std::cout << " Possible values are: iclnuim tum eurocmav icl svo" << std::endl;
 		std::cout << " To have details of arguments for any type of dataset you are interested by," << std::endl;
 		std::cout << " Please run the help mode for this dataset (e.g "  << argv[0] << "-d tum" << std::endl;
 		return EXIT_FAILURE;

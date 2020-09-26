@@ -4,8 +4,7 @@ ANDROID_EIGEN3_INCLUDE_DIR=${ANDROID_DEPS_DIR}/eigen3/include/eigen3
 ${REPOS_DIR}/eigen3 :
 	mkdir ${REPOS_DIR}/ -p
 	rm ${REPOS_DIR}/eigen3 -rf
-	cd ${REPOS_DIR}/ && hg clone --insecure "http://bitbucket.org/eigen/eigen" eigen3
-	cd ${REPOS_DIR}/eigen3 && hg update 3.2
+	cd ${REPOS_DIR}/ && git clone --depth 1 --branch 3.2.10 https://gitlab.com/libeigen/eigen.git eigen3
 
 
 ${DEPS_DIR}/eigen3  : ${REPOS_DIR}/eigen3 

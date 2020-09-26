@@ -76,7 +76,7 @@ bool analyseTUMFolder(const std::string &dirname) {
 }
 
 
-bool loadTUMDepthData(const std::string &dirname , SLAMFile &file, const Sensor::pose_t &pose, const DepthSensor::intrinsics_t &intrinsics,const CameraSensor::distortion_coefficients_t &distortion,  const DepthSensor::disparity_params_t &disparity_params, const DepthSensor::disparity_type_t &disparity_type) {
+bool loadTUMDepthData(const std::string &dirname , SLAMFile &file, const Sensor::pose_t &pose, const DepthSensor::intrinsics_t &intrinsics,const CameraSensor::distortion_coefficients_t &distortion,  const DepthSensor::disparity_params_t &disparity_params, const DepthSensor::disparity_type_t &disparity_type, const CameraSensor::distortion_type_t &distortion_type) {
 
 	DepthSensor *depth_sensor = new DepthSensor("Depth");
 	depth_sensor->Index = 0;
@@ -89,7 +89,7 @@ bool loadTUMDepthData(const std::string &dirname , SLAMFile &file, const Sensor:
 	depth_sensor->CopyPose(pose);
 	depth_sensor->CopyIntrinsics(intrinsics);
 	depth_sensor->CopyDisparityParams(disparity_params);
-	depth_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
+	depth_sensor->DistortionType = distortion_type;
 	depth_sensor->CopyRadialTangentialDistortion(distortion);
 	depth_sensor->Index = file.Sensors.size();
 	depth_sensor->Rate = 30.0;
@@ -143,7 +143,7 @@ bool loadTUMDepthData(const std::string &dirname , SLAMFile &file, const Sensor:
 }
 
 
-bool loadTUMRGBData(const std::string &dirname , SLAMFile &file, const Sensor::pose_t &pose, const CameraSensor::intrinsics_t &intrinsics, const CameraSensor::distortion_coefficients_t &distortion) {
+bool loadTUMRGBData(const std::string &dirname , SLAMFile &file, const Sensor::pose_t &pose, const CameraSensor::intrinsics_t &intrinsics, const CameraSensor::distortion_coefficients_t &distortion, const CameraSensor::distortion_type_t &distortion_type) {
 
 	CameraSensor *rgb_sensor = new CameraSensor("RGB", CameraSensor::kCameraType);
 	rgb_sensor->Index = 0;
@@ -154,7 +154,7 @@ bool loadTUMRGBData(const std::string &dirname , SLAMFile &file, const Sensor::p
 	rgb_sensor->Description = "RGB";
 	rgb_sensor->CopyPose(pose);
 	rgb_sensor->CopyIntrinsics(intrinsics);
-	rgb_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
+	rgb_sensor->DistortionType = distortion_type;
 	rgb_sensor->CopyRadialTangentialDistortion(distortion);
 	rgb_sensor->Index =file.Sensors.size();
 	rgb_sensor->Rate = 30.0;
@@ -206,7 +206,7 @@ bool loadTUMRGBData(const std::string &dirname , SLAMFile &file, const Sensor::p
 	return true;
 }
 
-bool loadTUMGreyData(const std::string &dirname , SLAMFile &file, const Sensor::pose_t &pose, const CameraSensor::intrinsics_t &intrinsics, const CameraSensor::distortion_coefficients_t &distortion) {
+bool loadTUMGreyData(const std::string &dirname , SLAMFile &file, const Sensor::pose_t &pose, const CameraSensor::intrinsics_t &intrinsics, const CameraSensor::distortion_coefficients_t &distortion, const CameraSensor::distortion_type_t &distortion_type) {
 
 	CameraSensor *grey_sensor = new CameraSensor("Grey", CameraSensor::kCameraType);
 	grey_sensor->Index = 0;
@@ -219,7 +219,7 @@ bool loadTUMGreyData(const std::string &dirname , SLAMFile &file, const Sensor::
 	grey_sensor->CopyPose(pose);
 	grey_sensor->CopyIntrinsics(intrinsics);
 	grey_sensor->CopyRadialTangentialDistortion(distortion);
-	grey_sensor->DistortionType = slambench::io::CameraSensor::RadialTangential;
+	grey_sensor->DistortionType = distortion_type;
 	grey_sensor->Index =file.Sensors.size();
 	grey_sensor->Rate = 30.0;
 
@@ -426,44 +426,32 @@ SLAMFile* TUMReader::GenerateSLAMFile () {
 	CameraSensor::intrinsics_t intrinsics_rgb;
 	DepthSensor::intrinsics_t intrinsics_depth;
 
+	CameraSensor::distortion_type_t distortion_type;
 	CameraSensor::distortion_coefficients_t distortion_rgb;
 	DepthSensor::distortion_coefficients_t distortion_depth;
 
+	DepthSensor::disparity_params_t disparity_params;
+	DepthSensor::disparity_type_t disparity_type;
 
-	if (dirname.find("freiburg1") != std::string::npos) {
-		std::cout << "This dataset is assumed to be using freiburg1." << std::endl;
 
-		for (int i = 0; i < 4; i++) {
-			intrinsics_rgb[i]   = fr1_intrinsics_rgb[i];
-			intrinsics_depth[i] = fr1_intrinsics_depth[i];
-			distortion_rgb[i]   = fr1_distortion_rgb[i];
-			distortion_depth[i] = fr1_distortion_depth[i];
-		}
+	uint32_t kinect = get_sensor_params(disparity_params, disparity_type,
+				intrinsics_rgb, intrinsics_depth,
+				distortion_rgb, distortion_depth,
+				distortion_type);
 
-	} else if (dirname.find("freiburg2") != std::string::npos) {
-		std::cout << "This dataset is assumed to be using freiburg2." << std::endl;
-		for (int i = 0; i < 4; i++) {
-			intrinsics_rgb[i]   = fr2_intrinsics_rgb[i];
-			intrinsics_depth[i] = fr2_intrinsics_depth[i];
-			distortion_rgb[i]   = fr2_distortion_rgb[i];
-			distortion_depth[i] = fr2_distortion_depth[i];
-		}
-
-	} else  {
-		std::cout << "Camera calibration might be wrong !." << std::endl;
+	if (kinect) {
+		std::cout << "using freiburg" << kinect	<< " camera calibration parameters" << std::endl;
+	} else {
+		std::cout << "using default camera calibration parameters" << std::endl;
+		std::cout << "warning: camera calibration might be wrong!" << std::endl;
 	}
 
 
+    /**
+     * load Depth
+     */
 
-	DepthSensor::disparity_params_t disparity_params =  {0.001,0.0};
-	DepthSensor::disparity_type_t disparity_type = DepthSensor::affine_disparity;
-
-
-	/**
-	 * load Depth
-	 */
-
-	if(depth && !loadTUMDepthData(dirname, slamfile,pose,intrinsics_depth,distortion_depth,disparity_params,disparity_type)) {
+	if(depth && !loadTUMDepthData(dirname, slamfile,pose,intrinsics_depth,distortion_depth,disparity_params,disparity_type,distortion_type)) {
 		std::cout << "Error while loading depth information." << std::endl;
 		delete slamfilep;
 		return nullptr;
@@ -475,7 +463,7 @@ SLAMFile* TUMReader::GenerateSLAMFile () {
 	 * load Grey
 	 */
 
-	if(grey && !loadTUMGreyData(dirname, slamfile,pose,intrinsics_rgb,distortion_rgb)) {
+	if(grey && !loadTUMGreyData(dirname, slamfile,pose,intrinsics_rgb,distortion_rgb,distortion_type)) {
 		std::cout << "Error while loading Grey information." << std::endl;
 		delete slamfilep;
 		return nullptr;
@@ -487,7 +475,7 @@ SLAMFile* TUMReader::GenerateSLAMFile () {
 	 * load RGB
 	 */
 
-	if(rgb && !loadTUMRGBData(dirname, slamfile,pose,intrinsics_rgb,distortion_rgb)) {
+	if(rgb && !loadTUMRGBData(dirname, slamfile,pose,intrinsics_rgb,distortion_rgb,distortion_type)) {
 		std::cout << "Error while loading RGB information." << std::endl;
 		delete slamfilep;
 		return nullptr;
