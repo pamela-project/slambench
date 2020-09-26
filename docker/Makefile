@@ -11,6 +11,7 @@ SLAMBENCH2_DIRECTORY=../
 
 ./tmp/%-docker-image/DockerFile : ./%.docker
 	mkdir -p ./tmp/$*-docker-image/slambench2
+	chcon -t docker_exec_t ./tmp/$*-docker-image/
 	rm -rf ./tmp/$*-docker-image/slambench2/*
 	cp -r ${SLAMBENCH2_DIRECTORY}/CMakeLists.txt ${SLAMBENCH2_DIRECTORY}/benchmarks ${SLAMBENCH2_DIRECTORY}/cmake_modules ${SLAMBENCH2_DIRECTORY}/framework ${SLAMBENCH2_DIRECTORY}/Makefile ./tmp/$*-docker-image/slambench2
 	cp -rf $< ./tmp/$*-docker-image/DockerFile
