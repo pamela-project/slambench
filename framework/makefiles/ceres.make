@@ -28,7 +28,6 @@ ${DEPS_DIR}/ceres : ${REPOS_DIR}/ceres eigen3 suitesparse
 	mkdir -p $@
 	cd ${REPOS_DIR}/ceres/build && make install
 
-
 ceres :
 	+if [ ! -d ${DEPS_DIR}/$@ ] ; then make ${DEPS_DIR}/$@ ; else echo "$@ skipped."; fi
 .PHONY: ceres

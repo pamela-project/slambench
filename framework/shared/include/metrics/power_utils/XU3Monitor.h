@@ -7,8 +7,6 @@
 
  */
 
-
-
 #ifndef FRAMEWORK_INCLUDE_METRICS_POWER_UTILS_XU3_MONITOR_H_
 #define FRAMEWORK_INCLUDE_METRICS_POWER_UTILS_XU3_MONITOR_H_
 
@@ -25,9 +23,9 @@ class XU3Monitor : public PowerMonitor {
 
 public :
 
-	static XU3Monitor * generate () {
+	static XU3Monitor *generate () {
 
-		static XU3Monitor * loader = nullptr;
+		static XU3Monitor *loader = nullptr;
 		assert (loader == nullptr);
 
 		loader = new XU3Monitor ();
@@ -88,7 +86,7 @@ public :
 		}
 	}
 
-	const slambench::values::ValueDescription & GetType () const {
+	const slambench::values::ValueDescription &GetType () const {
 		static const slambench::values::ValueDescription desc = slambench::values::ValueDescription({
 					{"A7_Power", slambench::values::VT_DOUBLE},
 					{"A15_Power", slambench::values::VT_DOUBLE},
@@ -98,7 +96,7 @@ public :
 		return desc;
 	}
 
-	slambench::values::Value * endSample () {
+	slambench::values::Value *endSample() {
 
 		this->vpowerA7   = 0.0;
 		this->vpowerA15  = 0.0;
@@ -118,10 +116,5 @@ public :
 			{"GPU_Power", v3}, {"DRAM_Power", v4}});;
 
 	}
-
-
 };
-
-
-
 #endif /* FRAMEWORK_INCLUDE_METRICS_POWER_UTILS_PAPI_MONITOR_H_ */

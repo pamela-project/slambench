@@ -32,7 +32,6 @@ namespace slambench {
 			
 			virtual void MeasureStart(Phase* phase) override;
 			virtual void MeasureEnd(Phase* phase) override;
-			
 			values::Value *GetValue(Phase *phase) override;
 			const slambench::values::ValueDescription& GetValueDescription() const override;
 			const std::string &GetDescription() const override;
@@ -40,7 +39,6 @@ namespace slambench {
 		private:
 			std::unordered_map<Phase *, time_t> phase_start_;
 			std::unordered_map<Phase *, time_t> phase_end_;
-			
 			uint64_t getTime() const;
 		};
 		

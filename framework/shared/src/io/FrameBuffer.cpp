@@ -14,59 +14,58 @@
 
 using namespace slambench::io;
 
-FrameBuffer::FrameBuffer() : _lock(false), _size(0), _data(nullptr) {
-	
+FrameBuffer::FrameBuffer() : lock_(false), size_(0), data_(nullptr) {
 }
 
 FrameBuffer::~FrameBuffer() {
 	// This is dangerous if the frame buffer hasn't been released
-	if(_data) {
-		free(_data);
+	if(data_) {
+		free(data_);
 	}
 }
 
 void FrameBuffer::Acquire() {
-	if(_lock.exchange(true)) {
+	if(lock_.exchange(true)) {
 		throw std::logic_error("FrameBuffer is already locked");
 	}
 }
 
 bool FrameBuffer::TryAcquire() {
-	if(_lock.exchange(true)) return false;
+	if(lock_.exchange(true)) return false;
 	return true;
 }
 
 void FrameBuffer::Release() {
-	_lock = false;
+    lock_ = false;
 }
 
 void FrameBuffer::ResetBuffer() {
-	if(_data) {
-		free(_data);
-		_data = malloc(0);
+	if(data_) {
+		free(data_);
+        data_ = malloc(0);
 	}
 }
 
 bool FrameBuffer::Busy() {
-	return _lock;
+	return lock_;
 }
 
 bool FrameBuffer::Reserve(size_t new_size) {
-	if(new_size > _size) {
-		_size = new_size;
+	if(new_size > size_) {
+        size_ = new_size;
 	}
 	
-	if(_data) {
-		_data = realloc(_data, _size);
-		if(_data == nullptr) return false;
+	if(data_) {
+        data_ = realloc(data_, size_);
+		if(data_ == nullptr) return false;
 	}
 	
 	return true;
 }
 
 void *FrameBuffer::Data() {
-	if(_data == nullptr) {
-		_data = malloc(_size);
+	if(data_ == nullptr) {
+        data_ = malloc(size_);
 	}
-	return _data;
+	return data_;
 }

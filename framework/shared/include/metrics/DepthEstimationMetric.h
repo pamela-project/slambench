@@ -9,9 +9,6 @@ namespace slambench {
         using slambench::values::FrameValue;
 
         class DepthEstimationMetric : public Metric {
-        private:
-            const slambench::outputs::BaseOutput * const tested_;
-            const slambench::outputs::BaseOutput * const gt_;
 
         public:
             DepthEstimationMetric(const slambench::outputs::BaseOutput * const tested,
@@ -21,11 +18,14 @@ namespace slambench {
 
             const slambench::values::ValueDescription& GetValueDescription() const override;
             const std::string& GetDescription() const override;
-
             void MeasureStart(Phase* phase) override;
             void MeasureEnd(Phase* phase) override;
-
             Value *GetValue(Phase* phase) override;
+
+        private:
+            const slambench::outputs::BaseOutput * const tested_;
+            const slambench::outputs::BaseOutput * const gt_;
+
         };
     }
 }

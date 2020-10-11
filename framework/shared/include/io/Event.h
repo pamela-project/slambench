@@ -16,16 +16,16 @@ namespace slambench {
   namespace io {
     
     struct Event {
-      TimeStamp ts_;
-      uint16_t x_;
-      uint16_t y_;
-      bool polarity_;
+      TimeStamp ts;
+      uint16_t x;
+      uint16_t y;
+      bool polarity;
 
-      Event(TimeStamp ts, uint16_t x, uint16_t y, bool polarity) : ts_(ts), x_(x), y_(y), polarity_(polarity) {}
+      Event(TimeStamp ts, uint16_t x, uint16_t y, bool polarity) : ts(ts), x(x), y(y), polarity(polarity) {}
     };
 
     std::ostream& operator << (std::ostream &out, const Event &e) {
-      out << e.ts_.S << "." << e.ts_.Ns << " = " << e.x_ << " " << e.y_ << " " << e.polarity_;
+      out << e.ts.S << "." << e.ts.Ns << " = " << e.x << " " << e.y << " " << e.polarity;
       return out;
     }
   }

@@ -22,10 +22,8 @@ namespace slambench {
 
                 const slambench::values::ValueDescription& GetValueDescription() const override;
                 const std::string& GetDescription() const override;
-
                 void MeasureStart(Phase* phase) override;
                 void MeasureEnd(Phase* phase) override;
-
                 Value *GetValue(Phase* phase) override;
         };
     }

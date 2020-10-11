@@ -10,7 +10,7 @@
 #include "include/EUROCMAV.h"
 #include "include/utils/RegexPattern.h"
 #include "include/utils/dataset_utils.h"
-#include "include/utils/sensor_builder.h"
+#include "io/sensor/sensor_builder.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
@@ -219,7 +219,7 @@ SLAMFile *EUROCMAVReader::GenerateSLAMFile() {
   }
 
   auto slamfile = new SLAMFile();
-
+  std::sort(sensor_directories.begin(), sensor_directories.end());
   for (auto &dirname : sensor_directories) {
 
     // try and get sensor.yaml file
@@ -228,7 +228,7 @@ SLAMFile *EUROCMAVReader::GenerateSLAMFile() {
     YAML::Node sensor = YAML::LoadFile(filename.c_str());
 
     // check sensor type
-    std::string sensor_type = sensor["sensor_type"].as<std::string>();
+    auto sensor_type = sensor["sensor_type"].as<std::string>();
 
     if (sensor_type == "camera" and this->stereo) {
       std::cerr << "Found sensor type " << sensor_type << " from directory " << dirname << std::endl;
@@ -311,7 +311,7 @@ SLAMFile *EUROCMAVReader::GenerateSLAMFile() {
 
           auto frame = new ImageFileFrame();
           frame->FrameSensor = grey_sensor;
-          frame->Filename = cam_dirname + "/data/" + pdir->d_name;
+          frame->filename = cam_dirname + "/data/" + pdir->d_name;
 
           uint64_t timestamp = strtol(pdir->d_name, nullptr, 10);
           frame->Timestamp.S = timestamp / 1000000000;
@@ -323,7 +323,7 @@ SLAMFile *EUROCMAVReader::GenerateSLAMFile() {
             // Add the clone RGB
             auto rgb_frame = new ImageFileFrame();
             rgb_frame->FrameSensor = rgb_sensor;
-            rgb_frame->Filename = cam_dirname + "/data/" + pdir->d_name;
+            rgb_frame->filename = cam_dirname + "/data/" + pdir->d_name;
             rgb_frame->Timestamp.S = timestamp / 1000000000;
             rgb_frame->Timestamp.Ns = timestamp % 1000000000;
             slamfile->AddFrame(rgb_frame);

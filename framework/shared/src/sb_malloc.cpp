@@ -37,7 +37,7 @@ MemoryProfile MemoryProfile::singleton;
 
 
 
-void MemoryProfile::StartFrame(int i) { _frame = i; _data[_frame]; _gpu_data[_frame];  track_allocs_frame = true;}
+void MemoryProfile::StartFrame(int i) { _frame = i; data_[_frame]; gpu_data_[_frame]; track_allocs_frame = true;}
 void MemoryProfile::EndFrame() { track_allocs_frame = false; }
 
 void MemoryProfile::StartAlgorithm() {
@@ -286,13 +286,13 @@ ADD_CUDA_ALLOCATION4(cudaMallocPitch ,
 		(void*) *devPtr,width * height );
 
 
-// __host__ ​cudaError_t cudaMallocArray ( cudaArray_t* array, const cudaChannelFormatDesc* desc, size_t width, size_t height = 0, unsigned int  flags = 0 )
+// __host__ ​cudaError_t cudaMallocArray ( cudaArray_t* array, const cudaChannelFormatDesc* desc_, size_t width, size_t height = 0, unsigned int  flags = 0 )
 //   Allocate an array on the device.
 //********************************************************
 /*
 CATCH_CUDA_FUNC5(cudaMallocArray ,
-		cudaArray_t* array, const void* desc, size_t width, size_t height , unsigned int  flags
-		, array,  desc ,  width,  height , flags )   ;
+		cudaArray_t* array, const void* desc_, size_t width, size_t height , unsigned int  flags
+		, array,  desc_ ,  width,  height , flags )   ;
 */
 
 

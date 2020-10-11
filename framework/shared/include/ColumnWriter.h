@@ -39,7 +39,7 @@ namespace slambench {
 
 	class ColumnInterface {
 	public:
-		virtual ~ColumnInterface();
+		virtual ~ColumnInterface() = default;
 		virtual void WriteHeader(std::ostream &str) const = 0;
 		virtual void Write(std::ostream &str) = 0;
 	};
@@ -47,7 +47,7 @@ namespace slambench {
 	class LibColumnInterface : public ColumnInterface {
 	public:
 		LibColumnInterface(SLAMBenchLibraryHelper *lib) : lib_(lib) {}
-		virtual ~LibColumnInterface();
+		virtual ~LibColumnInterface() = default;
 		void Write(std::ostream& str) override = 0;
 		void WriteHeader(std::ostream& str) const override = 0;
 
@@ -64,7 +64,7 @@ namespace slambench {
 	public:
 		ValueLibColumnInterface(SLAMBenchLibraryHelper *lib, metrics::Metric *metric, metrics::Phase *phase);
 		ValueLibColumnInterface(SLAMBenchLibraryHelper *lib, outputs::BaseOutput *output);
-		virtual ~ValueLibColumnInterface();
+		~ValueLibColumnInterface() override = default;
 		
 		virtual void Write(std::ostream& str) override;
 		virtual void WriteHeader(std::ostream& str) const override;
@@ -95,8 +95,8 @@ namespace slambench {
 	
 	class OutputTimestampColumnInterface : public ColumnInterface {
 	public:
-		OutputTimestampColumnInterface(outputs::BaseOutput *output);
-		virtual ~OutputTimestampColumnInterface();
+		explicit OutputTimestampColumnInterface(outputs::BaseOutput *output) : output_(output) {};
+		~OutputTimestampColumnInterface() override = default;
 		void Write(std::ostream& str) override;
 		void WriteHeader(std::ostream& str) const override;
 	private:
@@ -117,7 +117,8 @@ namespace slambench {
 	class ColumnWriter {
 	public:
 		ColumnWriter(std::ostream &str, const std::string &separator);
-		
+		~ColumnWriter() = default;
+
 		void AddColumn(ColumnInterface *interface);
 		void PrintRow();
 		void PrintHeader();

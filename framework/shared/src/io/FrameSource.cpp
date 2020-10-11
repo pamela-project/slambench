@@ -16,51 +16,33 @@
 
 using namespace slambench::io;
 
-FrameCollection::~FrameCollection() {
-
-}
-
-FrameStream::~FrameStream() {
-
-}
-
-FrameCollectionStream::FrameCollectionStream(FrameCollection& base_collection) : _collection(base_collection), _index(0) {
-
-}
+FrameCollectionStream::FrameCollectionStream(FrameCollection& base_collection) : collection_(base_collection), index_(0) {}
 
 SLAMFrame* FrameCollectionStream::GetNextFrame() {
 	if(!HasNextFrame()) {
 		return nullptr;
 	}
-	return _collection.GetFrame(_index++);
+	return collection_.GetFrame(index_++);
 }
 
 bool FrameCollectionStream::HasNextFrame() {
-	return _index < _collection.GetFrameCount();
+	return index_ < collection_.GetFrameCount();
 }
 
-GTBufferingFrameStream::GTFrameCollection::GTFrameCollection(GTBufferingFrameStream& gt_stream) : gt_stream_(gt_stream)
-{
-	
-}
-
-GTBufferingFrameStream::GTFrameCollection::~GTFrameCollection()
-{
-
-}
+GTBufferingFrameStream::GTFrameCollection::GTFrameCollection(GTBufferingFrameStream& gt_stream) : gt_stream_(gt_stream) {}
 
 SLAMFrame* GTBufferingFrameStream::GTFrameCollection::GetFrame(unsigned int index)
 {
 	return gt_stream_.gt_frames_.at(index);
 }
 
-SLAMFrame* GTBufferingFrameStream::GTFrameCollection::GetClosestFrameToTime(slambench::TimeStamp t)
+SLAMFrame* GTBufferingFrameStream::GTFrameCollection::GetClosestFrameToTime(const slambench::TimeStamp& ts)
 {
-	auto frame = std::lower_bound(gt_stream_.gt_frames_.begin(), gt_stream_.gt_frames_.end(), t,
-		[](SLAMFrame *frame, slambench::TimeStamp t){ return frame->Timestamp < t; });
+	auto frame = std::lower_bound(gt_stream_.gt_frames_.begin(), gt_stream_.gt_frames_.end(), ts,
+                                  [](SLAMFrame *frame, slambench::TimeStamp t){ return frame->Timestamp < t; });
 	if (frame == gt_stream_.gt_frames_.end()) {
 		frame--;
-	} else if (frame != gt_stream_.gt_frames_.begin() && (*frame)->Timestamp - t > t - (*(frame - 1))->Timestamp) {
+	} else if (frame != gt_stream_.gt_frames_.begin() && (*frame)->Timestamp - ts > ts - (*(frame - 1))->Timestamp) {
 		frame--;
 	}
 	return *frame;
@@ -73,13 +55,7 @@ unsigned int GTBufferingFrameStream::GTFrameCollection::GetFrameCount()
 
 GTBufferingFrameStream::GTBufferingFrameStream(FrameStream& base_stream) : base_stream_(base_stream), buffered_frame_(nullptr)
 {
-	fastForward();
-}
-
-
-GTBufferingFrameStream::~GTBufferingFrameStream()
-{
-
+    fastForward();
 }
 
 SLAMFrame* GTBufferingFrameStream::GetNextFrame()
@@ -100,6 +76,7 @@ bool GTBufferingFrameStream::HasNextFrame()
 
 GTBufferingFrameStream::GTFrameCollection* GTBufferingFrameStream::GetGTFrames()
 {
+	// TODO : memory leak here
 	return new GTFrameCollection(*this);
 }
 
@@ -127,15 +104,7 @@ void GTBufferingFrameStream::fastForward()
 	buffered_frame_ = next_frame;
 }
 
-RealTimeFrameStream::RealTimeFrameStream(FrameStream* base_stream, double multiplier, bool should_pause) : base_stream_(base_stream), acceleration_(multiplier), should_pause_(should_pause)
-{
-	
-}
-
-RealTimeFrameStream::~RealTimeFrameStream()
-{
-
-}
+RealTimeFrameStream::RealTimeFrameStream(FrameStream* base_stream, double multiplier, bool should_pause) : base_stream_(base_stream), acceleration_(multiplier), should_pause_(should_pause) {}
 
 bool RealTimeFrameStream::HasNextFrame()
 {

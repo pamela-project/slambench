@@ -1,14 +1,15 @@
 PANGOLIN_DIR=${DEPS_DIR}/pangolin/lib/cmake/Pangolin/
 
+CURRENT_PANGOLIN_COMMIT=c2a6ef524401945b493f14f8b5b8aa76cc7d71a9 # (Mar 18)
+
+## INFO: Previously we used 8b8b7b96adcf58ac2755dedd3f681fc512385af0 (Jan 17)
+
 ${REPOS_DIR}/pangolin :
 	mkdir ${REPOS_DIR} -p
 	rm ${REPOS_DIR}/pangolin -rf
 	git clone "https://github.com/stevenlovegrove/Pangolin.git" ${REPOS_DIR}/pangolin
-	cd ${REPOS_DIR}/pangolin && git checkout 8b8b7b96adcf58ac2755dedd3f681fc512385af0
-# git checkout b107252bf6dbb50b26597f5f2c2ca39c4412f72c
-# git checkout master
-# git checkout   021ed52ca8e355abf7cd2c783e12a316fc07218d
-# git checkout e849e3b # original for LSDSLAM
+	cd ${REPOS_DIR}/pangolin && git checkout ${CURRENT_PANGOLIN_COMMIT}
+
 
 ${DEPS_DIR}/pangolin : ${REPOS_DIR}/pangolin  eigen3
 	if [ ! -e $(EIGEN3_INCLUDE_DIR) ] ; \
@@ -16,10 +17,10 @@ ${DEPS_DIR}/pangolin : ${REPOS_DIR}/pangolin  eigen3
 		echo "ERROR: Pangolin requires EIGEN to be fully functional (make eigen).";\
 		exit 1;\
 	fi;
-	cd ${REPOS_DIR}/pangolin && cmake . -DAVFORMAT_INCLUDE_DIR=\"\"  "-DCMAKE_INSTALL_PREFIX:PATH=$@" -DEIGEN3_INCLUDE_DIR=${EIGEN3_INCLUDE_DIR} -DEIGEN_INCLUDE_DIR=${EIGEN3_INCLUDE_DIR}
-	+cd ${REPOS_DIR}/pangolin && make
+	cd ${REPOS_DIR}/pangolin && mkdir -p build && cd build && cmake .. -DBUILD_PANGOLIN_VIDEO=OFF  "-DCMAKE_INSTALL_PREFIX:PATH=$@"  -DEIGEN_INCLUDE_DIR=${EIGEN3_INCLUDE_DIR}
+	+cd ${REPOS_DIR}/pangolin/build && make
 	mkdir -p $@
-	cd ${REPOS_DIR}/pangolin && make install
+	cd ${REPOS_DIR}/pangolin/build && make install
 
 pangolin : 
 	+if [ ! -d ${DEPS_DIR}/$@ ] ; then make ${DEPS_DIR}/$@ ; else if cat ${DEPS_DIR}/pangolin/include/pangolin/config.h |grep -q "define HAVE_EIGEN" ; then echo "$@ skipped."; else make ${DEPS_DIR}/$@ ; fi; fi

@@ -86,36 +86,36 @@ namespace slambench {
 				void EndAlgorithm();
 				
 				void ResetBytesAllocated () {
-					_overall_data.ResetBytesAllocated();
+					overall_data_.ResetBytesAllocated();
 				}
 				void ResetGPUBytesAllocated () {
-					_overall_gpu_data.ResetBytesAllocated();
+					overall_gpu_data_.ResetBytesAllocated();
 				}
-				const MemoryData &GetDataForFrame(uint32_t frame_idx) const { return _data.at(frame_idx); }
+				const MemoryData &GetDataForFrame(uint32_t frame_idx) const { return data_.at(frame_idx); }
 				const MemoryData &GetDataForCurrentFrame() const { return GetDataForFrame(GetCurrentFrame()); }
-				const MemoryData &GetOverallData() const { return _overall_data; }
+				const MemoryData &GetOverallData() const { return overall_data_; }
 				
-				const MemoryData &GetGPUDataForFrame(uint32_t frame_idx) const { return _gpu_data.at(frame_idx); }
+				const MemoryData &GetGPUDataForFrame(uint32_t frame_idx) const { return gpu_data_.at(frame_idx); }
 				const MemoryData &GetGPUDataForCurrentFrame() const { return GetGPUDataForFrame(GetCurrentFrame()); }
-				const MemoryData &GetOverallGPUData() const { return _overall_gpu_data; }
+				const MemoryData &GetOverallGPUData() const { return overall_gpu_data_; }
 
-				bool HasDataForFrame(uint32_t frame_idx) const { return _data.count(frame_idx); }
+				bool HasDataForFrame(uint32_t frame_idx) const { return data_.count(frame_idx); }
 				
 				uint32_t GetCurrentFrame() const { return _frame; };
 			private:
-				std::map<uint32_t, MemoryData> _data;
-				std::map<uint32_t, MemoryData> _gpu_data;
-				MemoryData _overall_data;
-				MemoryData _overall_gpu_data;
+				std::map<uint32_t, MemoryData> data_;
+				std::map<uint32_t, MemoryData> gpu_data_;
+				MemoryData overall_data_;
+				MemoryData overall_gpu_data_;
 				uint32_t _frame;
 				
 
-				MemoryData &DataForFrame(uint32_t frame_idx) { return _data[frame_idx]; }
-				MemoryData &GPUDataForFrame(uint32_t frame_idx) { return _gpu_data[frame_idx]; }
+				MemoryData &DataForFrame(uint32_t frame_idx) { return data_[frame_idx]; }
+				MemoryData &GPUDataForFrame(uint32_t frame_idx) { return gpu_data_[frame_idx]; }
 				MemoryData &GPUDataForCurrentFrame() { return GPUDataForFrame(GetCurrentFrame()); }
 				MemoryData &DataForCurrentFrame() { return DataForFrame(GetCurrentFrame()); }
-				MemoryData &OverallData() { return _overall_data; }
-				MemoryData &OverallGPUData() { return _overall_gpu_data; }
+				MemoryData &OverallData() { return overall_data_; }
+				MemoryData &OverallGPUData() { return overall_gpu_data_; }
 		};
 	}
 }

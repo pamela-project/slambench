@@ -15,12 +15,12 @@
 
 class SLAMBenchException : public std::exception {
   private:
-    std::string err_msg;
+    std::string err_msg_;
 
   public:
-    SLAMBenchException(const char *msg) : err_msg(msg) {};
+    SLAMBenchException(const char *msg) : err_msg_(msg) {};
     ~SLAMBenchException() throw() {};
-    const char *what() const throw() { return this->err_msg.c_str(); };
+    const char *what() const throw() { return this->err_msg_.c_str(); };
 };
 
 

@@ -16,9 +16,11 @@ using namespace slambench::io;
 
 Sensor::Sensor(const sensor_name_t &name, const sensor_type_t &type) :
 		ParameterComponent(name),
-		sensor_type_(type),
-		sensor_name_(name), Rate(0) {
-}
+		Index(0),
+		Rate(0),
+		Delay(0),
+		sensor_name_(name),
+		sensor_type_(type) {}
 
 const Sensor::sensor_type_t &Sensor::GetType() const {
 	return sensor_type_;
@@ -26,10 +28,6 @@ const Sensor::sensor_type_t &Sensor::GetType() const {
 
 const Sensor::sensor_name_t &Sensor::GetName() const {
 	return sensor_name_;
-}
-
-
-Sensor::~Sensor() {
 }
 
 void Sensor::CopyPose(const pose_t &other) {
@@ -50,12 +48,7 @@ bool Sensor::IsVariableSize() const
 	return SensorDatabase::Singleton()->Get(GetType()).IsVariableSize();
 }
 
-
-SensorDeserialiser::~SensorDeserialiser() {
-
-}
-
-bool SensorDeserialiser::Deserialise(const Sensor::sensor_name_t &sensor_name, const Sensor::sensor_type_t &type, Deserialiser* d, Sensor** s) {
+bool SensorDeserialiser::Deserialise(const Sensor::sensor_name_t &sensor_name, const Sensor::sensor_type_t &type, const Deserialiser* d, Sensor** s) {
 	Sensor *sensor;
 	if(!InstantiateSensor(sensor_name, type, &sensor)) {
 		fprintf(stderr, "Could not instantiate sensor of type %s\n", type.c_str());
@@ -69,11 +62,10 @@ bool SensorDeserialiser::Deserialise(const Sensor::sensor_name_t &sensor_name, c
 	char desc[desc_bytes];
 	d->Read(desc, desc_bytes);
 	sensor->Description = desc;
-
 	d->Read(&sensor->Rate, sizeof(sensor->Rate));
-	
 	d->Read(&sensor->Pose, sizeof(sensor->Pose));
-	
+	d->Read(&sensor->Delay, sizeof(sensor->Delay));
+
 	*s = sensor;
 	bool success = DeserialiseSensorSpecific(d, *s);
 	if(!success) {
@@ -82,14 +74,7 @@ bool SensorDeserialiser::Deserialise(const Sensor::sensor_name_t &sensor_name, c
 	return success;
 }
 
-
-SensorSerialiser::~SensorSerialiser() {
-
-}
-
 bool SensorSerialiser::Serialise(Serialiser* serialiser, const Sensor* sensor) {
-
-
 	Sensor::sensor_type_t raw_name = sensor->GetName();
 	uint8_t name_size = raw_name.size()+1;
 	serialiser->Write(&name_size, sizeof(name_size));
@@ -99,18 +84,14 @@ bool SensorSerialiser::Serialise(Serialiser* serialiser, const Sensor* sensor) {
 	uint8_t type_size = raw_type.size()+1;
 	serialiser->Write(&type_size, sizeof(type_size));
 	serialiser->Write(raw_type.c_str(), type_size);
-	
-
-
-
 	serialiser->Write(&sensor->Index, sizeof(sensor->Index));
 	
 	uint32_t desc_bytes = sensor->Description.size()+1;
 	serialiser->Write(&desc_bytes, sizeof(desc_bytes));
-	
 	serialiser->Write(sensor->Description.c_str(), desc_bytes);
 	serialiser->Write(&sensor->Rate, sizeof(sensor->Rate));
 	serialiser->Write(&sensor->Pose, sizeof(sensor->Pose));
-	
+	serialiser->Write(&sensor->Delay, sizeof(sensor->Delay));
+
 	return SerialiseSensorSpecific(serialiser, sensor);
 }

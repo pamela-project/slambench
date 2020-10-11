@@ -47,13 +47,15 @@ namespace slambench {
 			distortion_type_t   DistortionType;
 			distortion_coefficients_t RadialTangentialDistortion;
 			distortion_coefficients_t EquidistantDistortion;
-			
+			distortion_coefficients_t Distortion;
+
 
 			size_t GetFrameSize(const SLAMFrame *frame) const override;
 			void CopyIntrinsics(const CameraSensor *other);
 			void CopyIntrinsics(const intrinsics_t &other);
 			void CopyRadialTangentialDistortion(const distortion_coefficients_t &other);
-                        void CopyEquidistantDistortion(const distortion_coefficients_t &other);
+            void CopyEquidistantDistortion(const distortion_coefficients_t &other);
+            void CopyDistortion(const distortion_coefficients_t &other, const distortion_type_t& type);
 		};
 	}
 }

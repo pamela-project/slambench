@@ -8,6 +8,8 @@ import numpy as np
 
 from utils import *
 
+LIBRARY_NAME_PROPERTY = "load-slam-library"
+
 PROPERTIES_SECTION     = "Properties"
 STATISTICS_SECTION     = "Statistics"
 
@@ -209,7 +211,7 @@ def load_data_from_files (filelist) :
           dataset = temp[PROPERTIES_SECTION]["input"]
           #dataset = dataset.split("/")[-1]
 
-          libraryname = temp[PROPERTIES_SECTION]["load-library"]
+          libraryname = temp[PROPERTIES_SECTION][LIBRARY_NAME_PROPERTY]
           
           if stats == None :
               printerr (" %s : stats == None.\n" % filename )

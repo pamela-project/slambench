@@ -20,7 +20,7 @@ using namespace slambench::outputs;
 
 slambench::io::SLAMFile* OutputManagerWriter::GetFile(OutputManager& outman)
 {
-	slambench::io::SLAMFile *file = new slambench::io::SLAMFile();
+	auto file = new slambench::io::SLAMFile();
 	std::lock_guard<FastLock> lock (outman.GetLock());
 	(void)lock; // I hate this werror
 	
@@ -124,21 +124,19 @@ slambench::io::SLAMFrame* OutputManagerWriter::CreateFrame(BaseOutput *output, T
 
 slambench::io::SLAMFrame* OutputManagerWriter::CreatePointCloudFrame(BaseOutput *output, TimeStamp ts, const slambench::values::PointCloudValue* value)
 {
-	slambench::io::PointCloud *pointcloud = new slambench::io::PointCloud();
+	auto pointcloud = new slambench::io::PointCloud();
 	
 	for(auto i : value->GetPoints()) {
 		pointcloud->Get().push_back(slambench::io::Point(i.X, i.Y, i.Z));
 	}
 	
-	slambench::io::SLAMInMemoryFrame *frame = new slambench::io::SLAMInMemoryFrame();
+	auto frame = new slambench::io::SLAMInMemoryFrame();
 	
 	auto pointclouddata = pointcloud->ToRaw();
 	
 	frame->FrameSensor = output_map_.at(output);
 	frame->Timestamp = ts;
-	frame->Data = malloc(pointclouddata.size());
-	memcpy(frame->Data, pointclouddata.data(), pointclouddata.size());
-	
+	frame->SetData(pointclouddata.data(), pointclouddata.size());
 	frame->SetVariableSize(pointclouddata.size());
 	
 	return frame;
@@ -146,10 +144,10 @@ slambench::io::SLAMFrame* OutputManagerWriter::CreatePointCloudFrame(BaseOutput 
 
 slambench::io::SLAMFrame* OutputManagerWriter::CreatePoseFrame(BaseOutput *output, TimeStamp ts, const slambench::values::PoseValue* value)
 {
-	slambench::io::SLAMInMemoryFrame *frame = new slambench::io::SLAMInMemoryFrame();
+	auto frame = new slambench::io::SLAMInMemoryFrame();
 	frame->FrameSensor = output_map_.at(output);
 	frame->Timestamp = ts;
-	frame->Data = (void*)&value->GetValue();
+	frame->SetData((void*)&value->GetValue());
 
 	return frame;
 }

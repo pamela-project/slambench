@@ -23,20 +23,20 @@ using namespace slambench::metrics;
 
 
 const slambench::values::ValueDescription &MemoryMetric::GetValueDescription() const {
-	return desc;
+	return desc_;
 }
 
-MemoryMetric::MemoryMetric() : Metric("Memory") , desc({})
+MemoryMetric::MemoryMetric() : Metric("Memory") , desc_({})
 {
 	slambench::memory::MemoryProfile::singleton.StartAlgorithm();
 
 //	if (cuda_monitor.IsActive()) {
-//		desc = slambench::values::ValueDescription({
+//		desc_ = slambench::values::ValueDescription({
 //						{"CPU_Memory",  slambench::values::VT_U64},
 //						{"GPU_Memory",  slambench::values::VT_U64},
 //						{"CUDA_Memory", slambench::values::VT_U64}});
 //	} else {
-		desc = slambench::values::ValueDescription({
+		desc_ = slambench::values::ValueDescription({
 						{"CPU_Memory",  slambench::values::VT_U64},
 						{"GPU_Memory",  slambench::values::VT_U64}});
 //	}

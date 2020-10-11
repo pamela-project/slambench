@@ -48,7 +48,7 @@ class ACCDeserialiser : public SensorDeserialiser {
 		return true;
 	}
 
-	bool DeserialiseSensorSpecific(Deserialiser* d, Sensor* s) override {
+	bool DeserialiseSensorSpecific(const Deserialiser* d, Sensor* s) override {
 		AccelerometerSensor *sensor = (AccelerometerSensor*)s;
 
 		d->Read(&sensor->Intrinsic , sizeof(sensor->Intrinsic));

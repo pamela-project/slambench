@@ -1,9 +1,4 @@
-
-
 ########################################## COMMIT USED #################################################################
-
-
-
 OPENNI2_REPOS=https://github.com/occipital/OpenNI2/
 OPENNI2_COMMIT=1fce8edffab43c4a4cf201cff86f415b07a2d37f
 
@@ -19,16 +14,9 @@ SENSORK_COMMIT=15f1975d5e50d84ca06ff784f83f8b7836749a7b
 FREENECT_REPOS=https://github.com/OpenKinect/libfreenect.git
 FREENECT_COMMIT=83e57e1318cc64c9aabac481b9e330acc1914a23
 
-
-
 ########################################## OPENNI 1.5 PART #################################################################
-
-
-
 OPENNI_INCLUDE_DIR=${DEPS_DIR}/openni15/Include
 OPENNI_LIBRARY=${DEPS_DIR}/openni15/Lib/libOpenNI.so
-
-
 
 ${REPOS_DIR}/libusb :
 	rm -rf $@
@@ -44,8 +32,6 @@ ${DEPS_DIR}/libusb : ${REPOS_DIR}/libusb
 libusb :
 	@+if [ ! -d ${DEPS_DIR}/$@ ] ; then make ${DEPS_DIR}/$@ ; else echo "$@ skipped."; fi
 
-
-
 ${REPOS_DIR}/openni15 : 
 	mkdir -p ${REPOS_DIR}
 	rm -rf ${REPOS_DIR}/openni15	
@@ -58,7 +44,6 @@ ${REPOS_DIR}/SensorKinect :
 	rm -rf ${REPOS_DIR}/SensorKinect	
 	cd ${REPOS_DIR} ; git clone ${SENSORK_REPOS} $@ && cd $@ && git checkout ${SENSORK_COMMIT}
 
-
 ${DEPS_DIR}/openni15 : ${REPOS_DIR}/openni15 ${DEPS_DIR}/libusb 
 	chmod +x ${REPOS_DIR}/openni15/Platform/Linux/CreateRedist/RedistMaker
 	cd ${REPOS_DIR}/openni15/Platform/Linux/CreateRedist/ && ./RedistMaker
@@ -67,12 +52,9 @@ ${DEPS_DIR}/openni15 : ${REPOS_DIR}/openni15 ${DEPS_DIR}/libusb
 	mv ${REPOS_DIR}/openni15/OpenNI-Bin-*/  ${DEPS_DIR}/openni15
 	cp ${REPOS_DIR}/openni15/Data/SamplesConfig.xml  ${DEPS_DIR}/openni15/
 
-
 ${DEPS_DIR}/SensorKinect : ${REPOS_DIR}/SensorKinect  ${REPOS_DIR}/openni15 
 	cd $</Platform/Linux/CreateRedist && ./RedistMaker
 	cp -rf $</Platform/Linux/Redist/Sensor-Bin-*/  $@/
-
-
 
 openni15 :
 	@+if [ ! -d ${DEPS_DIR}/$@ ] ; then make ${DEPS_DIR}/$@ ; else echo "$@ skipped."; fi
@@ -81,7 +63,6 @@ openni15 :
 	@echo " To test it : cd ${DEPS_DIR}/openni15 && ./Samples/Bin/x64-Release/Sample-NiSimpleRead"
 	@echo "********************************************************************"
 
-
 SensorKinect :
 	+if [ ! -d ${DEPS_DIR}/$@ ] ; then make ${DEPS_DIR}/$@ ; else echo "$@ skipped."; fi
 	@echo "********************************************************************"
@@ -89,22 +70,10 @@ SensorKinect :
 	@echo " To test it : cd ${DEPS_DIR}/openni15 && ./Samples/Bin/x64-Release/Sample-NiSimpleRead"
 	@echo "********************************************************************"
 
-
 .PHONY: openni15  SensorKinect
 
 
-
-
-
-
-
-
-
-
-
-
 ########################################## OPENNI 2 PART #################################################################
-
 # requires systemd-devel  doxygen
 
 OPENNI2_INCLUDE=${DEPS_DIR}/openni2/OpenNI-Linux-x64-2.2/Include
@@ -112,8 +81,6 @@ OPENNI2_REDIST=${DEPS_DIR}/openni2/OpenNI-Linux-x64-2.2/Redist
 
 OPENNI2_INCLUDE_PATH=${DEPS_DIR}/openni2/OpenNI-Linux-x64-2.2/Include
 OPENNI2_LIBRARY=${DEPS_DIR}/openni2/OpenNI-Linux-x64-2.2/Redist/libOpenNI2.so
-
-
 
 ${REPOS_DIR}/openni2 :
 	mkdir -p ${REPOS_DIR}

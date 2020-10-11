@@ -1,3 +1,15 @@
+ifndef DEPS_DIR
+$(error DEPS_DIR is not set)
+endif
+
+ifndef REPOS_DIR
+$(error REPOS_DIR is not set)
+endif
+
+ifndef DEPS_BUILD_DIR
+$(error DEPS_BUILD_DIR is not set)
+endif
+
 PCL_DIR=${DEPS_DIR}/pcl/share/pcl-1.8
 ANDROID_PCL_DIR=${ANDROID_DEPS_DIR}/pcl/share/pcl-1.8
 
@@ -27,6 +39,7 @@ ${DEPS_DIR}/pcl : ${REPOS_DIR}/pcl eigen3 flann
 	-DWITH_DAVIDSDK=FALSE \
 	-DWITH_DSSDK=FALSE \
 	-DWITH_RSSDK=FALSE \
+	-DWITH_VTK=FALSE \
 	-DWITH_PCAP=FALSE \
 	-DBUILD_common=TRUE                \
 	-DBUILD_octree=TRUE               \
@@ -54,8 +67,8 @@ ${DEPS_DIR}/pcl : ${REPOS_DIR}/pcl eigen3 flann
 	"-DCMAKE_INSTALL_PREFIX:PATH=$@" \
 	-DEIGEN_INCLUDE_DIR=${EIGEN3_INCLUDE_DIR} \
 	-DFLANN_LIBRARY=${FLANN_LIBRARY} -DCMAKE_BUILD_TYPE=RELEASE \
-	-DFLANN_INCLUDE_DIR=${FLANN_INCLUDE_DIR} # > ${DEPS_BUILD_DIR}/pcl//build.log.tmp 2>&1
-	if cat ${DEPS_BUILD_DIR}/pcl//build.log.tmp | grep "Requires external library" ; then echo "Error with deps of PCL." ; exit 1 ; fi
+	-DFLANN_INCLUDE_DIR=${FLANN_INCLUDE_DIR}  > ${DEPS_BUILD_DIR}/pcl/build.log.tmp 2>&1
+	if cat ${DEPS_BUILD_DIR}/pcl/build.log.tmp | grep "Requires external library" ; then echo "Error with deps of PCL." ; exit 1 ; fi
 	+cd ${DEPS_BUILD_DIR}/pcl/ && make 
 	mkdir -p $@
 	cd ${DEPS_BUILD_DIR}/pcl/ && make install

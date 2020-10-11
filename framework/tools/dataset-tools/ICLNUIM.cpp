@@ -9,7 +9,7 @@
 
 #include "include/ICLNUIM.h"
 #include "include/utils/dataset_utils.h"
-#include "include/utils/sensor_builder.h"
+#include "io/sensor/sensor_builder.h"
 
 #include <io/SLAMFile.h>
 #include <io/SLAMFrame.h>
@@ -23,6 +23,8 @@
 #include <utils/RegexPattern.h>
 #include <fstream>
 #include <iostream>
+#include <fstream>
+#include <Eigen/Core>
 
 using namespace slambench::io;
 
@@ -46,49 +48,43 @@ void ICLNUIMReader::AddSensors(SLAMFile &file) {
 
     if (this->rgb) {
         this->rgb_sensor = RGBSensorBuilder()
-                .name("RGB")
-                .rate(1)
-                .size(640, 480)
+                .rate(image_params.rate)
+                .size(image_params.width, image_params.height)
                 .pose(pose)
                 .intrinsics(intrinsics)
+                .index(file.Sensors.size())
                 .build();
 
-        this->rgb_sensor->Index = file.Sensors.size();
         file.Sensors.AddSensor(this->rgb_sensor);
     }
 
     if (this->depth) {
         this->depth_sensor = DepthSensorBuilder()
-                .name("Depth")
-                .rate(1)
-                .size(640, 480)
+                .rate(image_params.rate)
+                .size(image_params.width, image_params.height)
                 .disparity(disparity_type, disparity_params)
                 .pose(pose_depth)
                 .intrinsics(intrinsics_depth)
+                .index(file.Sensors.size())
                 .build();
 
-        this->depth_sensor->Index = file.Sensors.size();
         file.Sensors.AddSensor(this->depth_sensor);
     }
 
     if (this->grey) {
         this->grey_sensor = GreySensorBuilder()
-                .name("Grey")
-                .rate(1)
-                .size(640, 480)
+                .rate(image_params.rate)
+                .size(image_params.width, image_params.height)
                 .pose(pose)
                 .intrinsics(intrinsics)
+                .index(file.Sensors.size())
                 .build();
-
-        this->grey_sensor->Index = file.Sensors.size();
         file.Sensors.AddSensor(this->grey_sensor);
     }
 
     if (this->gt) {
         this->gt_sensor = GTSensorBuilder()
-                .name("GroundTruth")
-                .rate(1)
-                .description("Ground Truth")
+                .rate(image_params.rate)
                 .pose(pose)
                 .build();
 
@@ -286,9 +282,9 @@ bool ICLNUIMReader::GetFrame(const std::string &dirname, SLAMFile &file, int fra
 
         std::stringstream frame_name;
         frame_name << dirname << "/scene_00_" << std::setw(4) << std::setfill('0') << frame_no << ".png";
-        rgb_frame->Filename = frame_name.str();
+        rgb_frame->filename = frame_name.str();
 
-        if (access(rgb_frame->Filename.c_str(), F_OK) < 0) {
+        if (access(rgb_frame->filename.c_str(), F_OK) < 0) {
             printf("No RGB image for frame %d (%s)\n", frame_no, frame_name.str().c_str());
             return false;
         }
@@ -302,9 +298,9 @@ bool ICLNUIMReader::GetFrame(const std::string &dirname, SLAMFile &file, int fra
 
         std::stringstream frame_name;
         frame_name << dirname << "/scene_00_" << std::setw(4) << std::setfill('0') << frame_no << ".png";
-        rgb_frame->Filename = frame_name.str();
+        rgb_frame->filename = frame_name.str();
 
-        if (access(rgb_frame->Filename.c_str(), F_OK) < 0) {
+        if (access(rgb_frame->filename.c_str(), F_OK) < 0) {
             printf("No Grey image for frame %d (%s)\n", frame_no, frame_name.str().c_str());
             perror("");
             return false;
@@ -325,15 +321,15 @@ bool ICLNUIMReader::GetFrame(const std::string &dirname, SLAMFile &file, int fra
         }
         else {
             depth_frame = new TxtFileFrame();
-            dynamic_cast<TxtFileFrame*>(depth_frame)->InputPixelFormat = pixelformat::D_F_32;
+            dynamic_cast<TxtFileFrame*>(depth_frame)->input_pixel_format = pixelformat::D_F_32;
             depth_frame->ProcessCallback = undistort_frame;
         }
 
-        depth_frame->Filename = frame_name.str();
+        depth_frame->filename = frame_name.str();
         depth_frame->FrameSensor = depth_sensor;
         depth_frame->Timestamp = ts;
 
-        if (access(depth_frame->Filename.c_str(), F_OK) < 0) {
+        if (access(depth_frame->filename.c_str(), F_OK) < 0) {
             printf("No depth image for frame %d (%s)\n", frame_no, frame_name.str().c_str());
             perror("");
             return false;

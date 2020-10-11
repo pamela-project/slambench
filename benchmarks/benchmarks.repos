@@ -1,0 +1,20 @@
+monoslam;MonoSLAM [Davison et al, TPAMI'07];https://github.com/hanmekim/SceneLib2;master;https://github.com/bbodin/SceneLib2;benchmarks/monoslam/src/original
+ptam;PTAM [Klein et al, ISMAR'07 and ECCV'08];https://github.com/Oxford-PTAM/PTAM-GPL;master;https://github.com/bbodin/PTAM-GPL;benchmarks/ptam/src/original
+kfusion;KFusion [Newcombe et al. ISMAR'11] (Gerhard Reitmayr's implementation, old);https://github.com/GerhardR/kfusion;update-master;https://github.com/pamela-project/kfusion;benchmarks/kfusion/src/original
+kinectfusion;KinectFusion [Newcombe et al. ISMAR'11] (Christian Diller's implementation, new);https://github.com/chrdiller/KinectFusionApp;master;https://github.com/mihaibujanca/KinectFusion;benchmarks/kinectfusion/src/original
+lsdslam;LSDSLAM [Engel et al, ECCV'14];https://github.com/tum-vision/lsd_slam;master;https://github.com/pamela-project/lsd_slam.git;benchmarks/lsdslam/src/original
+lsdslam;LSDSLAM [Engel et al, ECCV'14];https://github.com/tum-vision/lsd_slam;cpp;https://github.com/pamela-project/lsd_slam.git;benchmarks/lsdslam/src/cpp
+svo;SVO [Forster et al, ICRA'14];https://github.com/uzh-rpg/rpg_svo;master;https://github.com/pamela-project/rpg_svo.git;benchmarks/svo/src/original
+infinitam;InfiniTAMv2 [Kahler et al, ISMAR'15];https://github.com/victorprad/InfiniTAM;update-master;https://github.com/bbodin/InfiniTAM.git;benchmarks/infinitam/src/original
+orbslam2;ORB-SLAM2 [Mur-Artal et al, TOR'15 and TOR'17];https://github.com/raulmur/ORB_SLAM2;update-master;https://github.com/pamela-project/ORB_SLAM2.git;benchmarks/orbslam2/src/original
+okvis;OKVIS [Leutenegger et al, IJRR'15];https://github.com/ethz-asl/okvis;master;https://github.com/bbodin/okvis;benchmarks/okvis/src/original
+dso;DSO [Engel et al. Arxiv'16];https://github.com/JakobEngel/dso;master;https://github.com/mihaibujanca/dso;benchmarks/dso/src/original
+efusion;ElasticFusion [Whelan et al, IJRR'16];https://github.com/mp3guy/ElasticFusion;master;https://github.com/bbodin/ElasticFusion;benchmarks/efusion/src/original
+bundlefusion;BundleFusion [Dai et al. ACM TOG'17];https://github.com/niessner/BundleFusion;master;https://github.com/Paul92/BundleFusion;benchmarks/bundlefusion/src/original
+semanticfusion;SemanticFusion [McCormac et al. ICRA'17];https://github.com/seaun163/semanticfusion;master;https://github.com/Paul92/semanticfusion;benchmarks/semanticfusion/src/original
+flame;FLAME [Greene et al. ICCV'17];https://github.com/robustrobotics/flame;master;https://github.com/mihaibujanca/flame;benchmarks/flame/src/original
+supereight;Supereight [Vespa et al. RA-L'18];https://github.com/emanuelev/supereight;master;https://github.com/pamela-project/supereight;benchmarks/supereight/src/original
+refusion;ReFusion [Palazollo et al. IROS'19];https://github.com/PRBonn/refusion;master;https://github.com/mihaibujanca/refusion;benchmarks/refusion/src/original
+open_vins;OpenVINS [Geneva et al. IROS'19];https://github.com/rpng/open_vins;rpng-master;https://github.com/mihaibujanca/open_vins;benchmarks/open_vins/src/original
+orbslam3;ORB-SLAM3 [Campos et al, ARXIV'20];https://github.com/UZ-SLAMLab/ORB_SLAM3;master;https://github.com/mihaibujanca/ORB_SLAM3;benchmarks/orbslam3/src/original
+fullfusion;FullFusion [Bujanca et al. ICCVW'19];https://github.com/mihaibujanca/fullfusion-jetson;master;https://github.com/mihaibujanca/fullfusion-jetson;benchmarks/fullfusion/src/original

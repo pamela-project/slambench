@@ -26,7 +26,6 @@ size_t IMUSensor::GetFrameSize(const SLAMFrame *frame) const  {
 
 class IMUSerialiser : public SensorSerialiser {
 	bool SerialiseSensorSpecific(Serialiser* serialiser, const Sensor* s) override {
-		// nothing to do
 
 		IMUSensor *sensor = (IMUSensor*)s;
 
@@ -34,7 +33,6 @@ class IMUSerialiser : public SensorSerialiser {
 		serialiser->Write(&sensor->GyroscopeDriftNoiseDensity, sizeof(sensor->GyroscopeDriftNoiseDensity));
 		serialiser->Write(&sensor->GyroscopeBiasDiffusion, sizeof(sensor->GyroscopeBiasDiffusion));
 		serialiser->Write(&sensor->GyroscopeSaturation          , sizeof(sensor->GyroscopeSaturation));
-
 
 		serialiser->Write(&sensor->AcceleratorNoiseDensity, sizeof(sensor->AcceleratorNoiseDensity));
 		serialiser->Write(&sensor->AcceleratorDriftNoiseDensity , sizeof(sensor->AcceleratorDriftNoiseDensity));
@@ -58,11 +56,10 @@ class IMUDeserialiser : public SensorDeserialiser {
 		return true;
 	}
 
-	bool DeserialiseSensorSpecific(Deserialiser* d, Sensor* s) override {
+	bool DeserialiseSensorSpecific(const Deserialiser* d, Sensor* s) override {
 		// nothing to do
 		(void)d;
 		(void)s;
-
 
 		IMUSensor *sensor = (IMUSensor*)s;
 
@@ -71,14 +68,10 @@ class IMUDeserialiser : public SensorDeserialiser {
 		d->Read(&sensor->GyroscopeBiasDiffusion, sizeof(sensor->GyroscopeBiasDiffusion));
 		d->Read(&sensor->GyroscopeSaturation          , sizeof(sensor->GyroscopeSaturation));
 
-
 		d->Read(&sensor->AcceleratorNoiseDensity, sizeof(sensor->AcceleratorNoiseDensity));
 		d->Read(&sensor->AcceleratorDriftNoiseDensity , sizeof(sensor->AcceleratorDriftNoiseDensity));
 		d->Read(&sensor->AcceleratorBiasDiffusion, sizeof(sensor->AcceleratorBiasDiffusion));
 		d->Read(&sensor->AcceleratorSaturation        , sizeof(sensor->AcceleratorSaturation));
-
-
-
 
 		return true;
 	}

@@ -92,8 +92,7 @@ class SLAMBenchUI_Pangolin : public SLAMBenchUI
 		bool FollowPoses();
 		void lockOutputs();
 		void unlockOutputs();
-		
-		
+
         pangolin::Var<long long> * frameCount;
         pangolin::Var<long long> * VRSS;
         pangolin::Var<long long> * VSIZE;

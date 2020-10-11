@@ -36,8 +36,8 @@ namespace slambench {
 			typedef std::vector<MetricPtr> metric_list_t;
 			typedef std::vector<Phase*> phase_list_t;
 
-			void AddPhaseMetric(MetricPtr m);
-			void AddFrameMetric(MetricPtr m);
+			void AddPhaseMetric(const MetricPtr& m);
+			void AddFrameMetric(const MetricPtr& m);
 
 			void AddPhase(Phase *p);
 			void AddPhase(const std::string &phase_name);
@@ -60,7 +60,6 @@ namespace slambench {
 
 			void BeginFrame();
 			void EndFrame();
-
 			void BeginInit();
 			void EndInit();
 
@@ -73,7 +72,7 @@ namespace slambench {
 			}
 
 			std::vector<double>& getDuration() {
-				return frame_phase_duration;
+				return frame_phase_duration_;
 			}
 
 		private:
@@ -90,8 +89,8 @@ namespace slambench {
 			
 			uint64_t frame_counter_;
 
-			char duration_metric_typeid[100];
-			std::vector<double> frame_phase_duration;
+			char duration_metric_typeid_[100];
+			std::vector<double> frame_phase_duration_;
 		};
 	}
 }

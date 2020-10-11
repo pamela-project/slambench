@@ -17,12 +17,12 @@
 
 using namespace slambench::io;
 
-SLAMFrameDeserialiser::SLAMFrameDeserialiser(FILE* file, SensorCollection& sensors, FrameBufferSource *fb_source) : Deserialiser(file), _sensors(sensors), _fb_source(fb_source) {
+SLAMFrameDeserialiser::SLAMFrameDeserialiser(FILE* file, SensorCollection& sensors, FrameBufferSource *fb_source) : Deserialiser(file), sensors_(sensors), fb_source_(fb_source) {
 
 }
 
 SLAMFrame* SLAMFrameDeserialiser::GetNextFrame() {
-	DeserialisedFrame *dsf = new DeserialisedFrame(*_fb_source->Next(), File());
+	DeserialisedFrame *dsf = new DeserialisedFrame(*fb_source_->Next(), File());
 	
 	if(!Read(&dsf->Timestamp, sizeof(dsf->Timestamp))) {
 		delete dsf;
@@ -30,11 +30,27 @@ SLAMFrame* SLAMFrameDeserialiser::GetNextFrame() {
 	}
 	
 	uint8_t sensor_index = 0;
-	Read(&sensor_index, sizeof(sensor_index));
-	dsf->FrameSensor = &_sensors.at(sensor_index);
+	if (!Read(&sensor_index, sizeof(sensor_index))) {
+		printf("Could not read sensor data");	        
+	        delete dsf;
+	  	return nullptr;
+	}
+
+	if (sensor_index >= sensors_.size()) {
+	  printf("Invalid sensor index (%d), max value is (%d).",
+             sensor_index, sensors_.size() - 1 );
+	        delete dsf;
+	  	return nullptr;
+	}
+	
+	dsf->FrameSensor = &sensors_.at(sensor_index);
 	if(dsf->FrameSensor->IsVariableSize()) {
 		uint32_t framesize;
-		Read(&framesize, sizeof(framesize));
+		if (!Read(&framesize, sizeof(framesize))) {
+		printf("Could not read frame size");	       
+	        delete dsf;
+	  	return nullptr;
+		}
 		dsf->SetVariableSize(framesize);
 	}
 	

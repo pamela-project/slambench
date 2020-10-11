@@ -11,27 +11,25 @@
 
 using namespace slambench::io;
 
-Deserialiser::Deserialiser(FILE *file) : _target_file(file) {
-	
+Deserialiser::Deserialiser(FILE *file) : target_file_(file) {}
+
+FILE *Deserialiser::File() const {
+	return target_file_;
 }
 
-FILE *Deserialiser::File() { 
-	return _target_file;
-}
-
-bool Deserialiser::Read(void *target, size_t bytes) {
+bool Deserialiser::Read(void *target, size_t bytes) const {
 	return fread(target, bytes, 1, File()) == 1;
 }
 
-bool Deserialiser::Skip(size_t bytes) {
+bool Deserialiser::Skip(size_t bytes) const {
 	fseek(File(), bytes, SEEK_CUR);
 	return true;
 }
 
-size_t Deserialiser::Offset() {
-	return ftell(File());
+size_t Deserialiser::Offset() const {
+	return ftello(File());
 }
 
-bool Deserialiser::Good() {
+bool Deserialiser::Good() const {
 	return feof(File()) == 0;
 }

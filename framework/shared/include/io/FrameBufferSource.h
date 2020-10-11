@@ -26,7 +26,7 @@ namespace slambench {
 			FrameBuffer *Next() override;
 			
 		private:
-			FrameBuffer _fb;
+			FrameBuffer fb_;
 		};
 	}
 }

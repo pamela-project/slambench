@@ -29,15 +29,12 @@ namespace slambench {
 			const std::string& GetDescription() const override;
 			void MeasureStart(Phase* phase) override;
 			void MeasureEnd(Phase* phase) override;
-			
 			Value *GetValue(Phase* phase) override;
 
 		private:
 			const outputs::TrajectoryInterface *trajectory_;
 			const outputs::TrajectoryInterface *ground_truth_;
-			
 			values::TrajectoryValue::pose_container_t latest_trajectory_;
-			
 			slambench::TimeStamp next_gt_ts_;
 		};
 	}

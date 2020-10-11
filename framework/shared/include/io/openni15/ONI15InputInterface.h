@@ -6,15 +6,14 @@
  This code is licensed under the MIT License.
 
  */
-
+#ifdef DO_OPENNI15
 #ifndef IO_ONI15INPUTINTERFACE_H
 #define IO_ONI15INPUTINTERFACE_H
 
-#include "../InputInterface.h"
-#include "../sensor/SensorCollection.h"
+#include <io/InputInterface.h>
+#include <io/sensor/SensorCollection.h>
 
 #include <string>
-
 
 namespace xn {
 	class Context;
@@ -29,7 +28,7 @@ namespace slambench {
 			class ONI15InputInterface : public InputInterface {
 			public:
 				ONI15InputInterface();
-				
+
 				FrameStream& GetFrames() override;
 				SensorCollection& GetSensors() override;
 
@@ -40,15 +39,16 @@ namespace slambench {
 
 				void BuildStream();
 
-				xn::Context * _context;
-				ONI15FrameStream *_stream;
+				xn::Context * context_;
+				ONI15FrameStream *stream_;
 				
-				SensorCollection _sensors;
-				bool _sensors_ready;
+				SensorCollection sensors_;
+				bool sensors_ready_;
 			};
 		}
 	}
 }
 
-#endif /* IO_ONI2INPUTINTERFACE_H */
+#endif /* IO_ONI15INPUTINTERFACE_H */
+#endif /* DO_OPENNI15 */
 

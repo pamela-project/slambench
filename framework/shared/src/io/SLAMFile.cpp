@@ -22,11 +22,11 @@ using namespace slambench::io;
 const SLAMFile::magic_num_t SLAMFile::MagicNum = "SLAM";
 
 SLAMFrame* SLAMFile::GetFrame(unsigned int index) {
-	return _frames.at(index);
+	return frames_.at(index);
 }
 
 unsigned int SLAMFile::GetFrameCount() {
-	return _frames.size();
+	return frames_.size();
 }
 
 void SLAMFile::AddFrame(SLAMFrame* frame) {
@@ -42,26 +42,26 @@ void SLAMFile::AddRegularFrame(SLAMFrame *frame) {
 	assert(!frame->FrameSensor->IsGroundTruth());
 	
 	// Place frame in correct place given the timestamp
-	for (auto it = _frames.begin() ; it != _frames.end() ; it++) {
+	for (auto it = frames_.begin() ; it != frames_.end() ; it++) {
 	  if((*it)->FrameSensor->IsGroundTruth()) { continue; }
 	  if ((*it)->Timestamp <= frame->Timestamp) { continue; }
-	  else {_frames.insert(it,frame);return;}
+	  else {frames_.insert(it, frame);return;}
 	}
 
-	_frames.push_back(frame);
+	frames_.push_back(frame);
 }
 
 void SLAMFile::AddGroundTruthFrame(SLAMFrame* frame)
 {
   	assert(frame->FrameSensor->IsGroundTruth());
 	
-	for (auto it = _frames.begin() ; it != _frames.end() ; it++) {
-	  if(!(*it)->FrameSensor->IsGroundTruth()) { _frames.insert(it,frame);return; }
+	for (auto it = frames_.begin() ; it != frames_.end() ; it++) {
+	  if(!(*it)->FrameSensor->IsGroundTruth()) { frames_.insert(it, frame);return; }
 	  if ((*it)->Timestamp <= frame->Timestamp) { continue; }
-	  else {_frames.insert(it,frame);return;}
+	  else {frames_.insert(it, frame);return;}
 	}
 
-	_frames.push_back(frame);
+	frames_.push_back(frame);
 }
 
 

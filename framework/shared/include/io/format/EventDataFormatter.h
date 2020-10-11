@@ -25,14 +25,14 @@ namespace slambench {
 		
 		class EventDataFormatter : public DataFormatter {
 		private:
-			uint8_t _coordsize;
+			uint8_t coordsize_;
 		public:
-			EventDataFormatter(Sensor *sensor, void *data) : DataFormatter(sensor, data) { _coordsize = ((EventCameraSensor*)sensor)->GetCoordinateSize(); }
+			EventDataFormatter(Sensor *sensor, void *data) : DataFormatter(sensor, data) { coordsize_ = ((EventCameraSensor*)sensor)->GetCoordinateSize(); }
 			
 			EventData Get() const {
 				EventData data;
 				const char *ptr = (const char*)Data();
-				switch(_coordsize) {
+				switch(coordsize_) {
 					case 1: 
 						data.X = *((uint8_t*)ptr++);
 						data.Y = *((uint8_t*)ptr++);
@@ -53,7 +53,7 @@ namespace slambench {
 			
 			void Put(const EventData &data) {
 				char *ptr = (char*)Data();
-				switch(_coordsize) {
+				switch(coordsize_) {
 					case 1: 
 						*((uint8_t*)ptr++) = data.X;
 						*((uint8_t*)ptr++) = data.Y;

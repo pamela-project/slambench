@@ -23,9 +23,9 @@ namespace slambench {
 			
 			SensorSerialiser *GetSerialiser() const { return serialiser_; }
 			SensorDeserialiser *GetDeserialiser() const {return deserialiser_; }
-			
 			bool IsGroundTruth() const { return is_ground_truth_; }
 			bool IsVariableSize() const { return is_variable_size_; }
+
 		private:
 			SensorSerialiser *serialiser_;
 			SensorDeserialiser *deserialiser_;
@@ -38,7 +38,6 @@ namespace slambench {
 			SensorDatabaseEntry &Get(const Sensor::sensor_type_t &sensor_name);
 			
 			void RegisterSensor(const Sensor::sensor_type_t &sensor_name, const SensorDatabaseEntry &entry);
-			
 			static SensorDatabase *Singleton(void);
 			
 		private:
@@ -50,7 +49,6 @@ namespace slambench {
 		public:
 			SensorDatabaseRegistration(const Sensor::sensor_type_t &name, const SensorDatabaseEntry &entry);
 		};
-		
 	}
 }
 

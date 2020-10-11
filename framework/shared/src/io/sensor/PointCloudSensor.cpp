@@ -16,9 +16,7 @@ using namespace slambench::io;
 const Sensor::sensor_type_t PointCloudSensor::kPointCloudType = "PointCloud";
 
 PointCloudSensor::PointCloudSensor(const sensor_name_t &sensor_name) : Sensor(sensor_name, kPointCloudType)
-{
-
-}
+{}
 
 size_t PointCloudSensor::GetFrameSize(const SLAMFrame *frame) const {
 	return frame->GetVariableSize();
@@ -44,7 +42,7 @@ class PCDeserialiser : public SensorDeserialiser {
 		return true;
 	}
 
-	bool DeserialiseSensorSpecific(Deserialiser* d, Sensor* s) override {
+	bool DeserialiseSensorSpecific(const Deserialiser* d, Sensor* s) override {
 		// nothing to do
 		(void)d;
 		(void)s;

@@ -47,7 +47,7 @@ class GyroDeserialiser : public SensorDeserialiser {
 		return true;
 	}
 
-	bool DeserialiseSensorSpecific(Deserialiser* d, Sensor* s) override {
+	bool DeserialiseSensorSpecific(const Deserialiser* d, Sensor* s) override {
 		GyroSensor *sensor = (GyroSensor*)s;
 
 		d->Read(&sensor->Intrinsic , sizeof(sensor->Intrinsic));

@@ -23,10 +23,10 @@ ATEMetric::ATEMetric(const slambench::outputs::TrajectoryInterface* tested_traje
 
 const slambench::values::ValueDescription &ATEMetric::GetValueDescription() const {
 	static const slambench::values::ValueDescription desc = slambench::values::ValueDescription({
-		{"AbsoluteError",  slambench::values::VT_DOUBLE},
-		{"OrientationError",  slambench::values::VT_DOUBLE},
-		{"MeanATE",  slambench::values::VT_DOUBLE},
-		{"MaxATE",  slambench::values::VT_DOUBLE}});
+		std::make_pair("AbsoluteError",  slambench::values::VT_DOUBLE),
+        std::make_pair("OrientationError",  slambench::values::VT_DOUBLE),
+        std::make_pair("MeanATE",  slambench::values::VT_DOUBLE),
+        std::make_pair("MaxATE",  slambench::values::VT_DOUBLE)});
 
 	return  desc;
 }

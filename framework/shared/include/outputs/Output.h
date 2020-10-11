@@ -36,7 +36,7 @@ namespace slambench {
 			typedef std::map<timestamp_t, const values::Value*> value_map_t;
 			
 			BaseOutput(const std::string &name, const values::ValueDescription &type, bool is_main_output = false);
-			virtual ~BaseOutput();
+			virtual ~BaseOutput() = default;
 			
 			const std::string &GetName() const { return name_; }
 			values::ValueType GetType() const { return type_.GetType(); }
@@ -66,7 +66,7 @@ namespace slambench {
 			bool only_keep_most_recent_;
 			bool active_;
 			bool main_;
-			
+
 			std::vector<callback_t> update_callbacks_;
 		};
 		
@@ -76,7 +76,7 @@ namespace slambench {
 		class Output : public BaseOutput {
 		public:
 			Output(const std::string &name, values::ValueType type, bool main_output = false);
-			virtual ~Output() override;
+			~Output() override = default;
 			
 			void AddPoint(timestamp_t time, const values::Value *value);
 
@@ -86,18 +86,17 @@ namespace slambench {
 				values_.clear();
 			}
 		private:
-			value_map_t  values_;
+			value_map_t values_;
 		};
 		
 		class DerivedOutput : public BaseOutput {
 		public:
 			DerivedOutput(const std::string &name, values::ValueType type, const std::initializer_list<BaseOutput*> &derived_from, bool main = false);
-			virtual ~DerivedOutput();
+			~DerivedOutput() override = default;
 			
 			bool Empty() const override;
 			const value_map_t::value_type& GetMostRecentValue() const override;
 			const BaseOutput::value_map_t& GetValues() const override;
-
 			void Invalidate();
 			
 		protected:
@@ -113,11 +112,11 @@ namespace slambench {
 		class AlignmentOutput : public DerivedOutput {
 		public:
 			AlignmentOutput(const std::string &name, TrajectoryInterface *gt_trajectory, BaseOutput *trajectory, TrajectoryAlignmentMethod *method);
-			virtual ~AlignmentOutput();
+			~AlignmentOutput() override = default;
 			
 			void Recalculate() override;
 			Eigen::Matrix4f& getTransformation() {
-				return transformation;
+				return transformation_;
 			}
 			/* When freezed, the alignment will stop updating in recalculate() */
 			void SetFreeze(bool freeze) { freeze_ = freeze; }
@@ -126,13 +125,13 @@ namespace slambench {
 			TrajectoryInterface *gt_trajectory_;
 			BaseOutput *trajectory_;
 			TrajectoryAlignmentMethod *method_;
-			Eigen::Matrix4f transformation;
+			Eigen::Matrix4f transformation_;
 		};
 		
 		class AlignedPoseOutput : public DerivedOutput {
 		public:
 			AlignedPoseOutput(const std::string &name, AlignmentOutput *alignment, BaseOutput *pose_output);
-			virtual ~AlignedPoseOutput();
+			~AlignedPoseOutput() override = default;
 			
 			void Recalculate() override;
 		private:
@@ -146,7 +145,7 @@ namespace slambench {
 		class AlignedPointCloudOutput : public DerivedOutput {
 		public:
 			AlignedPointCloudOutput(const std::string &name, AlignmentOutput *, BaseOutput *pc_output);
-			virtual ~AlignedPointCloudOutput();
+			~AlignedPointCloudOutput() override = default;
 
 			void Recalculate() override;
 
@@ -161,7 +160,7 @@ namespace slambench {
 		class AlignedTrajectoryOutput : public DerivedOutput {
 			public:
 				AlignedTrajectoryOutput(const std::string &name, AlignmentOutput *, BaseOutput *trajectory_output);
-				virtual ~AlignedTrajectoryOutput();
+				~AlignedTrajectoryOutput() override;
 
 				void Recalculate() override;
 			private:
@@ -177,19 +176,19 @@ namespace slambench {
 			PointCloudHeatMap(const std::string &name,
 							  BaseOutput *gt_pointcloud, BaseOutput *pointcloud,
 							  const std::function<values::ColoredPoint3DF(const values::HeatMapPoint3DF&, double, double)> &convert);
-			virtual ~PointCloudHeatMap();
+			~PointCloudHeatMap() override = default;
 
 			void Recalculate() override;
 			std::function<values::ColoredPoint3DF(const values::HeatMapPoint3DF&, double, double)> convert;
 		private:
-			BaseOutput *gt_pointcloud;
-			BaseOutput *pointcloud;
+			BaseOutput *gt_pointcloud_;
+			BaseOutput *pointcloud_;
 		};
 
 		class PoseToXYZOutput : public BaseOutput {
 		public:
 			PoseToXYZOutput(BaseOutput *pose_output);
-			virtual ~PoseToXYZOutput();
+			~PoseToXYZOutput() override = default;
 			const BaseOutput::value_map_t& GetValues() const override;
 			const value_map_t::value_type& GetMostRecentValue() const override;
 			

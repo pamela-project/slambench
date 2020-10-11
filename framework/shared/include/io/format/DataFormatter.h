@@ -19,14 +19,16 @@ namespace slambench {
 		public:
 			DataFormatter(Sensor *sensor, void *data);
 			
-			Sensor *GetSensor() { return _sensor; }
-			const Sensor *GetSensor() const { return _sensor; }
+			Sensor *GetSensor() { return sensor_; }
+			const Sensor *GetSensor() const { return sensor_; }
+
 		protected:
-			const void *Data() const { return _data; }
-			void *Data() { return _data; }
+			const void *Data() const { return data_; }
+			void *Data() { return data_; }
+
 		private:
-			void *_data;
-			Sensor *_sensor;
+			void *data_;
+			Sensor *sensor_;
 		};
 	}
 }

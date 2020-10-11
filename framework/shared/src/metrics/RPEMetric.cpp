@@ -50,8 +50,6 @@ Value *RPEMetric::GetValue(Phase* phase)
 {
 	(void)phase;
 
-	(void)phase;
-
 	auto gt_traj = ground_truth_->GetAll();
 	auto es_traj = latest_trajectory_;
 
@@ -66,24 +64,20 @@ Value *RPEMetric::GetValue(Phase* phase)
     // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 	// Previously there was i_delta in original implementation
 	// I drop the feature for now, will put it back later
+	// TODO: The solution here is to have ParameterComponent for Metrics, so this parameter is visible externally
 
 	// in RPE we compare shift from previous point, we need to store them
-	auto gt_previous_iterator = gt_traj.end() ;
-	auto es_previous_iterator = es_traj.end() ;
+	auto gt_previous_iterator = gt_traj.end();
+	auto es_previous_iterator = es_traj.end();
 
-	auto gt_iterator = gt_traj.begin() ;
-	auto es_iterator = es_traj.begin() ;
-
+	auto gt_iterator = gt_traj.begin();
+	auto es_iterator = es_traj.begin();
 	bool first_point = true;
 
-	for (es_iterator = es_traj.begin() ; es_iterator != es_traj.end() ; es_iterator ++) {
-
-
+	for (es_iterator = es_traj.begin(); es_iterator != es_traj.end(); es_iterator++) {
 		// Find closest gt point
 		//****************************************************************************************
-
-
-		// Step 1 : ensure GT in the futre exists
+		// Step 1 : ensure GT in the future exists
 		//***************************************
 
 		while(gt_iterator->first < es_iterator->first ) {
@@ -95,10 +89,8 @@ Value *RPEMetric::GetValue(Phase* phase)
 			break;
 		}
 
-
 		// Step 2 : Closest Future
 		//************************
-
 		auto closest = gt_iterator;
 		for (; gt_iterator != gt_traj.end(); ++gt_iterator) {
 			auto GT_TS  = gt_iterator;
@@ -113,10 +105,8 @@ Value *RPEMetric::GetValue(Phase* phase)
 		}
 		gt_iterator = closest;
 
-
 		// If at least two points are processed, we can compute  Relative Pose Error
 		//****************************************************************************************
-
 		if (!first_point) {
 
 	        auto pose_gt_i    = gt_previous_iterator->second.GetValue();
@@ -127,8 +117,6 @@ Value *RPEMetric::GetValue(Phase* phase)
 	        auto pose_es_j    = es_iterator->second.GetValue();
 	        auto pose_es_diff = pose_es_i * pose_es_j.inverse();
 
-
-
 	        Eigen::Matrix4f E = pose_es_diff * pose_gt_diff.inverse();
 	        Eigen::Vector3f v = E.block<3,1>(0,3);
 	        double length = v.norm();
@@ -136,7 +124,6 @@ Value *RPEMetric::GetValue(Phase* phase)
 	        count++;
 
 		}
-
 
 		// store previous values
 		//****************************************************************************************
@@ -146,11 +133,8 @@ Value *RPEMetric::GetValue(Phase* phase)
 
 	}
 
-	double RPE = std::sqrt(norms/ (double)count);
-
-
+	double RPE = (count == 0) ? 0 : std::sqrt(norms/ (double)count);
 	auto rpe_rmse = new slambench::values::TypeForVT<slambench::values::VT_DOUBLE>::type(RPE);
-
 
 	return new slambench::values::TypeForVT<slambench::values::VT_COLLECTION>::type({
 				{"RPE_RMSE",rpe_rmse},

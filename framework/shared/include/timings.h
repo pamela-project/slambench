@@ -15,11 +15,14 @@
 #include <sys/time.h>       /* clock_t, clock, CLOCKS_PER_SEC */
 #else
 #include <chrono>
+#include <sys/time.h>
+
 #endif
 
-/*
-inline float tick() {
 
+inline float tick() {
+    std::chrono::time_point<std::chrono::high_resolution_clock> tickdata;
+    tickdata = std::chrono::high_resolution_clock::now();
     static struct timeval t;
 
     struct timeval diff = t;
@@ -29,9 +32,6 @@ inline float tick() {
             / 1.e6;
 
 }
-*/
-
-
 
 inline double tock() {
 #ifdef __APPLE__
@@ -48,5 +48,14 @@ inline double tock() {
 		return total_time.count();
 #endif
 }
+//// this is duplicated to fix otherwise missing references in some of the algorithms
+//inline double TICK()
+//{
+//    return tock();
+//}
+//inline double TOCK(std::string str="", int size=0)
+//{
+//    return tock();
+//}
 
 #endif //TIMINGS_H

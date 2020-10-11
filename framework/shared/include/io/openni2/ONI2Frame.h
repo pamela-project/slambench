@@ -21,12 +21,8 @@ namespace slambench {
 			class ONI2Frame : public SLAMFrame {
 			public:
 				ONI2Frame(Sensor *sensor, const openni::VideoFrameRef &frameref);
-				
 				void* GetData() override;
 				void FreeData() override;
-				
-			private:
-				void *_data;
 			};
 		}
 	}

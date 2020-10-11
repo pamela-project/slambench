@@ -14,6 +14,7 @@
 #include "io/SLAMFile.h"
 
 #include <stdexcept>
+#include <iostream>
 
 using namespace slambench::io;
 
@@ -42,7 +43,8 @@ bool SLAMFileSerialiser::SerialiseFrames(SLAMFile &file) {
 		SLAMFrame *frame = file.GetFrame(i);
 		
 		if(!sfs.Serialise(*frame)) {
-			throw std::logic_error("Failed to serialise frame");
+			std::cerr<<"Failed to serialise frame";
+			return false;
 		}
 		if(FrameCallback != nullptr) {
 			FrameCallback(frame_idx, file.GetFrameCount());

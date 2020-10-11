@@ -13,15 +13,19 @@
 #include <ParameterComponent.h>
 
 namespace slambench {
-  namespace io {
-    class SLAMFile;
-  }
+    namespace io {
+        class SLAMFile;
+        class DatasetReader : public ParameterComponent {
+        public :
+            typedef struct {
+                const uint32_t width;
+                const uint32_t height;
+                const float rate;
+                const float depthMapFactor;
+            } image_params_t;
+            DatasetReader(const std::string &name) : ParameterComponent(name) {}
+            virtual slambench::io::SLAMFile *GenerateSLAMFile() = 0;
+        };
+    }
 }
-
-class DatasetReader : public ParameterComponent {
- public :
-  DatasetReader(const std::string& name) : ParameterComponent(name) {}
-  virtual slambench::io::SLAMFile* GenerateSLAMFile() = 0;
-};
-
 #endif /* FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_DATASETREADER_H_ */

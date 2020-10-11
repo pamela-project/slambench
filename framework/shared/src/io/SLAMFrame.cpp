@@ -59,21 +59,21 @@ void SLAMInMemoryFrame::FreeData() {
 	// do nothing
 }
 
-SLAMFileFrame::SLAMFileFrame() : _data(nullptr) {}
+SLAMFileFrame::SLAMFileFrame() : ProcessCallback(nullptr) {}
 
 void *SLAMFileFrame::GetData() {
-	if(_data != nullptr) return _data;
-	_data = LoadFile();
+	if(data_ != nullptr) return data_;
+    data_ = LoadFile();
 	
 	if(ProcessCallback != nullptr) {
-		ProcessCallback(this, (void*)_data);
+		ProcessCallback(this, (void*)data_);
 	}
 	
-	return _data;
+	return data_;
 }
 void SLAMFileFrame::FreeData() {
-	free(_data);
-	_data = nullptr;
+	free(data_);
+    data_ = nullptr;
 }
 
 void *TxtFileFrame::LoadFile() {
@@ -87,57 +87,6 @@ void *TxtFileFrame::LoadFile() {
 }
 
 template <typename DType> bool ParseElem(const std::string &str, DType &result);
-
-float parse_float(const std::string &str) {
-	double multiplier = 0.1;
-	// first, find decimal point
-	for(auto i : str) {
-		if(i == '.' || i == 'e') {
-			break;
-		}
-		multiplier *= 10;
-	}
-	
-	double output = 0;
-	for(auto i : str) {
-		if(i == 'e') {
-			break;
-		}
-		int digit = 0;
-		switch(i) {
-			case '0': break;
-			case '1': digit = 1; break;
-			case '2': digit = 2; break;
-			case '3': digit = 3; break;
-			case '4': digit = 4; break;
-			case '5': digit = 5; break;
-			case '6': digit = 6; break;
-			case '7': digit = 7; break;
-			case '8': digit = 8; break;
-			case '9': digit = 9; break;
-			case '.': digit = 0; break;
-			default:
-				throw std::logic_error("unhandled digit");
-		}
-		output += digit * multiplier;
-		multiplier /= 10;
-	}
-	
-	// parse exponent if it exists
-	float exponent = 1;
-	for(size_t i = 0; i < str.size(); ++i) {
-		if(str[i] == 'e') {
-			exponent = atoi(str.c_str()+i+1);
-		}
-	}
-	
-	// calculate final version
-	if(exponent != 1) {
-		output = output * pow(10, exponent);
-	}
-	
-	return output;
-}
 
 template<> bool ParseElem<float>(const std::string &str, float &result) {
 	if(str.size() == 0) return false;
@@ -270,31 +219,32 @@ void *TxtFileFrame::LoadCameraFile() {
 	CameraSensor *camera = (CameraSensor*)FrameSensor;
 	
 	void *data = nullptr;
-	switch(InputPixelFormat) {
+	auto frame_size = camera->Width * camera->Height;
+	switch(input_pixel_format) {
 		case pixelformat::G_I_8:
-			data = LoadData<unsigned char>(Filename, 1, camera->Width * camera->Height);
+			data = LoadData<unsigned char>(filename, 1, frame_size);
 			break;
 		case pixelformat::RGB_III_888:
-			data = LoadData<unsigned char>(Filename, 3, camera->Width * camera->Height);
+			data = LoadData<unsigned char>(filename, 3, frame_size);
 			break;
 		case pixelformat::D_I_8:
-			data = LoadData<unsigned char>(Filename, 1, camera->Width * camera->Height);
+			data = LoadData<unsigned char>(filename, 1, frame_size);
 			break;
 		case pixelformat::D_F_32:
-			data = LoadData<float>(Filename, 1, camera->Width * camera->Height);
+			data = LoadData<float>(filename, 1, frame_size);
 			break;
 		case pixelformat::D_F_64:
-			data = LoadData<double>(Filename, 1, camera->Width * camera->Height);
+			data = LoadData<double>(filename, 1, frame_size);
 			break;
 		case pixelformat::D_I_16:
-			data = LoadData<float>(Filename, 1, camera->Width * camera->Height);
+			data = LoadData<float>(filename, 1, frame_size);
 			break;
 		default:
 			assert(false);
 	}
 	
-	if(camera->PixelFormat != InputPixelFormat) {
-		void *newdata = Convert(data, camera->Width * camera->Height, InputPixelFormat, camera->PixelFormat);
+	if(camera->PixelFormat != input_pixel_format) {
+		void *newdata = Convert(data, frame_size, input_pixel_format, camera->PixelFormat);
 		free(data);
 		data = newdata;
 	}
@@ -302,31 +252,33 @@ void *TxtFileFrame::LoadCameraFile() {
 	return data;
 }
 
-DeserialisedFrame::DeserialisedFrame(FrameBuffer &buffer, FILE *file) : _buffer(buffer), _file(file) {
+DeserialisedFrame::DeserialisedFrame(FrameBuffer &buffer, FILE *file) : buffer_(buffer), file_(file), offset_(0) {
 	
 }
 
 void DeserialisedFrame::SetOffset(size_t new_offset) {
-	_offset = new_offset;
+    offset_ = new_offset;
 }
 
 void *DeserialisedFrame::GetData() {
-	_buffer.Acquire();
-	_buffer.Reserve(GetSize());
-	fseek(_file, _offset, SEEK_SET);
-	fread(_buffer.Data(), GetSize(), 1, _file);
-	
-	return _buffer.Data();
+	unsigned long size = GetSize();
+	buffer_.Acquire();
+	buffer_.Reserve(size);
+
+	fseeko(file_, offset_, SEEK_SET);
+	fread(buffer_.Data(), size, 1, file_);
+	// TODO : Check return value of fread
+	return buffer_.Data();
 }
 
 void DeserialisedFrame::FreeData() {
-	_buffer.Release();
-	_buffer.ResetBuffer();
+	buffer_.Release();
+	buffer_.ResetBuffer();
 }
 
 void* ImageFileFrame::LoadFile() {
 	// get file extension
-	std::string ext = Filename.substr(Filename.size()-3, 3);
+	std::string ext = filename.substr(filename.size() - 3, 3);
 	
 	if(ext == "png") return LoadPng();
 	else if(ext == "pgm") return LoadPbm();
@@ -343,7 +295,7 @@ void* ImageFileFrame::LoadPbm() {
 		throw std::logic_error("Unrecognized sensor type");
 	}
 	
-	std::ifstream file(Filename.c_str());
+	std::ifstream file(filename.c_str());
 	std::string mnum, size, max;
 	std::getline(file, mnum);
 	std::getline(file, size);
@@ -397,7 +349,7 @@ void* ImageFileFrame::LoadPng() {
 	std::vector<unsigned char> pixels;
 	unsigned width, height;
 	
-	auto mappedfile = core::ReadFile(Filename);
+	auto mappedfile = core::ReadFile(filename);
 	
 	
 	char *outdata;

@@ -27,22 +27,22 @@ namespace slambench {
 		public:
 			PixelData(const void *data) { 
 				const char *cdata = (const char*)data;
-				_r = (uint8_t) cdata[0];
-				_g = (uint8_t) cdata[1];
-				_b = (uint8_t) cdata[2];
+                r_ = (uint8_t) cdata[0];
+                g_ = (uint8_t) cdata[1];
+                b_ = (uint8_t) cdata[2];
 			}
 			
 			static const size_t Size = 3;
 					
 		private:
-			uint8_t _r, _g, _b;
+			uint8_t r_, g_, b_;
 			
 		public:
-			static_assert(sizeof(_r) + sizeof(_g) + sizeof(_b) == Size, "Size mismatch!");
+			static_assert(sizeof(r_) + sizeof(g_) + sizeof(b_) == Size, "Size mismatch!");
 			
-			uint8_t R() const { return _r; }
-			uint8_t G() const { return _g; }
-			uint8_t B() const { return _b; }
+			uint8_t R() const { return r_; }
+			uint8_t G() const { return g_; }
+			uint8_t B() const { return b_; }
 				
 		};
 		

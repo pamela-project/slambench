@@ -18,20 +18,19 @@
 namespace slambench {
 	namespace metrics {
 		class PowerMetric : public Metric {
-		private :
-			PowerMonitor *pm = nullptr;
-			slambench::values::Value  * last_res;
+
 		public:
 			PowerMetric();
-
 
 			const slambench::values::ValueDescription& GetValueDescription() const override;
 			const std::string& GetDescription() const override;
 			void MeasureStart(Phase* phase) override;
 			void MeasureEnd(Phase* phase) override;
-			
 			slambench::values::Value *GetValue(Phase* phase) override;
 
+        private :
+            PowerMonitor *pm_ = nullptr;
+            slambench::values::Value *last_res_;
 		};
 	}
 }

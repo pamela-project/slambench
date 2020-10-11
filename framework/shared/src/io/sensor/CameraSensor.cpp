@@ -28,7 +28,7 @@ CameraSensor::CameraSensor(const Sensor::sensor_name_t  &name,  const Sensor::se
 		PixelFormat(slambench::io::pixelformat::UNKNOWN),
 		DistortionType(NoDistortion)
 {
-	this->addParameter(TypedParameter<intrinsics_t>("ip", "intrinsics-parameters","Focal length and Principal Point Offset : fx,fy,cx,cy", &(this->Intrinsics),NULL));
+	this->addParameter(TypedParameter<intrinsics_t>("ip", "intrinsics-parameters","Focal length and Principal Point Offset : fx,fy,cx,cy", &(this->Intrinsics),nullptr));
 }
 
 size_t CameraSensor::GetFrameSize(const SLAMFrame *frame) const {
@@ -45,6 +45,11 @@ void CameraSensor::CopyRadialTangentialDistortion(const distortion_coefficients_
 void CameraSensor::CopyEquidistantDistortion(const distortion_coefficients_t &other) {
   for(unsigned int i = 0; i < 4 ; ++i) {
     EquidistantDistortion[i] = other[i];
+  }
+}
+void CameraSensor::CopyDistortion(const distortion_coefficients_t &other, const distortion_type_t& type) {
+  for(unsigned int i = 0; i < 5 ; ++i) {
+    Distortion[i] = other[i];
   }
 }
 
@@ -69,8 +74,8 @@ class CameraSensorSerialiser : public SensorSerialiser {
 		serialiser->Write(&sensor->Intrinsics, sizeof(sensor->Intrinsics));
 		serialiser->Write(&sensor->DistortionType, sizeof(sensor->DistortionType));
 		serialiser->Write(&sensor->RadialTangentialDistortion, sizeof(sensor->RadialTangentialDistortion));
-          serialiser->Write(&sensor->EquidistantDistortion, sizeof(sensor->EquidistantDistortion));
-
+        serialiser->Write(&sensor->EquidistantDistortion, sizeof(sensor->EquidistantDistortion));
+        serialiser->Write(&sensor->Distortion, sizeof(sensor->Distortion));
           return true;
 	}
 };
@@ -86,7 +91,7 @@ class CameraSensorDeserialiser : public SensorDeserialiser {
 		}
 	}
 
-	bool DeserialiseSensorSpecific(Deserialiser* deserialiser, Sensor* s) override {
+	bool DeserialiseSensorSpecific(const Deserialiser* deserialiser, Sensor* s) override {
 		CameraSensor *sensor = (CameraSensor*)s;
 		
 		assert(sensor->GetType() == CameraSensor::kCameraType);
@@ -98,7 +103,8 @@ class CameraSensorDeserialiser : public SensorDeserialiser {
 		deserialiser->Read(&sensor->Intrinsics, sizeof(sensor->Intrinsics));
 		deserialiser->Read(&sensor->DistortionType, sizeof(sensor->DistortionType));
 		deserialiser->Read(&sensor->RadialTangentialDistortion, sizeof(sensor->RadialTangentialDistortion));
-                deserialiser->Read(&sensor->EquidistantDistortion, sizeof(sensor->EquidistantDistortion));
+        deserialiser->Read(&sensor->EquidistantDistortion, sizeof(sensor->EquidistantDistortion));
+        deserialiser->Read(&sensor->Distortion, sizeof(sensor->Distortion));
 
 		return true;
 	}

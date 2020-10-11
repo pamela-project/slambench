@@ -66,7 +66,7 @@ class DepthSensorDeserialiser : public SensorDeserialiser {
 		}
 	}
 
-	bool DeserialiseSensorSpecific(Deserialiser* deserialiser, Sensor* s) override {
+	bool DeserialiseSensorSpecific(const Deserialiser* deserialiser, Sensor* s) override {
 		DepthSensor *sensor = (DepthSensor*)s;
 		
 		assert(sensor->GetType() == DepthSensor::kDepthType);
