@@ -26,6 +26,10 @@ extern "C" {
 		return sb_update_frame((SLAMBenchLibraryHelper *) slam_settings, (slambench::io::SLAMFrame  *) type);
 	}
 
+	bool c_sb_relocalize(void * slam_settings)  {
+		return sb_relocalize((SLAMBenchLibraryHelper *) slam_settings);
+	}
+
 	bool c_sb_process_once (void * slam_settings){
 		return sb_process_once((SLAMBenchLibraryHelper *) slam_settings);
 	}

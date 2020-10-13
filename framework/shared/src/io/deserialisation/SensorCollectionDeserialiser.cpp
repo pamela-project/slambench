@@ -21,7 +21,7 @@ SensorCollectionDeserialiser::SensorCollectionDeserialiser(std::FILE* _file) : D
 
 }
 
-bool SensorCollectionDeserialiser::Deserialise(SensorCollection& target) {
+bool SensorCollectionDeserialiser::Deserialise(SensorCollection& target) const {
 	uint32_t sensor_count;
 	Read(&sensor_count, sizeof(sensor_count));
 
@@ -37,7 +37,7 @@ bool SensorCollectionDeserialiser::Deserialise(SensorCollection& target) {
 	return true;
 }
 
-bool SensorCollectionDeserialiser::DeserialiseSensor(Sensor*& sensor) {
+bool SensorCollectionDeserialiser::DeserialiseSensor(Sensor*& sensor) const {
 	uint8_t sensor_name_size;
 	Read(&sensor_name_size, sizeof(sensor_name_size));
 	std::vector<char> namedata(sensor_name_size);

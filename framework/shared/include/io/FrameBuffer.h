@@ -26,15 +26,16 @@ namespace slambench {
 			void Release();
 			void ResetBuffer();
 			bool Busy();
-			
 			bool Reserve(size_t size);
-			
 			void *Data();
+			void resetLock() {
+				lock_.exchange(false);
+			}
 		
 		private:
-			std::atomic<bool> _lock;
-			size_t _size;
-			void *_data;
+			std::atomic<bool> lock_;
+			size_t size_;
+			void *data_;
 		};
 	}
 }

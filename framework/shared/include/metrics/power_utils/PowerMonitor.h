@@ -7,11 +7,8 @@
 
  */
 
-
-
 #ifndef FRAMEWORK_SHARED_INCLUDE_METRICS_POWER_UTILS_POWERMONITOR_H_
 #define FRAMEWORK_SHARED_INCLUDE_METRICS_POWER_UTILS_POWERMONITOR_H_
-
 
 class PowerMonitor {
 public:
@@ -21,6 +18,4 @@ public:
 	virtual void                       startSample() = 0;
 
 };
-
-
 #endif /* FRAMEWORK_SHARED_INCLUDE_METRICS_POWER_UTILS_POWERMONITOR_H_ */

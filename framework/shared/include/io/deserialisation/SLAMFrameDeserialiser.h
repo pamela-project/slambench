@@ -21,14 +21,12 @@ namespace slambench {
 		class SLAMFrameDeserialiser : public Deserialiser, public slambench::io::FrameStream {
 		public:
 			SLAMFrameDeserialiser(FILE *file, SensorCollection &_sensors, FrameBufferSource *fb_source);
-			
 			SLAMFrame* GetNextFrame() override;
 			bool HasNextFrame() override;
 
 		private:
-			SensorCollection &_sensors;
-			FILE *_file;
-			FrameBufferSource *_fb_source;
+			SensorCollection &sensors_;
+			FrameBufferSource *fb_source_;
 		};
 	}
 }

@@ -22,7 +22,7 @@ find_package(Boost 1.54 REQUIRED COMPONENTS system filesystem program_options re
 # EUROCMAV datasets support requirements - skip if not found
 find_package(LIBYAML QUIET)
 IF (NOT LIBYAML_FOUND)
-	message(STATUS "${BoldRed}LibYAML dependency for EUROCMAV datasets not found - dataset skipped${ColourReset}")
+	message(STATUS "${BoldRed}LibYAML dependency for UZH-FPV, EuRoC-MAV and OpenLORIS datasets not found - datasets skipped${ColourReset}")
 ENDIF ()
 
 #------------------------------------------------
@@ -82,17 +82,28 @@ endif ()
 ### add executables and target libraries
 #------------------------------------------------
 add_executable(io-readply io-readply.cpp)
-target_link_libraries(io-readply slambench-io)
+target_link_libraries(io-readply slambench-io slambench-metrics)
 
 add_executable(io-inspect-file io-inspect.cpp)
-target_link_libraries(io-inspect-file PRIVATE -Wl,--whole-archive slambench-io -Wl,--no-whole-archive)
+target_link_libraries(io-inspect-file PRIVATE -Wl,--whole-archive slambench-io slambench-metrics -Wl,--no-whole-archive)
 
 IF (LIBYAML_FOUND)
 	add_library(EUROCMAV EUROCMAV.cpp)
 	target_link_libraries(EUROCMAV slambench-io ${Boost_LIBRARIES} ${LIBYAML_LIBRARY})
-	target_include_directories(EUROCMAV PRIVATE ${Boost_INCLUDE_DIRS}  ${LIBYAML_INCLUDE_DIR})
+	target_include_directories(EUROCMAV PRIVATE ${Boost_INCLUDE_DIRS} ${LIBYAML_INCLUDE_DIR})
 	set(EUROCMAV_LIB "EUROCMAV")
-ENDIF ()
+
+	add_library(OpenLORIS OpenLORIS.cpp)
+	target_link_libraries(OpenLORIS slambench-io ${Boost_LIBRARIES} ${LIBYAML_LIBRARY})
+	target_include_directories(OpenLORIS PRIVATE ${Boost_INCLUDE_DIRS} ${LIBYAML_INCLUDE_DIR})
+	set(OpenLORIS_LIB "OpenLORIS")
+
+	add_library(UZHFPV UZHFPV.cpp)
+	target_link_libraries(UZHFPV slambench-io ${Boost_LIBRARIES} ${LIBYAML_LIBRARY})
+	target_include_directories(UZHFPV PRIVATE ${Boost_INCLUDE_DIRS} ${LIBYAML_INCLUDE_DIR})
+	set(UZHFPV_LIB "UZHFPV")
+
+ENDIF (LIBYAML_FOUND)
 
 add_library(SVO SVO.cpp)
 target_link_libraries(SVO slambench-io ${Boost_LIBRARIES})
@@ -105,6 +116,22 @@ target_include_directories(ICL PRIVATE ${Boost_INCLUDE_DIRS})
 add_library(TUM TUM.cpp)
 target_link_libraries(TUM slambench-io ${Boost_LIBRARIES})
 target_include_directories(TUM PRIVATE ${Boost_INCLUDE_DIRS})
+
+add_library(BONN BONN.cpp)
+target_link_libraries(BONN slambench-io ${Boost_LIBRARIES})
+target_include_directories(BONN PRIVATE ${Boost_INCLUDE_DIRS})
+
+add_library(ICLNUIM ICLNUIM.cpp)
+target_link_libraries(ICLNUIM slambench-io)
+target_include_directories(ICLNUIM PRIVATE ${Boost_INCLUDE_DIRS})
+
+add_library(ETHI ETHI.cpp)
+target_link_libraries(ETHI slambench-io TUM ICLNUIM)
+target_include_directories(ETHI PRIVATE ${Boost_INCLUDE_DIRS})
+
+add_library(VolumeDeform VolumeDeform.cpp)
+target_link_libraries(VolumeDeform slambench-io)
+target_include_directories(VolumeDeform PRIVATE ${Boost_INCLUDE_DIRS})
 
 # if all dependencies found add TUM-ROSBAG target
 IF (OpenCV_FOUND AND ROSPKGS_FOUND)
@@ -125,9 +152,5 @@ IF (OpenCV_FOUND AND ROSPKGS_FOUND)
 	set(TUM-ROSBAG_LIB "TUM-ROSBAG")
 endif ()
 
-add_library(ICLNUIM ICLNUIM.cpp)
-target_link_libraries(ICLNUIM slambench-io)
-target_include_directories(ICLNUIM PRIVATE ${Boost_INCLUDE_DIRS})
-
 add_executable(dataset-generator dataset-generator.cpp)
-target_link_libraries(dataset-generator TUM ICLNUIM ICL ${EUROCMAV_LIB} SVO ${TUM-ROSBAG_LIB})
+target_link_libraries(dataset-generator TUM UZHFPV ICLNUIM ICL ETHI BONN VolumeDeform ${OpenLORIS_LIB} ${UZHFPV_LIB} ${EUROCMAV_LIB} SVO ${TUM-ROSBAG_LIB})

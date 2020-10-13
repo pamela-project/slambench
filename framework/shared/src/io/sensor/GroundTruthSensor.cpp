@@ -43,7 +43,7 @@ class GTDeserialiser : public SensorDeserialiser {
 		return true;
 	}
 
-	bool DeserialiseSensorSpecific(Deserialiser* d, Sensor* s) override {
+	bool DeserialiseSensorSpecific(const Deserialiser* d, Sensor* s) override {
 		// nothing to do
 		(void)d;
 		(void)s;

@@ -571,32 +571,43 @@ bool SLAMBenchUI_Pangolin::DrawQueuedFrames() {
 
 	glEnable(GL_TEXTURE_2D);
 
+
+
 	for (unsigned int w = 0 ; w < frames_.size(); w++) {
 
 		slambench::values::FrameValue &frame = frames_.at(w);
 
 		glBindTexture(GL_TEXTURE_2D, textureId[w]);
 
-		GLint format, type;
-		switch(frame.GetFormat()) {
-		case slambench::io::pixelformat::G_I_8:
-			format = GL_LUMINANCE;
-			type   = GL_UNSIGNED_BYTE;
-			break;
-		case slambench::io::pixelformat::RGB_III_888:
-			format = GL_RGB;
-			type = GL_UNSIGNED_BYTE;
-			break;
-		case slambench::io::pixelformat::RGBA_IIII_8888:
-			format = GL_RGBA;
-			type = GL_UNSIGNED_BYTE;
-			break;
-		default:
-			// unknown type!
-			abort();
-		}
+        GLint format, type, internalformat;
+        switch(frame.GetFormat()) {
+            case slambench::io::pixelformat::G_I_8:
+            case slambench::io::pixelformat::D_I_8:
+                internalformat = GL_RGBA;
+                format = GL_LUMINANCE;
+                type   = GL_UNSIGNED_BYTE;
+                break;
+            case slambench::io::pixelformat::RGB_III_888:
+                internalformat = GL_RGB;
+                format = GL_RGB;
+                type = GL_UNSIGNED_BYTE;
+                break;
+            case slambench::io::pixelformat::RGBA_IIII_8888:
+                internalformat = GL_RGBA;
+                format = GL_RGBA;
+                type = GL_UNSIGNED_BYTE;
+                break;
+            case slambench::io::pixelformat::D_I_16:
+                internalformat = GL_LUMINANCE;
+                format = GL_LUMINANCE;
+                type = GL_UNSIGNED_SHORT;
+                break;
+            default:
+                // unknown type!
+                abort();
+        }
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frame.GetWidth(), frame.GetHeight(), 0, format, type, frame.GetData());
+        glTexImage2D(GL_TEXTURE_2D, 0, internalformat, frame.GetWidth(), frame.GetHeight(), 0, format, type, frame.GetData());
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -902,26 +913,35 @@ void SLAMBenchUI_Pangolin::drawBackground(slambench::values::FrameValue * frame)
 	glOrtho( 0, 1, 0, 1, -1, 1 );
 
 
-	GLint format, type;
+	GLint format, type, internalformat;
 	switch(frame->GetFormat()) {
 		case slambench::io::pixelformat::G_I_8:
+		case slambench::io::pixelformat::D_I_8:
+            internalformat = GL_RGBA;
 			format = GL_LUMINANCE;
 			type   = GL_UNSIGNED_BYTE;
 			break;
 		case slambench::io::pixelformat::RGB_III_888:
+            internalformat = GL_RGB;
 			format = GL_RGB;
 			type = GL_UNSIGNED_BYTE;
 			break;
 		case slambench::io::pixelformat::RGBA_IIII_8888:
+            internalformat = GL_RGBA;
 			format = GL_RGBA;
 			type = GL_UNSIGNED_BYTE;
 			break;
-		default:
+        case slambench::io::pixelformat::D_I_16:
+            internalformat = GL_LUMINANCE;
+            format = GL_LUMINANCE;
+            type = GL_UNSIGNED_SHORT;
+            break;
+        default:
 			// unknown type!
 			abort();
 		}
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, frame->GetWidth(), frame->GetHeight(), 0, format, type, frame->GetData());
+	glTexImage2D(GL_TEXTURE_2D, 0, internalformat, frame->GetWidth(), frame->GetHeight(), 0, format, type, frame->GetData());
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

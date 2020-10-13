@@ -43,10 +43,10 @@ namespace slambench {
 				bool HasNextFrame() override;
 
 			private:
-				openni::Device *_device;
+				openni::Device *device_;
 				
-				std::vector<openni::VideoStream*> _streams;
-				std::map<openni::VideoStream*, Sensor*> _sensor_map;
+				std::vector<openni::VideoStream*> streams_;
+				std::map<openni::VideoStream*, Sensor*> sensor_map_;
 			};
 			
 		}

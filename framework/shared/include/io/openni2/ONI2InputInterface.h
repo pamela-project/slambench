@@ -6,12 +6,12 @@
  This code is licensed under the MIT License.
 
  */
-
+#ifdef DO_OPENNI20
 #ifndef IO_ONI2INPUTINTERFACE_H
 #define IO_ONI2INPUTINTERFACE_H
 
-#include "../InputInterface.h"
-#include "../sensor/SensorCollection.h"
+#include <io/InputInterface.h>
+#include <io/sensor/SensorCollection.h>
 
 #include <string>
 
@@ -30,7 +30,7 @@ namespace slambench {
 			class ONI2InputInterface : public InputInterface {
 			public:
 				ONI2InputInterface();
-				ONI2InputInterface(std::string oni2_filename);
+				ONI2InputInterface(const std::string& oni2_filename);
 				
 				FrameStream& GetFrames() override;
 				SensorCollection& GetSensors() override;
@@ -42,15 +42,15 @@ namespace slambench {
 				DepthSensor *BuildDepthSensor(const openni::SensorInfo *sensor_info) ;
 
 
-				openni::Device *_device;
-				ONI2FrameStream *_stream;
+				openni::Device *device_;
+				ONI2FrameStream *stream_;
 				
-				SensorCollection _sensors;
-				bool _sensors_ready;
+				SensorCollection sensors_;
+				bool sensors_ready_;
 			};
 		}
 	}
 }
 
 #endif /* IO_ONI2INPUTINTERFACE_H */
-
+#endif /* DO_OPENNI20 */

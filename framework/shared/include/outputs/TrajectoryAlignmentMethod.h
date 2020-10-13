@@ -18,27 +18,33 @@
 #include <Eigen/Eigen>
 
 namespace slambench {
-	namespace outputs {
-		
-		class Output;
-		
-		class TrajectoryAlignmentMethod {
-		public:
-			typedef slambench::values::TrajectoryValue::pose_container_t trajectory_t;
-			virtual Eigen::Matrix4f operator()(const trajectory_t &ground_truth, const trajectory_t &trajectory) = 0;
-			virtual ~TrajectoryAlignmentMethod() {};
-		};
-		
-		class OriginalTrajectoryAlignmentMethod : public TrajectoryAlignmentMethod {
-		public:
-			virtual Eigen::Matrix4f operator()(const trajectory_t &ground_truth, const trajectory_t &trajectory) override;
-		};
-		
-		class NewTrajectoryAlignmentMethod : public TrajectoryAlignmentMethod {
-		public:
-			virtual Eigen::Matrix4f operator()(const trajectory_t &ground_truth, const trajectory_t &trajectory) override;
-		};
-	}
+    namespace outputs {
+
+        class Output;
+
+        class TrajectoryAlignmentMethod {
+        public:
+            typedef slambench::values::TrajectoryValue::pose_container_t trajectory_t;
+            virtual Eigen::Matrix4f operator()(const trajectory_t &ground_truth, const trajectory_t &trajectory) = 0;
+            virtual ~TrajectoryAlignmentMethod() {};
+        };
+
+        class OriginalTrajectoryAlignmentMethod : public TrajectoryAlignmentMethod {
+        public:
+            virtual Eigen::Matrix4f operator()(const trajectory_t &ground_truth, const trajectory_t &trajectory) override;
+        };
+
+
+        class UmeyamaTrajectoryAlignmentMethod : public TrajectoryAlignmentMethod {
+        public:
+            Eigen::Matrix4f operator()(const trajectory_t &ground_truth, const trajectory_t &trajectory) override;
+        };
+
+        class NewTrajectoryAlignmentMethod : public TrajectoryAlignmentMethod {
+        public:
+            virtual Eigen::Matrix4f operator()(const trajectory_t &ground_truth, const trajectory_t &trajectory) override;
+        };
+    }
 }
 
 #endif /* TRAJECTORYALIGNMENTMETHOD_H */

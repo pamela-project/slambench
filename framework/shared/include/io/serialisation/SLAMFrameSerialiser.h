@@ -20,12 +20,10 @@ namespace slambench {
 		class SLAMFrame;
 		
 		class SLAMFrameSerialiser : public Serialiser {
-			
 		public:
 			SLAMFrameSerialiser(FILE *target);
 			
 			bool Serialise(SLAMFrame &frame);
-			
 		};
 		
 	}

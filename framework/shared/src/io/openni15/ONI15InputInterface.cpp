@@ -7,7 +7,6 @@
 
  */
 
-
 #include "io/openni15/ONI15InputInterface.h"
 #include "io/sensor/CameraSensor.h"
 #include "io/sensor/DepthSensor.h"
@@ -22,56 +21,39 @@
 #include <XnLog.h>
 #include <XnCppWrapper.h>
 
-
-
-
 using namespace slambench::io;
 using namespace slambench::io::openni15;
 
-ONI15InputInterface::ONI15InputInterface() : _stream(nullptr), _sensors_ready(false) {
+ONI15InputInterface::ONI15InputInterface() : stream_(nullptr), sensors_ready_(false) {
 
-
-	this->_context = new xn::Context();
-    if (_context->Init() != XN_STATUS_OK) {
+	context_ = new xn::Context();
+    if (context_->Init() != XN_STATUS_OK) {
     	std::cerr << ( "OpenNI15: Error  Init Failed.") << std::endl;
     	exit(1);
     	return;
     }
 
-
-    if (_context->StartGeneratingAll() != XN_STATUS_OK) {
-    	std::cerr << ( "OpenNI15: _context.StartGeneratingAll() ERROR !!!") << std::endl;
+    if (context_->StartGeneratingAll() != XN_STATUS_OK) {
+    	std::cerr << ( "OpenNI15: context_.StartGeneratingAll() ERROR !!!") << std::endl;
     	exit(1);
     	return;
     }
 
-
     std::cerr << ( "OpenNI15:  Ready !!!") << std::endl;
 
-
-
-
 }
-
 
 FrameStream& ONI15InputInterface::GetFrames() {
 
-	if(_stream == nullptr) BuildStream();
-	
-	return *_stream;
+	if(stream_ == nullptr) BuildStream();
+	return *stream_;
 }
-
-
-
-
 
 SensorCollection& ONI15InputInterface::GetSensors() {
 
 	BuildSensors();
-	return _sensors;
+	return sensors_;
 }
-
-
 
 CameraSensor *ONI15InputInterface::BuildCameraSensor() {
 	
@@ -99,8 +81,6 @@ CameraSensor *ONI15InputInterface::BuildCameraSensor() {
 
 	return sensor;
 }
-
-
 
 DepthSensor *ONI15InputInterface::BuildDepthSensor() {
 
@@ -133,39 +113,36 @@ DepthSensor *ONI15InputInterface::BuildDepthSensor() {
 
 void ONI15InputInterface::BuildSensors() {
 
-	if(_sensors_ready) return;
-
+	if(sensors_ready_) return;
 
 	auto depth_sensor = BuildDepthSensor();
-	depth_sensor->Index = _sensors.size();
-	_sensors.AddSensor(depth_sensor);
+	depth_sensor->Index = sensors_.size();
+	sensors_.AddSensor(depth_sensor);
 
 	auto rgb_sensor = BuildCameraSensor();
-	rgb_sensor->Index = _sensors.size();
-	_sensors.AddSensor(rgb_sensor);
+	rgb_sensor->Index = sensors_.size();
+	sensors_.AddSensor(rgb_sensor);
 
-	_sensors_ready = true;
+    sensors_ready_ = true;
 }
 
 void ONI15InputInterface::BuildStream() {
 
 	BuildSensors();
-	_stream = new ONI15FrameStream(_context);
+    stream_ = new ONI15FrameStream(context_);
 
 	bool depth_found = false;
-	bool rgb_found= false;
+	bool rgb_found = false;
 
-
-
-	for(auto *sensor : _sensors) {
+	for(auto *sensor : sensors_) {
 		if(sensor->GetType() == slambench::io::CameraSensor::kCameraType) {
 			rgb_found = true;
-			assert(_stream->ActivateSensor((CameraSensor*)sensor));
+			assert(stream_->ActivateSensor((CameraSensor*)sensor));
 		} else if (sensor->GetType() == slambench::io::DepthSensor::kDepthType) {
 			depth_found = true;
-			assert(_stream->ActivateSensor((DepthSensor*)sensor));
+			assert(stream_->ActivateSensor((DepthSensor*)sensor));
 		}
 	}
 	assert(rgb_found and depth_found);
-	_stream->StartStreams();
+	stream_->StartStreams();
 }

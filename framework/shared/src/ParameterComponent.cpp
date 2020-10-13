@@ -15,9 +15,9 @@
 ParameterComponent::~ParameterComponent() {
 
 
-		for (Parameter* it : _arguments) {
+		for (Parameter* it : arguments_) {
 			delete it;
 		}
-		_arguments.clear();
+		arguments_.clear();
 
 }

@@ -107,7 +107,7 @@ bool PAPIMonitor::papi_init () {
 			return false;
 		}
 
-		strncpy(units[num_events],evinfo.units,sizeof(units[0])-1);
+		strncpy(units[num_events],evinfo.units,sizeof(units[0]));
 		// buffer must be null terminated to safely use strstr operation on it below
 		units[num_events][sizeof(units[0])-1] = '\0';
 

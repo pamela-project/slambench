@@ -7,8 +7,6 @@
 
  */
 
-
-
 #include "ColumnWriter.h"
 
 #include "metrics/Metric.h"
@@ -16,13 +14,7 @@
 #include "values/ValueInterface.h"
 #include "values/ValuePrinter.h"
 
-
 using namespace slambench;
-
-ColumnInterface::~ColumnInterface()
-{
-
-}
 
 std::string LibColumnInterface::GetHeaderPrefix() const
 {
@@ -36,20 +28,9 @@ std::string LibColumnInterface::GetHeaderPrefix() const
 	return libname;
 }
 
-ValueLibColumnInterface::ValueLibColumnInterface(SLAMBenchLibraryHelper* lib, outputs::BaseOutput* output) : ValueLibColumnInterface(lib, new values::OutputValueInterface(*output), output->GetName())
-{
+ValueLibColumnInterface::ValueLibColumnInterface(SLAMBenchLibraryHelper* lib, outputs::BaseOutput* output) : ValueLibColumnInterface(lib, new values::OutputValueInterface(*output), output->GetName()) {}
 
-}
-
-ValueLibColumnInterface::ValueLibColumnInterface(SLAMBenchLibraryHelper *lib, metrics::Metric *metric, metrics::Phase *phase) : ValueLibColumnInterface(lib, new values::MetricValueInterface(lib->GetMetricManager(), *metric, *phase), metric->GetName() + "_" + phase->GetName())
-{
-	
-}
-
-ValueLibColumnInterface::~ValueLibColumnInterface()
-{
-
-}
+ValueLibColumnInterface::ValueLibColumnInterface(SLAMBenchLibraryHelper *lib, metrics::Metric *metric, metrics::Phase *phase) : ValueLibColumnInterface(lib, new values::MetricValueInterface(lib->GetMetricManager(), *metric, *phase), metric->GetName() + "_" + phase->GetName()) {}
 
 void ValueLibColumnInterface::Write(std::ostream& str)
 {
@@ -67,15 +48,9 @@ void ValueLibColumnInterface::WriteHeader(std::ostream& str) const
 	str << GetHeaderPrefix() << name_;
 }
 
-CollectionValueLibColumnInterface::CollectionValueLibColumnInterface(SLAMBenchLibraryHelper* lib, metrics::Metric* metric, metrics::Phase* phase) : ValueLibColumnInterface(lib,metric, phase)
-{
+CollectionValueLibColumnInterface::CollectionValueLibColumnInterface(SLAMBenchLibraryHelper* lib, metrics::Metric* metric, metrics::Phase* phase) : ValueLibColumnInterface(lib,metric, phase) {}
 
-}
-
-CollectionValueLibColumnInterface::CollectionValueLibColumnInterface(SLAMBenchLibraryHelper* lib, outputs::BaseOutput* output) : ValueLibColumnInterface(lib, output)
-{
-
-}
+CollectionValueLibColumnInterface::CollectionValueLibColumnInterface(SLAMBenchLibraryHelper* lib, outputs::BaseOutput* output) : ValueLibColumnInterface(lib, output) {}
 
 void CollectionValueLibColumnInterface::WriteHeader(std::ostream& str) const
 {
@@ -131,22 +106,6 @@ void CollectionValueLibColumnInterface::WriteInvalid(std::ostream& str)
 	}
 }
 
-
-LibColumnInterface::~LibColumnInterface()
-{
-
-}
-
-OutputTimestampColumnInterface::OutputTimestampColumnInterface(outputs::BaseOutput* output) : output_(output)
-{
-
-}
-
-OutputTimestampColumnInterface::~OutputTimestampColumnInterface()
-{
-
-}
-
 void OutputTimestampColumnInterface::Write(std::ostream& str)
 {
 	TimeStamp ts = output_->GetMostRecentValue().first;
@@ -160,10 +119,7 @@ void OutputTimestampColumnInterface::WriteHeader(std::ostream& str) const
 	str << "Timestamp";
 }
 
-RowNumberColumn::RowNumberColumn() : counter_(1)
-{
-	
-}
+RowNumberColumn::RowNumberColumn() : counter_(1) {}
 
 void RowNumberColumn::Write(std::ostream& str)
 {
@@ -177,10 +133,7 @@ void RowNumberColumn::WriteHeader(std::ostream& str) const
 }
 
 
-ColumnWriter::ColumnWriter(std::ostream& str, const std::string &separator) : str_(str), separator_(separator)
-{
-
-}
+ColumnWriter::ColumnWriter(std::ostream& str, const std::string &separator) : str_(str), separator_(separator) {}
 
 void ColumnWriter::AddColumn(ColumnInterface* interface)
 {

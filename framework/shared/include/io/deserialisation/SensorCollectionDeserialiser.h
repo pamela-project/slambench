@@ -21,10 +21,8 @@ namespace slambench {
 		class SensorCollectionDeserialiser : public Deserialiser {
 		public:
 			SensorCollectionDeserialiser(std::FILE *_file);
-			
-			bool Deserialise(SensorCollection &target);
-		private:
-			bool DeserialiseSensor(Sensor *&sensor);
+			bool Deserialise(SensorCollection &target) const;
+			bool DeserialiseSensor(Sensor *&sensor) const;
 		};
 	}
 }

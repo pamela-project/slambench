@@ -15,7 +15,6 @@
 #include <map>
 #include <vector>
 
-
 namespace xn {
 	class DepthGenerator;
 	class ImageGenerator;
@@ -36,7 +35,6 @@ namespace slambench {
 			 Once the stream has been created, each desired sensor should be
 			 activated.
 			 */
-			
 			class ONI15FrameStream : public FrameStream {
 			public:
 				ONI15FrameStream(xn::Context *context) ;
@@ -48,17 +46,13 @@ namespace slambench {
 				bool HasNextFrame() override;
 
 			private:
-				xn::Context * _context;
-				xn::DepthGenerator* _depth_generator;
-				xn::ImageGenerator* _image_generator;
-				xn::DepthMetaData* DMD ;
-				xn::ImageMetaData* IMD ;
-
+				xn::Context * context_;
+				xn::DepthGenerator* depth_generator_;
+				xn::ImageGenerator* image_generator_;
+				xn::DepthMetaData* DMD_ ;
+				xn::ImageMetaData* IMD_ ;
 				std::map<xn::MapGenerator*, Sensor*> _sensor_map;
-
-
 			};
-			
 		}
 	}
 }

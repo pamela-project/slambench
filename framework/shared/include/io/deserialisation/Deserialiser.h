@@ -9,7 +9,6 @@
 
 #ifndef IO_DESERIALISER_H
 #define IO_DESERIALISER_H
-
 #include <cstdio>
 
 namespace slambench {
@@ -18,17 +17,15 @@ namespace slambench {
 		public:
 			Deserialiser(FILE *target_file);
 			
-			FILE *File();
-			
-			bool Read(void *target, size_t bytes);
-			bool Skip(size_t skip);
-			size_t Offset();
-			
-			bool Good();
+			FILE *File() const;
+			bool Read(void *target, size_t bytes) const;
+			bool Skip(size_t skip) const;
+			size_t Offset() const;
+			bool Good() const;
+
 		private:
-			FILE *_target_file;
+			FILE *target_file_;
 		};
 	}
 }
-
 #endif

@@ -12,5 +12,5 @@
 using namespace slambench::io;
 
 FrameBuffer *SingleFrameBufferSource::Next() {
-	return &_fb;
+	return &fb_;
 }

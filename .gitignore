@@ -2,7 +2,8 @@
 /docker/tmp
 /docker/nvidia-driver.run
 docker/workspace/
-
+framework/makefiles/benchmarks.makefile
+framework/makefiles/datasets.makefile
 # Build files
 /build/
 /install/
@@ -25,27 +26,9 @@ docker/workspace/
 
 
 # Ignore benchmarks folders
-
-benchmarks/efusion/
-benchmarks/infinitam/
-benchmarks/lsdslam/
-benchmarks/okvis/
-benchmarks/orbslam2/
-benchmarks/ptam/
-benchmarks/svo/
-benchmarks/monoslam/
-benchmarks/kfusion/
-
-
-
-# Exotic builds
-
-/benchmarks/monoslam/src/arm_m7/scenelib2/support/*.o
-/benchmarks/monoslam/src/arm_m7/scenelib2/*.o
-/benchmarks/monoslam/src/arm_m7/scenelib2/improc/*.o
-/benchmarks/monoslam/src/arm_m7/*.o
-/benchmarks/monoslam/src/arm_m7/*.a
-/benchmarks/monoslam/src/arm_m7/benchmark
+benchmarks/*
+!benchmarks/CMakeLists.txt
+!benchmarks/benchmarks.repos
 
 
 # DSE Files
@@ -60,7 +43,10 @@ paper/*.tex
 # Datasets
 
 /datasets
+/iros2020_results_backup
+/iros2020_results
 !/datasets/README.md
+!/datasets/datasets.repos
 
 # macOS
 .DS_Store
