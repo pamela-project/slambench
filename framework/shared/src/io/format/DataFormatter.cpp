@@ -12,6 +12,6 @@
 
 using namespace slambench::io;
 
-DataFormatter::DataFormatter(Sensor* sensor, void* data) : _data(data), _sensor(sensor) {
+DataFormatter::DataFormatter(Sensor* sensor, void* data) : data_(data), sensor_(sensor) {
 	
 }

@@ -24,63 +24,63 @@
 namespace slambench {
 	namespace metrics {
 
-PowerMetric::PowerMetric() : Metric("Power"), last_res(nullptr) {
+PowerMetric::PowerMetric() : Metric("Power"), last_res_(nullptr) {
 
-	pm = nullptr;
+    pm_ = nullptr;
 
 #ifdef PAPI_MONITORING
-	if (!pm) {
+	if (!pm_) {
 		std::cerr << "*** Test PAPI Monitoring." << std::endl;
-		pm = PAPIMonitor::generate();
-		if (pm) {std::cerr << "*** PAPI Monitoring works." << std::endl;}
+		pm_ = PAPIMonitor::generate();
+		if (pm_) {std::cerr << "*** PAPI Monitoring works." << std::endl;}
 		else {std::cerr << "*** PAPI Monitoring failed." << std::endl;}
 	}
 #endif
 
 #ifdef XU3_MONITORING
-	if (!pm) {
+	if (!pm_) {
 		std::cerr << "*** Test XU3 Monitoring." << std::endl;
-		pm = XU3Monitor::generate();
-		if (pm) {std::cerr << "*** XU3 Monitoring works." << std::endl;}
+        pm_ = XU3Monitor::generate();
+		if (pm_) {std::cerr << "*** XU3 Monitoring works." << std::endl;}
 		else {std::cerr << "*** XU3 Monitoring failed." << std::endl;}
 	}
 #endif
 	
-	if (!pm) {std::cerr << "*** There is no available power monitoring techniques on this system." << std::endl;}
+	if (!pm_) {std::cerr << "*** There is no available power monitoring techniques on this system." << std::endl;}
 
 }
 
 
 const values::ValueDescription &PowerMetric::GetValueDescription() const {
 	static const slambench::values::ValueDescription desc =  slambench::values::ValueDescription(slambench::values::VT_COLLECTION);
-	if (!pm) 	return  desc;
-	return pm->GetType();
+	if (!pm_) 	return  desc;
+	return pm_->GetType();
 }
 const std::string& PowerMetric::GetDescription() const {
 	static std::string with    = "PAPI Power consumption in Watts.";
 	static std::string without = "Power Monitor not found.";
-	return pm?with:without;
+	return pm_ ? with : without;
 }
 
 void PowerMetric::MeasureStart(Phase* phase) {
 	(void)phase;
-	if (pm) {
-		pm->startSample();
+	if (pm_) {
+		pm_->startSample();
 	}
 }
 
 void PowerMetric::MeasureEnd(Phase* phase) {
 	(void)phase;
-	if (pm) {
-		last_res = pm->endSample();
+	if (pm_) {
+        last_res_ = pm_->endSample();
 	}
 }
 
 slambench::values::Value * PowerMetric::GetValue(Phase* phase) {
 	(void)phase;
 
-	if (pm != nullptr) {
-		return last_res;
+	if (pm_ != nullptr) {
+		return last_res_;
 	} else {
 		return new slambench::values::TypeForVT<slambench::values::VT_COLLECTION>::type({});
 	}

@@ -52,7 +52,7 @@ namespace slambench {
 			void AddGroundTruthFrame(SLAMFrame *frame);
 			void AddRegularFrame(SLAMFrame *frame);
 			
-			frame_container_t _frames;
+			frame_container_t frames_;
 		};
 	}
 }

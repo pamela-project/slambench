@@ -19,42 +19,42 @@
 using namespace slambench::io::openni15;
 using namespace slambench::io;
 
-ONI15FrameStream::ONI15FrameStream(xn::Context *context) : _context(context) {
+ONI15FrameStream::ONI15FrameStream(xn::Context *context) : context_(context) {
 }
 
 SLAMFrame* ONI15FrameStream::GetNextFrame() {
 
 	ONI15Frame  *frame  = nullptr;
 
-	_context->WaitAnyUpdateAll();
+	context_->WaitAnyUpdateAll();
 
 	// all frame seen, we clean them all.
-	if (DMD and IMD) {
-		delete DMD; DMD = nullptr;
-		delete IMD; IMD = nullptr;
+	if (DMD_ and IMD_) {
+		delete DMD_; DMD_ = nullptr;
+		delete IMD_; IMD_ = nullptr;
 	}
 
 
 	// no Depth we give it a try
-	if (!DMD) {
-		DMD = new xn::DepthMetaData();
-		_depth_generator->GetMetaData(*DMD);
-		if (DMD->DataSize() == 0) {
-			delete DMD; DMD = nullptr;
+	if (!DMD_) {
+		DMD_ = new xn::DepthMetaData();
+		depth_generator_->GetMetaData(*DMD_);
+		if (DMD_->DataSize() == 0) {
+			delete DMD_; DMD_ = nullptr;
 		} else {
-			frame = new ONI15Frame(_sensor_map.at(_depth_generator), DMD);
+			frame = new ONI15Frame(_sensor_map.at(depth_generator_), DMD_);
 			return frame;
 		}
 	}
 
 	// no image we give it a try
-	if (!IMD) {
-		IMD = new xn::ImageMetaData();
-		_image_generator->GetMetaData(*IMD);
-		if (IMD->DataSize() == 0) {
-			delete IMD; IMD = nullptr;
+	if (!IMD_) {
+		IMD_ = new xn::ImageMetaData();
+		image_generator_->GetMetaData(*IMD_);
+		if (IMD_->DataSize() == 0) {
+			delete IMD_; IMD_ = nullptr;
 		} else {
-			frame = new ONI15Frame(_sensor_map.at(_image_generator), IMD);
+			frame = new ONI15Frame(_sensor_map.at(image_generator_), IMD_);
 			return frame;
 		}
 	}
@@ -70,28 +70,27 @@ bool ONI15FrameStream::HasNextFrame() {
 
 }
 
-
 bool ONI15FrameStream::ActivateSensor(CameraSensor* sensor) {
 
-	assert(_context);
+	assert(context_);
 
 	if(sensor->GetType()  == CameraSensor::kCameraType) {
 		xn::ImageGenerator *stream = new xn::ImageGenerator();
-		if (stream->Create(*_context) != XN_STATUS_OK) {
-			std::cout << ( "OpenNI15: Create(_context) ERROR  !!!") << std::endl;
+		if (stream->Create(*context_) != XN_STATUS_OK) {
+			std::cout << ( "OpenNI15: Create(context_) ERROR  !!!") << std::endl;
 			return false;
 		}
 
-		_image_generator = stream;
+		image_generator_ = stream;
 		_sensor_map[stream] = sensor;
 	}else if(sensor->GetType()  == DepthSensor::kDepthType) {
 		xn::DepthGenerator *stream  = new xn::DepthGenerator();
-		if (stream->Create(*_context) != XN_STATUS_OK) {
-			std::cout << ( "OpenNI15: Create(_context) ERROR  !!!") << std::endl;
+		if (stream->Create(*context_) != XN_STATUS_OK) {
+			std::cout << ( "OpenNI15: Create(context_) ERROR  !!!") << std::endl;
 			return false;
 		}
 
-		_depth_generator = stream;
+		depth_generator_ = stream;
 		_sensor_map[stream] = sensor;
 	}else{
 		throw std::logic_error("Unrecognized sensor type");
@@ -104,8 +103,8 @@ bool ONI15FrameStream::ActivateSensor(CameraSensor* sensor) {
 
 bool ONI15FrameStream::StartStreams() {
 
-	if (_context->StartGeneratingAll() != XN_STATUS_OK) {
-		std::cout << ( "OpenNI15 _context.StartGeneratingAll() ERROR !!!") << std::endl;
+	if (context_->StartGeneratingAll() != XN_STATUS_OK) {
+		std::cout << ( "OpenNI15 context_.StartGeneratingAll() ERROR !!!") << std::endl;
 		return false;
 	}
 	return true;

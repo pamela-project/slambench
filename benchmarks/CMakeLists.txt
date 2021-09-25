@@ -1,36 +1,25 @@
 #######################################################
 # This file is the CMAKE script for Benchmarks Libraries
 #######################################################
-
 cmake_minimum_required(VERSION 2.8)
 
 project(benchmarks)
-
-
 if (NOT SLAMBENCH_INCLUDE_DIR)
   message( FATAL_ERROR "SLAMBENCH_INCLUDE_DIR not found")
   else ()
   include_directories(${SLAMBENCH_INCLUDE_DIR})
 endif()
 
-
 ## EXTERNAL SOURCE CODE, SKIP WARNINGS ....
 ############################################################
-
 set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}    -Wno-error")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -Wno-error")
 
-
-
-
 #### ADD USE-CASES DIRECTORIES ###
 ############################################################
-
-
-
 if ("${APPS}" STREQUAL "all")
     message(STATUS "Select all applications...")
-    set(APPS_MOD "efusion;kfusion;lsdslam;monoslam;infinitam;ptam;okvis;orbslam2;svo")
+    set(APPS_MOD "efusion;kfusion;lsdslam;monoslam;infinitam;ptam;okvis;orbslam2;orbslam3;svo;flame,refusion,kinectfusion,dso,fullfusion")
 else()
     message(STATUS "Select only ${APPS} applications...")
     string(REPLACE "," ";" APPS_MOD "${APPS}")     

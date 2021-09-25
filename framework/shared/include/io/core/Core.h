@@ -32,6 +32,7 @@ namespace slambench {
 				
 				const void *Get() { return ptr_; }
 				size_t Size() { return size_; }
+
 			private:
 				void *ptr_;
 				size_t size_;

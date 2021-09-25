@@ -7,7 +7,6 @@
 
  */
 
-
 #ifndef IO_SLAMFRAME_H
 #define IO_SLAMFRAME_H
 
@@ -16,6 +15,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstddef>
+#include <cstring>
 
 #include "TimeStamp.h"
 #include "PixelFormat.h"
@@ -33,13 +33,24 @@ namespace slambench {
 			Sensor *FrameSensor;
 			
 			size_t GetSize() const;
-			
 			void SetVariableSize(uint32_t size);
 			uint32_t GetVariableSize() const;
-			
-			virtual void *GetData() = 0;
-			virtual void FreeData() = 0;
-			
+            virtual void *GetData() = 0;
+            virtual void FreeData() = 0;
+            inline void SetData(void* data, size_t size)
+            {
+                    data_ = malloc(size);
+                    memcpy(data_, data, size);
+            }
+            inline void SetData(void* data)
+            {
+                assert(data);
+                data_ = data;
+            }
+
+		protected:
+            void *data_;
+
 		private:
 			uint32_t size_if_variable_sized_;
 		};
@@ -58,24 +69,19 @@ namespace slambench {
 			
 			typedef void (*callback_t)(SLAMFileFrame *, void *);
 			callback_t ProcessCallback;
-			
-			std::string Filename;
+			std::string filename;
 			
 			void *GetData() override;
 			void FreeData() override;
 			
 		protected:
 			virtual void *LoadFile() = 0;
-		private:
-			void *_data;
 		};
 		
 		class TxtFileFrame : public SLAMFileFrame {
 		public:
-			
-			pixelformat::EPixelFormat InputPixelFormat;
-			
-			
+			pixelformat::EPixelFormat input_pixel_format;
+
 		protected:
 			void *LoadFile() override;
 			
@@ -97,16 +103,17 @@ namespace slambench {
 			DeserialisedFrame(FrameBuffer &buffer, FILE *file);
 			
 			void SetOffset(size_t data_offset);
-			
 			void *GetData() override;
 			void FreeData() override;
+			FrameBuffer& getFrameBuffer() {
+				return buffer_;
+			}
 			
 		private:
-			FrameBuffer &_buffer;
-			FILE *_file;
-			size_t _offset;
+			FrameBuffer &buffer_;
+			FILE *file_;
+			size_t offset_;
 		};
-		
 	}
 }
 

@@ -12,14 +12,11 @@
 
 #include "../SLAMFrame.h"
 
-
 #define linux true
 
 #include <XnOpenNI.h>
 #include <XnLog.h>
 #include <XnCppWrapper.h>
-
-
 
 namespace slambench {
 	namespace io {
@@ -29,12 +26,8 @@ namespace slambench {
 			public:
 				ONI15Frame(Sensor *sensor, const xn::OutputMetaData *frameref);
 				~ONI15Frame();
-				
 				void* GetData() override;
 				void FreeData() override;
-				
-			private:
-				void *_data;
 			};
 		}
 	}

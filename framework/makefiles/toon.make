@@ -1,7 +1,5 @@
-
 TOON_INCLUDE_DIR=${DEPS_DIR}/toon/include
 ANDROID_TOON_INCLUDE_DIR=${ANDROID_DEPS_DIR}/toon/include
-
 
 ${REPOS_DIR}/TooN :
 	mkdir ${REPOS_DIR} -p

@@ -28,13 +28,14 @@ namespace slambench {
 			typedef uint8_t sensor_base_t;
 			
 			Sensor(const sensor_name_t &sensor_name, const sensor_type_t &sensor_type);
-			virtual ~Sensor();
+			virtual ~Sensor() = default;
 		
 			std::string Description;
 			uint8_t Index;
 			pose_t Pose;
 			float Rate;
-			
+			float Delay; // Delay between sensor and baseline
+
 			virtual size_t GetFrameSize(const SLAMFrame *frame) const = 0;
 			const sensor_type_t &GetType() const;
 			const sensor_name_t &GetName() const;
@@ -52,18 +53,18 @@ namespace slambench {
 		
 		class SensorSerialiser {
 		public:
-			virtual ~SensorSerialiser();
+			virtual ~SensorSerialiser() = default;
 			bool Serialise(Serialiser *serialiser, const Sensor *sensor);
 			virtual bool SerialiseSensorSpecific(Serialiser *serialiser, const Sensor *sensor) = 0;
 		};
 		
 		class SensorDeserialiser {
 		public:
-			virtual ~SensorDeserialiser();
-			bool Deserialise(const Sensor::sensor_name_t &sensor_name, const Sensor::sensor_type_t &type, Deserialiser *d, Sensor **s);
+			virtual ~SensorDeserialiser() = default;
+			bool Deserialise(const Sensor::sensor_name_t &sensor_name, const Sensor::sensor_type_t &type, const Deserialiser *d, Sensor **s);
 			
 			virtual bool InstantiateSensor(const Sensor::sensor_name_t &sensor_name, const Sensor::sensor_type_t & type, Sensor **s) = 0;
-			virtual bool DeserialiseSensorSpecific(Deserialiser *d, Sensor *s) = 0;
+			virtual bool DeserialiseSensorSpecific(const Deserialiser *d, Sensor *s) = 0;
 		};
 		
 	}

@@ -10,6 +10,8 @@
 
 #include "io/sensor/AccelerometerSensor.h"
 #include "io/sensor/SensorDatabase.h"
+#include "io/serialisation/Serialiser.h"
+#include "io/deserialisation/Deserialiser.h"
 
 using namespace slambench::io;
 
@@ -24,10 +26,13 @@ size_t AccelerometerSensor::GetFrameSize(const SLAMFrame *frame) const  {
 }
 
 class ACCSerialiser : public SensorSerialiser {
-	bool SerialiseSensorSpecific(Serialiser* serialiser, const Sensor* sensor) override {
-		// nothing to do
-		(void)serialiser;
-		(void)sensor;
+	bool SerialiseSensorSpecific(Serialiser* serialiser, const Sensor* s) override {
+		AccelerometerSensor *sensor = (AccelerometerSensor*)s;
+
+		serialiser->Write(&sensor->Intrinsic , sizeof(sensor->Intrinsic));
+		serialiser->Write(&sensor->NoiseVariances, sizeof(sensor->NoiseVariances));
+		serialiser->Write(&sensor->BiasVariances, sizeof(sensor->BiasVariances));
+
 		return true;
 	}
 };
@@ -43,10 +48,13 @@ class ACCDeserialiser : public SensorDeserialiser {
 		return true;
 	}
 
-	bool DeserialiseSensorSpecific(Deserialiser* d, Sensor* s) override {
-		// nothing to do
-		(void)d;
-		(void)s;
+	bool DeserialiseSensorSpecific(const Deserialiser* d, Sensor* s) override {
+		AccelerometerSensor *sensor = (AccelerometerSensor*)s;
+
+		d->Read(&sensor->Intrinsic , sizeof(sensor->Intrinsic));
+		d->Read(&sensor->NoiseVariances, sizeof(sensor->NoiseVariances));
+		d->Read(&sensor->BiasVariances, sizeof(sensor->BiasVariances));
+
 		return true;
 	}
 };

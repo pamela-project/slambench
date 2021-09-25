@@ -13,8 +13,7 @@
 #include <string>
 #include <vector>
 
-
-class Parameter;
+struct Parameter;
 class ParameterComponent;
 
 typedef  std::vector<Parameter*>          arguments_vector ;
@@ -23,44 +22,40 @@ typedef  std::vector<ParameterComponent*> components_vector ;
 
 class ParameterComponent
 {
-private:
-	std::string        _name;
-	arguments_vector   _arguments;
-	components_vector  _components;
-
 public:
-	ParameterComponent(std::string name) : _name(name) {}
+	ParameterComponent(std::string name) : name_(name) {}
 
 	virtual ~ParameterComponent();
 
 	const arguments_vector &getParameters() const {
-		return _arguments;
+		return arguments_;
 	}
 
 	const components_vector &getComponents() const {
-		return _components;
+		return components_;
 	}
 
 	std::string getName() const {
-		return _name;
+		return name_;
 	}
 
 	template<typename T>
 	void addParameter(T p) {
 		T * param_ptr = new T (p);
-		this->_arguments.push_back(param_ptr);
+		this->arguments_.push_back(param_ptr);
 		param_ptr->resetValue();
 
 
 	}
 
 	void AddComponent(ParameterComponent *component) {
-		_components.push_back(component);
+		components_.push_back(component);
 	}
 
+private:
+    std::string        name_;
+    arguments_vector   arguments_;
+    components_vector  components_;
 
 };
-
-
-
 #endif

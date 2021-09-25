@@ -7,8 +7,6 @@
 
  */
 
-
-
 #ifndef MEMORYMETRIC_H
 #define MEMORYMETRIC_H
 
@@ -18,7 +16,6 @@
 #include <functional>
 #include <string>
 #include <unordered_map>
-
 
 namespace slambench {
 	namespace metrics {
@@ -31,22 +28,17 @@ namespace slambench {
 			
 			virtual void MeasureStart(Phase* phase) override;
 			virtual void MeasureEnd(Phase* phase) override;
-			
 			values::Value *GetValue(Phase* phase) override;
 			const values::ValueDescription &GetValueDescription() const override;
 			const std::string &GetDescription() const override;
-			
-		private:
-			
-			slambench::values::ValueDescription desc;
-			CUDAMonitor cuda_monitor;
 
 		private:
+//			CUDAMonitor cuda_monitor;
+            slambench::values::ValueDescription desc_;
 			std::unordered_map<Phase *, size_t> CPU_Usage_;
 			std::unordered_map<Phase *, size_t> GPU_Usage_;
 
 		};
-		
 	}
 }
 

@@ -1,0 +1,38 @@
+From 8f0d44f1b1b8de0eda131210ce6e09e84f4deea0 Mon Sep 17 00:00:00 2001
+From: Ryan Coe <bluemrp9@gmail.com>
+Date: Fri, 23 Feb 2018 17:06:37 -0800
+Subject: [PATCH 1/1] fix float usage in powf64
+
+Signed-off-by: Ryan Coe <bluemrp9@gmail.com>
+---
+ Source/LibRawLite/internal/dcraw_common.cpp | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/Source/LibRawLite/internal/dcraw_common.cpp b/Source/LibRawLite/internal/dcraw_common.cpp
+index 217133a9f9a1caccb77eae946b3af073f660b1cf..cde8e420ad66508feb1222b5fde7166104f6ff1a 100644
+--- a/Source/LibRawLite/internal/dcraw_common.cpp
++++ b/Source/LibRawLite/internal/dcraw_common.cpp
+@@ -5543,11 +5543,18 @@ static float powf_lim(float a, float b, float limup)
+ {
+   return (b>limup || b < -limup)?0.f:powf(a,b);
+ }
+-static float powf64(float a, float b)
++static float powf64(const float a, const float b)
+ {
+   return powf_lim(a,b,64.f);
+ }
+-
++static float powf64(const int a, const int b)
++{
++  return powf_lim((float)a,(float)b,64.f);
++}
++static float powf64(const double a, const double b)
++{
++  return powf_lim((float)a,(float)b,64.f);
++}
+ 
+ #ifdef LIBRAW_LIBRARY_BUILD
+ 
+-- 
+2.16.1
+

@@ -1,4 +1,3 @@
-
 ifndef DEPS_DIR
 $(error DEPS_DIR is not set)
 endif
@@ -10,8 +9,6 @@ endif
 ifndef DEPS_BUILD_DIR
 $(error DEPS_BUILD_DIR is not set)
 endif
-
-
 
 PCL_DIR=${DEPS_DIR}/pcl/share/pcl-1.8
 ANDROID_PCL_DIR=${ANDROID_DEPS_DIR}/pcl/share/pcl-1.8
@@ -42,6 +39,7 @@ ${DEPS_DIR}/pcl : ${REPOS_DIR}/pcl eigen3 flann
 	-DWITH_DAVIDSDK=FALSE \
 	-DWITH_DSSDK=FALSE \
 	-DWITH_RSSDK=FALSE \
+	-DWITH_VTK=FALSE \
 	-DWITH_PCAP=FALSE \
 	-DBUILD_common=TRUE                \
 	-DBUILD_octree=TRUE               \

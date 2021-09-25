@@ -1,5 +1,3 @@
-
-
 GCC7_COMPILER=${DEPS_DIR}/gcc7/bin/c++
 GCC5_COMPILER=${DEPS_DIR}/gcc5/bin/c++
 
@@ -10,7 +8,6 @@ ${REPOS_DIR}/${GCC_REPOS} :
 	mkdir -p ${REPOS_DIR}
 	rm -rf ${REPOS_DIR}/${GCC_REPOS}
 	cd ${REPOS_DIR} && git clone git://gcc.gnu.org/git/gcc.git ${GCC_REPOS}
-
 
 ${DEPS_DIR}/gcc5 : ${REPOS_DIR}/${GCC_REPOS}
 	cd $^ && git checkout gcc-5_3_0-release

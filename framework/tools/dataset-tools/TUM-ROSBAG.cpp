@@ -141,7 +141,7 @@ bool loadTUMROSBAG_DepthData(const std::string & dirname,
         depth_frame->FrameSensor  = depth_sensor;
         depth_frame->Timestamp.S  = imgi->header.stamp.sec;
         depth_frame->Timestamp.Ns = imgi->header.stamp.nsec;
-        depth_frame->Filename     = frame_name.str();
+        depth_frame->filename     = frame_name.str();
         file.AddFrame(depth_frame);
     }
 
@@ -281,7 +281,7 @@ bool loadTUMROSBAG_RGBGreyData(
             rgb_frame->FrameSensor = rgb_sensor;
             rgb_frame->Timestamp.S = imgi->header.stamp.sec;
             rgb_frame->Timestamp.Ns = imgi->header.stamp.nsec;
-            rgb_frame->Filename = frame_name.str();
+            rgb_frame->filename = frame_name.str();
             file.AddFrame(rgb_frame);
         }
 
@@ -299,7 +299,7 @@ bool loadTUMROSBAG_RGBGreyData(
             grey_frame->FrameSensor = grey_sensor;
             grey_frame->Timestamp.S = imgi->header.stamp.sec;
             grey_frame->Timestamp.Ns = imgi->header.stamp.nsec;
-            grey_frame->Filename = frame_name.str();
+            grey_frame->filename = frame_name.str();
             file.AddFrame(grey_frame);
         }
     }
@@ -369,7 +369,7 @@ bool loadTUMROSBAG_GroundTruthData(const std::string & bagname,
         for (const auto& msgii : msgi->transforms) {
             if (!r_o_rdy && msgii.child_frame_id == gt_ids.optical) {
                 // record the /openni_rgb_frame to /openni_rgb_optical_frame
-                // transformation only once
+                // transformation_ only once
                 if ((msgii.header.frame_id == gt_ids.rgb)) {
                     r_o_rdy = true;
                     all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
@@ -377,7 +377,7 @@ bool loadTUMROSBAG_GroundTruthData(const std::string & bagname,
                 }
             } else if (!c_r_rdy && msgii.child_frame_id == gt_ids.rgb) {
                 // record the /openni_camera to /openni_rgb_frame
-                // transformation only once
+                // transformation_ only once
                 if ((msgii.header.frame_id == gt_ids.camera)) {
                     c_r_rdy = true;
                     all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
@@ -385,14 +385,14 @@ bool loadTUMROSBAG_GroundTruthData(const std::string & bagname,
                 }
             } else if (!k_c_rdy && msgii.child_frame_id == gt_ids.camera) {
                 // record the /kinect to /openni_camera
-                // transformation only once
+                // transformation_ only once
                 if ((msgii.header.frame_id == gt_ids.kinect)) {
                     k_c_rdy = true;
                     all_rdy = r_o_rdy && c_r_rdy && k_c_rdy;
                     tf::transformMsgToTF(msgii.transform, k_c_trans);
                 }
             } else if (msgii.child_frame_id == gt_ids.kinect) {
-                // track continuously the /world to /kinect transformation
+                // track continuously the /world to /kinect transformation_
                 if (msgii.header.frame_id == gt_ids.world) {
                     w_k_new = true;
 

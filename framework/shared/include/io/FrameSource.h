@@ -24,7 +24,7 @@ namespace slambench {
 		
 		class FrameStream {
 		public:
-			virtual ~FrameStream();
+			virtual ~FrameStream() = default;
 			
 			virtual SLAMFrame *GetNextFrame() = 0;
 			virtual bool HasNextFrame() = 0;
@@ -32,7 +32,7 @@ namespace slambench {
 		
 		class FrameCollection {
 		public:
-			virtual ~FrameCollection();
+			virtual ~FrameCollection() = default;
 			
 			virtual SLAMFrame *GetFrame(unsigned int index) = 0;
 			virtual unsigned int GetFrameCount() = 0;
@@ -45,8 +45,8 @@ namespace slambench {
 			SLAMFrame* GetNextFrame() override;
 			bool HasNextFrame() override;
 		private:
-			FrameCollection &_collection;
-			unsigned int _index;
+			FrameCollection &collection_;
+			unsigned int index_;
 		};
 		
 		/**
@@ -59,21 +59,22 @@ namespace slambench {
 			class GTFrameCollection : public FrameCollection {
 			public:
 				GTFrameCollection(GTBufferingFrameStream &gt_stream);
-				virtual ~GTFrameCollection();
+				~GTFrameCollection() override = default;
 				
 				unsigned int GetFrameCount() override;
 				SLAMFrame* GetFrame(unsigned int index) override;
+				SLAMFrame* GetClosestFrameToTime(const slambench::TimeStamp& ts);
 				private:
 					GTBufferingFrameStream &gt_stream_;
 			};
 			
-			GTBufferingFrameStream(FrameStream &base_stream);
-			virtual ~GTBufferingFrameStream();
+			explicit GTBufferingFrameStream(FrameStream &base_stream);
+			~GTBufferingFrameStream() override = default;
 			
 			SLAMFrame* GetNextFrame() override;
 			bool HasNextFrame() override;
 
-			FrameCollection *GetGTFrames();
+			GTFrameCollection *GetGTFrames();
 		private:
 			void fastForward();
 			
@@ -92,7 +93,7 @@ namespace slambench {
 		class RealTimeFrameStream : public FrameStream {
 		public:
 			RealTimeFrameStream(FrameStream *base_stream, double multiplier, bool should_pause);
-			virtual ~RealTimeFrameStream();
+			~RealTimeFrameStream() override = default;
 			
 			SLAMFrame* GetNextFrame() override;
 			bool HasNextFrame() override;

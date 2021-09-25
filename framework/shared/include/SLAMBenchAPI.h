@@ -12,7 +12,6 @@
 #define FRAMEWORK_SHARED_INCLUDE_SLAMBENCHAPI_H_
 
 #include <SLAMBenchLibraryHelper.h>
-
 #include <Eigen/Core>
 
 
@@ -39,6 +38,7 @@ bool sb_init_slam_system(SLAMBenchLibraryHelper * slam_settings) ;
  * */
 
 bool sb_update_frame (SLAMBenchLibraryHelper * slam_settings, slambench::io::SLAMFrame * type) ;
+bool sb_relocalize (SLAMBenchLibraryHelper * slam_settings) ;
 bool sb_process_once (SLAMBenchLibraryHelper * slam_settings) ;
 
 
@@ -63,6 +63,7 @@ extern "C" {
 bool c_sb_new_slam_configuration(void * slam_settings) ;
 bool c_sb_init_slam_system(void* slam_settings) ;
 bool c_sb_update_frame (void * slam_settings, void * type) ;
+bool c_sb_relocalize (void * slam_settings) ;
 bool c_sb_process_once (void * slam_settings) ;
 bool c_sb_update_outputs(void *lib, void *timestamp);
 bool c_sb_clean_slam_system();

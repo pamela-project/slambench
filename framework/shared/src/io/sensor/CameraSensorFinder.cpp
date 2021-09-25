@@ -7,7 +7,6 @@
 
  */
 
-
 #include "io/sensor/CameraSensorFinder.h"
 #include "io/sensor/CameraSensor.h"
 #include "io/sensor/DepthSensor.h"

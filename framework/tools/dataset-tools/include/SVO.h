@@ -7,48 +7,49 @@
 
  */
 
-
 #ifndef FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_SVO_H_
 #define FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_SVO_H_
 
-
-
-#include <ParameterManager.h>
-#include <ParameterComponent.h>
-#include <Parameters.h>
-
-#include <io/sensor/Sensor.h>
 #include <io/sensor/CameraSensor.h>
 #include <io/sensor/DepthSensor.h>
 #include <io/sensor/GroundTruthSensor.h>
-#include "../../dataset-tools/include/DatasetReader.h"
+#include <io/sensor/Sensor.h>
+
+#include <string>
+
+#include "DatasetReader.h"
+
+#include <ParameterComponent.h>
+#include <ParameterManager.h>
+#include <Parameters.h>
+
 
 namespace slambench {
 
-namespace io {
+  namespace io {
 
-class SVOReader :  public DatasetReader {
+    class SVOReader : public DatasetReader {
+     private:
+      static constexpr CameraSensor::intrinsics_t svo_grey = {0.419547872, 0.657291667, 0.5, 0.5}; // ATAN
+      //  static constexpr CameraSensor::intrinsics_t svo_grey   = { 315.5, 315.5, 376.0, 240.0 }; // Pinhole
 
-private :
+      static constexpr float translation[] = {0.1131, 0.1131, 2.0};  // x, y, z
+      static constexpr float rotation[] = {0.0, 0.9675388, 0.2527226, 0.0};  // w, x, y, z
 
+     public:
+      std::string input;
 
+      explicit SVOReader(const std::string& name) : DatasetReader(name) {
+        this->addParameter(TypedParameter<std::string>(
+            "i", "input-directory",
+            "path of the SVO dataset directory",
+            &this->input, nullptr));
+      }
 
-public :
-	std::string input;
+      SLAMFile* GenerateSLAMFile() override;
+    };
 
-	SVOReader (std::string name) : DatasetReader(name) {
-		this->addParameter(TypedParameter<std::string>("i",     "input-directory",       "path of the SVO dataset directory",   &this->input, NULL));
-
-	}
-
-	SLAMFile* GenerateSLAMFile () ;
-
-
-};
-
-}
-}
-
-
+  }  // namespace io
+}  // namespace slambench
 
 #endif /* FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_SVO_H_ */

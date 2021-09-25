@@ -19,17 +19,17 @@
 
 using namespace slambench::io;
 
-SLAMFileDeserialiser::SLAMFileDeserialiser(FILE *file, FrameBufferSource *fb_source) : Deserialiser(file), _fb_source(fb_source) {
+SLAMFileDeserialiser::SLAMFileDeserialiser(FILE *file, FrameBufferSource *fb_source) : Deserialiser(file), fb_source_(fb_source) {
 	
 }
 
-bool SLAMFileDeserialiser::Deserialise(SLAMFile &target) {
+bool SLAMFileDeserialiser::Deserialise(SLAMFile &target) const {
 	if(!DeserialiseHeader(target)) return false;
 	if(!DeserialiseFrames(target)) return false;
 	return true;
 }
 
-bool SLAMFileDeserialiser::DeserialiseHeader(SLAMFile &target) {
+bool SLAMFileDeserialiser::DeserialiseHeader(SLAMFile &target) const {
 	SLAMFileHeaderDeserialiser d(File());
 	if(!d.Deserialise()) {
 		return false;
@@ -43,7 +43,7 @@ bool SLAMFileDeserialiser::DeserialiseHeader(SLAMFile &target) {
 	return true;
 }
 
-bool SLAMFileDeserialiser::DeserialiseFrames(SLAMFile &target) {
+bool SLAMFileDeserialiser::DeserialiseFrames(SLAMFile &target) const {
 	SLAMFrame *frame;
 	
 	while(DeserialiseFrame(target, frame)) {
@@ -53,7 +53,7 @@ bool SLAMFileDeserialiser::DeserialiseFrames(SLAMFile &target) {
 	return true;
 }
 
-bool SLAMFileDeserialiser::DeserialiseFrame(SLAMFile &file, SLAMFrame *&target) {
+bool SLAMFileDeserialiser::DeserialiseFrame(SLAMFile &file, SLAMFrame *&target) const {
 	DeserialisedFrame *dsf = new DeserialisedFrame(*GetNextFramebuffer(), File());
 	
 	if(!Read(&dsf->Timestamp, sizeof(dsf->Timestamp))) {
@@ -78,6 +78,6 @@ bool SLAMFileDeserialiser::DeserialiseFrame(SLAMFile &file, SLAMFrame *&target) 
 	return true;
 }
 
-FrameBuffer *SLAMFileDeserialiser::GetNextFramebuffer() {
-	return _fb_source->Next();
+FrameBuffer *SLAMFileDeserialiser::GetNextFramebuffer() const {
+	return fb_source_->Next();
 }

@@ -29,7 +29,6 @@ namespace slambench {
 			
 			void Begin();
 			void End();
-			
 			const std::string &GetName() { return name_; }
 			
 		private:

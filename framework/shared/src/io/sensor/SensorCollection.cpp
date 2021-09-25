@@ -15,23 +15,23 @@
 using namespace slambench::io;
 
 Sensor &SensorCollection::at(unsigned int sensor_idx) {
-	return *_container.at(sensor_idx);
+	return *container_.at(sensor_idx);
 }
 
 size_t SensorCollection::size() const {
-	return _container.size();
+	return container_.size();
 }
 
 void SensorCollection::AddSensor(Sensor* sensor) {
 	if(sensor == nullptr) {
 		throw std::logic_error("Cannot add a null sensor to SensorCollection");
 	}
-	sensor->Index = _container.size();
-	_container.push_back(sensor);
+	sensor->Index = container_.size();
+	container_.push_back(sensor);
 }
 
 Sensor* SensorCollection::GetSensor(const Sensor::sensor_type_t & type) {
-	for(auto &i : _container) {
+	for(auto &i : container_) {
 		if(i->GetType() == type) {
 			return i;
 		}
@@ -41,7 +41,7 @@ Sensor* SensorCollection::GetSensor(const Sensor::sensor_type_t & type) {
 }
 
 const Sensor* SensorCollection::GetSensor(const Sensor::sensor_type_t & type) const {
-	for(auto &i : _container) {
+	for(auto &i : container_) {
 		if(i->GetType() == type) {
 			return i;
 		}
@@ -52,7 +52,7 @@ const Sensor* SensorCollection::GetSensor(const Sensor::sensor_type_t & type) co
 
 std::vector<Sensor*> SensorCollection::GetSensors(const Sensor::sensor_type_t & type) {
 	std::vector<Sensor*> output;
-	for(auto &i : _container) {
+	for(auto &i : container_) {
 		if(i->GetType() == type) {
 			output.push_back(i);
 		}

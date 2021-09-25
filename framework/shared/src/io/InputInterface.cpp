@@ -20,31 +20,31 @@ InputInterface::~InputInterface() {
 
 }
 
-BasicInputInterface::BasicInputInterface(FrameStream& frames, SensorCollection& sensors) :_frames(frames), _sensors(sensors) {
+BasicInputInterface::BasicInputInterface(FrameStream& frames, SensorCollection& sensors) : frames_(frames), sensors_(sensors) {
 
 }
 
 FrameStream& BasicInputInterface::GetFrames() {
-	return _frames;
+	return frames_;
 }
 
 SensorCollection& BasicInputInterface::GetSensors() {
-	return _sensors;
+	return sensors_;
 }
 
-FileInputInterface::FileInputInterface(SLAMFile& input_file) : _file(input_file), _stream(input_file) {
+FileInputInterface::FileInputInterface(SLAMFile& input_file) : file_(input_file), stream_(input_file) {
 
 }
 
 FrameStream& FileInputInterface::GetFrames() {
-	return _stream;
+	return stream_;
 }
 
 SensorCollection& FileInputInterface::GetSensors() {
-	return _file.Sensors;
+	return file_.Sensors;
 }
 
-FileStreamInputInterface::FileStreamInputInterface(FILE* input_file, FrameBufferSource *fb_source) : _deserialiser(input_file, _sensors, fb_source) {
+FileStreamInputInterface::FileStreamInputInterface(FILE* input_file, FrameBufferSource *fb_source) : deserialiser_(input_file, sensors_, fb_source) {
 	// deserialise header and sensors
 
 	if (input_file == nullptr) {
@@ -57,16 +57,16 @@ FileStreamInputInterface::FileStreamInputInterface(FILE* input_file, FrameBuffer
 	}
 	
 	SensorCollectionDeserialiser scd(input_file);
-	if(!scd.Deserialise(_sensors)) {
+	if(!scd.Deserialise(sensors_)) {
 		throw std::exception();
 	}
 }
 
 
 FrameStream& FileStreamInputInterface::GetFrames() {
-	return _deserialiser;
+	return deserialiser_;
 }
 
 SensorCollection& FileStreamInputInterface::GetSensors() {
-	return _sensors;
+	return sensors_;
 }

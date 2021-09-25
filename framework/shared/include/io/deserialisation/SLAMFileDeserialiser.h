@@ -16,25 +16,21 @@ namespace slambench {
 	namespace io {
 		class FrameBuffer;
 		class FrameBufferSource;
-		
 		class SLAMFile;
 		class SLAMFrame;
 		
 		class SLAMFileDeserialiser : public Deserialiser {
 		public:
 			SLAMFileDeserialiser(FILE *file, FrameBufferSource *framebuffer_source);
-			
-			bool Deserialise(SLAMFile &target);
+			bool Deserialise(SLAMFile &target) const;
 			
 		private:
-			bool DeserialiseHeader(SLAMFile &target);
-			bool DeserialiseFrames(SLAMFile &target);
+			bool DeserialiseHeader(SLAMFile &target) const;
+			bool DeserialiseFrames(SLAMFile &target) const;
+			bool DeserialiseFrame(SLAMFile &file, SLAMFrame *&frame) const;
+			FrameBuffer *GetNextFramebuffer() const;
 			
-			bool DeserialiseFrame(SLAMFile &file, SLAMFrame *&frame);
-			
-			FrameBuffer *GetNextFramebuffer();
-			
-			FrameBufferSource *_fb_source;
+			FrameBufferSource *fb_source_;
 		};
 	}
 }

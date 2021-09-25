@@ -221,9 +221,9 @@ bool loadICLDepthData(const std::string &dirname , SLAMFile &file, const Sensor:
 
             std::stringstream frame_name;
             frame_name << dirname << "/depth/"  <<  frame_no << ".png";
-            depth_frame->Filename = frame_name.str();
+            depth_frame->filename = frame_name.str();
 
-            if(access(depth_frame->Filename.c_str(), F_OK) < 0) {
+            if(access(depth_frame->filename.c_str(), F_OK) < 0) {
                   printf("No depth image for frame (%s)\n", frame_name.str().c_str());
                   perror("");
                   return false;
@@ -305,9 +305,9 @@ bool loadICLRGBData(const std::string &dirname , SLAMFile &file, const Sensor::p
 
           std::stringstream frame_name;
           frame_name << dirname << "/rgb/"  <<  frame_no << ".png";
-          rgb_frame->Filename = frame_name.str();
+          rgb_frame->filename = frame_name.str();
 
-          if(access(rgb_frame->Filename.c_str(), F_OK) < 0) {
+          if(access(rgb_frame->filename.c_str(), F_OK) < 0) {
                 printf("No RGB image for frame (%s)\n", frame_name.str().c_str());
                 perror("");
                 return false;
@@ -387,9 +387,9 @@ bool loadICLGreyData(const std::string &dirname , SLAMFile &file, const Sensor::
 
           std::stringstream frame_name;
           frame_name << dirname << "/rgb/"  <<  frame_no << ".png";
-          grey_frame->Filename = frame_name.str();
+          grey_frame->filename = frame_name.str();
 
-          if(access(grey_frame->Filename.c_str(), F_OK) < 0) {
+          if(access(grey_frame->filename.c_str(), F_OK) < 0) {
                 printf("No GREY image for frame (%s)\n", frame_name.str().c_str());
                 perror("");
                 return false;

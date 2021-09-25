@@ -7,59 +7,86 @@
 
  */
 
-
 #ifndef FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_ICLNUIM_H_
 #define FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_ICLNUIM_H_
 
-#include <ParameterManager.h>
 #include <ParameterComponent.h>
+#include <ParameterManager.h>
 #include <Parameters.h>
 
-#include <io/sensor/Sensor.h>
 #include <io/sensor/CameraSensor.h>
 #include <io/sensor/DepthSensor.h>
 #include <io/sensor/GroundTruthSensor.h>
-#include "../../dataset-tools/include/DatasetReader.h"
-
-struct float3 { float x, y, z; };
+#include <fstream>
+#include "DatasetReader.h"
 
 namespace slambench {
 
-namespace io {
+  namespace io {
 
-class ICLNUIMReader :  public DatasetReader {
+    class ICLNUIMReader : public DatasetReader {
+     private:
+      CameraSensor *rgb_sensor = nullptr;
+      DepthSensor *depth_sensor = nullptr;
+      CameraSensor *grey_sensor = nullptr;
+      GroundTruthSensor *gt_sensor = nullptr;
 
-public :
-	std::string input;
-	bool grey = true, rgb = true, depth = true, gt = true;
-	std::string plyfile = "";
-	bool positive_focal = false;
+      std::ifstream istream;
+      static constexpr DepthSensor::disparity_params_t disparity_params = {0.0002, 0.0};
+      static constexpr DepthSensor::disparity_type_t disparity_type = DepthSensor::affine_disparity;
 
-	ICLNUIMReader (std::string name) : DatasetReader(name) {
-		this->addParameter(TypedParameter<std::string>("i",     "input-directory",       "path of the ICLNUIM dataset directory",   &this->input, NULL));
-		this->addParameter(TypedParameter<bool>("grey",     "grey",       "set to true or false to specify if the GREY stream need to be include in the slam file.",   &this->grey, NULL));
-		this->addParameter(TypedParameter<bool>("rgb",     "rgb",       "set to true or false to specify if the RGB stream need to be include in the slam file.",   &this->rgb, NULL));
-		this->addParameter(TypedParameter<bool>("depth",     "depth",       "set to true or false to specify if the DEPTH stream need to be include in the slam file.",   &this->depth, NULL));
-		this->addParameter(TypedParameter<bool>("gt",     "gt",       "set to true or false to specify if the GROUNDTRUTH POSE stream need to be include in the slam file.",   &this->gt, NULL));
-		this->addParameter(TypedParameter<std::string>("ply",     "ply-file",       "When a PLY file is specified, the GROUNDTRUTH POINT CLOUD will be included in the slam file.",   &this->plyfile, NULL));
-		this->addParameter(TypedParameter<bool>("pf",     "positive-focal",       "This is a workaround to correct the ICLNUIM to a positive focal lenght.",   &this->positive_focal, NULL));
+      void AddSensors(SLAMFile &file);
+      bool GetFrame(const std::string &dirname, SLAMFile &file, int frame_no);
+      bool AddFrames(const std::string &dirname, SLAMFile &file);
 
-	}
+     public:
+      static constexpr image_params_t image_params = { 640, 480, 1, 5000.0 };
 
-	SLAMFile* GenerateSLAMFile () ;
+        std::string input;
+      bool grey = true, rgb = true, depth = true, gt = true;
+      std::string plyfile = "";
+      bool positive_focal = false;
 
-private :
-	CameraSensor *rgb_sensor = nullptr;
-	DepthSensor *depth_sensor = nullptr;
-	CameraSensor *grey_sensor =  nullptr;
-	GroundTruthSensor *gt_sensor =  nullptr;
-	void AddSensors(SLAMFile &file);
-	bool GetFrame(const std::string &dirname, SLAMFile &file, int frame_no) ;
-	bool AddFrames(const std::string &dirname, SLAMFile &file) ;
+      explicit ICLNUIMReader(const std::string &name) : DatasetReader(name) {
+        this->addParameter(TypedParameter<std::string>("i", "input-directory",
+                                                       "path of the ICLNUIM dataset directory",
+                                                       &this->input, nullptr));
 
-};
+        this->addParameter(TypedParameter<bool>("grey", "grey",
+                                                "set to true or false to specify if the GREY "
+                                                "stream need to be include in the slam file.",
+                                                &this->grey, nullptr));
 
-}
-}
+        this->addParameter(TypedParameter<bool>("rgb", "rgb",
+                                                "set to true or false to specify if the RGB "
+                                                "stream need to be include in the slam file.",
+                                                &this->rgb, nullptr));
+
+        this->addParameter(TypedParameter<bool>("depth", "depth",
+                                                "set to true or false to specify if the DEPTH "
+                                                "stream need to be include in the slam file.",
+                                                &this->depth, nullptr));
+
+        this->addParameter(TypedParameter<bool>("gt", "gt",
+                                                "set to true or false to specify if the "
+                                                "GROUNDTRUTH POSE stream need to be include in the slam file.",
+                                                &this->gt, nullptr));
+
+        this->addParameter(TypedParameter<std::string>("ply", "ply-file",
+                                                       "When a PLY file is specified, the GROUNDTRUTH POINT CLOUD "
+                                                       "will be included in the slam file.",
+                                                       &this->plyfile, nullptr));
+
+        this->addParameter(TypedParameter<bool>("pf", "positive-focal",
+                                                "This is a workaround to correct the ICLNUIM "
+                                                "to a positive focal length.",
+                                                &this->positive_focal, nullptr));
+      }
+
+      SLAMFile *GenerateSLAMFile() override;
+    };
+
+  }  // namespace io
+}  // namespace slambench
 
 #endif /* FRAMEWORK_TOOLS_DATASET_TOOLS_INCLUDE_ICLNUIM_H_ */

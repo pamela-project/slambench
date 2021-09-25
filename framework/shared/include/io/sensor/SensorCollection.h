@@ -25,11 +25,11 @@ namespace slambench {
 			typedef std::vector<Sensor*> container_t;
 
 		public:
-			container_t::iterator begin() { return _container.begin(); }
-			container_t::iterator end() { return _container.end(); }
+			container_t::iterator begin() { return container_.begin(); }
+			container_t::iterator end() { return container_.end(); }
 			
-			container_t::const_iterator begin() const { return _container.begin(); }
-			container_t::const_iterator end() const { return _container.end(); }
+			container_t::const_iterator begin() const { return container_.begin(); }
+			container_t::const_iterator end() const { return container_.end(); }
 			
 			Sensor &at(unsigned int sensor_idx);
 			size_t size() const;
@@ -42,7 +42,7 @@ namespace slambench {
 			void AddSensor(Sensor *sensor);
 			
 		private:
-			container_t _container;
+			container_t container_;
 		
 		};
 		

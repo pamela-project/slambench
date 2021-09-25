@@ -38,18 +38,14 @@ public :
 	}
 
 private :
-
 	int EventSet;
 	long long before_time,after_time;
 	long long*values;
-
-
 	#define MAX_RAPL_EVENTS 64
 	char event_names[MAX_RAPL_EVENTS][PAPI_MAX_STR_LEN];
 	char units[MAX_RAPL_EVENTS][PAPI_MIN_STR_LEN];
 
 	int num_events=0;
-
 
 	struct PapiPower {
 		double packagePower;
@@ -93,7 +89,7 @@ public :
 		start_res = papi_start();
 	}
 
-	const slambench::values::ValueDescription & GetType () const {
+	const slambench::values::ValueDescription &GetType () const {
 		static const slambench::values::ValueDescription desc = slambench::values::ValueDescription({
 					{"PP0", slambench::values::VT_DOUBLE},
 					{"PP1", slambench::values::VT_DOUBLE},
@@ -102,7 +98,7 @@ public :
 		return desc;
 	}
 
-	slambench::values::Value * endSample () {
+	slambench::values::Value *endSample () {
 
 		assert(start_res);
 
@@ -121,10 +117,5 @@ public :
 		return new slambench::values::TypeForVT<slambench::values::VT_COLLECTION>::type({{"PP0", pp0}, {"PP1", pp1}, {"PAPI_PACKAGE", package}, {"PAPI_DRAM", dram}});;
 
 	}
-
-
 };
-
-
-
 #endif /* FRAMEWORK_INCLUDE_METRICS_POWER_UTILS_PAPI_MONITOR_H_ */

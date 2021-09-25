@@ -19,10 +19,10 @@ ONI15Frame::ONI15Frame(Sensor * sensor, const xn::OutputMetaData * md) {
 	Timestamp.S = md->Timestamp() / 1000000000;
 
 	size_t size =  md->DataSize();
-	_data = malloc(size);
+    data_ = malloc(size);
     const XnUInt8* ptr = md->Data();
     if (ptr) {
-          memcpy(_data,ptr,size);
+          memcpy(data_, ptr, size);
       }
 }
 
@@ -31,11 +31,11 @@ ONI15Frame::~ONI15Frame() {
 }
 
 void* ONI15Frame::GetData() {
-	assert(_data);
-	return _data;
+	assert(data_);
+	return data_;
 }
 
 void ONI15Frame::FreeData() {
-	free(_data);
-	_data = nullptr;
+	free(data_);
+    data_ = nullptr;
 }
