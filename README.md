@@ -58,14 +58,14 @@ In addition, if you use SLAMBench in scientific publications, we would appreciat
 ```
 @article{bujanca2021robust,
   title={Robust SLAM Systems: Are We There Yet?},
-  author={Bujanca, Mihai and Shi, Xuesong and Spear, Matthew and Zhao, Pengpeng and Lennox, Barry and Lujan, Mikel},
+  author={Bujanca, Mihai and Shi, Xuesong and Spear, Matthew and Zhao, Pengpeng and Lennox, Barry and Luj{\'a}n, Mikel},
   journal={arXiv preprint arXiv:2109.13160},
   year={2021}
 }
 
 @inproceedings{bujanca2019slambench,
   title={SLAMBench 3.0: Systematic automated reproducible evaluation of SLAM systems for robot vision challenges and scene understanding},
-  author={Bujanca, Mihai and Gafton, Paul and Saeedi, Sajad and Nisbet, Andy and Bodin, Bruno and O'Boyle, Michael FP and Davison, Andrew J and Kelly, Paul HJ and Riley, Graham and Lennox, Barry and others},
+  author={Bujanca, Mihai and Gafton, Paul and Saeedi, Sajad and Nisbet, Andy and Bodin, Bruno and O'Boyle, Michael FP and Davison, {Andrew J} and Kelly, {Paul H.J.} and Riley, Graham and Lennox, Barry and Luj{\'a}n, Mikel and Furber, Steven},
   booktitle={2019 International Conference on Robotics and Automation (ICRA)},
   pages={6351--6358},
   year={2019},
@@ -73,7 +73,7 @@ In addition, if you use SLAMBench in scientific publications, we would appreciat
 }
 
 @inproceedings{Bodin2018,
-author    = "Bruno Bodin and Harry Wagstaff and Sajad Saeedi and Luigi Nardi and Emanuele Vespa and Mayer, {John H} and Andy Nisbet and Mikel Luján and Steve Furber and Davison, {Andrew J} and Kelly, {Paul H.J.} and Michael O'Boyle",
+author    = "Bruno Bodin and Harry Wagstaff and Sajad Saeedi and Luigi Nardi and Emanuele Vespa and Mayer, {John H} and Andy Nisbet and Mikel Luj{\'a}n and Steve Furber and Davison, {Andrew J} and Kelly, {Paul H.J.} and Michael O'Boyle",
 title     = "SLAMBench2: Multi-Objective Head-to-Head Benchmarking for Visual SLAM",
 booktitle = "{IEEE Intl. Conf. on Robotics and Automation (ICRA)}",
 year = {2018},
