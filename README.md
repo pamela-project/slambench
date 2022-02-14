@@ -79,6 +79,15 @@ booktitle = "{IEEE Intl. Conf. on Robotics and Automation (ICRA)}",
 year = {2018},
 month = {May}
 }
+
+@inproceedings{Nardi2015,
+  title={Introducing SLAMBench, a performance and accuracy benchmarking methodology for SLAM},
+  author={Nardi, Luigi and Bodin, Bruno and Zia, M Zeeshan and Mawer, John and Nisbet, Andy and Kelly, Paul HJ and Davison, Andrew J and Luj{\'a}n, Mikel and O'Boyle, Michael FP and Riley, Graham and others},
+  booktitle={2015 IEEE international conference on robotics and automation (ICRA)},
+  pages={5783--5790},
+  year={2015},
+  organization={IEEE}
+}
 ```
 
 ## How to set up SLAMBench?
