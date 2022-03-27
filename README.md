@@ -56,11 +56,13 @@ SLAMBench currently supports the following algorithms:
 
 In addition, if you use SLAMBench in scientific publications, we would appreciate citations to the following papers:
 ```
-@article{bujanca2021robust,
-  title={Robust SLAM Systems: Are We There Yet?},
+
+@inproceedings{bujanca2021robust,  
   author={Bujanca, Mihai and Shi, Xuesong and Spear, Matthew and Zhao, Pengpeng and Lennox, Barry and Luj{\'a}n, Mikel},
-  journal={arXiv preprint arXiv:2109.13160},
-  year={2021}
+  booktitle={2021 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  title={Robust SLAM Systems: Are We There Yet?},
+  year={2021},
+  doi={10.1109/IROS51168.2021.9636814}
 }
 
 @inproceedings{bujanca2019slambench,
