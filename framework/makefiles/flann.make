@@ -5,7 +5,7 @@ FLANN_LIBRARY=${DEPS_DIR}/flann/lib/libflann.so
 ${REPOS_DIR}/flann :
 	mkdir -p ${REPOS_DIR}
 	rm -rf ${REPOS_DIR}/flann	
-	cd ${REPOS_DIR} ; git clone git://github.com/mariusmuja/flann.git flann
+	cd ${REPOS_DIR} ; git clone https://github.com/mariusmuja/flann.git flann
 	cd ${REPOS_DIR}/flann && git checkout 06a49513138009d19a1f4e0ace67fbff13270c69
 	touch ${REPOS_DIR}/flann/src/cpp/empty.cpp
 	sed -e "/add_library(flann_cpp SHARED/ s/\"\"/empty.cpp/" -e "/add_library(flann SHARED/ s/\"\"/empty.cpp/" -i ${REPOS_DIR}/flann/src/cpp/CMakeLists.txt
