@@ -16,7 +16,7 @@ case "$1" in
         echo "Select KFusion..."
         
         # Build image for KFusion if choice is y
-        if [ "$CHOICE" == "y" ]; then
+        if [ "$CHOICE" = "y" ]; then
         	echo "Building the KFusion image..."
         	docker build -t kfusion-deps $PATH_DOCKERFILE/kfusion
     	else

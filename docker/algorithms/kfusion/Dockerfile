@@ -57,4 +57,26 @@ RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=/deps/kfusion/" \
 	-DSLAMBENCH_INCLUDE_DIR=/repos/slambench/framework/shared/include/
 RUN make && make install
 
+# CMakeLists for generating dynamic library
+WORKDIR /deps/kfusion
+
+RUN echo "cmake_minimum_required(VERSION 2.8)" > CMakeLists.txt
+RUN echo "project(libkfusion)" >> CMakeLists.txt
+RUN echo "" >> CMakeLists.txt
+
+RUN echo "SET(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} -g -O3                  -Wall -Wno-unknown-pragmas -Wextra -Wno-error=deprecated-declarations -Wno-error=array-bounds\")" >> CMakeLists.txt
+RUN echo "SET(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} -g -O3  --std=c++11 -Wall -Wno-unknown-pragmas -Wextra -Wno-error=deprecated-declarations -Wno-error=array-bounds\")" >> CMakeLists.txt
+RUN echo "" >> CMakeLists.txt
+
+RUN echo "SET(LIBNAME kfusion-cpp-library)" >> CMakeLists.txt
+RUN echo "SET(PATH_TO_STATIC /deps/kfusion/lib/libkfusion-cpp.a)" >> CMakeLists.txt
+RUN echo "SET(SLAMBENCH_C_WRAPPER	-Wl,--whole-archive -L/slambench/build/lib/ slambench-c-wrapper	-Wl,--no-whole-archive)" >> CMakeLists.txt
+RUN echo "SET(NULL_FILE_PATH	\"/slambench/build/null.cpp\")" >> CMakeLists.txt
+RUN echo "" >> CMakeLists.txt
+
+RUN echo "add_library(\${LIBNAME} SHARED \${NULL_FILE_PATH})" >> CMakeLists.txt
+RUN echo "target_link_libraries(\${LIBNAME} PRIVATE \${SLAMBENCH_C_WRAPPER} \${PATH_TO_STATIC})" >> CMakeLists.txt
+RUN echo "SET_TARGET_PROPERTIES(\${LIBNAME} PROPERTIES LINK_FLAGS \"\${ARGN}\")" >> CMakeLists.txt
+RUN echo "install(TARGETS \${LIBNAME}  DESTINATION  lib/)" >> CMakeLists.txt
+RUN echo "" >> CMakeLists.txt
 
