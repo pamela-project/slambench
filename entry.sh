@@ -26,7 +26,7 @@ case "$1" in
             echo "Missing data path or algorithm path."
             exit 1
         fi
-        ./build/bin/slambench -i "$2" -load "$3"
+        ./build/bin/slambench -i "$2" -load "$3" --gui true
         ;;
     *)
         echo "Invalid argument. Usage: $0 [--test | --dataset <dataset_name> | --build <data_path> <algorithm_path>]"
