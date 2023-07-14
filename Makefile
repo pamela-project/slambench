@@ -65,7 +65,7 @@ slambench: build/Makefile
 .PHONY: build/Makefile
 
 #### Benchmarks ####
-framework/makefiles/benchmarks.makefile : framework/makefiles/download_benchmarks.py benchmarks/benchmarks.repos
+framework/makefiles/benchmarks.makefile : framework/makefiles/download_benchmarks.py benchmarks/benchmarks.json
 	python $^ > $@
 include framework/makefiles/benchmarks.makefile
 
