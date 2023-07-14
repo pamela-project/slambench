@@ -1,7 +1,7 @@
 #######################################################
 # This file is the CMAKE script for Benchmarks Libraries
 #######################################################
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.10)
 
 project(benchmarks)
 if (NOT SLAMBENCH_INCLUDE_DIR)

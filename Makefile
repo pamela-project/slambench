@@ -37,7 +37,7 @@ include ./framework/makefiles/deps.makefile
 #### Compilation targets ####
 build/Makefile : framework/CMakeLists.txt
 	mkdir -p build/
-	cd build; ${DEPS_ENV} cmake -U -Bbuild -H.  -DAPPS="${APPS}"  ${DEPS_ARGS} -D"CMAKE_MODULE_PATH:PATH=${ROOT_DIR}/cmake_modules" ..
+	${DEPS_ENV} cmake -U * -Bbuild -H.  -DAPPS="${APPS}"  ${DEPS_ARGS} -D"CMAKE_MODULE_PATH:PATH=${ROOT_DIR}/cmake_modules" ..
 
 slambench: build/Makefile
 	$(MAKE) -C build $(MFLAGS)
@@ -65,7 +65,7 @@ slambench: build/Makefile
 .PHONY: build/Makefile
 
 #### Benchmarks ####
-framework/makefiles/benchmarks.makefile : framework/makefiles/download_benchmarks.py benchmarks/benchmarks.repos
+framework/makefiles/benchmarks.makefile : framework/makefiles/download_benchmarks.py benchmarks/benchmarks.json
 	python $^ > $@
 include framework/makefiles/benchmarks.makefile
 

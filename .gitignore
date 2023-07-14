@@ -28,7 +28,6 @@ framework/makefiles/datasets.makefile
 # Ignore benchmarks folders
 benchmarks/*
 !benchmarks/CMakeLists.txt
-!benchmarks/benchmarks.repos
 
 
 # DSE Files

@@ -1,0 +1,162 @@
+{
+  "monoslam" : {
+    "name": "MonoSLAM",
+    "reference" : "Davison et al, TPAMI'07",
+    "original_repo" : "https://github.com/hanmekim/SceneLib2",
+    "new_repo" : "https://github.com/bbodin/SceneLib",
+    "branch" : "master",
+    "path" : "benchmarks/monoslam/src/original"
+  },
+  "ptam" : {
+    "name" : "PTAM",
+    "reference" : "Klein et al, ISMAR'07 and ECCV'08",
+    "original_repo" : "https://github.com/Oxford-PTAM/PTAM-GPL",
+    "new_repo" : "https://github.com/bbodin/PTAM-GPL",
+    "branch" : "master",
+    "path": "benchmarks/ptam/src/original"
+  },
+  "kfusion" : {
+    "name" : "KFusion",
+    "reference" : "Newcombe et al. ISMAR'11",
+    "original_repo" : "https://github.com/GerhardR/kfusion",
+    "new_repo" : "ttps://github.com/pamela-project/kfusion",
+    "branch" : "update-master",
+    "path" : "benchmarks/kfusion/src/original"
+  },
+  "kinectfusion" : {
+    "name" : "KinectFusion",
+    "reference" : "Newcombe et al. ISMAR'11",
+    "original_repo" : "https://github.com/chrdiller/KinectFusionApp",
+    "new_repo" : "https://github.com/mihaibujanca/KinectFusion",
+    "branch" : "master",
+    "path" : "benchmarks/kinectfusion/src/original"
+  },
+  "lsdslam" : {
+    "name" : "LSDSLAM",
+    "reference" : "Engel et al, ECCV'14",
+    "original_repo" : "https://github.com/tum-vision/lsd_slam",
+    "new_repo" : "https://github.com/pamela-project/lsd_slam.git",
+    "branch" : "master",
+    "path" : "benchmarks/lsdslam/src/original"
+  },
+  "lsdslamcpp" : {
+    "name" : "LSDSLAM",
+    "reference" : "Engel et al, ECCV'14",
+    "original_repo" : "https://github.com/tum-vision/lsd_slam",
+    "new_repo" : "https://github.com/pamela-project/lsd_slam.git",
+    "branch" : "cpp",
+    "path" : "benchmarks/lsdslam/src/cpp"
+  },
+  "svo" : {
+    "name" : "SVO",
+    "reference" : "Forster et al, ICRA'14",
+    "original_repo" : "https://github.com/uzh-rpg/rpg_svo",
+    "new_repo" : "https://github.com/pamela-project/rpg_svo.git",
+    "branch" : "master",
+    "path" : "benchmarks/svo/src/original"
+  },
+  "infinitam" : {
+    "name" : "InfiniTAMv2",
+    "reference" : "Kahler et al, ISMAR'15",
+    "original_repo" : "https://github.com/victorprad/InfiniTAM",
+    "new_repo" : "https://github.com/bbodin/InfiniTAM.git",
+    "branch" : "update-master",
+    "path" : "benchmarks/infinitam/src/original"
+  },
+  "orbslam2" : {
+    "name" : "ORB-SLAM2",
+    "reference" : "Mur-Artal et al, TOR'15 and TOR'17",
+    "original_repo" : "https://github.com/raulmur/ORB_SLAM2",
+    "new_repo" : "https://github.com/pamela-project/ORB_SLAM2.git",
+    "branch" : "update-master",
+    "path" : "benchmarks/orbslam2/src/original"
+  },
+  "orbslam3" : {
+    "name" : "ORB-SLAM3",
+    "reference" : "Campos et al, ARXIV'20",
+    "original_repo" : "https://github.com/UZ-SLAMLab/ORB_SLAM3",
+    "new_repo" : "https://github.com/mihaibujanca/ORB_SLAM3",
+    "branch" : "master",
+    "path" : "benchmarks/orbslam3/src/original"
+  },
+  "okvis" : {
+    "name" : "OKVIS",
+    "reference" : "Leutenegger et al, IJRR'15",
+    "original_repo" : "https://github.com/ethz-asl/okvis",
+    "new_repo" : "https://github.com/bbodin/okvis",
+    "branch" : "master",
+    "path" : "benchmarks/okvis/src/original"
+  },
+  "dso" : {
+    "name" : "DSO",
+    "reference" : "Engel et al. Arxiv'16",
+    "original_repo" : "https://github.com/JakobEngel/dso",
+    "new_repo" : "https://github.com/mihaibujanca/dso",
+    "branch" : "master",
+    "path" : "benchmarks/dso/src/original"
+  },
+  "efusion" : {
+    "name" : "ElasticFusion",
+    "reference" : "Whelan et al, IJRR'16",
+    "original_repo" : "https://github.com/mp3guy/ElasticFusion",
+    "new_repo" : "https://github.com/bbodin/ElasticFusion",
+    "branch" : "master",
+    "path" : "benchmarks/efusion/src/original"
+  },
+  "bundlefusion" : {
+    "name" : "BundleFusion",
+    "reference" : "Dai et al. ACM TOG'17",
+    "original_repo" : "https://github.com/niessner/BundleFusion",
+    "new_repo" : "https://github.com/Paul92/BundleFusion",
+    "branch" : "master",
+    "path" : "benchmarks/bundlefusion/src/original"
+  },
+  "semanticfusion" : {
+    "name" : "SemanticFusion",
+    "reference" : "McCormac et al. ICRA'17",
+    "original_repo" : "https://github.com/seaun163/semanticfusion",
+    "new_repo" : "https://github.com/Paul92/semanticfusion",
+    "branch" : "master",
+    "path" : "benchmarks/semanticfusion/src/original"
+  },
+  "flame" : {
+    "name" : "FLAME",
+    "reference" : "Greene et al. ICCV'17",
+    "original_repo" : "https://github.com/robustrobotics/flame",
+    "new_repo" : "https://github.com/mihaibujanca/flame",
+    "branch" : "master",
+    "path" : "benchmarks/flame/src/original"
+  },
+  "supereight" : {
+    "name" : "Supereight",
+    "reference" : "Vespa et al. RA-L'18",
+    "original_repo" : "https://github.com/emanuelev/supereight",
+    "new_repo" : "https://github.com/pamela-project/supereight",
+    "branch" : "master",
+    "path" : "benchmarks/supereight/src/original"
+  },
+  "refusion" : {
+    "name" : "ReFusion",
+    "reference" : "Palazollo et al. IROS'19",
+    "original_repo" : "https://github.com/PRBonn/refusion",
+    "new_repo" : "https://github.com/mihaibujanca/refusion",
+    "branch" : "master",
+    "path" : "benchmarks/refusion/src/original"
+  },
+  "open_vins" : {
+    "name" : "OpenVINS",
+    "reference" : "Geneva et al. IROS'19",
+    "original_repo" : "https://github.com/rpng/open_vins",
+    "new_repo" : "https://github.com/mihaibujanca/open_vins",
+    "branch" : "rpng-master",
+    "path" : "benchmarks/open_vins/src/original"
+  },
+  "fullfusion" : {
+    "name" : "FullFusion",
+    "reference" : "Bujanca et al. ICCVW'19",
+    "original_repo" : "https://github.com/mihaibujanca/fullfusion-jetson",
+    "new_repo" : "https://github.com/mihaibujanca/fullfusion-jetson",
+    "branch" : "master",
+    "path" : "benchmarks/fullfusion/src/original"
+  }
+}
