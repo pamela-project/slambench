@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.10)
 
 add_executable(slambench slambench_app.cpp)
 target_include_directories(slambench PUBLIC ${SLAMBENCH_INCLUDE_DIR} ${PROJECT_SOURCE_DIR}/shared/include)
