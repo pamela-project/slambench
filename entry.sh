@@ -21,12 +21,28 @@ case "$1" in
         # echo "$repos" | base64 -d > "$file"
         make "$2"
         ;;
-    --build)
+    --build-gui)
         if [ -z "$2" ] || [ -z "$3" ]; then
             echo "Missing data path or algorithm path."
             exit 1
         fi
-        ./build/bin/slambench -i "$2" -load "$3" --gui true
+        if uname -r | grep -q Microsoft; then
+            ARG DEBIAN_FRONTEND=noninteractive
+            apt install -y vainfo mesa-va-drivers
+            ENV LIBVA_DRIVER_NAME=d3d12
+            ENV LD_LIBRARY_PATH=/usr/lib/wsl/lib
+            ./build/bin/slambench -i "$2" -load "$3" --gui true    
+        else
+            echo "Running on native Linux"
+        fi
+        
+        ;;
+    --build-cli)
+        if [ -z "$2" ] || [ -z "$3" ]; then
+            echo "Missing data path or algorithm path."
+            exit 1
+        fi
+        ./build/bin/slambench -i "$2" -load "$3"
         ;;
     *)
         echo "Invalid argument. Usage: $0 [--test | --dataset <dataset_name> | --build <data_path> <algorithm_path>]"

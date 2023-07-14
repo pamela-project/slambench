@@ -61,4 +61,4 @@ RUN make pcl
 #	+make Sophus
 # build slambench
 RUN make slambench
-ENTRYPOINT [ "entry.sh" ]
+ENTRYPOINT [ "./entry.sh" ]
