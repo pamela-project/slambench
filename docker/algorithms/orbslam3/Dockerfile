@@ -80,7 +80,7 @@ RUN git clone https://github.com/nikolaradulov/slambench.git slambench
 
 # ====== <ORB-SLAM3> ======
 WORKDIR /repos
-RUN git clone --branch master https://github.com/yuhaozhang7/ORB_SLAM3.git orbslam3
+RUN git clone --recursive --branch master https://github.com/yuhaozhang7/ORB_SLAM3.git orbslam3
 
 # Generate static library
 WORKDIR orbslam3
