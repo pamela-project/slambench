@@ -75,7 +75,13 @@ RUN make -j2 && make install
 
 # ====== <SLAMBench> ======
 WORKDIR /repos
-RUN git clone https://github.com/nikolaradulov/slambench.git slambench
+RUN git clone --branch algorithm_volume https://github.com/nikolaradulov/slambench.git slambench
+
+WORKDIR /deps/orbslam3
+RUN mkdir wrapper && mkdir Vocabulary
+WORKDIR /repos/slambench/docker/algorithms/wrapper
+RUN mv libslambench-c-wrapper.a /deps/orbslam3/wrapper
+RUN mv null.cpp /deps/orbslam3/wrapper
 
 
 # ====== <ORB-SLAM3> ======
@@ -88,7 +94,7 @@ RUN mkdir build
 WORKDIR build
 RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=/deps/orbslam3/" \
 	-DCMAKE_PREFIX_PATH="/deps/orbslam3/opencv" \
-	-DWRAPPER_PATH=/repos/slambench/docker/algorithms/wrapper/ \
+	-DWRAPPER_PATH=/deps/orbslam3/wrapper/ \
 	-DTOON_INCLUDE_DIR=/deps/orbslam3/toon/include/ \
 	-DEIGEN3_INCLUDE_DIR=/deps/orbslam3/eigen3/include/eigen3/ \
 	-DPangolin_INCLUDE_DIRS=/deps/orbslam3/pangolin/include/ \
@@ -97,8 +103,6 @@ RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=/deps/orbslam3/" \
 RUN make -j2 && make install
 
 # Move the vocabulary file
-WORKDIR /deps/orbslam3
-RUN mkdir Vocabulary
 WORKDIR /repos/orbslam3/Vocabulary
 RUN tar -xf ORBvoc.txt.tar.gz
 RUN mv ORBvoc.txt /deps/orbslam3/Vocabulary
