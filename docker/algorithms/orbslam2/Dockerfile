@@ -80,7 +80,7 @@ RUN git clone https://github.com/nikolaradulov/slambench.git slambench
 
 # ====== <ORB-SLAM2> ======
 WORKDIR /repos
-RUN git clone --branch update-master https://github.com/yuhaozhang7/ORB_SLAM2.git orbslam2
+RUN git clone --recursive --branch update-master https://github.com/yuhaozhang7/ORB_SLAM2.git orbslam2
 
 # Generate static library
 WORKDIR orbslam2
@@ -94,6 +94,11 @@ RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=/deps/orbslam2/" \
 	-DSLAMBENCH_INCLUDE_DIRS=/repos/slambench/framework/shared/include/ \
 	-DPangolin_LIBRARIES=/deps/orbslam2/pangolin/lib/libpangolin.so
 RUN make && make install
+# Move the vocabulary file
+WORKDIR /deps/orbslam2
+RUN mkdir Vocabulary
+WORKDIR /repos/orbslam2/Vocabulary
+RUN mv ORBvoc.bin /deps/orbslam2/Vocabulary
 
 
 # CMakeLists for generating dynamic library
