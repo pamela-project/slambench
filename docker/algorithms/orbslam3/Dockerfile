@@ -75,11 +75,11 @@ RUN make -j2 && make install
 
 # ====== <SLAMBench> ======
 WORKDIR /repos
-RUN git clone --branch algorithm_volume https://github.com/nikolaradulov/slambench.git slambench
+RUN git clone --branch fake_slambench https://github.com/nikolaradulov/slambench.git slambench
 
 WORKDIR /deps/orbslam3
 RUN mkdir wrapper && mkdir Vocabulary
-WORKDIR /repos/slambench/docker/algorithms/wrapper
+WORKDIR /repos/slambench/docker/wrapper
 RUN mv libslambench-c-wrapper.a /deps/orbslam3/wrapper
 RUN mv null.cpp /deps/orbslam3/wrapper
 
