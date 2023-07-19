@@ -46,6 +46,40 @@ case "$1" in
     		--mount source=lsdslam-vol,destination=/deps/lsdslam \
     		lsdslam-deps
         ;;
+    "orbslam2")
+        echo "Select ORB-SLAM2..."
+        
+        # Build image for LSD-SLAM if choice is y
+        if [ "$CHOICE" = "y" ]; then
+            echo "Building the ORB-SLAM2 image..."
+            docker build -t orbslam2-deps $PATH_DOCKERFILE/orbslam2
+        else
+            echo "No image build requested."
+        fi
+        
+        echo "Populate volume for ORB-SLAM2..."
+        docker run -d \
+            --name=orbslam2 \
+            --mount source=orbslam2-vol,destination=/deps/orbslam2 \
+            orbslam2-deps
+        ;;
+    "orbslam3")
+        echo "Select ORB-SLAM3..."
+        
+        # Build image for LSD-SLAM if choice is y
+        if [ "$CHOICE" = "y" ]; then
+            echo "Building the ORB-SLAM3 image..."
+            docker build -t orbslam3-deps $PATH_DOCKERFILE/orbslam3
+        else
+            echo "No image build requested."
+        fi
+        
+        echo "Populate volume for ORB-SLAM3..."
+        docker run -d \
+            --name=orbslam3 \
+            --mount source=orbslam3-vol,destination=/deps/orbslam3 \
+            orbslam3-deps
+        ;;
     *)
         echo "Invalid algorithm!"
         ;;
