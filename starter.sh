@@ -51,4 +51,4 @@ esac
 echo "Starting Docker container: $container_name"
 echo "Command: $docker_run_command"
 
-#eval "$docker_run_command"
+eval "$docker_run_command"

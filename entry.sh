@@ -17,7 +17,7 @@ case "$1" in
         fi
         make "$2"
         ;;
-    --build-gui)
+    --bench-gui)
         if [ -z "$2" ] || [ -z "$3" ]; then
             echo "Missing data path or algorithm path."
             exit 1
@@ -26,20 +26,34 @@ case "$1" in
         apt install -y vainfo mesa-va-drivers
         ENV LIBVA_DRIVER_NAME=d3d12
         ENV LD_LIBRARY_PATH=/usr/lib/wsl/lib
-        slam_file=$(find "$dataset_folder" -type f -name "*.slam")
-        # Extract the path to the .slam file
-        slam_file_path=$(dirname "$slam_file")
-        ./build/bin/slambench -i "$slam_file_path" -load "$3" --gui true
+        if [ -f "$3" ]; then
+            ./build/bin/slambench -i "$2" -load "$3" --gui true
+        else
+            vol_name=$(basename "$(dirname "$3")")
+            cd "/deps/$vol_name/"
+            cmake .
+            make 
+            /slambench/build/bin/slambench -i "$2" -load "$3" --gui true
+        fi
         ;;
-    --build-cli)
+    --bench-cli)
         if [ -z "$2" ] || [ -z "$3" ]; then
             echo "Missing data path or algorithm path."
             exit 1
         fi
-        slam_file=$(find "$dataset_folder" -type f -name "*.slam")
-        # Extract the path to the .slam file
-        slam_file_path=$(dirname "$slam_file")
-        ./build/bin/slambench -i "$slam_file_path" -load "$3"
+        # check file exists in path 
+        if [ -f "$3" ]; then
+            ./build/bin/slambench -i "$2" -load "$3" 
+        else
+            vol_name=$(basename "$(dirname "$3")")
+            cd "/deps/$vol_name/"
+            cmake .
+            make 
+            /slambench/build/bin/slambench -i "$2" -load "$3" 
+        fi
+        ;;
+    --interactive)
+        /bin/bash
         ;;
     *)
         echo "Invalid argument. Usage: $0 [--test | --dataset <dataset_name> | --build <data_path> <algorithm_path>]"
