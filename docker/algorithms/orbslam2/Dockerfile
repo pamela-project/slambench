@@ -102,8 +102,6 @@ RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=/deps/orbslam2/" \
 RUN make && make install
 
 # Move the vocabulary file
-WORKDIR /deps/orbslam2
-RUN mkdir Vocabulary
 WORKDIR /repos/orbslam2/Vocabulary
 RUN mv ORBvoc.bin /deps/orbslam2/Vocabulary
 
