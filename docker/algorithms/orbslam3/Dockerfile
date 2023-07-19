@@ -107,4 +107,8 @@ WORKDIR /repos/orbslam3/Vocabulary
 RUN tar -xf ORBvoc.txt.tar.gz
 RUN mv ORBvoc.txt /deps/orbslam3/Vocabulary
 
+# Script for export lib path
+WORKDIR /deps/orbslam3
+RUN echo "export LD_LIBRARY_PATH=\"/deps/orbslam3/lib:/deps/orbslam3/pangolin/lib:/deps/orbslam3/opencv/lib:/deps/orbslam3/DBoW2:/deps/orbslam3/g2o:$LD_LIBRARY_PATH\"" > libpath.txt
+
 
