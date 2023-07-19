@@ -2,6 +2,7 @@
 import sys
 import os
 import platform
+import argparse 
 
 def is_wsl():
     return "Microsoft" in platform.uname().release
@@ -14,7 +15,7 @@ def print_usage():
     print("  dataset     - Create a specified dataset.")
     print("\nOptions:")
     print("  For 'run' mode:")
-    print("Usage: {} run [options] <file_name> [<volume1> ... <volumeN>]".format(sys.argv[0]))
+    print("Usage: {} run [options] <dataset_location_in_volume> [<library1_path> ... <libraryN_path>]".format(sys.argv[0]))
     print("    bench-cli         - Run a benchmark with provided arguments using the command line as interface.")
     print("    bench-gui         - Run a benchmark with provided arguments with the visualisation tool of SLAMBench.")
     print("    interactive-cli   - Run the container in interactive mode with mounts for datasets and algorithms.")
@@ -27,36 +28,37 @@ def print_usage():
     print("    list              - print list of available datasets")
     sys.exit(1)
 
-def makeDataset():
-    if len(sys.argv)<4 and sys.argv[2]=="list":
+def dataset_handle(run_type, vol_name, dataset):
+    if run_type=='list':
         return "docker run slambench/main --list_datasets"
     else: 
-        vol_name = sys.argv[2]
-        dataset = sys.argv[3]
+        if vol_name is None or dataset is None:
+            print("starter.py dataset: error: the following arguments are required: -v/--volume_name, -d/--dataset")
+            sys.exit(1)
         return f"docker run --mount source={vol_name},destination=/slambench/datasets slambench/main {dataset}"
 
-def runHandle():
+def run_handle(mode, volumes, file, paths):
     """
         The function handles the running options of the tool. 
     """
 
-    mode = sys.argv[2]
-    file = sys.argv[3]
-    paths = sys.argv[4:]
+    # mode = sys.argv[2]
+    # file = sys.argv[3]
+    # paths = sys.argv[4:]
     image = "slambench/main"
-
     # Start the Docker container
     container_name = "{}-container".format(image)
     deps_dir = "/deps"
-    file_items=items = file.split("/")
-    docker_run_command = "--mount source={},destination=/slambench/datasets".format(file_items[1])
-    end = file +" "
+    docker_run_command=""
+    for volume in volumes:
+        docker_run_command += "--mount source={},destination=/slambench/datasets".format(volume)
+    end = " "
 
     volumes = []
     for path in paths:
-        name = os.path.basename(os.path.dirname(path))
-        volumes.append("{}-vol".format(name))
-        end += "{} ".format(path)
+        names = path.split('/')
+        volumes.append("{}-vol".format(names[0]))
+        end += "{} ".format('/deps'+path)
 
     print(end)
     print(volumes)
@@ -91,26 +93,49 @@ def runHandle():
         sys.exit(1)
 
     print("Starting Docker container: {}".format(container_name))
-    print("Command: {}".format(docker_run_command))
+    # print("Command: {}".format(docker_run_command))
 
     return docker_run_command
 
 def main():
-    # Check if the correct number of arguments is provided
-    if len(sys.argv) < 2:
-        print_usage()
+    parser = argparse.ArgumentParser(description="This is a tool to run Docker containers with SLAMBench.")
+    subparsers = parser.add_subparsers(dest="mode", help="Select the mode of operation.")
 
-    # Parse command-line arguments
-    mode = sys.argv[1]
-    if mode == 'run':
-        docker_run_command = runHandle()
-    elif mode == "dataset":
-        docker_run_command = makeDataset()
-    elif mode == "help":
-        print_usage()
+    
+    run_parser = subparsers.add_parser("run", help="When running the tool in run mode")
+    run_parser.add_argument("-dv","--dataset_volume", nargs="+",  type=str, help="Specify the volume to be mounted for the dataset.", required=True)
+    run_parser.add_argument("-d", "--dataset",nargs="+",  type=str, help="Specify the dataset file to be used", required=True)
+    run_parser.add_argument("-a","--algorithm", nargs="*", help="Specify algorithms to be used. Must be of the form <algorithm_name>/<library_name>. Refer to the wiki for more information.", required=True)
+    run_parser.add_argument("-t", "--type", choices=['cli', 'gui', 'interactive-cli', 'interactive-gui'], required=True)
+    
+    
+
+    build_parser = subparsers.add_parser("build", help="Running the tool in build mode")
+    build_parser.add_argument("build_option", choices=["download", "build"], help="Download or build the container for SLAMBench.")
+    
+    
+
+    dataset_parser = subparsers.add_parser("dataset", help="Running the tool in dataset mode")
+    dataset_parser.add_argument("-t", "--type", choices=['list','make'], required=True)
+    dataset_parser.add_argument("-v", "--volume_name", help="Specify the volume name.")
+    dataset_parser.add_argument("-d", "--dataset", help="Specify the dataset.")
+    
+    args = parser.parse_args()
+    if args.mode == "run":
+        docker_run_command = run_handle(args.type, args.dataset_volume, args.dataset, args.algorithm)
+    elif args.mode == "build":
+        docker_run_command = build_handle(args.build_option)
+    elif args.mode == "dataset": 
+        docker_run_command = dataset_handle(args.type, args.volume_name, args.dataset)
+    else:
+        print("Invalid mode! Use one of the following:")
+        print("  run      - Run benchmarks with provided arguments.")
+        print("  build    - Download or build the container for SLAMBench.")
+        print("  dataset  - Create a specified dataset.")
         sys.exit(1)
-
-    os.system(docker_run_command)
+    
+    print("Command: {}".format(docker_run_command))
+    # os.system(docker_run_command)
 
 if __name__ == "__main__":
     main()
