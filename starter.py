@@ -37,7 +37,7 @@ def dataset_handle(run_type, vol_name, dataset):
             sys.exit(1)
         return f"docker run --mount source={vol_name},destination=/slambench/datasets slambench/main {dataset}"
 
-def run_handle(mode, volumes, file, paths):
+def run_handle(mode, volumes, files, paths):
     """
         The function handles the running options of the tool. 
     """
@@ -45,6 +45,10 @@ def run_handle(mode, volumes, file, paths):
     # mode = sys.argv[2]
     # file = sys.argv[3]
     # paths = sys.argv[4:]
+    if not mode.startswith('interactive'):
+        if volumes is None or files is None or paths is None:
+            print(f"{sys.argv[0]} {mode}: error: the following arguments are required -dv/--dataset_volume, -d/--dataset, -a/--algorithm")
+            sys.exit(1)
     image = "slambench/main"
     # Start the Docker container
     container_name = "{}-container".format(image)
@@ -52,13 +56,14 @@ def run_handle(mode, volumes, file, paths):
     docker_run_command=""
     for volume in volumes:
         docker_run_command += "--mount source={},destination=/slambench/datasets".format(volume)
-    end = " "
-
+    end = ""
+    for file in files:
+        end+=f"{file} "
     volumes = []
     for path in paths:
         names = path.split('/')
         volumes.append("{}-vol".format(names[0]))
-        end += "{} ".format('/deps'+path)
+        end += "{} ".format('/deps/'+path)
 
     print(end)
     print(volumes)
@@ -103,9 +108,9 @@ def main():
 
     
     run_parser = subparsers.add_parser("run", help="When running the tool in run mode")
-    run_parser.add_argument("-dv","--dataset_volume", nargs="+",  type=str, help="Specify the volume to be mounted for the dataset.", required=True)
-    run_parser.add_argument("-d", "--dataset",nargs="+",  type=str, help="Specify the dataset file to be used", required=True)
-    run_parser.add_argument("-a","--algorithm", nargs="*", help="Specify algorithms to be used. Must be of the form <algorithm_name>/<library_name>. Refer to the wiki for more information.", required=True)
+    run_parser.add_argument("-dv","--dataset_volume", nargs=1,  type=str, help="Specify the volume to be mounted for the dataset.")
+    run_parser.add_argument("-d", "--dataset",nargs=1,  type=str, help="Specify the dataset file to be used")
+    run_parser.add_argument("-a","--algorithm", nargs="*", help="Specify algorithms to be used. Must be of the form <algorithm_name>/<library_name>. Refer to the wiki for more information.")
     run_parser.add_argument("-t", "--type", choices=['cli', 'gui', 'interactive-cli', 'interactive-gui'], required=True)
     
     
@@ -135,7 +140,7 @@ def main():
         sys.exit(1)
     
     print("Command: {}".format(docker_run_command))
-    # os.system(docker_run_command)
+    os.system(docker_run_command)
 
 if __name__ == "__main__":
     main()
