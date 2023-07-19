@@ -55,6 +55,9 @@ case "$1" in
     --interactive)
         /bin/bash
         ;;
+    --list_datasets
+        make datasets
+        ;;
     *)
         echo "Invalid argument. Usage: $0 [--test | --dataset <dataset_name> | --build <data_path> <algorithm_path>]"
         exit 1
