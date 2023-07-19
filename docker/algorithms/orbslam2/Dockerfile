@@ -75,8 +75,13 @@ RUN make -j2 && make install
 
 # ====== <SLAMBench> ======
 WORKDIR /repos
-RUN git clone https://github.com/nikolaradulov/slambench.git slambench
+RUN git clone --branch fake_slambench https://github.com/nikolaradulov/slambench.git slambench
 
+WORKDIR /deps/orbslam2
+RUN mkdir wrapper && mkdir Vocabulary
+WORKDIR /repos/slambench/docker/wrapper
+RUN mv libslambench-c-wrapper.a /deps/orbslam2/wrapper
+RUN mv null.cpp /deps/orbslam2/wrapper
 
 # ====== <ORB-SLAM2> ======
 WORKDIR /repos
@@ -88,47 +93,23 @@ RUN mkdir build
 WORKDIR build
 RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=/deps/orbslam2/" \
 	-DCMAKE_PREFIX_PATH="/deps/orbslam2/opencv" \
+	-DWRAPPER_PATH=/deps/orbslam2/wrapper/ \
 	-DTOON_INCLUDE_DIR=/deps/orbslam2/toon/include/ \
 	-DEIGEN3_INCLUDE_DIR=/deps/orbslam2/eigen3/include/eigen3/ \
 	-DPangolin_INCLUDE_DIRS=/deps/orbslam2/pangolin/include/ \
 	-DSLAMBENCH_INCLUDE_DIRS=/repos/slambench/framework/shared/include/ \
 	-DPangolin_LIBRARIES=/deps/orbslam2/pangolin/lib/libpangolin.so
 RUN make && make install
+
 # Move the vocabulary file
 WORKDIR /deps/orbslam2
 RUN mkdir Vocabulary
 WORKDIR /repos/orbslam2/Vocabulary
 RUN mv ORBvoc.bin /deps/orbslam2/Vocabulary
 
-
-# CMakeLists for generating dynamic library
+# Script for export lib path
 WORKDIR /deps/orbslam2
+RUN echo "export LD_LIBRARY_PATH=\"/deps/orbslam2/lib:/deps/orbslam2/pangolin/lib:/deps/orbslam2/opencv/lib:/deps/orbslam2/DBoW2:/deps/orbslam2/g2o:$LD_LIBRARY_PATH\"" > libpath.txt
 
-RUN echo "cmake_minimum_required(VERSION 2.8)" > CMakeLists.txt
-RUN echo "project(liborbslam2)" >> CMakeLists.txt
-RUN echo "" >> CMakeLists.txt
-
-RUN echo "SET(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} -g -O3                  -Wall -Wno-unknown-pragmas -Wextra -Wno-error=deprecated-declarations -Wno-error=array-bounds\")" >> CMakeLists.txt
-RUN echo "SET(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} -g -O3  --std=c++11 -Wall -Wno-unknown-pragmas -Wextra -Wno-error=deprecated-declarations -Wno-error=array-bounds\")" >> CMakeLists.txt
-RUN echo "" >> CMakeLists.txt
-
-RUN echo "SET(LIBNAME orbslam2-original-library)" >> CMakeLists.txt
-RUN echo "SET(SLAMBENCH_C_WRAPPER	-Wl,--whole-archive -L/slambench/build/lib/ slambench-c-wrapper	-Wl,--no-whole-archive)" >> CMakeLists.txt
-RUN echo "SET(NULL_FILE_PATH	\"/slambench/build/null.cpp\")" >> CMakeLists.txt
-RUN echo "" >> CMakeLists.txt
-
-RUN echo "find_package(OpenCV 3.0 QUIET)" >> CMakeLists.txt
-RUN echo "set(ORB_SLAM2_LIB	/deps/orbslam2/lib/liborbslam2.so)" >> CMakeLists.txt
-RUN echo "set(Pangolin_LIBRARIES	/deps/orbslam2/pangolin/lib/libpangolin.so)" >> CMakeLists.txt
-RUN echo "set(DBOW2_LIB	/deps/orbslam2/DBoW2/libDBoW2.so)" >> CMakeLists.txt
-RUN echo "set(G20_LIB		/deps/orbslam2/g2o/libg2o.so)" >> CMakeLists.txt
-RUN echo "set(common_libraries     \${ORB_SLAM2_LIB} \${OpenCV_LIBS} \${Pangolin_LIBRARIES} \${DBOW2_LIB} \${G20_LIB})" >> CMakeLists.txt
-RUN echo "" >> CMakeLists.txt
-
-RUN echo "add_library(\${LIBNAME} SHARED \${NULL_FILE_PATH})" >> CMakeLists.txt
-RUN echo "target_link_libraries(\${LIBNAME} PRIVATE \${SLAMBENCH_C_WRAPPER} /deps/orbslam2/lib/liborbslam2-original.so \${common_libraries})" >> CMakeLists.txt
-RUN echo "SET_TARGET_PROPERTIES(\${LIBNAME} PROPERTIES LINK_FLAGS \"\${ARGN}\")" >> CMakeLists.txt
-RUN echo "install(TARGETS \${LIBNAME}  DESTINATION  lib/)" >> CMakeLists.txt
-RUN echo "" >> CMakeLists.txt
 
 
