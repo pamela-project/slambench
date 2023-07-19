@@ -98,7 +98,9 @@ RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=/deps/orbslam2/" \
 	-DEIGEN3_INCLUDE_DIR=/deps/orbslam2/eigen3/include/eigen3/ \
 	-DPangolin_INCLUDE_DIRS=/deps/orbslam2/pangolin/include/ \
 	-DSLAMBENCH_INCLUDE_DIRS=/repos/slambench/framework/shared/include/ \
-	-DPangolin_LIBRARIES=/deps/orbslam2/pangolin/lib/libpangolin.so
+	-DPangolin_LIBRARIES=/deps/orbslam2/pangolin/lib/libpangolin.so \
+	-DCMAKE_SHARED_LINKER_FLAGS="-Wl,--disable-new-dtags" \
+	-DLIB_PATH="/deps/orbslam2/lib:/deps/orbslam2/pangolin/lib:/deps/orbslam2/opencv/lib:/deps/orbslam2/DBoW2:/deps/orbslam2/g2o"
 RUN make && make install
 
 # Move the vocabulary file
