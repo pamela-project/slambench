@@ -100,7 +100,6 @@ RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=/deps/orbslam3/" \
 	-DPangolin_INCLUDE_DIRS=/deps/orbslam3/pangolin/include/ \
 	-DSLAMBENCH_INCLUDE_DIRS=/repos/slambench/framework/shared/include/ \
 	-DPangolin_LIBRARIES=/deps/orbslam3/pangolin/lib/libpangolin.so \
-	-DCMAKE_SHARED_LINKER_FLAGS="-Wl,--disable-new-dtags" \
 	-DLIB_PATH="/deps/orbslam3/lib:/deps/orbslam3/pangolin/lib:/deps/orbslam3/opencv/lib:/deps/orbslam3/DBoW2:/deps/orbslam3/g2o"
 RUN make -j2 && make install
 
