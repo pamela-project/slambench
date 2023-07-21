@@ -27,7 +27,7 @@ case "$1" in
         ENV LIBVA_DRIVER_NAME=d3d12
         ENV LD_LIBRARY_PATH=/usr/lib/wsl/lib
         # set path for slam
-        slam_file=$(find "/datasets" -type f -name "$2")
+        slam_file=$(find "./datasets" -type f -name "$2")
         echo "$slam_file"
         if [ -f "$3" ]; then
             ./build/bin/slambench -i "$slam_file" -load "$3" --gui true
@@ -37,6 +37,7 @@ case "$1" in
             cmake .
             make 
             /slambench/build/bin/slambench -i "$slam_file" -load "$3" --gui true
+        fi
         ;;
     --bench-cli)
         if [ -z "$2" ] || [ -z "$3" ]; then
@@ -53,15 +54,17 @@ case "$1" in
             cmake .
             make 
             /slambench/build/bin/slambench -i "$slam_file" -load "$3" 
+        fi
         ;;
     --interactive)
         /bin/bash
         ;;
-    --list_datasets
+    --list_datasets)
         make datasets
         ;;
     *)
         echo "Invalid argument. Usage: $0 [--test | --dataset <dataset_name> | --build <data_path> <algorithm_path>]"
         exit 1
         ;;
+        
 esac

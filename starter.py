@@ -35,7 +35,7 @@ def dataset_handle(run_type, vol_name, dataset):
         if vol_name is None or dataset is None:
             print("starter.py dataset: error: the following arguments are required: -v/--volume_name, -d/--dataset")
             sys.exit(1)
-        return f"docker run --mount source={vol_name},destination=/slambench/datasets slambench/main {dataset}"
+        return f"docker run --mount source={vol_name},destination=/slambench/datasets slambench/main --dataset {dataset}"
 
 def run_handle(mode, volumes, files, paths):
     """
