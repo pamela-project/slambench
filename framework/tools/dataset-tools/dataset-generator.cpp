@@ -33,6 +33,7 @@
 #include "include/UZHFPV.h"
 #include "include/OpenLORIS.h"
 #include "include/VolumeDeform.h"
+#include "include/KITTI.h"
 
 using namespace slambench::io;
 
@@ -92,6 +93,8 @@ public:
             config->reader = new EUROCMAVReader("");
         } else if (dataset_name == "icl") {
             config->reader = new ICLReader("");
+        } else if (dataset_name == "kitti") {
+            config->reader = new KITTIReader("");
         } else if (dataset_name == "svo") {
             config->reader = new SVOReader("");
         } else if (dataset_name == "bonn") {

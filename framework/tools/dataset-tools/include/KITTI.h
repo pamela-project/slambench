@@ -44,7 +44,7 @@ namespace slambench {
         
         public:
             std::string input;
-            bool grey = true, rgb = true, lidar = true, imu = true, gt = true;
+            bool grey = true, rgb = true, lidar = false, imu = false, gt = false;
 
             explicit KITTIReader(std::string name) : DatasetReader(std::move(name)) {
                 this->addParameter(TypedParameter<std::string>("i",

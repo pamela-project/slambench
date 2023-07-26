@@ -58,7 +58,7 @@ bool loadKITTIRGBData(const std::string &dirname,
     boost::regex comment = boost::regex(RegexPattern::comment);
     // format of timestamp: yyyy-mm-dd hr:min:sec.nsec 2011-09-30 12:40:59.442522880
     // extract hr, min, sec, nsec
-    boost::regex pattern("(\\d+):(\\d+):(\\d+)\\.(\\d+)");
+    boost::regex pattern("^\\d{4}-\\d{2}-\\d{2} (\\d{2}):(\\d{2}):(\\d{2})\\.(\\d{9})$");
 
     int img_index = 0;
     while (std::getline(infile, line)) {
@@ -132,7 +132,7 @@ bool loadKITTIGreyData(const std::string &dirname,
     boost::regex comment = boost::regex(RegexPattern::comment);
     // format of timestamp: yyyy-mm-dd hr:min:sec.nsec 2011-09-30 12:40:59.442522880
     // extract hr, min, sec, nsec
-    boost::regex pattern("(\\d+):(\\d+):(\\d+)\\.(\\d+)");
+    boost::regex pattern("^\\d{4}-\\d{2}-\\d{2} (\\d{2}):(\\d{2}):(\\d{2})\\.(\\d{9})$");
 
     int img_index = 0;
     while (std::getline(infile, line)) {
