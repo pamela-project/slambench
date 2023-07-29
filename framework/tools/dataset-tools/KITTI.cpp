@@ -33,10 +33,10 @@
 
 using namespace slambench::io;
 
-std::list<slambench::TimeStamp> loadLeftRGBTimeStamps(const std::string &dirname) {
+std::list<slambench::TimeStamp> loadLeftGreyTimeStamps(const std::string &dirname) {
 
     std::string line;
-    std::ifstream infile(dirname + "/image_02/timestamps.txt");
+    std::ifstream infile(dirname + "/image_00/timestamps.txt");
     std::list<slambench::TimeStamp> timestamps;
 
     boost::smatch match;
@@ -71,14 +71,15 @@ std::list<slambench::TimeStamp> loadLeftRGBTimeStamps(const std::string &dirname
 }
 
 bool loadKITTIRGBData(const std::string &dirname,
+                      const std::string &camera_idx,
                       SLAMFile &file,
                       const Sensor::pose_t &pose,
                       const CameraSensor::intrinsics_t &intrinsics,
                       const CameraSensor::distortion_type_t &distortion_type,
                       const CameraSensor::distortion_coefficients_t &distortion,
-                      const bool calib) {
+                      const bool rect) {
     
-    auto img_params = KITTIReader::get_image_params(calib);
+    auto img_params = KITTIReader::get_image_params(rect);
     auto rgb_sensor = RGBSensorBuilder()
             .rate(img_params.rate)
             .size(img_params.width, img_params.height)
@@ -91,7 +92,7 @@ bool loadKITTIRGBData(const std::string &dirname,
     file.Sensors.AddSensor(rgb_sensor);
 
     std::string line;
-    std::ifstream infile(dirname + "/image_02/timestamps.txt");
+    std::ifstream infile(dirname + "/" + camera_idx + "/timestamps.txt");
 
     boost::smatch match;
     boost::regex comment = boost::regex(RegexPattern::comment);
@@ -125,7 +126,7 @@ bool loadKITTIRGBData(const std::string &dirname,
             img_index++;
 
             std::stringstream frame_name;
-            frame_name << dirname << "/image_02/data/" << rgb_filename;
+            frame_name << dirname << "/" << camera_idx << "/data/" << rgb_filename;
             rgb_frame->filename = frame_name.str();
 
             if (access(rgb_frame->filename.c_str(), F_OK) < 0) {
@@ -145,14 +146,15 @@ bool loadKITTIRGBData(const std::string &dirname,
 }
 
 bool loadKITTIGreyData(const std::string &dirname,
+                      const std::string &camera_idx,
                       SLAMFile &file,
                       const Sensor::pose_t &pose,
                       const CameraSensor::intrinsics_t &intrinsics,
                       const CameraSensor::distortion_type_t &distortion_type,
                       const CameraSensor::distortion_coefficients_t &distortion,
-                      const bool calib) {
+                      const bool rect) {
     
-    auto img_params = KITTIReader::get_image_params(calib);
+    auto img_params = KITTIReader::get_image_params(rect);
     auto grey_sensor = GreySensorBuilder()
             .rate(img_params.rate)
             .size(img_params.width, img_params.height)
@@ -165,6 +167,7 @@ bool loadKITTIGreyData(const std::string &dirname,
     file.Sensors.AddSensor(grey_sensor);
 
     std::string line;
+    // std::ifstream infile(dirname + "/" + camera_idx + "/timestamps.txt");
     std::ifstream infile(dirname + "/image_00/timestamps.txt");
 
     boost::smatch match;
@@ -199,7 +202,7 @@ bool loadKITTIGreyData(const std::string &dirname,
             img_index++;
 
             std::stringstream frame_name;
-            frame_name << dirname << "/image_00/data/" << grey_filename;
+            frame_name << dirname << "/" << camera_idx << "/data/" << grey_filename;
             grey_frame->filename = frame_name.str();
 
             if (access(grey_frame->filename.c_str(), F_OK) < 0) {
@@ -216,6 +219,10 @@ bool loadKITTIGreyData(const std::string &dirname,
         }
     }
     return true;
+}
+
+bool loadKITTIIMUData() {
+    
 }
 
 bool loadKITTIGroundTruthData(const std::string &dirname, SLAMFile &file) {
@@ -242,31 +249,8 @@ bool loadKITTIGroundTruthData(const std::string &dirname, SLAMFile &file) {
     */
     std::ifstream infile;
     int start, end;
-    if (dirname.find("2011_10_03_drive_0027") != std::string::npos) {
-        // pose 00
-        std::cerr << "Use pose 00 for 2011_10_03_drive_0027" << std::endl;
-        infile.open(dirname+"/poses/00.txt");
-        start = 0; end = 4540;
-
-    } else if (dirname.find("2011_10_03_drive_0042") != std::string::npos) {
-        // pose 01
-        std::cerr << "Use pose 01 for 2011_10_03_drive_0042" << std::endl;
-        infile.open(dirname+"/poses/01.txt");
-        start = 0; end = 1100;
-
-    } else if (dirname.find("2011_10_03_drive_0034") != std::string::npos) {
-        // pose 02
-        std::cerr << "Use pose 02 for 2011_10_03_drive_0034" << std::endl;
-        infile.open(dirname+"/poses/02.txt");
-        start = 0; end = 4660;
-
-    } else if (dirname.find("2011_09_26_drive_0067") != std::string::npos) {
-        // pose 03
-        std::cerr << "Use pose 03 for 2011_09_26_drive_0067" << std::endl;
-        infile.open(dirname+"/poses/03.txt");
-        start = 0; end = 800;
-
-    } else if (dirname.find("2011_09_30_drive_0016") != std::string::npos) {
+    // do not support 26 and 30 yet
+    if (dirname.find("2011_09_30_drive_0016") != std::string::npos) {
         // pose 04
         std::cerr << "Use pose 04 for 2011_09_30_drive_0016" << std::endl;
         infile.open(dirname+"/poses/04.txt");
@@ -316,7 +300,7 @@ bool loadKITTIGroundTruthData(const std::string &dirname, SLAMFile &file) {
         std::cerr << "Fail to open the pose file" << std::endl;
     }
 
-    std::list<slambench::TimeStamp> timestamps = loadLeftRGBTimeStamps(dirname);
+    std::list<slambench::TimeStamp> timestamps = loadLeftGreyTimeStamps(dirname);
     if (timestamps.size() == 0) {
         std::cerr << "Unable to load timestamps of left RGB camera" << std::endl;
         return false;
@@ -414,37 +398,61 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
     auto slamfilep = new SLAMFile();
     SLAMFile &slamfile = *slamfilep;
 
-    Sensor::pose_t pose = Eigen::Matrix4f::Identity();
-
-    CameraSensor::intrinsics_t cam_intrinsics;
+    CameraSensor::intrinsics_t cam_intrinsics_lgrey;
+    CameraSensor::intrinsics_t cam_intrinsics_rgrey;
+    CameraSensor::intrinsics_t cam_intrinsics_lrgb;
+    CameraSensor::intrinsics_t cam_intrinsics_rrgb;
 
     CameraSensor::distortion_type_t cam_distortion_type;
-    CameraSensor::distortion_coefficients_t cam_distortion;
-    bool calib = true;
+    CameraSensor::distortion_coefficients_t cam_distortion_lgrey;
+    CameraSensor::distortion_coefficients_t cam_distortion_rgrey;
+    CameraSensor::distortion_coefficients_t cam_distortion_lrgb;
+    CameraSensor::distortion_coefficients_t cam_distortion_rrgb;
 
-    KITTIReader::DatasetOrigin d_origin
-        = get_sensor_params(cam_intrinsics, cam_distortion_type, cam_distortion);
+    Sensor::pose_t pose_lgrey = Eigen::Matrix4f::Identity();
+    Sensor::pose_t pose_rgrey = Eigen::Matrix4f::Identity();
+    Sensor::pose_t pose_lrgb = Eigen::Matrix4f::Identity();
+    Sensor::pose_t pose_rrgb = Eigen::Matrix4f::Identity();
+    bool rect = true;
+
+    KITTIReader::DatasetOrigin d_origin = check_data_origin();
     
     // Check the raw data type
-    if (d_origin == KITTIReader::DatasetOrigin::RD11_09_30_CALIB) {
+    if (d_origin == KITTIReader::DatasetOrigin::RD11_09_30) {
+
+        std::cout << "using unrectified parameter from 2011-09-30" << std::endl;
+        get_params(cam_intrinsics_lgrey, cam_intrinsics_rgrey, cam_intrinsics_lrgb, cam_intrinsics_rrgb,
+                    cam_distortion_type, cam_distortion_lgrey, cam_distortion_rgrey, cam_distortion_lrgb, cam_distortion_rrgb);
+        pose_rgrey << 9.993424e-01,  1.830363e-02, -3.129928e-02, -5.370000e-01,  
+                     -1.856768e-02,  9.997943e-01, -8.166432e-03,  5.591661e-03,
+                      3.114337e-02,  8.742218e-03,  9.994767e-01, -1.200541e-02,
+                      0.000000e+00,  0.000000e+00,  0.000000e+00,  1.000000e+00;
+        pose_rgrey = pose_rgrey.inverse().eval();
+
+        pose_lrgb <<  9.999805e-01, -4.971067e-03, -3.793081e-03,  6.030222e-02,
+                      4.954076e-03,  9.999777e-01, -4.475856e-03, -1.293125e-03,
+                      3.815246e-03,  4.456977e-03,  9.999828e-01,  5.900421e-03,
+                      0.000000e+00,  0.000000e+00,  0.000000e+00,  1.000000e+00;
+        pose_lrgb = pose_lrgb.inverse().eval();
+
+        pose_rrgb <<  9.994995e-01,  1.667420e-02, -2.688514e-02, -4.747879e-01,
+                     -1.673122e-02,  9.998582e-01, -1.897204e-03,  5.631988e-03,
+                      2.684969e-02,  2.346075e-03,  9.996367e-01, -5.233709e-03,
+                      0.000000e+00,  0.000000e+00,  0.000000e+00,  1.000000e+00;
+        pose_rrgb = pose_rrgb.inverse().eval();
+
+        rect = false;
+
+    } else if (d_origin == KITTIReader::DatasetOrigin::RD11_09_30_RECT) {
 
         std::cout << "using rectified parameter from 2011-09-30" << std::endl;
-        calib = true;
+        get_params(cam_intrinsics_lgrey, cam_intrinsics_rgrey, cam_intrinsics_lrgb, cam_intrinsics_rrgb,
+                    cam_distortion_type, cam_distortion_lgrey, cam_distortion_rgrey, cam_distortion_lrgb, cam_distortion_rrgb);
+        pose_rgrey(0, 3) = -5.370000e-01;
+        pose_lrgb(0, 3) = 5.956621e-02;
+        pose_rrgb(0, 3) = -4.731050e-01;
 
-    } else if (d_origin == KITTIReader::DatasetOrigin::RD11_10_03_CALIB) {
-
-        std::cout << "implmentation incomplete for rectified 2011-10-03" << std::endl;
-        return nullptr;
-
-    } else if (d_origin == KITTIReader::DatasetOrigin::RD11_09_30) {
-
-        std::cout << "implmentation incomplete for 2011-09-30" << std::endl;
-        return nullptr;
-
-    } else if (d_origin == KITTIReader::DatasetOrigin::RD11_10_03) {
-
-        std::cout << "implmentation incomplete for 2011-10-03" << std::endl;
-        return nullptr;
+        rect = true;
 
     } else {
 
@@ -452,15 +460,39 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
         return nullptr;
 
     }
-
-    if (grey && !loadKITTIGreyData(dirname, slamfile, pose, cam_intrinsics, cam_distortion_type, cam_distortion, calib)) {
-        std::cout << "Error while loading Grey information." << std::endl;
+    
+    // Load Left Grey Camera
+    std::string left_grey = "image_00";
+    if (grey && !loadKITTIGreyData(dirname, left_grey, slamfile, pose_lgrey, 
+                                   cam_intrinsics_lgrey, cam_distortion_type, cam_distortion_lgrey, rect)) {
+        std::cout << "Error while loading left Grey information." << std::endl;
         delete slamfilep;
         return nullptr;
     }
 
-    if (rgb && !loadKITTIRGBData(dirname, slamfile, pose, cam_intrinsics, cam_distortion_type, cam_distortion, calib)) {
-        std::cout << "Error while loading RGB information." << std::endl;
+    // Load Right Grey Camera
+    std::string right_grey = "image_01";
+    if (grey && stereo && !loadKITTIGreyData(dirname, right_grey, slamfile, pose_rgrey, 
+                                   cam_intrinsics_rgrey, cam_distortion_type, cam_distortion_rgrey, rect)) {
+        std::cout << "Error while loading right Grey information." << std::endl;
+        delete slamfilep;
+        return nullptr;
+    }
+
+    // Load Left RGB Camera
+    std::string left_rgb = "image_02";
+    if (rgb && !loadKITTIRGBData(dirname, left_rgb, slamfile, pose_lrgb, 
+                                 cam_intrinsics_lrgb, cam_distortion_type, cam_distortion_lrgb, rect)) {
+        std::cout << "Error while loading left RGB information." << std::endl;
+        delete slamfilep;
+        return nullptr;
+    }
+
+    // Load Right RGB Camera
+    std::string right_rgb = "image_03";
+    if (rgb && stereo && !loadKITTIRGBData(dirname, right_rgb, slamfile, pose_rrgb, 
+                                 cam_intrinsics_rrgb, cam_distortion_type, cam_distortion_rrgb, rect)) {
+        std::cout << "Error while loading left RGB information." << std::endl;
         delete slamfilep;
         return nullptr;
     }
