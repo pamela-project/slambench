@@ -133,9 +133,11 @@ add_library(VolumeDeform VolumeDeform.cpp)
 target_link_libraries(VolumeDeform slambench-io)
 target_include_directories(VolumeDeform PRIVATE ${Boost_INCLUDE_DIRS})
 
-add_library(KITTI KITTI.cpp)
-target_link_libraries(KITTI slambench-io)
-target_include_directories(KITTI PRIVATE ${Boost_INCLUDE_DIRS})
+IF (OpenCV_FOUND)
+	add_library(KITTI KITTI.cpp)
+	target_link_libraries(KITTI slambench-io ${OpenCV_LIBRARIES})
+	target_include_directories(KITTI PRIVATE ${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
+endif ()
 
 # if all dependencies found add TUM-ROSBAG target
 IF (OpenCV_FOUND AND ROSPKGS_FOUND)

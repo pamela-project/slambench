@@ -32,7 +32,8 @@ namespace slambench {
 
         private:
             static constexpr image_params_t img_params_unrect = { 1392, 512, 10.0, 1.0};
-            static constexpr image_params_t img_params_rect = { 1226, 370, 10.0, 1.0};
+            // original recitified image size: 1226*370, make it become multiple of 16
+            static constexpr image_params_t img_params_rect = { 1232, 368, 10.0, 1.0};
             
             // 2011_09_30 not rectified
             static constexpr CameraSensor::intrinsics_t intrinsics_110930_lgrey
@@ -64,21 +65,10 @@ namespace slambench {
                     = {-3.726025e-01, 1.973869e-01, -5.746215e-04, 7.444947e-05, -6.699658e-02};
 
             // 2011_09_30_rect
-            static constexpr CameraSensor::intrinsics_t intrinsics_110930_lgrey_rect
-                    = { 9.786977e+02 / img_params_rect.width, 9.717435e+02 / img_params_rect.height,
-                        6.900000e+02 / img_params_rect.width, 2.497222e+02 / img_params_rect.height };
-            
-            static constexpr CameraSensor::intrinsics_t intrinsics_110930_rgrey_rect
-                    = { 9.892043e+02 / img_params_rect.width, 9.832048e+02 / img_params_rect.height,
-                        7.020000e+02 / img_params_rect.width, 2.616538e+02 / img_params_rect.height };
-            
-            static constexpr CameraSensor::intrinsics_t intrinsics_110930_lrgb_rect
-                    = { 9.591977e+02 / img_params_rect.width, 9.529324e+02 / img_params_rect.height,
-                        6.944383e+02 / img_params_rect.width, 2.416793e+02 / img_params_rect.height };
-            
-            static constexpr CameraSensor::intrinsics_t intrinsics_110930_rrgb_rect
-                    = { 9.035972e+02 / img_params_rect.width, 8.979356e+02 / img_params_rect.height,
-                        6.979803e+02 / img_params_rect.width, 2.392935e+02 / img_params_rect.height };
+            // divided by unresized width and height.
+            static constexpr CameraSensor::intrinsics_t intrinsics_110930_rect
+                    = { 7.070912e+02 / 1226, 7.070912e+02 / 370,
+                        6.018873e+02 / 1226, 1.831104e+02 / 370 };
         
         public:
             std::string input;
@@ -158,10 +148,10 @@ namespace slambench {
                     
                     std::cout << "loading params of rectified 2011_09_30 ..." << std::endl;
                     for (uint32_t i = 0; i < 4; i++) {
-                        cam_intrinsics_lgrey[i] = intrinsics_110930_lgrey_rect[i];
-                        cam_intrinsics_rgrey[i] = intrinsics_110930_rgrey_rect[i];
-                        cam_intrinsics_lrgb[i] = intrinsics_110930_lrgb_rect[i];
-                        cam_intrinsics_rrgb[i] = intrinsics_110930_rrgb_rect[i];
+                        cam_intrinsics_lgrey[i] = intrinsics_110930_rect[i];
+                        cam_intrinsics_rgrey[i] = intrinsics_110930_rect[i];
+                        cam_intrinsics_lrgb[i] = intrinsics_110930_rect[i];
+                        cam_intrinsics_rrgb[i] = intrinsics_110930_rect[i];
                     }
 
                     distortion_type = CameraSensor::NoDistortion;

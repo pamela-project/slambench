@@ -18,6 +18,8 @@
 #include <io/sensor/GroundTruthSensor.h>
 #include <io/format/PointCloud.h>
 #include <Eigen/Eigen>
+#include "opencv2/imgproc/imgproc.hpp"
+#include <opencv2/highgui/highgui.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
@@ -68,6 +70,26 @@ std::list<slambench::TimeStamp> loadLeftGreyTimeStamps(const std::string &dirnam
         }
     }
     return timestamps;
+}
+
+bool resizeImage(const std::string &filename, int width, int height) {
+
+    cv::Mat originalImage = cv::imread(filename);
+
+    if (originalImage.empty()) {
+        std::cout << "Could not read the image: " << filename << std::endl;
+        return false;
+    }
+
+    cv::Mat resizedImage;
+    cv::resize(originalImage, resizedImage, cv::Size(width, height));
+
+    if (!cv::imwrite(filename, resizedImage)) {
+        std::cout << "Could not save the resized image." << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
 bool loadKITTIRGBData(const std::string &dirname,
@@ -127,6 +149,12 @@ bool loadKITTIRGBData(const std::string &dirname,
 
             std::stringstream frame_name;
             frame_name << dirname << "/" << camera_idx << "/data/" << rgb_filename;
+            // rectified image should be resize to dimensions that is multiple of 16
+            if (rect) {
+                if (!resizeImage(frame_name.str(), img_params.width, img_params.height)){
+                    return false;
+                }
+            }
             rgb_frame->filename = frame_name.str();
 
             if (access(rgb_frame->filename.c_str(), F_OK) < 0) {
@@ -167,8 +195,8 @@ bool loadKITTIGreyData(const std::string &dirname,
     file.Sensors.AddSensor(grey_sensor);
 
     std::string line;
-    // std::ifstream infile(dirname + "/" + camera_idx + "/timestamps.txt");
-    std::ifstream infile(dirname + "/image_00/timestamps.txt");
+    std::ifstream infile(dirname + "/" + camera_idx + "/timestamps.txt");
+    // std::ifstream infile(dirname + "/image_00/timestamps.txt");
 
     boost::smatch match;
     boost::regex comment = boost::regex(RegexPattern::comment);
@@ -203,6 +231,11 @@ bool loadKITTIGreyData(const std::string &dirname,
 
             std::stringstream frame_name;
             frame_name << dirname << "/" << camera_idx << "/data/" << grey_filename;
+            if (rect) {
+                if (!resizeImage(frame_name.str(), img_params.width, img_params.height)){
+                    return false;
+                }
+            }
             grey_frame->filename = frame_name.str();
 
             if (access(grey_frame->filename.c_str(), F_OK) < 0) {
@@ -448,7 +481,8 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
         std::cout << "using rectified parameter from 2011-09-30" << std::endl;
         get_params(cam_intrinsics_lgrey, cam_intrinsics_rgrey, cam_intrinsics_lrgb, cam_intrinsics_rrgb,
                     cam_distortion_type, cam_distortion_lgrey, cam_distortion_rgrey, cam_distortion_lrgb, cam_distortion_rrgb);
-        pose_rgrey(0, 3) = -5.370000e-01;
+        pose_rgrey(0, 3) = -5.370000e-01; 
+        pose_rgrey = pose_rgrey.inverse().eval();
         pose_lrgb(0, 3) = 5.956621e-02;
         pose_rrgb(0, 3) = -4.731050e-01;
 
