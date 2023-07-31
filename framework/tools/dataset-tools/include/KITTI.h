@@ -67,8 +67,8 @@ namespace slambench {
             // 2011_09_30_rect
             // divided by unresized width and height.
             static constexpr CameraSensor::intrinsics_t intrinsics_110930_rect
-                    = { 7.070912e+02 / 1226, 7.070912e+02 / 370,
-                        6.018873e+02 / 1226, 1.831104e+02 / 370 };
+                    = { 7.113765e+02 / img_params_rect.width, 7.032691e+02 / img_params_rect.height,
+                        6.048329e+02 / img_params_rect.width, 1.821206e+02 / img_params_rect.height };
         
         public:
             std::string input;

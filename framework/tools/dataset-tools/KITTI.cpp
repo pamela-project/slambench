@@ -65,10 +65,12 @@ std::list<slambench::TimeStamp> loadLeftGreyTimeStamps(const std::string &dirnam
 
         } else {
             std::cerr << "Unknown line in timestamps.txt of left RGB camera:" << line << std::endl;
+            infile.close();
             timestamps.clear();
             return timestamps;
         }
     }
+    infile.close();
     return timestamps;
 }
 
@@ -167,9 +169,11 @@ bool loadKITTIRGBData(const std::string &dirname,
 
         } else {
             std::cerr << "Unknown line:" << line << std::endl;
+            infile.close();
             return false;
         }
     }
+    infile.close();
     return true;
 }
 
@@ -233,6 +237,7 @@ bool loadKITTIGreyData(const std::string &dirname,
             frame_name << dirname << "/" << camera_idx << "/data/" << grey_filename;
             if (rect) {
                 if (!resizeImage(frame_name.str(), img_params.width, img_params.height)){
+                    infile.close();
                     return false;
                 }
             }
@@ -241,6 +246,7 @@ bool loadKITTIGreyData(const std::string &dirname,
             if (access(grey_frame->filename.c_str(), F_OK) < 0) {
                 printf("No Grey image for frame (%s)\n", frame_name.str().c_str());
                 perror("");
+                infile.close();
                 return false;
             }
 
@@ -248,14 +254,121 @@ bool loadKITTIGreyData(const std::string &dirname,
 
         } else {
             std::cerr << "Unknown line:" << line << std::endl;
+            infile.close();
             return false;
         }
     }
+    infile.close();
     return true;
 }
 
-bool loadKITTIIMUData() {
-    
+bool loadKITTIIMUData(const std::string &dirname,
+                      SLAMFile &file,
+                      const Sensor::pose_t &pose,
+                      const bool rect) {
+
+    auto imu_sensor = new IMUSensor(dirname);
+    imu_sensor->Index = file.Sensors.size();
+    imu_sensor->Rate = 10.0;
+
+    imu_sensor->GyroscopeNoiseDensity = 1.6968e-04;
+    imu_sensor->GyroscopeBiasDiffusion = 0.003491;
+    imu_sensor->AcceleratorNoiseDensity = 2.0000e-3;
+    imu_sensor->AcceleratorBiasDiffusion = 5.0000e-3;
+    imu_sensor->CopyPose(pose);
+
+    file.Sensors.AddSensor(imu_sensor);
+
+    const std::string& num = RegexPattern::decimal;
+    const std::string& start = RegexPattern::start;
+    const std::string& end = RegexPattern::end;
+
+    std::string expr = start
+        + num + "\\s" + num + "\\s" + num + "\\s"           // lat, lon, alt: 1-3
+        + num + "\\s" + num + "\\s" + num + "\\s"           // roll, pitch, yaw: 4-6
+        + num + "\\s" + num + "\\s"                         // vn, ve: 7-8
+        + num + "\\s" + num + "\\s" + num + "\\s"           // vf, vl, vu: 9-11
+        + num + "\\s" + num + "\\s" + num + "\\s"           // ax, ay, az: 12-14
+        + num + "\\s" + num + "\\s" + num + "\\s"           // af, al, au: 15-17
+        + num + "\\s" + num + "\\s" + num + "\\s"           // wx, wy, wz: 18-20
+        + num + "\\s" + num + "\\s" + num + "\\s"           // wf, wl, wu: 21-23
+        + num + "\\s" + num + "\\s"                         // pos_accuracy, vel_accuracy: 24-25
+        + num + "\\s" + num + "\\s"                         // navstat, numsats: 26-27
+        + num + "\\s" + num + "\\s" + num + "\\s*"          // posmode, velmode, orimode: 28-30
+        + end;
+
+    std::string line_ts;
+    std::string line_imu;
+
+    boost::smatch match_ts;
+    boost::smatch match_imu;
+    std::ifstream infile_ts(dirname + "/oxts/timestamps.txt");
+    std::ifstream infile_imu;
+
+    boost::regex comment = boost::regex(RegexPattern::comment);
+    boost::regex pattern_imu = boost::regex(expr);
+    boost::regex pattern_ts("^\\d{4}-\\d{2}-\\d{2} (\\d{2}):(\\d{2}):(\\d{2})\\.(\\d{9})$");
+
+    int imu_index = 0;
+    while (std::getline(infile_ts, line_ts)) {
+        if (line_ts.empty()) {
+            continue;
+        } else if (boost::regex_match(line_ts, match_ts, comment)) {
+            continue;
+        } else if (boost::regex_match(line_ts, match_ts, pattern_ts)) {
+
+            int hour = std::stoi(match_ts[1]);
+            int min = std::stoi(match_ts[2]);
+            int second = std::stoi(match_ts[3]);
+            int timestampS = hour * 3600 + min * 60 + second;
+            int timestampNS = std::stoi(match_ts[4]) * std::pow(10, 9 - match_ts[4].length());
+
+            auto IMU_frame = new SLAMInMemoryFrame();
+            IMU_frame->FrameSensor = imu_sensor;
+            IMU_frame->Timestamp.S = timestampS;
+            IMU_frame->Timestamp.Ns = timestampNS;
+            IMU_frame->Data = malloc(imu_sensor->GetFrameSize(IMU_frame));
+
+            // start from 0000000000.txt
+            std::stringstream tmp_filename;
+            tmp_filename << std::setw(10) << std::setfill('0') << imu_index;
+            std::string imu_filename = tmp_filename.str() + ".txt";
+            imu_index++;
+            infile_imu.open(imu_filename);
+            std::getline(infile_imu, line_imu);
+
+            if (boost::regex_match(line_imu, match_imu, pattern_imu)) {
+                float gx = std::stof(match_imu[18]);
+                float gy = std::stof(match_imu[19]);
+                float gz = std::stof(match_imu[20]);
+                float ax = std::stof(match_imu[12]);
+                float ay = std::stof(match_imu[13]);
+                float az = std::stof(match_imu[14]);
+
+                ((float *)IMU_frame->Data)[0] = gx;
+                ((float *)IMU_frame->Data)[1] = gy;
+                ((float *)IMU_frame->Data)[2] = gz;
+                ((float *)IMU_frame->Data)[3] = ax;
+                ((float *)IMU_frame->Data)[4] = ay;
+                ((float *)IMU_frame->Data)[5] = az;
+
+                file.AddFrame(IMU_frame);
+                infile_imu.close();
+            } else {
+                std::cerr << "Unknown line:" << line_imu << std::endl;
+                infile_imu.close();
+                infile_ts.close();
+                return false;
+            }
+
+        } else {
+            std::cerr << "Unknown line:" << line_ts << std::endl;
+            infile_ts.close();
+            return false;
+        }
+    }
+    infile_ts.close();
+    return true;
 }
 
 bool loadKITTIGroundTruthData(const std::string &dirname, SLAMFile &file) {
@@ -327,6 +440,7 @@ bool loadKITTIGroundTruthData(const std::string &dirname, SLAMFile &file) {
 
     } else {
         std::cerr << "Invalid path to KITTI dataset groundtruth" << std::endl;
+        return false;
     }
 
     if (!infile.is_open()) {
@@ -336,6 +450,7 @@ bool loadKITTIGroundTruthData(const std::string &dirname, SLAMFile &file) {
     std::list<slambench::TimeStamp> timestamps = loadLeftGreyTimeStamps(dirname);
     if (timestamps.size() == 0) {
         std::cerr << "Unable to load timestamps of left RGB camera" << std::endl;
+        infile.close();
         return false;
     }
 
@@ -364,6 +479,7 @@ bool loadKITTIGroundTruthData(const std::string &dirname, SLAMFile &file) {
         for (const std::string& val : pose_values) {
             if (!boost::regex_match(val, pattern)) {
                 std::cerr << val << " is NOT in the valid scientific notation format." << std::endl;
+                infile.close();
                 return false;
             }
             float number = boost::lexical_cast<float>(val);
@@ -389,6 +505,7 @@ bool loadKITTIGroundTruthData(const std::string &dirname, SLAMFile &file) {
 
         file.AddFrame(gt_frame);
     }
+    infile.close();
     return true;
 }
 
@@ -446,6 +563,8 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
     Sensor::pose_t pose_rgrey = Eigen::Matrix4f::Identity();
     Sensor::pose_t pose_lrgb = Eigen::Matrix4f::Identity();
     Sensor::pose_t pose_rrgb = Eigen::Matrix4f::Identity();
+
+    Sensor::pose_t pose_imu = Eigen::Matrix4f::Identity();
     bool rect = true;
 
     KITTIReader::DatasetOrigin d_origin = check_data_origin();
@@ -474,6 +593,12 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
                       0.000000e+00,  0.000000e+00,  0.000000e+00,  1.000000e+00;
         pose_rrgb = pose_rrgb.inverse().eval();
 
+        pose_imu <<  9.999976e-01,  7.553071e-04, -2.035826e-03, -8.086759e-01, 
+                    -7.854027e-04,  9.998898e-01, -1.482298e-02,  3.195559e-01,
+                     2.024406e-03,  1.482454e-02,  9.998881e-01, -7.997231e-01,
+                     0.000000e+00,  0.000000e+00,  0.000000e+00,  1.000000e+00;
+        pose_imu = pose_imu.inverse().eval();
+
         rect = false;
 
     } else if (d_origin == KITTIReader::DatasetOrigin::RD11_09_30_RECT) {
@@ -481,10 +606,21 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
         std::cout << "using rectified parameter from 2011-09-30" << std::endl;
         get_params(cam_intrinsics_lgrey, cam_intrinsics_rgrey, cam_intrinsics_lrgb, cam_intrinsics_rrgb,
                     cam_distortion_type, cam_distortion_lgrey, cam_distortion_rgrey, cam_distortion_lrgb, cam_distortion_rrgb);
-        pose_rgrey(0, 3) = -5.370000e-01; 
+
+        pose_rgrey(0, 3) = -5.370000e-01;  
         pose_rgrey = pose_rgrey.inverse().eval();
+
         pose_lrgb(0, 3) = 5.956621e-02;
+        pose_lrgb = pose_lrgb.inverse().eval();
+
         pose_rrgb(0, 3) = -4.731050e-01;
+        pose_rrgb = pose_rrgb.inverse().eval();
+
+        pose_imu <<  9.999976e-01,  7.553071e-04, -2.035826e-03, -8.086759e-01, 
+                    -7.854027e-04,  9.998898e-01, -1.482298e-02,  3.195559e-01,
+                     2.024406e-03,  1.482454e-02,  9.998881e-01, -7.997231e-01,
+                     0.000000e+00,  0.000000e+00,  0.000000e+00,  1.000000e+00;
+        pose_imu = pose_imu.inverse().eval();
 
         rect = true;
 
