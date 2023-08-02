@@ -264,8 +264,7 @@ bool loadKITTIGreyData(const std::string &dirname,
 
 bool loadKITTIIMUData(const std::string &dirname,
                       SLAMFile &file,
-                      const Sensor::pose_t &pose,
-                      const bool rect) {
+                      const Sensor::pose_t &pose) {
 
     auto imu_sensor = new IMUSensor(dirname);
     imu_sensor->Index = file.Sensors.size();
@@ -279,22 +278,22 @@ bool loadKITTIIMUData(const std::string &dirname,
 
     file.Sensors.AddSensor(imu_sensor);
 
-    const std::string& num = RegexPattern::decimal;
+    const std::string& num = RegexPattern::number;
     const std::string& start = RegexPattern::start;
     const std::string& end = RegexPattern::end;
 
     std::string expr = start
-        + num + "\\s" + num + "\\s" + num + "\\s"           // lat, lon, alt: 1-3
-        + num + "\\s" + num + "\\s" + num + "\\s"           // roll, pitch, yaw: 4-6
-        + num + "\\s" + num + "\\s"                         // vn, ve: 7-8
-        + num + "\\s" + num + "\\s" + num + "\\s"           // vf, vl, vu: 9-11
-        + num + "\\s" + num + "\\s" + num + "\\s"           // ax, ay, az: 12-14
-        + num + "\\s" + num + "\\s" + num + "\\s"           // af, al, au: 15-17
-        + num + "\\s" + num + "\\s" + num + "\\s"           // wx, wy, wz: 18-20
-        + num + "\\s" + num + "\\s" + num + "\\s"           // wf, wl, wu: 21-23
-        + num + "\\s" + num + "\\s"                         // pos_accuracy, vel_accuracy: 24-25
-        + num + "\\s" + num + "\\s"                         // navstat, numsats: 26-27
-        + num + "\\s" + num + "\\s" + num + "\\s*"          // posmode, velmode, orimode: 28-30
+        + num + "\\s+" + num + "\\s+" + num + "\\s+"           // lat, lon, alt: 1-3
+        + num + "\\s+" + num + "\\s+" + num + "\\s+"           // roll, pitch, yaw: 4-6
+        + num + "\\s+" + num + "\\s+"                         // vn, ve: 7-8
+        + num + "\\s+" + num + "\\s+" + num + "\\s+"           // vf, vl, vu: 9-11
+        + num + "\\s+" + num + "\\s+" + num + "\\s+"           // ax, ay, az: 12-14
+        + num + "\\s+" + num + "\\s+" + num + "\\s+"           // af, al, au: 15-17
+        + num + "\\s+" + num + "\\s+" + num + "\\s+"           // wx, wy, wz: 18-20
+        + num + "\\s+" + num + "\\s+" + num + "\\s+"           // wf, wl, wu: 21-23
+        + num + "\\s+" + num + "\\s+"                         // pos_accuracy, vel_accuracy: 24-25
+        + num + "\\s+" + num + "\\s+"                         // navstat, numsats: 26-27
+        + num + "\\s+" + num + "\\s+" + num + "\\s*"          // posmode, velmode, orimode: 28-30
         + end;
 
     std::string line_ts;
@@ -310,6 +309,7 @@ bool loadKITTIIMUData(const std::string &dirname,
     boost::regex pattern_ts("^\\d{4}-\\d{2}-\\d{2} (\\d{2}):(\\d{2}):(\\d{2})\\.(\\d{9})$");
 
     int imu_index = 0;
+    bool lock = true;
     while (std::getline(infile_ts, line_ts)) {
         if (line_ts.empty()) {
             continue;
@@ -334,7 +334,7 @@ bool loadKITTIIMUData(const std::string &dirname,
             tmp_filename << std::setw(10) << std::setfill('0') << imu_index;
             std::string imu_filename = tmp_filename.str() + ".txt";
             imu_index++;
-            infile_imu.open(imu_filename);
+            infile_imu.open(dirname + "/oxts/data/" + imu_filename);
             std::getline(infile_imu, line_imu);
 
             if (boost::regex_match(line_imu, match_imu, pattern_imu)) {
@@ -368,6 +368,118 @@ bool loadKITTIIMUData(const std::string &dirname,
         }
     }
     infile_ts.close();
+    return true;
+}
+
+bool loadKITTILidarData(const std::string &dirname,
+                        SLAMFile &file,
+                        const Sensor::pose_t &pose) {
+    
+    auto lidar_sensor = new LidarSensor(dirname);
+    lidar_sensor->Index = file.Sensors.size();
+    lidar_sensor->Rate = 10.0;
+
+    lidar_sensor->PointsPerCycle = 100000;
+    lidar_sensor->AltitudeAboveGround = 1.73;
+    lidar_sensor->HorizontalFoV[0] = 0.0;
+    lidar_sensor->HorizontalFoV[1] = 360.0;
+    lidar_sensor->VerticalFoV[0] = 2.0;
+    lidar_sensor->VerticalFoV[1] = -24.9;
+    lidar_sensor->VerticalAngResolution = 0.09;
+    lidar_sensor->BeamNum = 64;
+    lidar_sensor->CopyPose(pose);
+
+    file.Sensors.AddSensor(lidar_sensor);
+
+    std::string line;
+    std::ifstream infile(dirname + "/velodyne_points/timestamps.txt");
+
+    boost::smatch match;
+    boost::regex comment = boost::regex(RegexPattern::comment);
+    // format of timestamp: yyyy-mm-dd hr:min:sec.nsec 2011-09-30 12:40:59.442522880
+    // extract hr, min, sec, nsec
+    boost::regex pattern("^\\d{4}-\\d{2}-\\d{2} (\\d{2}):(\\d{2}):(\\d{2})\\.(\\d{9})$");
+
+    int lidar_index = 0;
+    int num_point = lidar_sensor->PointsPerCycle;
+    while (std::getline(infile, line)) {
+        if (line.empty()) {
+            continue;
+        } else if (boost::regex_match(line, match, comment)) {
+            continue;
+        } else if (boost::regex_match(line, match, pattern)) {
+
+            int hour = std::stoi(match[1]);
+            int min = std::stoi(match[2]);
+            int second = std::stoi(match[3]);
+            int timestampS = hour * 3600 + min * 60 + second;
+            int timestampNS = std::stoi(match[4]) * std::pow(10, 9 - match[4].length());
+
+            // ====== Load pointcloud for each frame
+            // start from 0000000000.bin
+            std::stringstream tmp_filename;
+            tmp_filename << std::setw(10) << std::setfill('0') << lidar_index;
+            std::string lidar_file_bin = tmp_filename.str() + ".bin";
+            lidar_file_bin = dirname + "/velodyne_points/data/" + lidar_file_bin;
+            lidar_index++;
+
+            float *data = new float[num_point * 4];
+            // pointers
+            float *px = data + 0;
+            float *py = data + 1;
+            float *pz = data + 2;
+            float *pr = data + 3;
+
+            std::ifstream stream(lidar_file_bin.c_str(), std::ios::binary);
+            if (!stream) {
+                std::cerr << "Failed to open the file.\n";
+                delete[] data;
+                return false;
+            }
+
+            num_point = stream.read(reinterpret_cast<char*>(data), sizeof(float) * num_point * 4).gcount() / (sizeof(float) * 4);
+            stream.close();
+
+            std::vector<Point> point_clouds;
+            point_clouds.reserve(num_point);
+
+            for (int32_t i = 0; i < num_point; i++) {
+                Eigen::Vector4f point_4d_eigen(*px, *py, *pz, 1.0);
+                // convert to rectified camera coordinates
+                point_4d_eigen = pose * point_4d_eigen;
+                Point point_3d(point_4d_eigen[0], point_4d_eigen[1], point_4d_eigen[2]);
+                point_clouds.emplace_back(point_3d);
+                px += 4; py += 4; pz += 4; pr += 4;
+            }
+
+            // free memory
+            delete[] data;
+
+            auto pc = new PointCloud();
+            pc->Get() = point_clouds;
+            std::vector<char> rawpointcloud = pc->ToRaw();
+            int num_bytes = rawpointcloud.size();
+
+            auto lidar_frame = new SLAMInMemoryFrame();
+            lidar_frame->FrameSensor = lidar_sensor;
+            lidar_frame->Timestamp.S = timestampS;
+            lidar_frame->Timestamp.Ns = timestampNS;
+
+            lidar_frame->Data = malloc(num_bytes);
+            lidar_frame->SetVariableSize(rawpointcloud.size());
+            std::copy(rawpointcloud.data(),
+                    rawpointcloud.data() + num_bytes,
+                    reinterpret_cast<char*>(lidar_frame->Data));
+
+            file.AddFrame(lidar_frame);
+
+        } else {
+            std::cerr << "Unknown line:" << line << std::endl;
+            infile.close();
+            return false;
+        }
+    }
+    infile.close();
     return true;
 }
 
@@ -564,7 +676,12 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
     Sensor::pose_t pose_lrgb = Eigen::Matrix4f::Identity();
     Sensor::pose_t pose_rrgb = Eigen::Matrix4f::Identity();
 
-    Sensor::pose_t pose_imu = Eigen::Matrix4f::Identity();
+    // a_2_b the transformation matrix that convert point in a coordinate to b coordinate
+    Sensor::pose_t imu_2_velo = Eigen::Matrix4f::Identity();
+    Sensor::pose_t velo_2_lgrey = Eigen::Matrix4f::Identity();
+
+    Sensor::pose_t R_rect_00;
+
     bool rect = true;
 
     KITTIReader::DatasetOrigin d_origin = check_data_origin();
@@ -593,12 +710,6 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
                       0.000000e+00,  0.000000e+00,  0.000000e+00,  1.000000e+00;
         pose_rrgb = pose_rrgb.inverse().eval();
 
-        pose_imu <<  9.999976e-01,  7.553071e-04, -2.035826e-03, -8.086759e-01, 
-                    -7.854027e-04,  9.998898e-01, -1.482298e-02,  3.195559e-01,
-                     2.024406e-03,  1.482454e-02,  9.998881e-01, -7.997231e-01,
-                     0.000000e+00,  0.000000e+00,  0.000000e+00,  1.000000e+00;
-        pose_imu = pose_imu.inverse().eval();
-
         rect = false;
 
     } else if (d_origin == KITTIReader::DatasetOrigin::RD11_09_30_RECT) {
@@ -616,12 +727,21 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
         pose_rrgb(0, 3) = -4.731050e-01;
         pose_rrgb = pose_rrgb.inverse().eval();
 
-        pose_imu <<  9.999976e-01,  7.553071e-04, -2.035826e-03, -8.086759e-01, 
-                    -7.854027e-04,  9.998898e-01, -1.482298e-02,  3.195559e-01,
-                     2.024406e-03,  1.482454e-02,  9.998881e-01, -7.997231e-01,
-                     0.000000e+00,  0.000000e+00,  0.000000e+00,  1.000000e+00;
-        pose_imu = pose_imu.inverse().eval();
+        imu_2_velo <<  9.999976e-01,  7.553071e-04, -2.035826e-03, -8.086759e-01, 
+                      -7.854027e-04,  9.998898e-01, -1.482298e-02,  3.195559e-01,
+                       2.024406e-03,  1.482454e-02,  9.998881e-01, -7.997231e-01,
+                       0.000000e+00,  0.000000e+00,  0.000000e+00,  1.000000e+00;
 
+        velo_2_lgrey << 7.027555e-03, -9.999753e-01,  2.599616e-05, -7.137748e-03,  
+                       -2.254837e-03, -4.184312e-05, -9.999975e-01, -7.482656e-02,
+                        9.999728e-01,  7.027479e-03, -2.255075e-03, -3.336324e-01,
+                        0.000000e+00,  0.000000e+00,  0.000000e+00,  1.000000e+00;
+
+        R_rect_00 << 9.999280e-01, 8.085985e-03, -8.866797e-03, 0.000000e+00,
+                    -8.123205e-03, 9.999583e-01, -4.169750e-03, 0.000000e+00,
+                     8.832711e-03, 4.241477e-03,  9.999520e-01, 0.000000e+00,
+                     0.000000e+00, 0.000000e+00,  0.000000e+00, 1.000000e+00;
+        
         rect = true;
 
     } else {
@@ -663,6 +783,31 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
     if (rgb && stereo && !loadKITTIRGBData(dirname, right_rgb, slamfile, pose_rrgb, 
                                  cam_intrinsics_rrgb, cam_distortion_type, cam_distortion_rrgb, rect)) {
         std::cout << "Error while loading left RGB information." << std::endl;
+        delete slamfilep;
+        return nullptr;
+    }
+
+    // do not support unrectified and unsync imu and lidar data
+    Sensor::pose_t pose_imu = imu_2_velo;
+    if (imu && grey) {
+        // to rectified camera coordinate if we use camera
+        std::cout << "IMU pose represents transformation of a point from IMU coordinates to rectified camera coordinate!" << std::endl;
+        pose_imu = R_rect_00 * velo_2_lgrey * imu_2_velo;
+        // pose_imu = Eigen::Matrix4f::Identity();
+    }
+    if (imu && rect && !loadKITTIIMUData(dirname, slamfile, pose_imu)) {
+        std::cout << "Error while loading IMU information." << std::endl;
+        delete slamfilep;
+        return nullptr;
+    }
+
+    Sensor::pose_t pose_lidar = Eigen::Matrix4f::Identity();
+    if (lidar && grey) {
+        std::cout << "Lidar pose represents transformation of a point from Lidar coordinates to rectified camera coordinate!" << std::endl;
+        pose_lidar = R_rect_00 * velo_2_lgrey;
+    }
+    if (lidar && rect && !loadKITTILidarData(dirname, slamfile, pose_lidar)) {
+        std::cout << "Error while loading Lidar information." << std::endl;
         delete slamfilep;
         return nullptr;
     }

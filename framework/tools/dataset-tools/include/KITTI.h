@@ -72,7 +72,7 @@ namespace slambench {
         
         public:
             std::string input;
-            bool grey = true, rgb = false, stereo = true, lidar = false, imu = false, gt = false;
+            bool grey = false, rgb = false, stereo = false, lidar = true, imu = false, gt = false;
 
             explicit KITTIReader(std::string name) : DatasetReader(std::move(name)) {
                 this->addParameter(TypedParameter<std::string>("i",
@@ -118,14 +118,14 @@ namespace slambench {
             }
 
             void get_params(CameraSensor::intrinsics_t &cam_intrinsics_lgrey,
-                                CameraSensor::intrinsics_t &cam_intrinsics_rgrey,
-                                CameraSensor::intrinsics_t &cam_intrinsics_lrgb,
-                                CameraSensor::intrinsics_t &cam_intrinsics_rrgb,
-                                CameraSensor::distortion_type_t &distortion_type,
-                                CameraSensor::distortion_coefficients_t &cam_distortion_lgrey,
-                                CameraSensor::distortion_coefficients_t &cam_distortion_rgrey,
-                                CameraSensor::distortion_coefficients_t &cam_distortion_lrgb,
-                                CameraSensor::distortion_coefficients_t &cam_distortion_rrgb) {
+                            CameraSensor::intrinsics_t &cam_intrinsics_rgrey,
+                            CameraSensor::intrinsics_t &cam_intrinsics_lrgb,
+                            CameraSensor::intrinsics_t &cam_intrinsics_rrgb,
+                            CameraSensor::distortion_type_t &distortion_type,
+                            CameraSensor::distortion_coefficients_t &cam_distortion_lgrey,
+                            CameraSensor::distortion_coefficients_t &cam_distortion_rgrey,
+                            CameraSensor::distortion_coefficients_t &cam_distortion_lrgb,
+                            CameraSensor::distortion_coefficients_t &cam_distortion_rrgb) {
                 if (input.find("2011_09_30") != std::string::npos && input.find("sync") == std::string::npos) {
                     
                     std::cout << "loading params of unrectified 2011_09_30 ..." << std::endl;

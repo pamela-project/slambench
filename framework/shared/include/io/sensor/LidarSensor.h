@@ -19,15 +19,13 @@ namespace slambench {
 			static const sensor_type_t kLidarType;
 			
 			// More infos: https://felix.rohrba.ch/en/2015/four-essential-lidar-parameters/
-			typedef float point_density_t;
-			typedef float sidelap_t;
+			typedef float points_per_cyc_t;
 			typedef float altitude_above_ground_t;
 			typedef float fov_t[2];
 			typedef float angular_resolution_t;
 			typedef int beam_num_t;
 
-			point_density_t PointDensity;
-			sidelap_t SideLap;
+			points_per_cyc_t PointsPerCycle;
 			altitude_above_ground_t AltitudeAboveGround;
 			fov_t HorizontalFoV;
 			fov_t VerticalFoV;

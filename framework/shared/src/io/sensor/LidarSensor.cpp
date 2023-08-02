@@ -42,8 +42,7 @@ class LidarSerialiser : public SensorSerialiser {
 	bool SerialiseSensorSpecific(Serialiser* serialiser, const Sensor* s) override {
 		LidarSensor *sensor = (LidarSensor*)s;
 		
-		serialiser->Write(&sensor->PointDensity, sizeof(sensor->PointDensity));
-		serialiser->Write(&sensor->SideLap, sizeof(sensor->SideLap));
+		serialiser->Write(&sensor->PointsPerCycle, sizeof(sensor->PointsPerCycle));
 		serialiser->Write(&sensor->AltitudeAboveGround, sizeof(sensor->AltitudeAboveGround));
 		serialiser->Write(&sensor->HorizontalFoV, sizeof(sensor->HorizontalFoV));
 		serialiser->Write(&sensor->VerticalFoV, sizeof(sensor->VerticalFoV));
@@ -70,8 +69,7 @@ class LidarDeserialiser : public SensorDeserialiser {
 		
 		assert(sensor->GetType() == LidarSensor::kLidarType);
 		
-		deserialiser->Read(&sensor->PointDensity, sizeof(sensor->PointDensity));
-		deserialiser->Read(&sensor->SideLap, sizeof(sensor->SideLap));
+		deserialiser->Read(&sensor->PointsPerCycle, sizeof(sensor->PointsPerCycle));
 		deserialiser->Read(&sensor->AltitudeAboveGround, sizeof(sensor->AltitudeAboveGround));
 		deserialiser->Read(&sensor->HorizontalFoV, sizeof(sensor->HorizontalFoV));
 		deserialiser->Read(&sensor->VerticalFoV, sizeof(sensor->VerticalFoV));
@@ -83,4 +81,4 @@ class LidarDeserialiser : public SensorDeserialiser {
 	}
 };
 
-static slambench::io::SensorDatabaseRegistration lidar_reg(LidarSensor::kLidarType, slambench::io::SensorDatabaseEntry(new LidarSerialiser(), new LidarDeserialiser(), false, false));
+static slambench::io::SensorDatabaseRegistration lidar_reg(LidarSensor::kLidarType, slambench::io::SensorDatabaseEntry(new LidarSerialiser(), new LidarDeserialiser(), false, true));
