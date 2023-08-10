@@ -802,10 +802,12 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
     }
 
     Sensor::pose_t pose_lidar = Eigen::Matrix4f::Identity();
-    if (lidar && grey) {
-        std::cout << "Lidar pose represents transformation of a point from Lidar coordinates to rectified camera coordinate!" << std::endl;
-        pose_lidar = R_rect_00 * velo_2_lgrey;
-    }
+    // TODO: seems problematic if convert th lidar points to camera coordinates.
+    // Sensor::pose_t pose_lidar = velo_2_lgrey;
+    // if (lidar && grey) {
+    //     std::cout << "Lidar pose represents transformation of a point from Lidar coordinates to rectified camera coordinate!" << std::endl;
+    //     pose_lidar = R_rect_00 * velo_2_lgrey;
+    // }
     if (lidar && rect && !loadKITTILidarData(dirname, slamfile, pose_lidar)) {
         std::cout << "Error while loading Lidar information." << std::endl;
         delete slamfilep;
