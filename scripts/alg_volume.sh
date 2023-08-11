@@ -49,7 +49,7 @@ case "$1" in
     "orbslam2")
         echo "Select ORB-SLAM2..."
         
-        # Build image for LSD-SLAM if choice is y
+        # Build image for ORB-SLAM2 if choice is y
         if [ "$CHOICE" = "y" ]; then
             echo "Building the ORB-SLAM2 image..."
             docker build -t orbslam2-deps $PATH_DOCKERFILE/orbslam2
@@ -66,7 +66,7 @@ case "$1" in
     "orbslam3")
         echo "Select ORB-SLAM3..."
         
-        # Build image for LSD-SLAM if choice is y
+        # Build image for ORB-SLAM3 if choice is y
         if [ "$CHOICE" = "y" ]; then
             echo "Building the ORB-SLAM3 image..."
             docker build -t orbslam3-deps $PATH_DOCKERFILE/orbslam3
@@ -83,7 +83,7 @@ case "$1" in
     "openvins")
         echo "Select Open-VINS..."
         
-        # Build image for LSD-SLAM if choice is y
+        # Build image for Open-VINS if choice is y
         if [ "$CHOICE" = "y" ]; then
             echo "Building the Open-VINS image..."
             docker build -t openvins-deps $PATH_DOCKERFILE/openvins
@@ -96,6 +96,23 @@ case "$1" in
             --name=openvins \
             --mount source=openvins-vol,destination=/deps/openvins \
             openvins-deps
+        ;;
+    "loam")
+        echo "Select LOAM..."
+        
+        # Build image for LOAM if choice is y
+        if [ "$CHOICE" = "y" ]; then
+            echo "Building the LOAM image..."
+            docker build -t loam-deps $PATH_DOCKERFILE/loam
+        else
+            echo "No image build requested."
+        fi
+        
+        echo "Populate volume for LOAM.."
+        docker run -d \
+            --name=loam \
+            --mount source=loam-vol,destination=/deps/loam \
+            loam-deps
         ;;
     *)
         echo "Invalid algorithm!"

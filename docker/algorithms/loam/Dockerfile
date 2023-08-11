@@ -14,6 +14,8 @@ RUN apt-get -y install libboost-all-dev libyaml-cpp-dev
 RUN apt-get -y install gfortran libblas-dev liblapack-dev
 # Required by ceres
 RUN apt-get -y install libgoogle-glog-dev
+# Required by pcl
+RUN apt-get -y install freeglut3 freeglut3-dev libglew-dev libglu1-mesa libglu1-mesa-dev libgl1-mesa-glx libgl1-mesa-dev
 
 # Make directory for deps and lib
 RUN mkdir repos
@@ -88,7 +90,7 @@ RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=$LOAM_DIR/ceres" \
              -DCXSPARSE_LIBRARY=$LOAM_DIR/suitesparse/lib/libcxsparse.a
 RUN make -j$(expr $(nproc) - 2) && make install
 
-RUN apt-get -y install freeglut3 freeglut3-dev libglew-dev libglu1-mesa libglu1-mesa-dev libgl1-mesa-glx libgl1-mesa-dev
+
 # ===== <PCL 1.8> =====
 WORKDIR /repos
 RUN git clone https://github.com/PointCloudLibrary/pcl.git pcl
@@ -153,12 +155,12 @@ RUN mv null.cpp $LOAM_DIR/wrapper
 
 # ====== <LOAM> ======
 WORKDIR /repos
-RUN git clone --recursive --branch slambench https://github.com/yuhaozhang7/oh_my_loam.git ohloam
+RUN git clone --recursive --branch slambench https://github.com/yuhaozhang7/oh_my_loam.git loam
 
-WORKDIR ohloam
+WORKDIR loam
 RUN mkdir build
 WORKDIR build
-RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=$LOAM_DIR/lib" \
+RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=$LOAM_DIR/" \
  	-DWRAPPER_PATH=$LOAM_DIR/wrapper/ \
  	-DEIGEN_INCLUDE_DIR=$LOAM_DIR/eigen3/include/eigen3/ \
 	-DFLANN_INCLUDE_DIR=$LOAM_DIR/flann/include/ \
