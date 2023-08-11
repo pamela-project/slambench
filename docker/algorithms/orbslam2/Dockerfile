@@ -87,7 +87,6 @@ RUN mv null.cpp /deps/orbslam2/wrapper
 WORKDIR /repos
 RUN git clone --recursive --branch update-master https://github.com/yuhaozhang7/ORB_SLAM2.git orbslam2
 
-# Generate static library
 WORKDIR orbslam2
 RUN mkdir build
 WORKDIR build
