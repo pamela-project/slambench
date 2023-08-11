@@ -51,6 +51,27 @@ datasets/OpenLORIS/%.all :
 	${check_generator}
 	./build/bin/dataset-generator -d eurocmav -i $</mav0 -o $@ -imu true --stereo-grey true -gt true
 
+
+#### KITTI ####
+./datasets/KITTI/poses :
+	mkdir -p $(@D)/poses
+	cd $(@D)/poses && ${WGET} "https://s3.eu-central-1.amazonaws.com/avg-kitti/data_odometry_poses.zip" && unzip -j data_odometry_poses.zip -d .
+
+./datasets/KITTI/%.zip :
+	mkdir -p $(@D)
+	cd $(@D) && ${WGET} "https://s3.eu-central-1.amazonaws.com/avg-kitti/raw_data/$*.zip"
+
+./datasets/KITTI/%.dir : ./datasets/KITTI/%.zip ./datasets/KITTI/poses
+	mkdir $@
+	cp -r ./datasets/KITTI/poses $@
+	unzip $< -d $@
+	cd $@ && mv ./*/*/* . && rm -r ./2011_*
+
+./datasets/KITTI/%.slam :  ./datasets/KITTI/%.dir
+	${check_generator}
+	./build/bin/dataset-generator -d kitti -i $< -o $@
+
+
 #### TUM ####
 # check if using tgz file or rosbag
 ifeq (TUM, $(findstring TUM, $(MAKECMDGOALS)))
