@@ -99,12 +99,17 @@ RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=/deps/orbslam3/" \
 	-DEIGEN3_INCLUDE_DIR=/deps/orbslam3/eigen3/include/eigen3/ \
 	-DPangolin_INCLUDE_DIRS=/deps/orbslam3/pangolin/include/ \
 	-DSLAMBENCH_INCLUDE_DIRS=/repos/slambench/framework/shared/include/ \
-	-DPangolin_LIBRARIES=/deps/orbslam3/pangolin/lib/libpangolin.so
+	-DPangolin_LIBRARIES=/deps/orbslam3/pangolin/lib/libpangolin.so \
+	-DLIB_PATH="/deps/orbslam3/lib:/deps/orbslam3/pangolin/lib:/deps/orbslam3/opencv/lib:/deps/orbslam3/DBoW2:/deps/orbslam3/g2o"
 RUN make -j2 && make install
 
 # Move the vocabulary file
 WORKDIR /repos/orbslam3/Vocabulary
 RUN tar -xf ORBvoc.txt.tar.gz
 RUN mv ORBvoc.txt /deps/orbslam3/Vocabulary
+
+# Script for export lib path
+WORKDIR /deps/orbslam3
+RUN echo "export LD_LIBRARY_PATH=\"/deps/orbslam3/lib:/deps/orbslam3/pangolin/lib:/deps/orbslam3/opencv/lib:/deps/orbslam3/DBoW2:/deps/orbslam3/g2o:$LD_LIBRARY_PATH\"" > libpath.txt
 
 

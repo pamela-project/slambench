@@ -97,16 +97,23 @@ RUN make -j2 && make install
 
 # ====== <SLAMBench> ======
 WORKDIR /repos
-RUN git clone https://github.com/nikolaradulov/slambench.git slambench
+RUN git clone --branch fake_slambench https://github.com/nikolaradulov/slambench.git slambench
+
+WORKDIR /deps/lsdslam
+RUN mkdir wrapper
+WORKDIR /repos/slambench/docker/wrapper
+RUN mv libslambench-c-wrapper.a /deps/lsdslam/wrapper
+RUN mv null.cpp /deps/lsdslam/wrapper
 
 # ====== <LSD-SLAM> ======
 WORKDIR /repos
-RUN git clone --branch cpp https://github.com/yuhaozhang7/lsd_slam.git lsdslam
+RUN git clone --recursive --branch cpp https://github.com/yuhaozhang7/lsd_slam.git lsdslam
 
 WORKDIR lsdslam
 RUN mkdir build
 WORKDIR build
 RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=/deps/lsdslam/" \
+	-DWRAPPER_PATH=/deps/lsdslam/wrapper/ \
 	-DEIGEN3_INCLUDE_DIR=/deps/lsdslam/eigen3/include/eigen3/ \
 	-DPangolin_INCLUDE_DIR=/deps/lsdslam/pangolin/include/ \
 	-DG2O_INCLUDE_DIR=/deps/lsdslam/g2o/include/ \
@@ -124,35 +131,7 @@ RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=/deps/lsdslam/" \
 RUN make && make install
 
 
-# CMakeLists for generating dynamic library
+# Script for export lib path
 WORKDIR /deps/lsdslam
+RUN echo "export LD_LIBRARY_PATH=\"/deps/lsdslam/lib:$LD_LIBRARY_PATH\"" > libpath.txt
 
-RUN echo "cmake_minimum_required(VERSION 2.8)" > CMakeLists.txt
-RUN echo "project(liblsdslam)" >> CMakeLists.txt
-RUN echo "" >> CMakeLists.txt
-
-RUN echo "SET(CMAKE_C_FLAGS \"\${CMAKE_C_FLAGS} -g -O3                  -Wall -Wno-unknown-pragmas -Wextra -Wno-error=deprecated-declarations -Wno-error=array-bounds\")" >> CMakeLists.txt
-RUN echo "SET(CMAKE_CXX_FLAGS \"\${CMAKE_CXX_FLAGS} -g -O3  --std=c++11 -Wall -Wno-unknown-pragmas -Wextra -Wno-error=deprecated-declarations -Wno-error=array-bounds\")" >> CMakeLists.txt
-RUN echo "" >> CMakeLists.txt
-
-RUN echo "SET(LIBNAME lsdslam-cpp-library)" >> CMakeLists.txt
-RUN echo "SET(PATH_TO_STATIC /deps/lsdslam/lib/liblsdslam-cpp.a)" >> CMakeLists.txt
-RUN echo "SET(SLAMBENCH_C_WRAPPER	-Wl,--whole-archive -L/slambench/build/lib/ slambench-c-wrapper	-Wl,--no-whole-archive)" >> CMakeLists.txt
-RUN echo "SET(NULL_FILE_PATH	\"/slambench/build/null.cpp\")" >> CMakeLists.txt
-RUN echo "" >> CMakeLists.txt
-
-RUN echo "set(G2O_TYPES_SIM3	/deps/lsdslam/g2o/lib/libg2o_types_sim3.so)" >> CMakeLists.txt
-RUN echo "set(G2O_TYPES_SBA	/deps/lsdslam/g2o/lib/libg2o_types_sba.so)" >> CMakeLists.txt
-RUN echo "set(G2O_CORE_LIBRARY	/deps/lsdslam/g2o/lib/libg2o_core.so)" >> CMakeLists.txt
-RUN echo "set(G2O_SOLVER_CSPARSE	/deps/lsdslam/g2o/lib/libg2o_solver_csparse.so)" >> CMakeLists.txt
-RUN echo "set(G2O_SOLVER_CSPARSE_EXTENSION	/deps/lsdslam/g2o/lib/libg2o_csparse_extension.so)" >> CMakeLists.txt
-RUN echo "set(G2O_STUFF_LIBRARY	/deps/lsdslam/g2o/lib/libg2o_stuff.so)" >> CMakeLists.txt
-RUN echo "set(CSPARSE_LIBRARY	/deps/lsdslam/suitesparse/lib/libcxsparse.a)" >> CMakeLists.txt
-RUN echo "set(common_libraries     \${G2O_TYPES_SIM3} \${G2O_TYPES_SBA}   \${G2O_CORE_LIBRARY}  \${G2O_SOLVER_CSPARSE} \${G2O_SOLVER_CSPARSE_EXTENSION} \${G2O_STUFF_LIBRARY}  \${CSPARSE_LIBRARY} )" >> CMakeLists.txt
-RUN echo "" >> CMakeLists.txt
-
-RUN echo "add_library(\${LIBNAME} SHARED \${NULL_FILE_PATH})" >> CMakeLists.txt
-RUN echo "target_link_libraries(\${LIBNAME} PRIVATE \${SLAMBENCH_C_WRAPPER} \${PATH_TO_STATIC} \${common_libraries})" >> CMakeLists.txt
-RUN echo "SET_TARGET_PROPERTIES(\${LIBNAME} PROPERTIES LINK_FLAGS \"\${ARGN}\")" >> CMakeLists.txt
-RUN echo "install(TARGETS \${LIBNAME}  DESTINATION  lib/)" >> CMakeLists.txt
-RUN echo "" >> CMakeLists.txt

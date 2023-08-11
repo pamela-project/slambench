@@ -80,6 +80,23 @@ case "$1" in
             --mount source=orbslam3-vol,destination=/deps/orbslam3 \
             orbslam3-deps
         ;;
+    "openvins")
+        echo "Select Open-VINS..."
+        
+        # Build image for LSD-SLAM if choice is y
+        if [ "$CHOICE" = "y" ]; then
+            echo "Building the Open-VINS image..."
+            docker build -t openvins-deps $PATH_DOCKERFILE/openvins
+        else
+            echo "No image build requested."
+        fi
+        
+        echo "Populate volume for Open-VINS.."
+        docker run -d \
+            --name=openvins \
+            --mount source=openvins-vol,destination=/deps/openvins \
+            openvins-deps
+        ;;
     *)
         echo "Invalid algorithm!"
         ;;
