@@ -38,6 +38,7 @@ RUN apt-get -y install \
 # download git folder
 RUN git clone https://github.com/nikolaradulov/slambench.git
 WORKDIR /slambench
+RUN git checkout 93fa32123c8878a311ecb02acd2ad8971292a4ab
 RUN apt-get install python
 COPY entry.sh /slambench
 RUN chmod +x /slambench/entry.sh

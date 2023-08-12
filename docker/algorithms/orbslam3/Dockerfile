@@ -76,7 +76,6 @@ RUN make -j2 && make install
 # ====== <SLAMBench> ======
 WORKDIR /repos
 RUN git clone --branch fake_slambench https://github.com/nikolaradulov/slambench.git slambench
-
 WORKDIR /deps/orbslam3
 RUN mkdir wrapper && mkdir Vocabulary
 WORKDIR /repos/slambench/docker/wrapper
