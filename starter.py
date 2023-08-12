@@ -63,7 +63,7 @@ def run_handle(mode, volumes, files, paths):
     for path in paths:
         names = path.split('/')
         volumes.append("{}-vol".format(names[0]))
-        end += "{} ".format('/deps/'+path)
+        end += "{} ".format('/deps/'+names[0]+'/lib/'+names[1])
 
     print(end)
     print(volumes)
@@ -79,14 +79,17 @@ def run_handle(mode, volumes, files, paths):
         docker_run_command = "docker run {} {} --bench-cli {}".format(docker_run_command, image, end)
     # GUI mode. Starts the visualisation tool of SLAMBench 
     elif mode == "gui":
-        if is_wsl:
+        if is_wsl():
             docker_run_command = "docker run -v /tmp/.X11-unix:/tmp/.X11-unix -v /mnt/wslg:/mnt/wslg -v /usr/lib/wsl:/usr/lib/wsl --device=/dev/dxg -e DISPLAY={} --device /dev/dri/card0 --device /dev/dri/renderD128 -e WAYLAND_DISPLAY={} -e XDG_RUNTIME_DIR={} {} {} --bench-gui {}".format(os.environ["DISPLAY"], os.environ["WAYLAND_DISPLAY"], os.environ["XDG_RUNTIME_DIR"], docker_run_command, image, end)
         else: 
+            docker_run_command = "docker run --env=\"DISPLAY\" --env=\"QT_X11_NO_MITSHM=1\" --volume=\"/tmp/.X11-unix:/tmp/.X11-unix:rw\" {} {} --bench-gui {}".format( docker_run_command, image, end)
+            # give access to the docker daemon
+            os.system('xhost +local:docker')
             print("Linux support for GUI in development")
-            sys.exit(1)
+            # sys.exit(1)
     # interactive mode. Supportsa windowing for GUI
     elif mode == "interactive-gui":
-        if is_wsl:
+        if is_wsl():
             docker_run_command = "docker run -v /tmp/.X11-unix:/tmp/.X11-unix -v /mnt/wslg:/mnt/wslg -v /usr/lib/wsl:/usr/lib/wsl --device=/dev/dxg -e DISPLAY={} --device /dev/dri/card0 --device /dev/dri/renderD128 -e WAYLAND_DISPLAY={} -e XDG_RUNTIME_DIR={} {} {} --interactive ".format(os.environ["DISPLAY"], os.environ["WAYLAND_DISPLAY"], os.environ["XDG_RUNTIME_DIR"], docker_run_command, image)
         else:
             print("Linux support for GUI in development")
@@ -103,6 +106,7 @@ def run_handle(mode, volumes, files, paths):
     return docker_run_command
 
 def main():
+    print(is_wsl())
     parser = argparse.ArgumentParser(description="This is a tool to run Docker containers with SLAMBench.")
     subparsers = parser.add_subparsers(dest="mode", help="Select the mode of operation.")
 
@@ -141,6 +145,8 @@ def main():
     
     print("Command: {}".format(docker_run_command))
     os.system(docker_run_command)
+    if not is_wsl():
+        os.system('xhost -local:docker')
 
 if __name__ == "__main__":
     main()
