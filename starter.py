@@ -82,7 +82,7 @@ def run_handle(mode, volumes, files, paths):
         if is_wsl():
             docker_run_command = "docker run -v /tmp/.X11-unix:/tmp/.X11-unix -v /mnt/wslg:/mnt/wslg -v /usr/lib/wsl:/usr/lib/wsl --device=/dev/dxg -e DISPLAY={} --device /dev/dri/card0 --device /dev/dri/renderD128 -e WAYLAND_DISPLAY={} -e XDG_RUNTIME_DIR={} {} {} --bench-gui {}".format(os.environ["DISPLAY"], os.environ["WAYLAND_DISPLAY"], os.environ["XDG_RUNTIME_DIR"], docker_run_command, image, end)
         else: 
-            docker_run_command = "docker run -e DISPLAY={} --env=\"QT_X11_NO_MITSHM=1\" -v /tmp/.X11-unix:/tmp/.X11-unix:rw {} {} --bench-gui {}".format(os.environ["DISPLAY"], docker_run_command, image, end)
+            docker_run_command = "docker run --env=\"DISPLAY\"  --env=\"QT_X11_NO_MITSHM=1\" -v /tmp/.X11-unix:/tmp/.X11-unix:rw --device /dev/dri/card0 --device /dev/dri/renderD128 {} {} --bench-gui {}".format( docker_run_command, image, end)
             # give access to the docker daemon
             os.system('xhost +local:docker')
             print("Linux support for GUI in development")
@@ -92,7 +92,7 @@ def run_handle(mode, volumes, files, paths):
         if is_wsl():
             docker_run_command = "docker run -v /tmp/.X11-unix:/tmp/.X11-unix -v /mnt/wslg:/mnt/wslg -v /usr/lib/wsl:/usr/lib/wsl --device=/dev/dxg -e DISPLAY={} --device /dev/dri/card0 --device /dev/dri/renderD128 -e WAYLAND_DISPLAY={} -e XDG_RUNTIME_DIR={} {} {} --interactive ".format(os.environ["DISPLAY"], os.environ["WAYLAND_DISPLAY"], os.environ["XDG_RUNTIME_DIR"], docker_run_command, image)
         else:
-            docker_run_command = "docker run -e DIPLAY={} --env=\"QT_X11_NO_MITSHM=1\" -v /tmp/.X11-unix:/tmp/.X11-unix:rw {} {} --interactive ".format(os.environ["DISPLAY"], docker_run_command, image)
+            docker_run_command = "docker run --env=\"DISPLAY\" --device /dev/dri/card0 --device /dev/dri/renderD128 --env=\"QT_X11_NO_MITSHM=1\" -v /tmp/.X11-unix:/tmp/.X11-unix:rw {} {} --interactive ".format( docker_run_command, image)
             # give access to the docker daemon
             os.system('xhost +local:docker')
     # interactive mode. Command line only 
