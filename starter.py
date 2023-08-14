@@ -3,6 +3,25 @@ import sys
 import os
 import platform
 import argparse 
+import subprocess
+
+
+def build_handle():
+    try:
+        output = subprocess.check_output("docker pull slambench/main ", shell=True, text=True)
+    except:
+        print("Image download Failed...")
+    images = subprocess.check_output("docker images", shell=True, text=True)
+    if "slambench/main" not in images:
+        print("Seems like download failed, cannot find image. Build starting ...")
+        current_directory = os.getcwd()
+        if current_directory.endswith("/slambench"):
+            os.system("docker build . -t slambench/main")
+        else: 
+            os.system("git clone https://github.com/nikolaradulov/slambench.git")     
+            os.system("docker build ./slambench -t slambench/main")
+    else:
+        print("A version of the container is already present on host and it shall be used. Alternatively the image can manually be build by \'docker build <path to Dockerfile -t slambench/main\'")
 
 def is_wsl():
     return "microsoft" in platform.uname().release
@@ -133,8 +152,7 @@ def main():
     run_parser.add_argument("slamopt", nargs="*")
     
 
-    build_parser = subparsers.add_parser("build", help="Running the tool in build mode")
-    build_parser.add_argument("build_option", choices=["download", "build"], help="Download or build the container for SLAMBench.")
+    build_parser = subparsers.add_parser("install", help="Downloads the main container/builds it")
     
     
 
@@ -147,8 +165,9 @@ def main():
     if args.mode == "run":
         # get the arguments after the separator
         docker_run_command = run_handle(args.type, args.dataset_volume, args.dataset, args.algorithm, args.save_config, args.slamopt)
-    elif args.mode == "build":
-        docker_run_command = build_handle(args.build_option)
+    elif args.mode == "install":
+        docker_run_command = build_handle()
+        sys.exit(0)
     elif args.mode == "dataset": 
         docker_run_command = dataset_handle(args.type, args.volume_name, args.dataset)
     else:
