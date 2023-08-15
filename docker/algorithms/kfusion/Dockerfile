@@ -23,7 +23,7 @@ WORKDIR eigen3
 RUN mkdir build
 WORKDIR build
 RUN cmake .. -DBUILD_SHARED_LIBS=OFF  -DCMAKE_BUILD_TYPE=Release  "-DCMAKE_INSTALL_PREFIX:PATH=/deps/kfusion/eigen3/"
-RUN make && make install
+RUN make -j$(expr $(nproc) - 2) && make install
 
 
 # ====== <TooN> ======
@@ -62,9 +62,8 @@ RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=/deps/kfusion/" \
 	-DEIGEN3_INCLUDE_DIR=/deps/kfusion/eigen3/include/eigen3/ \
 	-DTOON_INCLUDE_PATHS=/deps/kfusion/toon/include/ \
 	-DSLAMBENCH_INCLUDE_DIR=/repos/slambench/framework/shared/include/
-RUN make && make install
+RUN make -j$(expr $(nproc) - 2) && make install
 
 # Script for export lib path
 WORKDIR /deps/kfusion
 RUN echo "export LD_LIBRARY_PATH=\"/deps/kfusion/lib:$LD_LIBRARY_PATH\"" > libpath.txt
-
