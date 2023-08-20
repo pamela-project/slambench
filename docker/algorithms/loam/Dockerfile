@@ -3,7 +3,7 @@ FROM ubuntu:20.04
 
 # Install git and other dependencies
 ARG DEBIAN_FRONTEND=noninteractive
-ENV LOAM_DIR=/deps/loam
+ENV LOAM_DIR=/deps/aloam
 
 RUN apt-get -y update && apt-get -y upgrade
 RUN apt-get -y install git
@@ -153,16 +153,16 @@ RUN mv libslambench-c-wrapper.a $LOAM_DIR/wrapper
 RUN mv null.cpp $LOAM_DIR/wrapper
 
 
-# ====== <LOAM> ======
+# ====== <A-LOAM> ======
 WORKDIR /repos
-RUN git clone --recursive --branch slambench https://github.com/yuhaozhang7/oh_my_loam.git loam
+RUN git clone --recursive --branch slambench https://github.com/yuhaozhang7/oh_my_loam.git aloam
 
-WORKDIR loam
+WORKDIR aloam
 RUN mkdir build
 WORKDIR build
 RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=$LOAM_DIR/" \
  	-DWRAPPER_PATH=$LOAM_DIR/wrapper/ \
- 	-DEIGEN_INCLUDE_DIR=$LOAM_DIR/eigen3/include/eigen3/ \
+ 	-DEIGEN3_INCLUDE_DIR=$LOAM_DIR/eigen3/include/eigen3/ \
 	-DFLANN_INCLUDE_DIR=$LOAM_DIR/flann/include/ \
     -DPCL_INCLUDE_DIR=$LOAM_DIR/pcl/include/pcl-1.8/ \
     -DCERES_INCLUDE_DIR=$LOAM_DIR/ceres/include/ \
@@ -172,3 +172,8 @@ RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=$LOAM_DIR/" \
     -DCERES_LIBRARY_DIR=$LOAM_DIR/ceres/lib/ \
  	-DLIB_PATH="$LOAM_DIR/lib:$LOAM_DIR/pcl/lib:$LOAM_DIR/ceres/lib:$LOAM_DIR/flann/lib"
 RUN make -j$(expr $(nproc) - 2) && make install
+
+WORKDIR $LOAM_DIR
+RUN mkdir configs
+WORKDIR configs
+RUN mv /repos/aloam/configs/*.yaml .

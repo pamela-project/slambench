@@ -18,7 +18,7 @@
 #include <io/sensor/GroundTruthSensor.h>
 #include <io/format/PointCloud.h>
 #include <Eigen/Eigen>
-#include "opencv2/imgproc/imgproc.hpp"
+#include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
 #include <boost/filesystem.hpp>
@@ -423,52 +423,31 @@ bool loadKITTILidarData(const std::string &dirname,
             lidar_file_bin = dirname + "/velodyne_points/data/" + lidar_file_bin;
             lidar_index++;
 
-            float *data = new float[num_point * 4];
-            // pointers
-            float *px = data + 0;
-            float *py = data + 1;
-            float *pz = data + 2;
-            float *pr = data + 3;
-
             std::ifstream stream(lidar_file_bin.c_str(), std::ios::binary);
             if (!stream) {
                 std::cerr << "Failed to open the file.\n";
-                delete[] data;
                 return false;
             }
 
-            num_point = stream.read(reinterpret_cast<char*>(data), sizeof(float) * num_point * 4).gcount() / (sizeof(float) * 4);
+            // Get the size of the file
+            stream.seekg(0, std::ios::end);
+            size_t fileSize = stream.tellg();
+            stream.seekg(0, std::ios::beg);
+
+            std::vector<char> data_vector(fileSize);
+            stream.read(data_vector.data(), fileSize);
+            size_t actual_num_point = stream.gcount() / (sizeof(float) * 4);
             stream.close();
-
-            std::vector<Point> point_clouds;
-            point_clouds.reserve(num_point);
-
-            for (int32_t i = 0; i < num_point; i++) {
-                Eigen::Vector4f point_4d_eigen(*px, *py, *pz, 1.0);
-                // convert to rectified camera coordinates
-                point_4d_eigen = pose * point_4d_eigen;
-                Point point_3d(point_4d_eigen[0], point_4d_eigen[1], point_4d_eigen[2]);
-                point_clouds.emplace_back(point_3d);
-                px += 4; py += 4; pz += 4; pr += 4;
-            }
-
-            // free memory
-            delete[] data;
-
-            auto pc = new PointCloud();
-            pc->Get() = point_clouds;
-            std::vector<char> rawpointcloud = pc->ToRaw();
-            int num_bytes = rawpointcloud.size();
 
             auto lidar_frame = new SLAMInMemoryFrame();
             lidar_frame->FrameSensor = lidar_sensor;
             lidar_frame->Timestamp.S = timestampS;
             lidar_frame->Timestamp.Ns = timestampNS;
 
-            lidar_frame->Data = malloc(num_bytes);
-            lidar_frame->SetVariableSize(rawpointcloud.size());
-            std::copy(rawpointcloud.data(),
-                    rawpointcloud.data() + num_bytes,
+            lidar_frame->Data = malloc(data_vector.size());
+            lidar_frame->SetVariableSize(data_vector.size());
+            std::copy(data_vector.data(),
+                    data_vector.data() + data_vector.size(),
                     reinterpret_cast<char*>(lidar_frame->Data));
 
             file.AddFrame(lidar_frame);
@@ -789,12 +768,6 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
 
     // do not support unrectified and unsync imu and lidar data
     Sensor::pose_t pose_imu = imu_2_velo;
-    if (imu && grey) {
-        // to rectified camera coordinate if we use camera
-        std::cout << "IMU pose represents transformation of a point from IMU coordinates to rectified camera coordinate!" << std::endl;
-        pose_imu = R_rect_00 * velo_2_lgrey * imu_2_velo;
-        // pose_imu = Eigen::Matrix4f::Identity();
-    }
     if (imu && rect && !loadKITTIIMUData(dirname, slamfile, pose_imu)) {
         std::cout << "Error while loading IMU information." << std::endl;
         delete slamfilep;

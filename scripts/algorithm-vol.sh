@@ -97,22 +97,22 @@ case "$1" in
             --mount source=openvins-vol,destination=/deps/openvins \
             openvins-deps
         ;;
-    "loam")
-        echo "Select LOAM..."
+    "aloam")
+        echo "Select A-LOAM..."
         
-        # Build image for LOAM if choice is y
+        # Build image for A-LOAM if choice is y
         if [ "$CHOICE" = "y" ]; then
-            echo "Building the LOAM image..."
-            docker build -t loam-deps $PATH_DOCKERFILE/loam
+            echo "Building the A-LOAM image..."
+            docker build -t aloam-deps $PATH_DOCKERFILE/aloam
         else
             echo "No image build requested."
         fi
         
-        echo "Populate volume for LOAM.."
+        echo "Populate volume for A-LOAM.."
         docker run -d \
-            --name=loam \
-            --mount source=loam-vol,destination=/deps/loam \
-            loam-deps
+            --name=aloam \
+            --mount source=aloam-vol,destination=/deps/aloam \
+            aloam-deps
         ;;
     *)
         echo "Invalid algorithm!"
