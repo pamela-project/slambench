@@ -18,7 +18,7 @@ case "$1" in
         # Build image for KFusion if choice is y
         if [ "$CHOICE" = "y" ]; then
         	echo "Building the KFusion image..."
-        	docker build -t kfusion-deps $PATH_DOCKERFILE/kfusion
+        	docker build -t kfusion-img $PATH_DOCKERFILE/kfusion
     	else
     		echo "No image build requested."
     	fi
@@ -27,7 +27,7 @@ case "$1" in
         docker run -d \
             --name=kfusion \
             --mount source=kfusion-vol,destination=/deps/kfusion \
-            kfusion-deps
+            kfusion-img
         ;;
     "lsdslam")
         echo "Select LSD-SLAM..."
@@ -35,7 +35,7 @@ case "$1" in
         # Build image for LSD-SLAM if choice is y
         if [ "$CHOICE" = "y" ]; then
         	echo "Building the LSD-SLAM image..."
-    		docker build -t lsdslam-deps $PATH_DOCKERFILE/lsdslam
+    		docker build -t lsdslam-img $PATH_DOCKERFILE/lsdslam
     	else
     		echo "No image build requested."
     	fi
@@ -44,7 +44,7 @@ case "$1" in
     	docker run -d \
     		--name=lsdslam \
     		--mount source=lsdslam-vol,destination=/deps/lsdslam \
-    		lsdslam-deps
+    		lsdslam-img
         ;;
     "orbslam2")
         echo "Select ORB-SLAM2..."
@@ -52,7 +52,7 @@ case "$1" in
         # Build image for ORB-SLAM2 if choice is y
         if [ "$CHOICE" = "y" ]; then
             echo "Building the ORB-SLAM2 image..."
-            docker build -t orbslam2-deps $PATH_DOCKERFILE/orbslam2
+            docker build -t orbslam2-img $PATH_DOCKERFILE/orbslam2
         else
             echo "No image build requested."
         fi
@@ -61,7 +61,7 @@ case "$1" in
         docker run -d \
             --name=orbslam2 \
             --mount source=orbslam2-vol,destination=/deps/orbslam2 \
-            orbslam2-deps
+            orbslam2-img
         ;;
     "orbslam3")
         echo "Select ORB-SLAM3..."
@@ -69,7 +69,7 @@ case "$1" in
         # Build image for ORB-SLAM3 if choice is y
         if [ "$CHOICE" = "y" ]; then
             echo "Building the ORB-SLAM3 image..."
-            docker build -t orbslam3-deps $PATH_DOCKERFILE/orbslam3
+            docker build -t orbslam3-img $PATH_DOCKERFILE/orbslam3
         else
             echo "No image build requested."
         fi
@@ -78,7 +78,7 @@ case "$1" in
         docker run -d \
             --name=orbslam3 \
             --mount source=orbslam3-vol,destination=/deps/orbslam3 \
-            orbslam3-deps
+            orbslam3-img
         ;;
     "openvins")
         echo "Select Open-VINS..."
@@ -86,7 +86,7 @@ case "$1" in
         # Build image for Open-VINS if choice is y
         if [ "$CHOICE" = "y" ]; then
             echo "Building the Open-VINS image..."
-            docker build -t openvins-deps $PATH_DOCKERFILE/openvins
+            docker build -t openvins-img $PATH_DOCKERFILE/openvins
         else
             echo "No image build requested."
         fi
@@ -95,7 +95,7 @@ case "$1" in
         docker run -d \
             --name=openvins \
             --mount source=openvins-vol,destination=/deps/openvins \
-            openvins-deps
+            openvins-img
         ;;
     "aloam")
         echo "Select A-LOAM..."
@@ -103,7 +103,7 @@ case "$1" in
         # Build image for A-LOAM if choice is y
         if [ "$CHOICE" = "y" ]; then
             echo "Building the A-LOAM image..."
-            docker build -t aloam-deps $PATH_DOCKERFILE/aloam
+            docker build -t aloam-img $PATH_DOCKERFILE/aloam
         else
             echo "No image build requested."
         fi
@@ -112,7 +112,24 @@ case "$1" in
         docker run -d \
             --name=aloam \
             --mount source=aloam-vol,destination=/deps/aloam \
-            aloam-deps
+            aloam-img
+        ;;
+    "legoloam")
+        echo "Select LeGO-LOAM..."
+        
+        # Build image for LeGO-LOAM if choice is y
+        if [ "$CHOICE" = "y" ]; then
+            echo "Building the LeGO-LOAM image..."
+            docker build -t legoloam-img $PATH_DOCKERFILE/legoloam
+        else
+            echo "No image build requested."
+        fi
+        
+        echo "Populate volume for LeGO-LOAM.."
+        docker run -d \
+            --name=legoloam \
+            --mount source=legoloam-vol,destination=/deps/legoloam \
+            legoloam-img
         ;;
     *)
         echo "Invalid algorithm!"
