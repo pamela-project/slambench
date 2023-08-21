@@ -139,6 +139,13 @@ IF (OpenCV_FOUND)
 	target_include_directories(KITTI PRIVATE ${Boost_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 endif ()
 
+find_package(PCL QUIET)
+IF (PCL_FOUND)
+	add_library(NSH NSH.cpp)
+	target_link_libraries(NSH slambench-io ${PCL_LIBRARIES})
+	target_include_directories(NSH PRIVATE ${Boost_INCLUDE_DIRS} ${PCL_INCLUDE_DIRS})
+endif ()
+
 # if all dependencies found add TUM-ROSBAG target
 IF (OpenCV_FOUND AND ROSPKGS_FOUND)
 	add_library(TUM-ROSBAG TUM-ROSBAG.cpp)
@@ -159,4 +166,4 @@ IF (OpenCV_FOUND AND ROSPKGS_FOUND)
 endif ()
 
 add_executable(dataset-generator dataset-generator.cpp)
-target_link_libraries(dataset-generator KITTI TUM UZHFPV ICLNUIM ICL ETHI BONN VolumeDeform ${OpenLORIS_LIB} ${UZHFPV_LIB} ${EUROCMAV_LIB} SVO ${TUM-ROSBAG_LIB})
+target_link_libraries(dataset-generator KITTI NSH TUM UZHFPV ICLNUIM ICL ETHI BONN VolumeDeform ${OpenLORIS_LIB} ${UZHFPV_LIB} ${EUROCMAV_LIB} SVO ${TUM-ROSBAG_LIB})

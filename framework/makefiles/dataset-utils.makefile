@@ -72,6 +72,21 @@ datasets/OpenLORIS/%.all :
 	./build/bin/dataset-generator -d kitti -i $< -o $@
 
 
+#### NSH ####
+./datasets/NSH/nsh_indoor_and_outdoor.zip :
+	mkdir -p $(@D)
+	cd $(@D) && ${WGET} --load-cookies /tmp/cookies.txt "https://drive.google.com/uc?export=download&confirm=$(${WGET} --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://drive.google.com/uc?export=download&id=1s1MfoRyqfsG7h8TZCAyB42125BGuA6kE' -O- | sed -rn 's/.confirm=([0-9A-Za-z_]+)./\1\n/p')&id=1s1MfoRyqfsG7h8TZCAyB42125BGuA6kE" -O nsh_indoor_and_outdoor.zip && rm -rf /tmp/cookies.txt
+
+
+./datasets/NSH/nsh_indoor_and_outdoor.dir : ./datasets/NSH/nsh_indoor_and_outdoor.zip
+	mkdir $@
+	unzip $< -d $@
+
+./datasets/NSH/nsh_indoor_and_outdoor.slam : ./datasets/NSH/nsh_indoor_and_outdoor.dir
+	${check_generator}
+	./build/bin/dataset-generator -d nsh -i $< -o $@
+
+
 #### TUM ####
 # check if using tgz file or rosbag
 ifeq (TUM, $(findstring TUM, $(MAKECMDGOALS)))

@@ -390,6 +390,7 @@ bool loadKITTILidarData(const std::string &dirname,
     lidar_sensor->CopyPose(pose);
 
     file.Sensors.AddSensor(lidar_sensor);
+    std::cout << "Lidar sensor created ..." << std::endl;
 
     std::string line;
     std::ifstream infile(dirname + "/velodyne_points/timestamps.txt");
