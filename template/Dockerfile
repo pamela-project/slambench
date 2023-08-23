@@ -9,6 +9,8 @@ ENV ALG_DIR=/deps/algorithm-name
 RUN apt-get -y update && apt-get -y upgrade
 RUN apt-get -y install git
 RUN apt-get -y install g++
+RUN apt-get -y install wget
+RUN apt-get -y install unzip
 RUN apt-get -y install cmake
 # Boost is commonly used
 RUN apt-get -y install libboost-all-dev
