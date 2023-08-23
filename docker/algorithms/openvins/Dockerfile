@@ -75,5 +75,3 @@ RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=$OPENVINS_DIR/" \
 	-DSLAMBENCH_INCLUDE_DIRS=/repos/slambench/framework/shared/include/ \
 	-DLIB_PATH="$OPENVINS_DIR/lib:$OPENVINS_DIR/opencv/lib"
 RUN make -j$(expr $(nproc) - 2) && make install
-
-
