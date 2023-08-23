@@ -12,9 +12,9 @@ RUN apt-get -y install g++
 RUN apt-get -y install cmake
 # Boost is commonly used
 RUN apt-get -y install libboost-all-dev
-# Required by suitesparse
+# Required by Suitesparse
 RUN apt-get -y install gfortran libblas-dev liblapack-dev
-# Required by ceres
+# Required by Ceres
 RUN apt-get -y install libgoogle-glog-dev
 
 
@@ -160,6 +160,7 @@ RUN make install
 
 # ========== <PCL 1.8> ==========
 # Requires: <Flann>
+RUN apt-get -y install libboost-all-dev freeglut3 freeglut3-dev libglew-dev libglu1-mesa libglu1-mesa-dev libgl1-mesa-glx libgl1-mesa-dev
 WORKDIR /repos
 RUN git clone https://github.com/PointCloudLibrary/pcl.git pcl
 WORKDIR pcl
