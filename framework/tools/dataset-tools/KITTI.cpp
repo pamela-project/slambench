@@ -390,7 +390,7 @@ bool loadKITTILidarData(const std::string &dirname,
     lidar_sensor->CopyPose(pose);
 
     file.Sensors.AddSensor(lidar_sensor);
-    std::cout << "Lidar sensor created ..." << std::endl;
+    std::cout << "LiDAR sensor created..." << std::endl;
 
     std::string line;
     std::ifstream infile(dirname + "/velodyne_points/timestamps.txt");
@@ -669,7 +669,7 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
     // Check the raw data type
     if (d_origin == KITTIReader::DatasetOrigin::RD11_09_30) {
 
-        std::cout << "using unrectified parameter from 2011-09-30" << std::endl;
+        std::cout << "Using unrectified parameter from 2011-09-30" << std::endl;
         get_params(cam_intrinsics_lgrey, cam_intrinsics_rgrey, cam_intrinsics_lrgb, cam_intrinsics_rrgb,
                     cam_distortion_type, cam_distortion_lgrey, cam_distortion_rgrey, cam_distortion_lrgb, cam_distortion_rrgb);
         pose_rgrey << 9.993424e-01,  1.830363e-02, -3.129928e-02, -5.370000e-01,  
@@ -694,7 +694,7 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
 
     } else if (d_origin == KITTIReader::DatasetOrigin::RD11_09_30_RECT) {
 
-        std::cout << "using rectified parameter from 2011-09-30" << std::endl;
+        std::cout << "Using rectified parameter from 2011-09-30" << std::endl;
         get_params(cam_intrinsics_lgrey, cam_intrinsics_rgrey, cam_intrinsics_lrgb, cam_intrinsics_rrgb,
                     cam_distortion_type, cam_distortion_lgrey, cam_distortion_rgrey, cam_distortion_lrgb, cam_distortion_rrgb);
 
@@ -769,21 +769,19 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
 
     // do not support unrectified and unsync imu and lidar data
     Sensor::pose_t pose_imu = imu_2_velo;
-    if (imu && rect && !loadKITTIIMUData(dirname, slamfile, pose_imu)) {
+    if (imu && !loadKITTIIMUData(dirname, slamfile, pose_imu)) {
         std::cout << "Error while loading IMU information." << std::endl;
         delete slamfilep;
         return nullptr;
     }
 
-    Sensor::pose_t pose_lidar = Eigen::Matrix4f::Identity();
-    // TODO: seems problematic if convert th lidar points to camera coordinates.
-    // Sensor::pose_t pose_lidar = velo_2_lgrey;
-    // if (lidar && grey) {
-    //     std::cout << "Lidar pose represents transformation of a point from Lidar coordinates to rectified camera coordinate!" << std::endl;
-    //     pose_lidar = R_rect_00 * velo_2_lgrey;
-    // }
-    if (lidar && rect && !loadKITTILidarData(dirname, slamfile, pose_lidar)) {
-        std::cout << "Error while loading Lidar information." << std::endl;
+    Sensor::pose_t pose_lidar = velo_2_lgrey;
+    if (lidar && rect) {
+        std::cout << "LiDAR pose represents transformation of a point from LiDAR coordinates to rectified camera coordinate!" << std::endl;
+        pose_lidar = R_rect_00 * velo_2_lgrey;
+    }
+    if (lidar && !loadKITTILidarData(dirname, slamfile, pose_lidar)) {
+        std::cout << "Error while loading LiDAR information." << std::endl;
         delete slamfilep;
         return nullptr;
     }

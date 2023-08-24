@@ -128,7 +128,7 @@ namespace slambench {
                             CameraSensor::distortion_coefficients_t &cam_distortion_rrgb) {
                 if (input.find("2011_09_30") != std::string::npos && input.find("sync") == std::string::npos) {
                     
-                    std::cout << "loading params of unrectified 2011_09_30 ..." << std::endl;
+                    std::cout << "Loading params of unrectified 2011_09_30..." << std::endl;
                     for (uint32_t i = 0; i < 4; i++) {
                         cam_intrinsics_lgrey[i] = intrinsics_110930_lgrey[i];
                         cam_intrinsics_rgrey[i] = intrinsics_110930_rgrey[i];
@@ -146,7 +146,7 @@ namespace slambench {
 
                 } else if (input.find("2011_09_30") != std::string::npos && input.find("sync") != std::string::npos) {
                     
-                    std::cout << "loading params of rectified 2011_09_30 ..." << std::endl;
+                    std::cout << "Loading params of rectified 2011_09_30..." << std::endl;
                     for (uint32_t i = 0; i < 4; i++) {
                         cam_intrinsics_lgrey[i] = intrinsics_110930_rect[i];
                         cam_intrinsics_rgrey[i] = intrinsics_110930_rect[i];
