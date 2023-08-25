@@ -95,28 +95,29 @@ RUN mv null.cpp $ALG_DIR/wrapper
 WORKDIR /repos
 RUN git clone --recursive https://github.com/username/algorithm.git algorithm-name
 
-## "-DCMAKE_INSTALL_PREFIX:PATH=$ALG_DIR/"
+## [ -DCMAKE_INSTALL_PREFIX:PATH=$ALG_DIR/" ]
 ### depends on how you write the CMakeLists.txt of the algorithm
 ### if you have 'install(TARGETS algorithm-library  DESTINATION  lib/)',
 ### then 'libalgorithm-library.so' will be install at $ALG_DIR/lib/
 
-## "-DLIB_PATH="$ALG_DIR/lib:$ALG_DIR/ceres/lib"
+## [ -DLIB_PATH="\$ORIGIN:\$ORIGIN/../ceres/lib" ]
+### $ORIGIN is the location of algorithms library
 ### specify the path to 'lib' directory of dependencies, so generated library knows where to find the linked libraries.
 
 ### In CMakeList.txt, you would need:
 ### SET_TARGET_PROPERTIES(${library_name}-library PROPERTIES LINK_FLAGS "-Wl,--disable-new-dtags")
-### SET_TARGET_PROPERTIES(${library_name}-library PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "${LIB_PATH}")
+### SET_TARGET_PROPERTIES(${library_name}-library PROPERTIES INSTALL_RPATH "${LIB_PATH}")
 
 WORKDIR algorithm-name
 RUN mkdir build
 WORKDIR build
 RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=$ALG_DIR/" \
- 	-DWRAPPER_PATH=$ALG_DIR/wrapper/ \
-   -DSLAMBENCH_INCLUDE_DIR=/repos/slambench/framework/shared/include/ \
- 	-DEIGEN3_INCLUDE_DIR=$ALG_DIR/eigen3/include/eigen3/ \
-   -DCERES_INCLUDE_DIR=$ALG_DIR/ceres/include/ \
-   -DCERES_LIBRARY_DIR=$ALG_DIR/ceres/lib/ \
- 	-DLIB_PATH="$ALG_DIR/lib:$ALG_DIR/ceres/lib"
+	-DWRAPPER_PATH=$ALG_DIR/wrapper/ \
+	-DSLAMBENCH_INCLUDE_DIR=/repos/slambench/framework/shared/include/ \
+	-DEIGEN3_INCLUDE_DIR=$ALG_DIR/eigen3/include/eigen3/ \
+	-DCERES_INCLUDE_DIR=$ALG_DIR/ceres/include/ \
+	-DCERES_LIBRARY_DIR=$ALG_DIR/ceres/lib/ \
+	-DLIB_PATH="\$ORIGIN:\$ORIGIN/../ceres/lib"
 RUN make -j$(expr $(nproc) - 2) && make install
 
 

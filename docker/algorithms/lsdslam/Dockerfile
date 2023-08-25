@@ -129,5 +129,5 @@ RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=$LSD_DIR/" \
 	-DG2O_SOLVER_CSPARSE_EXTENSION=$LSD_DIR/g2o/lib/libg2o_csparse_extension.so \
 	-DG2O_STUFF_LIBRARY=$LSD_DIR/g2o/lib/libg2o_stuff.so \
 	-DCSPARSE_LIBRARY=$LSD_DIR/suitesparse/lib/libcxsparse.a \
-	-DLIB_PATH="$LSD_DIR/lib:$LSD_DIR/opencv/lib:$LSD_DIR/g2o/lib:$LSD_DIR/pangolin/lib:$LSD_DIR/suitesparse/lib"
+	-DLIB_PATH="\$ORIGIN:\$ORIGIN/../opencv/lib:\$ORIGIN/../g2o/lib:\$ORIGIN/../pangolin/lib:\$ORIGIN/../suitesparse/lib"
 RUN make -j$(expr $(nproc) - 2) && make install

@@ -100,7 +100,7 @@ RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=$ORB3_DIR/" \
 	-DPangolin_INCLUDE_DIRS=$ORB3_DIR/pangolin/include/ \
 	-DSLAMBENCH_INCLUDE_DIRS=/repos/slambench/framework/shared/include/ \
 	-DPangolin_LIBRARIES=$ORB3_DIR/pangolin/lib/libpangolin.so \
-	-DLIB_PATH="$ORB3_DIR/lib:$ORB3_DIR/pangolin/lib:$ORB3_DIR/opencv/lib:$ORB3_DIR/DBoW2:$ORB3_DIR/g2o"
+	-DLIB_PATH="\$ORIGIN:\$ORIGIN/../pangolin/lib:\$ORIGIN/../opencv/lib:\$ORIGIN/../DBoW2:\$ORIGIN/../g2o"
 RUN make -j$(expr $(nproc) - 2) && make install
 
 # Move the vocabulary file

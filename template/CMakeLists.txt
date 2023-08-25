@@ -76,7 +76,7 @@ function(generate_slam_library library_name )
     SET_TARGET_PROPERTIES(${library_name}-library PROPERTIES LINK_FLAGS "${ARGN}")
     # ${LIB_PATH} specify the path to library directory of dependencies
     # therefore, this path is embedded into ${library_name}-library, liblegoloam-original-library.so in this case.
-    SET_TARGET_PROPERTIES(${library_name}-library PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE INSTALL_RPATH "${LIB_PATH}")
+    SET_TARGET_PROPERTIES(${library_name}-library PROPERTIES INSTALL_RPATH "${LIB_PATH}")
     install(TARGETS ${library_name}-library  DESTINATION  lib/)
 
 endfunction()

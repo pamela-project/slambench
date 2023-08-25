@@ -170,7 +170,7 @@ RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=$LOAM_DIR/" \
 	-DFLANN_LIBRARY_DIR=$LOAM_DIR/flann/lib/ \
     -DPCL_LIBRARY_DIR=$LOAM_DIR/pcl/lib/ \
     -DCERES_LIBRARY_DIR=$LOAM_DIR/ceres/lib/ \
- 	-DLIB_PATH="$LOAM_DIR/lib:$LOAM_DIR/pcl/lib:$LOAM_DIR/ceres/lib:$LOAM_DIR/flann/lib"
+ 	-DLIB_PATH="\$ORIGIN:\$ORIGIN/../pcl/lib:\$ORIGIN/../ceres/lib:\$ORIGIN/../flann/lib"
 RUN make -j$(expr $(nproc) - 2) && make install
 
 WORKDIR $LOAM_DIR
