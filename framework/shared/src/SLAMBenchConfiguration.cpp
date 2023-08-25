@@ -47,6 +47,7 @@
 #include <unistd.h>
 #include <memory>
 #include <assert.h>
+#include <iomanip>
 
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -68,6 +69,7 @@ SLAMBenchConfiguration::SLAMBenchConfiguration(void (*custom_input_callback)(Par
     addParameter(TypedParameter<std::string>("o", "log-file", "Output log file", &log_file_, &default_log_file, log_callback));
     addParameter(TypedParameter<std::vector<std::string>>("i", "input" , "Specify the input file or mode." , &input_files_, &default_input_files , custom_input_callback));
     addParameter(TypedParameter<std::vector<std::string> >("load", "load-slam-library" , "Load a specific SLAM library."     , &slam_library_names_, &default_slam_libraries, libs_callback));
+    addParameter(TypedParameter<std::string>("sgt", "save-groundtruth", "Output groundtruth file", &save_groundtruth_file_, &default_save_groundtruth_file));
     addParameter(TriggeredParameter("dse",   "dse",    "Output solution space of parameters.",    dse_callback));
     addParameter(TriggeredParameter("h",     "help",   "Print the help.", help_callback));
     addParameter(TypedParameter<bool>("realtime",     "realtime-mode",      "realtime frame loading mode",                   &realtime_mode_, &default_is_false));
@@ -149,6 +151,9 @@ void SLAMBenchConfiguration::InitGroundtruth(bool with_point_cloud) {
 
         ground_truth_.LoadGTOutputsFromSLAMFile(interface->GetSensors(), gt_buffering_stream->GetGTFrames(), with_point_cloud);
     }
+
+    if (!save_groundtruth_file_.empty())
+        SaveGroundTruth();
 
     auto gt_trajectory = ground_truth_.GetMainOutput(slambench::values::VT_POSE);
     if(gt_trajectory == nullptr) {
@@ -403,6 +408,32 @@ void SLAMBenchConfiguration::SaveResults()
         writer.WriteTrajectory(traj);
         std::cout << "Ground-truth saved into " << gt_file.string() << std::endl;
     }
+}
+
+void SLAMBenchConfiguration::SaveGroundTruth() {
+
+    slambench::outputs::BaseOutput::value_map_t traj = GetGroundTruth().GetMainOutput(slambench::values::VT_POSE)->GetValues();
+    std::ofstream out(save_groundtruth_file_);
+
+    for (const auto& pair : traj) {
+        slambench::outputs::BaseOutput::timestamp_t timestamp = pair.first;
+        const slambench::values::Value* value = pair.second;
+        const slambench::values::PoseValue* poseValuePtr = dynamic_cast<const slambench::values::PoseValue*>(value);
+
+        if (poseValuePtr) {
+            // Get the matrix
+            Eigen::Matrix4f mat = poseValuePtr->GetValue();
+
+            // Write matrix to the file as a single line of 16 numbers
+            for (int row = 0; row < 4; ++row) {
+                for (int col = 0; col < 4; ++col) {
+                    out << mat(row, col) << (col == 3 && row == 3 ? "\n" : " ");
+                }
+            }
+        }
+    }
+    out.close();
+    std::cout << "Ground-truth saved into " << save_groundtruth_file_ << std::endl;
 }
 
 void SLAMBenchConfiguration::InitWriter() {

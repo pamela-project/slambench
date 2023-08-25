@@ -161,9 +161,9 @@ RUN mv null.cpp $ALG_DIR/wrapper
 
 # ====== <LeGO-LOAM> ======
 WORKDIR /repos
-RUN git clone --recursive --branch slambench https://github.com/yuhaozhang7/LeGO-LOAM.git legoloam2
+RUN git clone --recursive --branch slambench https://github.com/yuhaozhang7/LeGO-LOAM.git legoloam
 
-WORKDIR /repos/legoloam2/LeGO-LOAM-NoROS
+WORKDIR /repos/legoloam/LeGO-LOAM-NoROS
 RUN mkdir build
 WORKDIR build
 RUN cmake .. "-DCMAKE_INSTALL_PREFIX:PATH=$ALG_DIR/" \
@@ -186,4 +186,4 @@ RUN make -j$(expr $(nproc) - 2) && make install
 WORKDIR $ALG_DIR
 RUN mkdir configs
 WORKDIR configs
-RUN mv /repos/legoloam2/LeGO-LOAM-NoROS/configs/*.yaml .
+RUN mv /repos/legoloam/LeGO-LOAM-NoROS/configs/*.yaml .
