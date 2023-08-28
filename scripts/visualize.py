@@ -28,8 +28,10 @@ def extract_result_from_file(filename):
     abs_errors = []
     ori_errors = []
     duration_frames = []
-    meanATE, maxATE, RPE_RMSE = 0, 0, 0
+    meanATE, maxATE, RPE_RMSE = -1, -1, -1
     cpu_memory, gpu_memory = 0, 0
+
+    has_accuracy = False
 
     # Loop through each line in the file
     idx = 0
@@ -39,15 +41,16 @@ def extract_result_from_file(filename):
         # If the line contains "Frame Number", it's the header
         if "Frame Number" in line:
             # Get the indices of X, Y, Z from the header
-            x_idx, y_idx, z_idx = parts.index("X"), parts.index("Y"), parts.index("Z")
-            abs_error_idx, ori_error_idx = parts.index("AbsoluteError"), parts.index("OrientationError")
-            duration_frame_idx = parts.index("Duration_Frame")
-            meanATE_idx, maxATE_idx, RPE_RMSE_idx = parts.index("MeanATE"), parts.index("MaxATE"), parts.index("RPE_RMSE")
-            cpu_memory_idx, gpu_memory_idx = parts.index("CPU_Memory"), parts.index("GPU_Memory")
+            values_to_check = ["AbsoluteError", "OrientationError", "MeanATE", "MaxATE", "RPE_RMSE"]
+            has_accuracy = all(value in parts for value in values_to_check)
 
-            if 0 in [x_idx, y_idx, z_idx, abs_error_idx, ori_error_idx, duration_frame_idx, meanATE_idx, maxATE_idx, RPE_RMSE_idx, cpu_memory_idx, gpu_memory_idx]:
-                print("Invalid index to one of the metrics")
-                return []
+            if has_accuracy:
+                abs_error_idx, ori_error_idx = parts.index("AbsoluteError"), parts.index("OrientationError")
+                meanATE_idx, maxATE_idx, RPE_RMSE_idx = parts.index("MeanATE"), parts.index("MaxATE"), parts.index("RPE_RMSE")
+
+            x_idx, y_idx, z_idx = parts.index("X"), parts.index("Y"), parts.index("Z")
+            duration_frame_idx = parts.index("Duration_Frame")
+            cpu_memory_idx, gpu_memory_idx = parts.index("CPU_Memory"), parts.index("GPU_Memory")
 
             continue
         
@@ -59,13 +62,13 @@ def extract_result_from_file(filename):
             x, y, z = parts[x_idx], parts[y_idx], parts[z_idx]
             poses.append((x, y, z))
 
-            abs_error, ori_error = float(parts[abs_error_idx]), float(parts[ori_error_idx])
-            abs_errors.append(abs_error)
-            ori_errors.append(ori_error)
+            if has_accuracy:
+                abs_error, ori_error = float(parts[abs_error_idx]), float(parts[ori_error_idx])
+                abs_errors.append(abs_error)
+                ori_errors.append(ori_error)
+                meanATE, maxATE, RPE_RMSE = float(parts[meanATE_idx]), float(parts[maxATE_idx]), float(parts[RPE_RMSE_idx])
 
             duration_frames.append(float(parts[duration_frame_idx]))
-
-            meanATE, maxATE, RPE_RMSE = float(parts[meanATE_idx]), float(parts[maxATE_idx]), float(parts[RPE_RMSE_idx])
             cpu_memory, gpu_memory = float(parts[cpu_memory_idx]), float(parts[gpu_memory_idx])
 
         else:
@@ -303,15 +306,20 @@ def main():
         # For visualization, the base name of the file can be used as a label 
         algo_names.append(os.path.basename(filepath).split('_')[0])
 
+    # ===== Plot the figure ======
     if args.groundtruth:
         visualize_coordinates(poses_list, ["GroundTruth"] + algo_names)
     else:
         visualize_coordinates(poses_list, algo_names)
 
-    # visualize_metrices(abs_errors_list, algo_names, "Absolute Error")
-    # visualize_metrices(ori_errors_list, algo_names, "Orientation Error")
+    # if abs_errors_list[0] != [] and ori_errors_list[0] != []:
+    #     visualize_metrices(abs_errors_list, algo_names, "Absolute Error")
+    #     visualize_metrices(ori_errors_list, algo_names, "Orientation Error")
+
     visualize_metrices(duration_frames_list, algo_names, "Duration Frame")
-    visualize_bar_graph(meanATE_list, maxATE_list, RPE_RMSE_list, algo_names)
+
+    if meanATE_list[0] != -1 and maxATE_list[0] != -1 and RPE_RMSE_list[0] != -1:
+        visualize_bar_graph(meanATE_list, maxATE_list, RPE_RMSE_list, algo_names)
 
     # ===== Save result in txt file ======
     if args.output_folder:
