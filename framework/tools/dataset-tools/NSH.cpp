@@ -52,7 +52,7 @@ bool loadNSHLidarData(const std::string &dirname,
     lidar_sensor->BeamNum = 16;
 
     file.Sensors.AddSensor(lidar_sensor);
-    std::cout << "Lidar sensor created ..." << std::endl;
+    std::cout << "Lidar sensor created..." << std::endl;
 
     std::string line;
     std::ifstream infile(dirname + "/timestamp.txt");

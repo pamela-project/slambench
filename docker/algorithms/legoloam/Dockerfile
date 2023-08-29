@@ -7,7 +7,7 @@ ENV ALG_DIR=/deps/legoloam
 RUN apt-get -y update && apt-get -y upgrade
 RUN apt-get -y install git
 RUN apt-get -y install g++
-RUN apt-get -y install wget
+RUN apt-get -y install curl
 RUN apt-get -y install unzip
 RUN apt-get -y install cmake
 RUN apt-get -y install libboost-all-dev
@@ -44,7 +44,7 @@ RUN make -j$(expr $(nproc) - 2) && make install
 
 # ===== <GTSAM> =====
 WORKDIR /repos
-RUN wget -O gtsam.zip https://github.com/borglab/gtsam/archive/4.0.0-alpha2.zip
+RUN curl -L -o gtsam.zip https://github.com/borglab/gtsam/archive/4.0.0-alpha2.zip
 RUN unzip gtsam.zip
 
 # Build gtsam
