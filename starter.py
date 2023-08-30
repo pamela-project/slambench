@@ -3,9 +3,28 @@ import sys
 import os
 import platform
 import argparse 
+import subprocess
+
+
+def build_handle():
+    try:
+        output = subprocess.check_output("docker pull slambench/main ", shell=True, text=True)
+    except:
+        print("Image download Failed...")
+    images = subprocess.check_output("docker images", shell=True, text=True)
+    if "slambench/main" not in images:
+        print("Seems like download failed, cannot find image. Build starting ...")
+        current_directory = os.getcwd()
+        if current_directory.endswith("/slambench"):
+            os.system("docker build . -t slambench/main")
+        else: 
+            os.system("git clone https://github.com/nikolaradulov/slambench.git")     
+            os.system("docker build ./slambench -t slambench/main")
+    else:
+        print("A version of the container is already present on host and it shall be used. Alternatively the image can manually be build by \'docker build <path to Dockerfile -t slambench/main\'")
 
 def is_wsl():
-    return "Microsoft" in platform.uname().release
+    return "microsoft" in platform.uname().release
 
 def print_usage():
     print("Usage: {} <mode> [options]".format(sys.argv[0]))
@@ -37,14 +56,11 @@ def dataset_handle(run_type, vol_name, dataset):
             sys.exit(1)
         return f"docker run --mount source={vol_name},destination=/slambench/datasets slambench/main --dataset {dataset}"
 
-def run_handle(mode, volumes, files, paths):
+def run_handle(mode, volumes, files, paths, save, extra):
     """
         The function handles the running options of the tool. 
     """
 
-    # mode = sys.argv[2]
-    # file = sys.argv[3]
-    # paths = sys.argv[4:]
     if not mode.startswith('interactive'):
         if volumes is None or files is None or paths is None:
             print(f"{sys.argv[0]} {mode}: error: the following arguments are required -dv/--dataset_volume, -d/--dataset, -a/--algorithm")
@@ -65,9 +81,10 @@ def run_handle(mode, volumes, files, paths):
         volumes.append("{}-vol".format(names[0]))
         end += "{} ".format('/deps/'+names[0]+'/lib/'+names[1])
 
-    print(end)
-    print(volumes)
-
+    if len(extra)!=0:
+        for val in extra:
+            end += f" {val}"
+    
     # Mount volumes in the Docker container
     for volume in volumes:
         # Remove the 'vol' suffix
@@ -104,7 +121,20 @@ def run_handle(mode, volumes, files, paths):
 
     print("Starting Docker container: {}".format(container_name))
     # print("Command: {}".format(docker_run_command))
-
+    
+    # save the config file from the provided settings
+    if save is not None: 
+        config = configparser.ConfigParser()
+        config['DEFAULT']={'Mode':mode}
+        config['DATASET']={'Volume':volume,
+                            'Path': files}
+        counter =1
+        for path in paths:
+            names = path.split('/')
+            config['ALGORITHM'+str(counter)]={'Volume': names[0],
+                                              'Implentation': path}
+        with open(save, 'w') as configfile:
+            config.write(configfile)
     return docker_run_command
 
 def main():
@@ -118,11 +148,11 @@ def main():
     run_parser.add_argument("-d", "--dataset",nargs=1,  type=str, help="Specify the dataset file to be used")
     run_parser.add_argument("-a","--algorithm", nargs="*", help="Specify algorithms to be used. Must be of the form <algorithm_name>/<library_name>. Refer to the wiki for more information.")
     run_parser.add_argument("-t", "--type", choices=['cli', 'gui', 'interactive-cli', 'interactive-gui'], required=True)
-    
+    run_parser.add_argument("-s","--save_config",  help="Save current configuration to config file")
+    run_parser.add_argument("slamopt", nargs="*")
     
 
-    build_parser = subparsers.add_parser("build", help="Running the tool in build mode")
-    build_parser.add_argument("build_option", choices=["download", "build"], help="Download or build the container for SLAMBench.")
+    build_parser = subparsers.add_parser("install", help="Downloads the main container/builds it")
     
     
 
@@ -133,9 +163,11 @@ def main():
     
     args = parser.parse_args()
     if args.mode == "run":
-        docker_run_command = run_handle(args.type, args.dataset_volume, args.dataset, args.algorithm)
-    elif args.mode == "build":
-        docker_run_command = build_handle(args.build_option)
+        # get the arguments after the separator
+        docker_run_command = run_handle(args.type, args.dataset_volume, args.dataset, args.algorithm, args.save_config, args.slamopt)
+    elif args.mode == "install":
+        docker_run_command = build_handle()
+        sys.exit(0)
     elif args.mode == "dataset": 
         docker_run_command = dataset_handle(args.type, args.volume_name, args.dataset)
     else:
