@@ -36,6 +36,153 @@
 
 using namespace slambench::io;
 
+bool loadNewerGreyData(const std::string &dirname,
+                      SLAMFile &file,
+                      const float rate,
+                      const int width,
+                      const int height,
+                      const Sensor::pose_t &pose,
+                      const CameraSensor::intrinsics_t &intrinsics,
+                      const CameraSensor::distortion_type_t &distortion_type,
+                      const CameraSensor::distortion_coefficients_t &distortion) {
+    
+    auto grey_sensor = GreySensorBuilder()
+            .rate(rate)
+            .size(width, height)
+            .pose(pose)
+            .intrinsics(intrinsics)
+            .distortion(distortion_type, distortion)
+            .index(file.Sensors.size())
+            .build();
+    
+    file.Sensors.AddSensor(grey_sensor);
+
+    boost::regex image_pattern("infra[12]_(\\d+)_(\\d+).png");
+    boost::smatch match;
+
+    boost::filesystem::directory_iterator end_itr; // Default constructor yields past-the-end
+    for (boost::filesystem::directory_iterator itr(dirname); itr != end_itr; ++itr) {
+
+        if (boost::filesystem::is_regular_file(itr->status()) && itr->path().extension() == ".png") {
+
+            std::string filename = itr->path().filename().string();
+
+            if (boost::regex_match(filename, match, image_pattern)) {
+                int timestampS = std::stoi(match[1].str());
+                int timestampNS = std::stoi(match[2].str());
+
+                auto grey_frame = new ImageFileFrame();
+                grey_frame->FrameSensor = grey_sensor;
+                grey_frame->Timestamp.S = timestampS;
+                grey_frame->Timestamp.Ns = timestampNS;
+
+                std::string grey_filename = itr->path().string();
+
+                grey_frame->filename = grey_filename;
+
+                if (access(grey_frame->filename.c_str(), F_OK) < 0) {
+                    printf("No Grey image for frame (%s)\n", grey_filename.c_str());
+                    perror("");
+                    return false;
+                }
+
+                file.AddFrame(grey_frame);
+            } else {
+                std::cerr << "Unknown file:" << itr->path().filename() << std::endl;
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+
+bool loadNewerLidarIMUData(const std::string &dirname, SLAMFile &file) {
+
+    auto imu_sensor = new IMUSensor(dirname);
+    imu_sensor->Index = file.Sensors.size();
+    imu_sensor->Description = "Ouster IMU";
+    imu_sensor->Rate = 10.0;  // originally is 100Hz, sync to 10 to match lidar frequency.
+
+    imu_sensor->GyroscopeNoiseDensity = 0.000208;
+    imu_sensor->GyroscopeDriftNoiseDensity = 4.0e-6;
+    imu_sensor->GyroscopeBiasDiffusion = 0.000004;
+    imu_sensor->GyroscopeSaturation = 7.8;
+
+    imu_sensor->AcceleratorNoiseDensity = 0.001249;
+    imu_sensor->AcceleratorDriftNoiseDensity = 4.0e-5;
+    imu_sensor->AcceleratorBiasDiffusion = 0.000106;
+    imu_sensor->AcceleratorSaturation = 176.0;
+
+    std::string line;
+
+    boost::smatch match;
+    std::ifstream infile(dirname + "/" + "ouster_imu.csv");
+
+    const std::string& num = RegexPattern::number;
+    const std::string& start = RegexPattern::start;
+    const std::string& end = RegexPattern::end;
+
+    // new format: #counter, sec, nansec, wx, wy, wz, ax, ay, az
+    std::string expr = start
+        + num + ","             // counter
+        + num + ","             // sec
+        + num + ","             // nsec
+        + num + ","             // wx
+        + num + ","             // wy
+        + num + ","             // wz
+        + num + ","             // ax
+        + num + ","             // ay
+        + num + "\\s*"          // az
+        + end;
+
+    boost::regex imu_line = boost::regex(expr);
+    boost::regex comment = boost::regex(RegexPattern::comment);
+
+    
+    bool is_first_pose = true;
+    while (std::getline(infile, line)) {
+        if (line.empty()) {
+            continue;
+        } else if (boost::regex_match(line, match, comment)) {
+            continue;
+        } else if (boost::regex_match(line, match, imu_line)) {
+
+            int timestampS = std::stoi(match[2]);
+            int timestampNS = std::stoi(match[3]);
+
+            float wx = std::stof(match[4]);
+            float wy = std::stof(match[5]);
+            float wz = std::stof(match[6]);
+            float ax = std::stof(match[7]);
+            float ay = std::stof(match[8]);
+            float az = std::stof(match[9]);
+
+            auto IMU_frame = new SLAMInMemoryFrame();
+            IMU_frame->FrameSensor = imu_sensor;
+            IMU_frame->Timestamp.S = timestampS;
+            IMU_frame->Timestamp.Ns = timestampNS;
+            IMU_frame->Data = malloc(imu_sensor->GetFrameSize(IMU_frame));
+
+            ((float *)IMU_frame->Data)[0] = wx;
+            ((float *)IMU_frame->Data)[1] = wy;
+            ((float *)IMU_frame->Data)[2] = wz;
+
+            ((float *)IMU_frame->Data)[3] = ax;
+            ((float *)IMU_frame->Data)[4] = ay;
+            ((float *)IMU_frame->Data)[5] = az;
+
+            file.AddFrame(IMU_frame);
+
+        } else {
+            std::cerr << "Unknown line:" << line << std::endl;
+            return false;
+        }
+    }
+    return true;
+}
+
+
 bool loadNewerLidarData(const std::string &dirname, SLAMFile &file) {
     
     std::string lidar_dirname = dirname + "/ouster_scan";
@@ -45,7 +192,7 @@ bool loadNewerLidarData(const std::string &dirname, SLAMFile &file) {
     lidar_sensor->BeamNum = 64;
 
     file.Sensors.AddSensor(lidar_sensor);
-    std::cout << "Lidar sensor created... (It would take a while)" << std::endl;
+    std::cout << "Lidar sensor created... (It could take a while)" << std::endl;
 
     Eigen::Matrix4f Z_rot_135;
     float val = std::sqrt(2.0f) / 2.0f;
@@ -77,7 +224,7 @@ bool loadNewerLidarData(const std::string &dirname, SLAMFile &file) {
 
                     // Extract timestamp from the filename
                     int timestampS = std::stoi(match[1].str());
-                    int timestampNS = std::stoi(match[2].str());
+                    int timestampNS = std::stoi(match[2].str());;
 
                     // ====== Load pointcloud for each frame
                     std::string lidar_file_pcd = lidar_dirname + "/" + filename;
@@ -214,7 +361,7 @@ bool loadNewerGroundTruthData(const std::string &dirname, SLAMFile &file) {
 
 
 SLAMFile* NewerCollegeReader::GenerateSLAMFile() {
-    if(!(lidar)) {
+    if(!(lidar || grey || stereo)) {
         std::cerr <<  "No sensors defined\n";
         return nullptr;
     }
@@ -233,8 +380,41 @@ SLAMFile* NewerCollegeReader::GenerateSLAMFile() {
     auto slamfilep = new SLAMFile();
     SLAMFile &slamfile = *slamfilep;
 
+    float rate = 30.0;
+    int width = 848;
+    int height = 480;
+
+    CameraSensor::intrinsics_t cam_intrinsics 
+        = {431.3873911369959 / width, 430.2496176152663 / height, 
+           427.4407802012019 / width, 238.52694867508183 / height};
+
+    CameraSensor::distortion_type_t cam_distortion_type = CameraSensor::NoDistortion;
+    CameraSensor::distortion_coefficients_t cam_distortion = {0.0, 0.0, 0.0, 0.0, 0.0};
+
+    Sensor::pose_t pose_lgrey = Eigen::Matrix4f::Identity();
+    Sensor::pose_t pose_rgrey = Eigen::Matrix4f::Identity();
+    pose_rgrey(0, 3) = 0.050043625246917856;
+
+    if (grey && !loadNewerGreyData(dirname + "/image_left", slamfile, rate, width, height, pose_lgrey, cam_intrinsics, cam_distortion_type, cam_distortion)) {
+        std::cout << "Error while loading Left Grey information." << std::endl;
+        delete slamfilep;
+        return nullptr;
+    }
+
+    if (stereo && !loadNewerGreyData(dirname + "/image_right", slamfile, rate, width, height, pose_rgrey, cam_intrinsics, cam_distortion_type, cam_distortion)) {
+        std::cout << "Error while loading Right Grey information." << std::endl;
+        delete slamfilep;
+        return nullptr;
+    }
+
     if (lidar && !loadNewerLidarData(dirname, slamfile)) {
         std::cout << "Error while loading Lidar information." << std::endl;
+        delete slamfilep;
+        return nullptr;
+    }
+
+    if (lidar && imu && !loadNewerLidarIMUData(dirname, slamfile)) {
+        std::cout << "Error while loading Ouster IMU information." << std::endl;
         delete slamfilep;
         return nullptr;
     }

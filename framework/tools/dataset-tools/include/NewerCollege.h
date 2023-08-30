@@ -27,12 +27,10 @@ namespace slambench {
   namespace io {
 
     class NewerCollegeReader : public DatasetReader {
-    private:
-        static constexpr CameraSensor::intrinsics_t fr1_intrinsics_rgb = {0.9375, 1.25, 0.5, 0.5};
 
     public:
         std::string input;
-        bool grey=true, imu = true, gt = true, stereo = true, lidar = true;
+        bool grey=true, imu = false, gt = true, stereo = true, lidar = true;
 
         explicit NewerCollegeReader(std::string name) : DatasetReader(std::move(name)) {
                 this->addParameter(TypedParameter<std::string>("i",
@@ -57,7 +55,7 @@ namespace slambench {
         }
     
 
-      SLAMFile* GenerateSLAMFile() override;
+        SLAMFile* GenerateSLAMFile() override;
     };
 
   }  // namespace io
