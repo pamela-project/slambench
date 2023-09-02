@@ -12,6 +12,12 @@ from scipy.interpolate import UnivariateSpline
 
 args = None
 
+def calculate_rmse(abs_errors):
+    squared_errors = np.square(abs_errors)
+    mean_squared_error = np.mean(squared_errors)
+    rmse = np.sqrt(mean_squared_error)
+    return rmse
+
 def extract_result_from_file(filename):
     
     with open(filename, "r") as f:
@@ -19,16 +25,14 @@ def extract_result_from_file(filename):
         lines = f.readlines()
 
     x_idx, y_idx, z_idx = 0, 0, 0
-    abs_error_idx, ori_error_idx = 0, 0
     duration_frame_idx = 0
-    meanATE_idx, maxATE_idx, RPE_RMSE_idx = 0, 0, 0
+    meanATE_idx, maxATE_idx = 0, 0
+    ATE_RMSE_idx, RPE_RMSE_idx = 0, 0
     cpu_memory_idx, gpu_memory_idx = 0, 0
 
     poses = []
-    abs_errors = []
-    ori_errors = []
     duration_frames = []
-    meanATE, maxATE, RPE_RMSE = -1, -1, -1
+    meanATE, maxATE, ATE_RMSE, RPE_RMSE = -1, -1, -1, -1
     cpu_memory, gpu_memory = 0, 0
 
     has_accuracy = False
@@ -41,12 +45,12 @@ def extract_result_from_file(filename):
         # If the line contains "Frame Number", it's the header
         if "Frame Number" in line:
             # Get the indices of X, Y, Z from the header
-            values_to_check = ["AbsoluteError", "OrientationError", "MeanATE", "MaxATE", "RPE_RMSE"]
+            values_to_check = ["MeanATE", "MaxATE", "ATE_RMSE", "RPE_RMSE"]
             has_accuracy = all(value in parts for value in values_to_check)
 
             if has_accuracy:
-                abs_error_idx, ori_error_idx = parts.index("AbsoluteError"), parts.index("OrientationError")
-                meanATE_idx, maxATE_idx, RPE_RMSE_idx = parts.index("MeanATE"), parts.index("MaxATE"), parts.index("RPE_RMSE")
+                meanATE_idx, maxATE_idx = parts.index("MeanATE"), parts.index("MaxATE")
+                ATE_RMSE_idx, RPE_RMSE_idx = parts.index("ATE_RMSE"), parts.index("RPE_RMSE")
 
             x_idx, y_idx, z_idx = parts.index("X"), parts.index("Y"), parts.index("Z")
             duration_frame_idx = parts.index("Duration_Frame")
@@ -54,7 +58,7 @@ def extract_result_from_file(filename):
 
             continue
         
-        if parts[abs_error_idx] == "-nan" or parts[abs_error_idx] == "nan":
+        if parts[ATE_RMSE_idx] in ("-nan", "nan") or parts[RPE_RMSE_idx] in ("-nan", "nan") or parts[maxATE_idx] in ("-nan", "nan"):
             continue
 
         # Check if the first part is a string that represents an integer
@@ -63,10 +67,8 @@ def extract_result_from_file(filename):
             poses.append((x, y, z))
 
             if has_accuracy:
-                abs_error, ori_error = float(parts[abs_error_idx]), float(parts[ori_error_idx])
-                abs_errors.append(abs_error)
-                ori_errors.append(ori_error)
-                meanATE, maxATE, RPE_RMSE = float(parts[meanATE_idx]), float(parts[maxATE_idx]), float(parts[RPE_RMSE_idx])
+                meanATE, maxATE = float(parts[meanATE_idx]), float(parts[maxATE_idx])
+                ATE_RMSE, RPE_RMSE = float(parts[ATE_RMSE_idx]), float(parts[RPE_RMSE_idx])
 
             duration_frames.append(float(parts[duration_frame_idx]))
             cpu_memory, gpu_memory = float(parts[cpu_memory_idx]), float(parts[gpu_memory_idx])
@@ -74,7 +76,7 @@ def extract_result_from_file(filename):
         else:
             continue
 
-    return poses, abs_errors, ori_errors, duration_frames, meanATE, maxATE, RPE_RMSE, cpu_memory, gpu_memory
+    return poses, duration_frames, meanATE, maxATE, ATE_RMSE, RPE_RMSE, cpu_memory, gpu_memory
 
 
 def extract_xyz_from_gt(filename):
@@ -127,7 +129,10 @@ def visualize_coordinates(coords, labels):
         ys_smooth = y_spline(np.linspace(0, len(ys)-1, 300))
         zs_smooth = z_spline(np.linspace(0, len(zs)-1, 300))
 
-        ax.plot(xs_smooth, ys_smooth, zs_smooth, label=label, linewidth=0.9)
+        if label == "GroundTruth":
+            ax.plot(xs_smooth, ys_smooth, zs_smooth, label=label, linewidth=0.9, linestyle="--", color="black")
+        else:
+            ax.plot(xs_smooth, ys_smooth, zs_smooth, label=label, linewidth=0.9)
 
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
@@ -200,7 +205,7 @@ def visualize_metrices(values_list, algo_names, metric="NONE"):
     for label in ax.get_yticklabels():
         label.set_rotation(45)
     
-    plt.legend()
+    plt.legend(loc='upper left')
 
     # Save the figure
     if args.output_folder:
@@ -218,25 +223,25 @@ def visualize_metrices(values_list, algo_names, metric="NONE"):
     plt.close()
 
 
-def visualize_bar_graph(meanATE_list, maxATE_list, RPE_RMSE_list, algo_names):
+def visualize_bar_graph(meanATE_list, maxATE_list, ATE_RMSE_list, RPE_RMSE_list, algo_names):
     # Number of algorithms
     n_algos = len(algo_names)
 
     # Set the positions and width for the bars
     bar_width = 0.1
-    index = np.arange(3)  # Three groups: meanATE, maxATE, and RPE_RMSE
+    index = np.arange(4)  # Now four groups: meanATE, maxATE, ATE_RMSE, and RPE_RMSE
 
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    for i, (mean, max_, rpe_rmse, name) in enumerate(zip(meanATE_list, maxATE_list, RPE_RMSE_list, algo_names)):
-        ax.bar(index + i*bar_width, [mean, max_, rpe_rmse], bar_width, label=name)
+    for i, (mean, max_, ate_rmse, rpe_rmse, name) in enumerate(zip(meanATE_list, maxATE_list, ATE_RMSE_list, RPE_RMSE_list, algo_names)):
+        ax.bar(index + i*bar_width, [mean, max_, ate_rmse, rpe_rmse], bar_width, label=name)
 
     # Add some text for labels, title, and custom x-axis tick labels, etc.
     ax.set_xlabel('Metrices')
     ax.set_ylabel('Values')
     ax.set_title('Comparison of Different Algorithms')
     ax.set_xticks(index + (bar_width * n_algos / 2) - bar_width/2)
-    ax.set_xticklabels(['meanATE', 'maxATE', 'RPE_RMSE'])
+    ax.set_xticklabels(['meanATE', 'maxATE', 'ATE_RMSE', 'RPE_RMSE'])
     ax.legend()
 
     if args.output_folder:
@@ -269,14 +274,13 @@ def main():
         return
 
     poses_list = []
-    abs_errors_list = []
-    ori_errors_list = []
 
     duration_frames_list = []
     mean_durantion_frame_list = []
 
     meanATE_list = []
     maxATE_list = []
+    ATE_RMSE_list = []
     RPE_RMSE_list = []
 
     cpu_memory_list = []
@@ -289,15 +293,14 @@ def main():
         poses_list.append(extract_xyz_from_gt(args.groundtruth))
     
     for filepath in args.algorithms:
-        poses, abs_errors, ori_errors, duration_frames, meanATE, maxATE, RPE_RMSE, cpu_memory, gpu_memory = extract_result_from_file(filepath)
+        poses, duration_frames, meanATE, maxATE, ATE_RMSE, RPE_RMSE, cpu_memory, gpu_memory = extract_result_from_file(filepath)
         poses_list.append(poses)
-        # abs_errors_list.append(abs_errors)
-        # ori_errors_list.append(ori_errors)
         duration_frames_list.append(duration_frames)
         mean_durantion_frame_list.append(sum(duration_frames) / len(duration_frames))
 
         meanATE_list.append(meanATE)
         maxATE_list.append(maxATE)
+        ATE_RMSE_list.append(ATE_RMSE)
         RPE_RMSE_list.append(RPE_RMSE)
 
         cpu_memory_list.append(cpu_memory)
@@ -312,24 +315,21 @@ def main():
     else:
         visualize_coordinates(poses_list, algo_names)
 
-    # if abs_errors_list[0] != [] and ori_errors_list[0] != []:
-    #     visualize_metrices(abs_errors_list, algo_names, "Absolute Error")
-    #     visualize_metrices(ori_errors_list, algo_names, "Orientation Error")
-
     visualize_metrices(duration_frames_list, algo_names, "Duration Frame")
 
-    if meanATE_list[0] != -1 and maxATE_list[0] != -1 and RPE_RMSE_list[0] != -1:
-        visualize_bar_graph(meanATE_list, maxATE_list, RPE_RMSE_list, algo_names)
+    if meanATE_list[0] != -1 and maxATE_list[0] != -1 and ATE_RMSE_list[0] != -1 and RPE_RMSE_list[0] != -1:
+        visualize_bar_graph(meanATE_list, maxATE_list, ATE_RMSE_list, RPE_RMSE_list, algo_names)
 
     # ===== Save result in txt file ======
     if args.output_folder:
         output_filepath = os.path.join(args.output_folder, f"results.txt")
         with open(output_filepath, "w") as file:
-            for name, mean_ate, max_ate, rpe_rmse, mean_dur, cpu_mem, gpu_mem in \
-            zip(algo_names, meanATE_list, maxATE_list, RPE_RMSE_list, mean_durantion_frame_list, cpu_memory_list, gpu_memory_list):
+            for name, mean_ate, max_ate, ate_rmse, rpe_rmse, mean_dur, cpu_mem, gpu_mem in \
+            zip(algo_names, meanATE_list, maxATE_list, ATE_RMSE_list, RPE_RMSE_list, mean_durantion_frame_list, cpu_memory_list, gpu_memory_list):
                 file.write(f"===== {name} =====\n")
                 file.write(f"meanATE: {mean_ate}\n")
                 file.write(f"maxATE: {max_ate}\n")
+                file.write(f"ATE_RMSE: {ate_rmse}\n")
                 file.write(f"RPE_RMSE: {rpe_rmse}\n")
                 file.write(f"meanDuration: {mean_dur}\n")
                 file.write(f"CPU_Memory: {cpu_mem}\n")
@@ -338,25 +338,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-"""
-def main():
-    parser = argparse.ArgumentParser(description="Visualize 3D coordinates.")
-    parser.add_argument('-d', '--dataset', required=True, help="Dataset name in lowercase e.g. kitti")
-    parser.add_argument('-a', '--algorithms', required=True, nargs='+', help="Algorithms e.g. legoloam aloam")
-
-    args = parser.parse_args()
-
-    coords_list = []
-    for algo in args.algorithms:
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        filename = os.path.join(script_dir, "..", "result", args.dataset, algo, f"{algo}-{args.dataset}-result.txt")
-        coords_list.append(extract_xyz_from_file(filename))
-    
-    visualize_coordinates(coords_list, args.algorithms)
-
-
-if __name__ == "__main__":
-    main()
-"""
