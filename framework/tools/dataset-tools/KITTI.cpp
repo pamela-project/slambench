@@ -476,7 +476,7 @@ bool loadKITTIGroundTruthData(const std::string &dirname, SLAMFile &file) {
      * 00: 2011_10_03_drive_0027 000000 004540
      * 01: 2011_10_03_drive_0042 000000 001100
      * 02: 2011_10_03_drive_0034 000000 004660
-     * 03: 2011_09_26_drive_0067 000000 000800
+     * 03: 2011_09_26_drive_0067 000000 000800  NOT PUBLIC
      * 04: 2011_09_30_drive_0016 000000 000270
      * 05: 2011_09_30_drive_0018 000000 002760
      * 06: 2011_09_30_drive_0020 000000 001100
@@ -487,8 +487,26 @@ bool loadKITTIGroundTruthData(const std::string &dirname, SLAMFile &file) {
     */
     std::ifstream infile;
     int start, end;
-    // do not support 26 and 30 yet
-    if (dirname.find("2011_09_30_drive_0016") != std::string::npos) {
+    
+    if (dirname.find("2011_10_03_drive_0027") != std::string::npos) {
+        // pose 04
+        std::cerr << "Use pose 00 for 2011_10_03_drive_0027" << std::endl;
+        infile.open(dirname+"/poses/00.txt");
+        start = 0; end = 4540;
+
+    } else if (dirname.find("2011_10_03_drive_0042") != std::string::npos) {
+        // pose 04
+        std::cerr << "Use pose 00 for 2011_10_03_drive_0042" << std::endl;
+        infile.open(dirname+"/poses/01.txt");
+        start = 0; end = 1100;
+
+    } else if (dirname.find("2011_10_03_drive_0034") != std::string::npos) {
+        // pose 04
+        std::cerr << "Use pose 00 for 2011_10_03_drive_0034" << std::endl;
+        infile.open(dirname+"/poses/02.txt");
+        start = 0; end = 4660;
+
+    } else if (dirname.find("2011_09_30_drive_0016") != std::string::npos) {
         // pose 04
         std::cerr << "Use pose 04 for 2011_09_30_drive_0016" << std::endl;
         infile.open(dirname+"/poses/04.txt");
@@ -667,32 +685,7 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
     KITTIReader::DatasetOrigin d_origin = check_data_origin();
     
     // Check the raw data type
-    if (d_origin == KITTIReader::DatasetOrigin::RD11_09_30) {
-
-        std::cout << "Using unrectified parameter from 2011-09-30" << std::endl;
-        get_params(cam_intrinsics_lgrey, cam_intrinsics_rgrey, cam_intrinsics_lrgb, cam_intrinsics_rrgb,
-                    cam_distortion_type, cam_distortion_lgrey, cam_distortion_rgrey, cam_distortion_lrgb, cam_distortion_rrgb);
-        pose_rgrey << 9.993424e-01,  1.830363e-02, -3.129928e-02, -5.370000e-01,  
-                     -1.856768e-02,  9.997943e-01, -8.166432e-03,  5.591661e-03,
-                      3.114337e-02,  8.742218e-03,  9.994767e-01, -1.200541e-02,
-                      0.000000e+00,  0.000000e+00,  0.000000e+00,  1.000000e+00;
-        pose_rgrey = pose_rgrey.inverse().eval();
-
-        pose_lrgb <<  9.999805e-01, -4.971067e-03, -3.793081e-03,  6.030222e-02,
-                      4.954076e-03,  9.999777e-01, -4.475856e-03, -1.293125e-03,
-                      3.815246e-03,  4.456977e-03,  9.999828e-01,  5.900421e-03,
-                      0.000000e+00,  0.000000e+00,  0.000000e+00,  1.000000e+00;
-        pose_lrgb = pose_lrgb.inverse().eval();
-
-        pose_rrgb <<  9.994995e-01,  1.667420e-02, -2.688514e-02, -4.747879e-01,
-                     -1.673122e-02,  9.998582e-01, -1.897204e-03,  5.631988e-03,
-                      2.684969e-02,  2.346075e-03,  9.996367e-01, -5.233709e-03,
-                      0.000000e+00,  0.000000e+00,  0.000000e+00,  1.000000e+00;
-        pose_rrgb = pose_rrgb.inverse().eval();
-
-        rect = false;
-
-    } else if (d_origin == KITTIReader::DatasetOrigin::RD11_09_30_RECT) {
+    if (d_origin == KITTIReader::DatasetOrigin::RD11_09_30_RECT) {
 
         std::cout << "Using rectified parameter from 2011-09-30" << std::endl;
         get_params(cam_intrinsics_lgrey, cam_intrinsics_rgrey, cam_intrinsics_lrgb, cam_intrinsics_rrgb,
@@ -720,6 +713,38 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
         R_rect_00 << 9.999280e-01, 8.085985e-03, -8.866797e-03, 0.000000e+00,
                     -8.123205e-03, 9.999583e-01, -4.169750e-03, 0.000000e+00,
                      8.832711e-03, 4.241477e-03,  9.999520e-01, 0.000000e+00,
+                     0.000000e+00, 0.000000e+00,  0.000000e+00, 1.000000e+00;
+        
+        rect = true;
+
+    } else if (d_origin == KITTIReader::DatasetOrigin::RD11_10_03_RECT) {
+
+        std::cout << "Using rectified parameter from 2011-10-03" << std::endl;
+        get_params(cam_intrinsics_lgrey, cam_intrinsics_rgrey, cam_intrinsics_lrgb, cam_intrinsics_rrgb,
+                    cam_distortion_type, cam_distortion_lgrey, cam_distortion_rgrey, cam_distortion_lrgb, cam_distortion_rrgb);
+
+        pose_rgrey(0, 3) = -5.370000e-01;  
+        pose_rgrey = pose_rgrey.inverse().eval();
+
+        pose_lrgb(0, 3) = 5.954406e-02;
+        pose_lrgb = pose_lrgb.inverse().eval();
+
+        pose_rrgb(0, 3) = -4.738786e-01;
+        pose_rrgb = pose_rrgb.inverse().eval();
+
+        imu_2_velo <<  9.999976e-01,  7.553071e-04, -2.035826e-03, -8.086759e-01, 
+                      -7.854027e-04,  9.998898e-01, -1.482298e-02,  3.195559e-01,
+                       2.024406e-03,  1.482454e-02,  9.998881e-01, -7.997231e-01,
+                       0.000000e+00,  0.000000e+00,  0.000000e+00,  1.000000e+00;
+
+        velo_2_lgrey <<  7.967514e-03, -9.999679e-01, -8.462264e-04, -1.377769e-02, 
+                        -2.771053e-03,  8.241710e-04, -9.999958e-01, -5.542117e-02,
+                         9.999644e-01,  7.969825e-03, -2.764397e-03, -2.918589e-01,
+                         0.000000e+00,  0.000000e+00,  0.000000e+00,  1.000000e+00;
+
+        R_rect_00 << 9.999454e-01, 7.259129e-03, -7.519551e-03, 0.000000e+00,
+                    -7.292213e-03, 9.999638e-01, -4.381729e-03, 0.000000e+00,
+                     7.487471e-03, 4.436324e-03,  9.999621e-01, 0.000000e+00,
                      0.000000e+00, 0.000000e+00,  0.000000e+00, 1.000000e+00;
         
         rect = true;

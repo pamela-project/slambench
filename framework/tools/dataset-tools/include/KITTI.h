@@ -27,48 +27,23 @@ namespace slambench {
 
     namespace io {
         class KITTIReader : public DatasetReader {
-        enum DatasetOrigin { Default = 0, RD11_09_30, RD11_09_30_RECT};
+        enum DatasetOrigin { Default = 0, RD11_09_30_RECT, RD11_10_03_RECT};
         enum CameraID {LEFT_GREY, RIGHT_GREY, LEFT_RGB, RIGHT_RGB};
 
         private:
             static constexpr image_params_t img_params_unrect = { 1392, 512, 10.0, 1.0};
             // original recitified image size: 1226*370, make it become multiple of 16
             static constexpr image_params_t img_params_rect = { 1232, 368, 10.0, 1.0};
-            
-            // 2011_09_30 not rectified
-            static constexpr CameraSensor::intrinsics_t intrinsics_110930_lgrey
-                    = { 9.786977e+02 / img_params_unrect.width, 9.717435e+02 / img_params_unrect.height,
-                        6.900000e+02 / img_params_unrect.width, 2.497222e+02 / img_params_unrect.height };
-            
-            static constexpr CameraSensor::intrinsics_t intrinsics_110930_rgrey
-                    = { 9.892043e+02 / img_params_unrect.width, 9.832048e+02 / img_params_unrect.height,
-                        7.020000e+02 / img_params_unrect.width, 2.616538e+02 / img_params_unrect.height };
-            
-            static constexpr CameraSensor::intrinsics_t intrinsics_110930_lrgb
-                    = { 9.591977e+02 / img_params_unrect.width, 9.529324e+02 / img_params_unrect.height,
-                        6.944383e+02 / img_params_unrect.width, 2.416793e+02 / img_params_unrect.height };
-            
-            static constexpr CameraSensor::intrinsics_t intrinsics_110930_rrgb
-                    = { 9.035972e+02 / img_params_unrect.width, 8.979356e+02 / img_params_unrect.height,
-                        6.979803e+02 / img_params_unrect.width, 2.392935e+02 / img_params_unrect.height };
-
-            static constexpr CameraSensor::distortion_coefficients_t dc_110930_lgrey 
-                    = {-3.792567e-01, 2.121203e-01, 9.182571e-04, 1.911304e-03, -7.605535e-02};
-
-            static constexpr CameraSensor::distortion_coefficients_t dc_110930_rgrey
-                    = {-3.720803e-01, 1.944116e-01, -1.077099e-04, -9.031379e-05, -6.314998e-02};
-            
-            static constexpr CameraSensor::distortion_coefficients_t dc_110930_lrgb
-                    = {-3.725637e-01, 1.979803e-01, 1.799970e-04, 1.250593e-03, -6.608481e-02};
-
-            static constexpr CameraSensor::distortion_coefficients_t dc_110930_rrgb
-                    = {-3.726025e-01, 1.973869e-01, -5.746215e-04, 7.444947e-05, -6.699658e-02};
 
             // 2011_09_30_rect
-            // divided by unresized width and height.
             static constexpr CameraSensor::intrinsics_t intrinsics_110930_rect
                     = { 7.113765e+02 / img_params_rect.width, 7.032691e+02 / img_params_rect.height,
                         6.048329e+02 / img_params_rect.width, 1.821206e+02 / img_params_rect.height };
+            
+            // 2011_10_03_rect
+            static constexpr CameraSensor::intrinsics_t intrinsics_111003_rect
+                    = { 7.188560e+02 / img_params_rect.width, 7.188560e+02 / img_params_rect.height,
+                        6.071928e+02 / img_params_rect.width, 1.852157e+02 / img_params_rect.height };
         
         public:
             std::string input;
@@ -108,10 +83,10 @@ namespace slambench {
 
             DatasetOrigin check_data_origin() {
 
-                if (input.find("2011_09_30") != std::string::npos && input.find("sync") == std::string::npos) {
-                    return DatasetOrigin::RD11_09_30;
-                } else if (input.find("2011_09_30") != std::string::npos && input.find("sync") != std::string::npos) {
+                if (input.find("2011_09_30") != std::string::npos && input.find("sync") != std::string::npos) {
                     return DatasetOrigin::RD11_09_30_RECT;
+                } else if (input.find("2011_10_03") != std::string::npos && input.find("sync") != std::string::npos) {
+                    return DatasetOrigin::RD11_10_03_RECT;
                 }
 
                 return DatasetOrigin::Default;
@@ -126,25 +101,8 @@ namespace slambench {
                             CameraSensor::distortion_coefficients_t &cam_distortion_rgrey,
                             CameraSensor::distortion_coefficients_t &cam_distortion_lrgb,
                             CameraSensor::distortion_coefficients_t &cam_distortion_rrgb) {
-                if (input.find("2011_09_30") != std::string::npos && input.find("sync") == std::string::npos) {
-                    
-                    std::cout << "Loading params of unrectified 2011_09_30..." << std::endl;
-                    for (uint32_t i = 0; i < 4; i++) {
-                        cam_intrinsics_lgrey[i] = intrinsics_110930_lgrey[i];
-                        cam_intrinsics_rgrey[i] = intrinsics_110930_rgrey[i];
-                        cam_intrinsics_lrgb[i] = intrinsics_110930_lrgb[i];
-                        cam_intrinsics_rrgb[i] = intrinsics_110930_rrgb[i];
-                    }
-
-                    distortion_type = CameraSensor::RadialTangential;
-                    for (uint32_t i = 0; i < 5; i++) {
-                        cam_distortion_lgrey[i] = dc_110930_lgrey[i];
-                        cam_distortion_rgrey[i] = dc_110930_rgrey[i];
-                        cam_distortion_lrgb[i] = dc_110930_lrgb[i];
-                        cam_distortion_rrgb[i] = dc_110930_rrgb[i];
-                    }
-
-                } else if (input.find("2011_09_30") != std::string::npos && input.find("sync") != std::string::npos) {
+                                
+                if (input.find("2011_09_30") != std::string::npos && input.find("sync") != std::string::npos) {
                     
                     std::cout << "Loading params of rectified 2011_09_30..." << std::endl;
                     for (uint32_t i = 0; i < 4; i++) {
@@ -152,6 +110,24 @@ namespace slambench {
                         cam_intrinsics_rgrey[i] = intrinsics_110930_rect[i];
                         cam_intrinsics_lrgb[i] = intrinsics_110930_rect[i];
                         cam_intrinsics_rrgb[i] = intrinsics_110930_rect[i];
+                    }
+
+                    distortion_type = CameraSensor::NoDistortion;
+                    for (uint32_t i = 0; i < 5; i++) {
+                        cam_distortion_lgrey[i] = 0.0;
+                        cam_distortion_rgrey[i] = 0.0;
+                        cam_distortion_lrgb[i] = 0.0;
+                        cam_distortion_rrgb[i] = 0.0;
+                    }
+
+                } else if (input.find("2011_10_03") != std::string::npos && input.find("sync") != std::string::npos) {
+                    
+                    std::cout << "Loading params of rectified 2011_10_03..." << std::endl;
+                    for (uint32_t i = 0; i < 4; i++) {
+                        cam_intrinsics_lgrey[i] = intrinsics_111003_rect[i];
+                        cam_intrinsics_rgrey[i] = intrinsics_111003_rect[i];
+                        cam_intrinsics_lrgb[i] = intrinsics_111003_rect[i];
+                        cam_intrinsics_rrgb[i] = intrinsics_111003_rect[i];
                     }
 
                     distortion_type = CameraSensor::NoDistortion;
