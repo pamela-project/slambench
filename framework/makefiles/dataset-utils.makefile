@@ -313,7 +313,7 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 #### Newer College ####
 ./datasets/NewerCollege/newer_college_short_quad_mid.zip :
 	mkdir -p $(@D)
-	cd $(@D) && ${WGET} --load-cookies /tmp/cookies.txt "https://drive.google.com/uc?export=download&confirm=$(${WGET} --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://drive.google.com/uc?export=download&id=1fPk3AOFi-brFmvl2uFqqf55p9cEDwyO3' -O- | sed -rn 's/.confirm=([0-9A-Za-z_]+)./\1\n/p')&id=1fPk3AOFi-brFmvl2uFqqf55p9cEDwyO3" -O newer_college_short_quad_mid.zip && rm -rf /tmp/cookies.txt
+	cd $(@D) && ${WGET} --load-cookies /tmp/cookies.txt "https://drive.google.com/uc?export=download&confirm=$(${WGET} --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://drive.google.com/uc?export=download&id=1e2BPl0hhD8f6IasCxCZe--1CfHwU0X_b' -O- | sed -rn 's/.confirm=([0-9A-Za-z_]+)./\1\n/p')&id=1e2BPl0hhD8f6IasCxCZe--1CfHwU0X_b" -O newer_college_short_quad_mid.zip && rm -rf /tmp/cookies.txt
 
 
 ./datasets/NewerCollege/newer_college_short_quad_mid.dir : ./datasets/NewerCollege/newer_college_short_quad_mid.zip
