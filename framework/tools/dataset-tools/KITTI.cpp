@@ -74,13 +74,17 @@ std::list<slambench::TimeStamp> loadLeftGreyTimeStamps(const std::string &dirnam
     return timestamps;
 }
 
-bool resizeImage(const std::string &filename, int width, int height) {
+bool resizeKITTIImage(const std::string &filename, int width, int height) {
 
     cv::Mat originalImage = cv::imread(filename);
 
     if (originalImage.empty()) {
         std::cout << "Could not read the image: " << filename << std::endl;
         return false;
+    }
+
+    if (originalImage.cols % 16 == 0 && originalImage.rows % 16 == 0) {
+        return true;
     }
 
     cv::Mat resizedImage;
@@ -153,7 +157,7 @@ bool loadKITTIRGBData(const std::string &dirname,
             frame_name << dirname << "/" << camera_idx << "/data/" << rgb_filename;
             // rectified image should be resize to dimensions that is multiple of 16
             if (rect) {
-                if (!resizeImage(frame_name.str(), img_params.width, img_params.height)){
+                if (!resizeKITTIImage(frame_name.str(), img_params.width, img_params.height)){
                     return false;
                 }
             }
@@ -236,7 +240,7 @@ bool loadKITTIGreyData(const std::string &dirname,
             std::stringstream frame_name;
             frame_name << dirname << "/" << camera_idx << "/data/" << grey_filename;
             if (rect) {
-                if (!resizeImage(frame_name.str(), img_params.width, img_params.height)){
+                if (!resizeKITTIImage(frame_name.str(), img_params.width, img_params.height)){
                     infile.close();
                     return false;
                 }
@@ -648,6 +652,10 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
         requirements.emplace_back("oxts/data");
         requirements.emplace_back("oxts/dataformat.txt");
         requirements.emplace_back("oxts/timestamps.txt");
+    }
+
+    if (gt) {
+        requirements.emplace_back("poses");
     }
 
     if (!checkRequirements(dirname, requirements)) {
