@@ -35,6 +35,9 @@
 
 using namespace slambench::io;
 
+int kitti_start = 0;
+int kitti_end = 0;
+
 std::list<slambench::TimeStamp> loadLeftGreyTimeStamps(const std::string &dirname) {
 
     std::string line;
@@ -47,10 +50,17 @@ std::list<slambench::TimeStamp> loadLeftGreyTimeStamps(const std::string &dirnam
     // extract hr, min, sec, nsec
     boost::regex pattern("^\\d{4}-\\d{2}-\\d{2} (\\d{2}):(\\d{2}):(\\d{2})\\.(\\d{9})$");
 
+    int ts_index = 0;
     while (std::getline(infile, line)) {
         if (line.empty() || boost::regex_match(line, match, comment)) {
             continue;
         } else if (boost::regex_match(line, match, pattern)) {
+
+            if (ts_index < kitti_start) {
+                ts_index++;
+                continue;
+            }
+            ts_index++;
 
             int hour = std::stoi(match[1]);
             int min = std::stoi(match[2]);
@@ -136,6 +146,11 @@ bool loadKITTIRGBData(const std::string &dirname,
             continue;
         } else if (boost::regex_match(line, match, pattern)) {
 
+            if (img_index < kitti_start) {
+                img_index++;
+                continue;
+            }
+
             int hour = std::stoi(match[1]);
             int min = std::stoi(match[2]);
             int second = std::stoi(match[3]);
@@ -219,6 +234,11 @@ bool loadKITTIGreyData(const std::string &dirname,
         } else if (boost::regex_match(line, match, comment)) {
             continue;
         } else if (boost::regex_match(line, match, pattern)) {
+
+            if (img_index < kitti_start) {
+                img_index++;
+                continue;
+            }
 
             int hour = std::stoi(match[1]);
             int min = std::stoi(match[2]);
@@ -321,6 +341,11 @@ bool loadKITTIIMUData(const std::string &dirname,
             continue;
         } else if (boost::regex_match(line_ts, match_ts, pattern_ts)) {
 
+            if (imu_index < kitti_start) {
+                imu_index++;
+                continue;
+            }
+
             int hour = std::stoi(match_ts[1]);
             int min = std::stoi(match_ts[2]);
             int second = std::stoi(match_ts[3]);
@@ -414,6 +439,11 @@ bool loadKITTILidarData(const std::string &dirname,
             continue;
         } else if (boost::regex_match(line, match, pattern)) {
 
+            if (lidar_index < kitti_start) {
+                lidar_index++;
+                continue;
+            }
+
             int hour = std::stoi(match[1]);
             int min = std::stoi(match[2]);
             int second = std::stoi(match[3]);
@@ -490,67 +520,66 @@ bool loadKITTIGroundTruthData(const std::string &dirname, SLAMFile &file) {
      * 10: 2011_09_30_drive_0034 000000 001200
     */
     std::ifstream infile;
-    int start, end;
     
     if (dirname.find("2011_10_03_drive_0027") != std::string::npos) {
         // pose 04
         std::cerr << "Use pose 00 for 2011_10_03_drive_0027" << std::endl;
         infile.open(dirname+"/poses/00.txt");
-        start = 0; end = 4540;
+        kitti_start = 0; kitti_end = 4540;
 
     } else if (dirname.find("2011_10_03_drive_0042") != std::string::npos) {
         // pose 04
         std::cerr << "Use pose 00 for 2011_10_03_drive_0042" << std::endl;
         infile.open(dirname+"/poses/01.txt");
-        start = 0; end = 1100;
+        kitti_start = 0; kitti_end = 1100;
 
     } else if (dirname.find("2011_10_03_drive_0034") != std::string::npos) {
         // pose 04
         std::cerr << "Use pose 00 for 2011_10_03_drive_0034" << std::endl;
         infile.open(dirname+"/poses/02.txt");
-        start = 0; end = 4660;
+        kitti_start = 0; kitti_end = 4660;
 
     } else if (dirname.find("2011_09_30_drive_0016") != std::string::npos) {
         // pose 04
         std::cerr << "Use pose 04 for 2011_09_30_drive_0016" << std::endl;
         infile.open(dirname+"/poses/04.txt");
-        start = 0; end = 270;
+        kitti_start = 0; kitti_end = 270;
 
     } else if (dirname.find("2011_09_30_drive_0018") != std::string::npos) {
         // pose 05
         std::cerr << "Use pose 05 for 2011_09_30_drive_0018" << std::endl;
         infile.open(dirname+"/poses/05.txt");
-        start = 0; end = 2760;
+        kitti_start = 0; kitti_end = 2760;
 
     } else if (dirname.find("2011_09_30_drive_0020") != std::string::npos) {
         // pose 06
         std::cerr << "Use pose 06 for 2011_09_30_drive_0020" << std::endl;
         infile.open(dirname+"/poses/06.txt");
-        start = 0; end = 1100;
+        kitti_start = 0; kitti_end = 1100;
 
     } else if (dirname.find("2011_09_30_drive_0027") != std::string::npos) {
         // pose 07
         std::cerr << "Use pose 07 for 2011_09_30_drive_0027" << std::endl;
         infile.open(dirname+"/poses/07.txt");
-        start = 0; end = 1100;
+        kitti_start = 0; kitti_end = 1100;
 
     } else if (dirname.find("2011_09_30_drive_0028") != std::string::npos) {
         // pose 08
         std::cerr << "Use pose 08 for 2011_09_30_drive_0028" << std::endl;
         infile.open(dirname+"/poses/08.txt");
-        start = 1100; end = 5170;
+        kitti_start = 1100; kitti_end = 5170;
 
     } else if (dirname.find("2011_09_30_drive_0033") != std::string::npos) {
         // pose 09
         std::cerr << "Use pose 09 for 2011_09_30_drive_0033" << std::endl;
         infile.open(dirname+"/poses/09.txt");
-        start = 0; end = 1590;
+        kitti_start = 0; kitti_end = 1590;
 
     } else if (dirname.find("2011_09_30_drive_0034") != std::string::npos) {
         // pose 10
         std::cerr << "Use pose 10 for 2011_09_30_drive_0034" << std::endl;
         infile.open(dirname+"/poses/10.txt");
-        start = 0; end = 1200;
+        kitti_start = 0; kitti_end = 1200;
 
     } else {
         std::cerr << "Invalid path to KITTI dataset groundtruth" << std::endl;
@@ -763,6 +792,12 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
         return nullptr;
 
     }
+
+    if (gt && !loadKITTIGroundTruthData(dirname, slamfile)) {
+        std::cout << "Error while loading GroundTruth information." << std::endl;
+        delete slamfilep;
+        return nullptr;
+    }
     
     // Load Left Grey Camera
     std::string left_grey = "image_00";
@@ -815,12 +850,6 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
     }
     if (lidar && !loadKITTILidarData(dirname, slamfile, pose_lidar)) {
         std::cout << "Error while loading LiDAR information." << std::endl;
-        delete slamfilep;
-        return nullptr;
-    }
-
-    if (gt && !loadKITTIGroundTruthData(dirname, slamfile)) {
-        std::cout << "Error while loading GroundTruth information." << std::endl;
         delete slamfilep;
         return nullptr;
     }
