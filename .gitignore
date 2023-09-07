@@ -48,6 +48,13 @@ paper/*.tex
 !/datasets/README.md
 !/datasets/datasets.repos
 
+# Results
+/results
+
+# Tmp Scripts
+/scripts
+
 # macOS
 .DS_Store
+.vscode/
 
