@@ -30,7 +30,7 @@ def extract_result_from_file(filename):
     ATE_RMSE_idx, RPE_RMSE_idx = 0, 0
     cpu_memory_idx, gpu_memory_idx = 0, 0
 
-    poses = []
+    poses = [(0.0, 0.0, 0.0)]
     duration_frames = []
     meanATE, maxATE, ATE_RMSE, RPE_RMSE = -1, -1, -1, -1
     cpu_memory, gpu_memory = 0, 0
@@ -57,9 +57,12 @@ def extract_result_from_file(filename):
             cpu_memory_idx, gpu_memory_idx = parts.index("CPU_Memory"), parts.index("GPU_Memory")
 
             continue
-        
-        if parts[ATE_RMSE_idx] in ("-nan", "nan") or parts[RPE_RMSE_idx] in ("-nan", "nan") or parts[maxATE_idx] in ("-nan", "nan"):
+
+        if parts[ATE_RMSE_idx] in ("-nan", "nan") or parts[maxATE_idx] in ("-nan", "nan"):
             continue
+
+        if parts[RPE_RMSE_idx] in ("-nan", "nan"):
+            break
 
         # Check if the first part is a string that represents an integer
         if re.match(r"^\d+$", parts[0]):
@@ -257,6 +260,98 @@ def visualize_bar_graph(meanATE_list, maxATE_list, ATE_RMSE_list, RPE_RMSE_list,
         plt.show()
 
     plt.close(fig)
+
+
+def compute_ATE(groundtruth, estimated):
+    """
+    Compute Absolute Trajectory Error (ATE) for each pose.
+
+    Args:
+    - groundtruth: List of groundtruth poses.
+    - estimated: List of estimated poses.
+
+    Returns:
+    - A list of ATE values for each pose.
+    """
+    # assert len(groundtruth) == len(estimated), "Both lists must have the same length."
+
+    ate_values = []
+    # count = 701
+    for gt, est in zip(groundtruth[:701], estimated[:701]):
+        # Convert to numpy arrays of float type
+        gt_array = np.array(gt, dtype=float)
+        est_array = np.array(est, dtype=float)
+        
+        error = gt_array - est_array
+        ate = np.linalg.norm(error)
+        ate_values.append(ate)
+    
+    return ate_values
+
+
+def compute_RPE(groundtruth, estimated):
+    """
+    Compute the Relative Pose Error (RPE) for each frame between a ground truth trajectory and an estimated trajectory.
+    
+    Parameters:
+    - groundtruth: list of ground truth poses [(x1, y1, z1), (x2, y2, z2), ...]
+    - estimated: list of estimated poses [(x1, y1, z1), (x2, y2, z2), ...]
+    
+    Returns:
+    - rpes: List of RPE values for each frame
+    """
+    
+    assert len(groundtruth) == len(estimated), "The two lists should have the same length"
+    
+    N = len(groundtruth)
+    rpes = []
+
+    for i in range(1, N):
+        delta_gt = np.array([
+            float(groundtruth[i][0]) - float(groundtruth[i-1][0]),
+            float(groundtruth[i][1]) - float(groundtruth[i-1][1]),
+            float(groundtruth[i][2]) - float(groundtruth[i-1][2])
+        ])
+        
+        delta_estimated = np.array([
+            float(estimated[i][0]) - float(estimated[i-1][0]),
+            float(estimated[i][1]) - float(estimated[i-1][1]),
+            float(estimated[i][2]) - float(estimated[i-1][2])
+        ])
+
+        rpe = np.linalg.norm(delta_gt - delta_estimated)
+        rpes.append(rpe)
+    
+    return rpes
+
+
+def plot_ATE_or_RPE(*ate_values_lists, labels=None, start_index=0, end_index=2900, transparency=0.8):
+    """
+    Plot multiple ATE values.
+
+    Args:
+    - ate_values_lists: Multiple lists of ATE values.
+    - labels: List of strings for labeling each ATE values list in the plot legend.
+    - start_index: Index to start plotting from.
+    - end_index: Index to end plotting. If None, plots till the end.
+    - transparency: Value between 0 and 1 for line transparency.
+    """
+    x_values = range(start_index, end_index if end_index else len(ate_values_lists[0]))
+    
+    for idx, ate_values in enumerate(ate_values_lists):
+        label = labels[idx] if labels else None
+        plt.plot(x_values, ate_values[start_index:end_index], label=label, alpha=transparency)
+        
+    plt.axvline(x=385, color='r', linestyle='--', label='man appear')
+    plt.axvline(x=591, color='g', linestyle='--', label='man disappear')
+        
+    plt.xlabel('Frames', fontsize=12)
+    plt.ylabel('RPE (m)', fontsize=12)
+    # plt.title('Absolute Trajectory Error (ATE) from Index {} to {}'.format(start_index, end_index))
+    plt.grid(True)
+    if labels:
+        plt.legend(loc="upper left", fontsize=12)
+    plt.show()
 
 
 def main():
