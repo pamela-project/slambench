@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PATH_DOCKERFILE=../docker/algorithms
+PATH_DOCKERFILE=./docker/algorithms
 
 if [ -z "$1" ]; then
     echo "No algorithm provided. Please provide an algorithm as an argument."
@@ -135,5 +135,4 @@ case "$1" in
         echo "Invalid algorithm!"
         ;;
 esac
-
 
