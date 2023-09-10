@@ -1,5 +1,6 @@
 RUN overhead-exp-setup.sh first
 $ cd ~/slambench
+$ mkdir ./results/log_files/overhead/ -p
 $ ./scripts/experiment/overhead-exp-setup.sh
 
 Check you have the slambench images
@@ -28,6 +29,7 @@ $ python3 starter.py run -t interactive-gui -dv KITTI07 -d 2011_09_30_drive_0027
 
 Now you are in the container
 $ cd /slambench
+$ mkdir ./results/log_files/overhead/ -p
 $ ./scripts/experiment/overhead-exp-run.sh kitti
 Exit the container
 
@@ -45,6 +47,7 @@ START THE CONTAINER
 $ python3 starter.py run -t interactive-gui -dv NewerCollegeQM -d newer_college_short_quad_mid.slam -a aloam/libaloam-original-library.so legoloam/liblegoloam-original-library.so
 
 $ cd /slambench
+$ mkdir ./results/log_files/overhead/ -p
 $ ./scripts/experiment/overhead-exp-run.sh newercollege
 Exit the container
 
@@ -59,6 +62,7 @@ START THE CONTAINER
 $ python3 starter.py run -t interactive-gui -dv NSH -d nsh_indoor_and_outdoor.slam -a aloam/libaloam-original-library.so legoloam/liblegoloam-original-library.so
 
 $ cd /slambench
+$ mkdir ./results/log_files/overhead/ -p
 $ ./scripts/experiment/overhead-exp-run.sh nsh
 Exit the container
 
