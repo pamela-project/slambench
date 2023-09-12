@@ -103,16 +103,23 @@ bool loadNewerLidarIMUData(const std::string &dirname, SLAMFile &file) {
     imu_sensor->Index = file.Sensors.size();
     imu_sensor->Description = "Ouster IMU";
     imu_sensor->Rate = 10.0;  // originally is 100Hz, sync to 10 to match lidar frequency.
-
     imu_sensor->GyroscopeNoiseDensity = 0.000208;
-    imu_sensor->GyroscopeDriftNoiseDensity = 4.0e-6;
-    imu_sensor->GyroscopeBiasDiffusion = 0.000004;
-    imu_sensor->GyroscopeSaturation = 7.8;
+    imu_sensor->GyroscopeBiasDiffusion = 4e-06;
 
     imu_sensor->AcceleratorNoiseDensity = 0.001249;
-    imu_sensor->AcceleratorDriftNoiseDensity = 4.0e-5;
     imu_sensor->AcceleratorBiasDiffusion = 0.000106;
-    imu_sensor->AcceleratorSaturation = 176.0;
+
+    Eigen::Matrix4f pose; // the location of imu origin at lidar coordinate
+    pose << -1.0,  0.0,  0.0, -0.006253,
+             0.0, -1.0,  0.0,  0.011775,
+             0.0,  0.0,  1.0, -0.028535,
+             0.0,  0.0,  0.0,  1.0;
+
+    imu_sensor->CopyPose(pose);
+
+    file.Sensors.AddSensor(imu_sensor);
+    std::cout << "Ouster IMU Sensor createrd..." << std::endl;
+    std::cout << "HINT: the pose of Ouster IMU represents location of imu origin at lidar coordinate" << std::endl;
 
     std::string line;
 
