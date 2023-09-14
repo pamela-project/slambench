@@ -252,6 +252,12 @@ void SLAMBenchConfiguration::ComputeLoopAlgorithm(bool *stay_on, SLAMBenchUI *ui
             if (current_frame->FrameSensor->GetType() != slambench::io::GroundTruthSensor::kGroundTruthTrajectoryType) {
                 // ********* [[ NEW FRAME PROCESSED BY ALGO ]] *********
                 for (size_t i = 0; i < slam_libs_.size(); i++) {
+
+                    if (frame_count < start_frame_) {
+                        ongoing = true;
+                        std::cout << "star frame is " << start_frame_ << ", so skip frame " << frame_count << std::endl;
+                        break;
+                    }
                     auto lib = slam_libs_[i];
                     // ********* [[ SEND THE FRAME ]] *********
                     ongoing = not lib->c_sb_update_frame(lib, current_frame);
