@@ -326,29 +326,43 @@ def compute_RPE(groundtruth, estimated):
     return rpes
 
 
-def plot_ATE_or_RPE(rpe_values, labels, start_index=0, end_index=None, transparency=0.8):
+def moving_average(data, window_size=10):
+    cumsum_vec = np.cumsum(np.insert(data, 0, 0))
+    ma_vec = (cumsum_vec[window_size:] - cumsum_vec[:-window_size]) / window_size
+    return ma_vec
+
+
+def plot_ATE_or_RPE(rpe_values, labels, start_index=0, end_index=4000, transparency=1.0, smooth=True, reduce_resolution=False):
     """
     Plot RPE values.
 
     Args:
-    - rpe_values: List of RPE values.
-    - labels: List of strings for labeling each RPE value in the plot legend.
-    - start_index: Index to start plotting from.
-    - end_index: Index to end plotting. If None, plots till the end.
-    - transparency: Value between 0 and 1 for line transparency.
+    ...
+    - smooth: If True, applies moving average to smooth data.
+    - reduce_resolution: If True, plots 1 out of every five points.
     """
     
-    # Ensure that the number of RPE values matches the number of labels
     assert len(rpe_values) == len(labels), "Number of RPE values should match the number of labels"
     
     for idx, rpe_value in enumerate(rpe_values):
         current_end_index = end_index if end_index else len(rpe_value)
         x_values = range(start_index, current_end_index)
         
-        plt.plot(x_values, rpe_value[start_index:current_end_index], label=labels[idx], alpha=transparency)
+        if smooth:
+            smoothed_rpe = moving_average(rpe_value[start_index:current_end_index])
+            plt.plot(x_values[len(x_values)-len(smoothed_rpe):], smoothed_rpe, label=labels[idx], alpha=transparency)
+        elif reduce_resolution:
+            reduced_x = x_values[::5]
+            reduced_rpe = rpe_value[start_index:current_end_index:5]
+            plt.plot(reduced_x, reduced_rpe, label=labels[idx], alpha=transparency)
+        else:
+            plt.plot(x_values, rpe_value[start_index:current_end_index], label=labels[idx], alpha=transparency)
+
+        transparency -= 0.1
         
     plt.xlabel('Frames', fontsize=12)
     plt.ylabel('RPE (m)', fontsize=12)
+    plt.yscale('log')
     plt.grid(True)
     plt.legend(loc="upper left", fontsize=12)
 
@@ -444,7 +458,7 @@ def main():
         visualize_bar_graph(meanATE_list, maxATE_list, ATE_RMSE_list, RPE_RMSE_list, algo_names)
 
     # ===== Save result in txt file ======
-    if args.output_folder:
+    if args.output_folder and args.groundtruth:
         output_filepath = os.path.join(args.output_folder, f"results.txt")
         with open(output_filepath, "w") as file:
             file.write(f"Number of Poses: {gt_length}\n\n")
@@ -460,6 +474,22 @@ def main():
                 file.write(f"CPU_Memory: {cpu_mem}\n")
                 file.write(f"GPU_Memory: {gpu_mem}\n\n")
             print(f"Saved results.txt to: {output_filepath}")
+    elif args.output_folder:
+        output_filepath = os.path.join(args.output_folder, f"results.txt")
+        with open(output_filepath, "w") as file:
+            file.write(f"Number of Poses: {gt_length}\n\n")
+            for name, mean_ate, max_ate, ate_rmse, rpe_rmse, mean_dur, cpu_mem, gpu_mem in \
+            zip(algo_names, meanATE_list, maxATE_list, ATE_RMSE_list, RPE_RMSE_list, mean_durantion_frame_list, cpu_memory_list, gpu_memory_list):
+                file.write(f"===== {name} =====\n")
+                file.write(f"meanATE: {mean_ate}\n")
+                file.write(f"maxATE: {max_ate}\n")
+                file.write(f"ATE_RMSE: {ate_rmse}\n")
+                file.write(f"RPE_RMSE: {rpe_rmse}\n")
+                file.write(f"meanDuration: {mean_dur}\n")
+                file.write(f"CPU_Memory: {cpu_mem}\n")
+                file.write(f"GPU_Memory: {gpu_mem}\n\n")
+            print(f"Saved results.txt to: {output_filepath}")
+
 
 if __name__ == "__main__":
     main()
