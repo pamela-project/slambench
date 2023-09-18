@@ -313,8 +313,7 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 #### Newer College ####
 ./datasets/NewerCollege/newer_college_short_quad_mid.zip :
 	mkdir -p $(@D)
-	cd $(@D) && ${WGET} --load-cookies /tmp/cookies.txt "https://drive.google.com/uc?export=download&confirm=$(${WGET} --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://drive.google.com/uc?export=download&id=1e2BPl0hhD8f6IasCxCZe--1CfHwU0X_b' -O- | sed -rn 's/.confirm=([0-9A-Za-z_]+)./\1\n/p')&id=1e2BPl0hhD8f6IasCxCZe--1CfHwU0X_b" -O newer_college_short_quad_mid.zip && rm -rf /tmp/cookies.txt
-
+	cd $(@D) && ${WGET} --load-cookies /tmp/cookies.txt "https://drive.google.com/uc?export=download&confirm=$(${WGET} --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://drive.google.com/uc?export=download&id=12pX0NnDKsEzROycd-XRr4weUtdJ8ql1z' -O- | sed -rn 's/.confirm=([0-9A-Za-z_]+)./\1\n/p')&id=12pX0NnDKsEzROycd-XRr4weUtdJ8ql1z" -O newer_college_short_quad_mid.zip && rm -rf /tmp/cookies.txt
 
 ./datasets/NewerCollege/newer_college_short_quad_mid.dir : ./datasets/NewerCollege/newer_college_short_quad_mid.zip
 	mkdir $@
@@ -323,6 +322,20 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 ./datasets/NewerCollege/newer_college_short_quad_mid.slam : ./datasets/NewerCollege/newer_college_short_quad_mid.dir
 	${check_generator}
 	./build/bin/dataset-generator -d newercollege -i $< -o $@
+
+
+#### DARPA ####
+./datasets/DARPASubt/darpa_subt_anymal_01_sync.zip :
+	mkdir -p $(@D)
+	cd $(@D) && ${WGET} --load-cookies /tmp/cookies.txt "https://drive.google.com/uc?export=download&confirm=$(${WGET} --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://drive.google.com/uc?export=download&id=17DCNsg8LOH-LNEeNwOV1fExr3xhOYW64' -O- | sed -rn 's/.confirm=([0-9A-Za-z_]+)./\1\n/p')&id=17DCNsg8LOH-LNEeNwOV1fExr3xhOYW64" -O darpa_subt_anymal_01_sync.zip && rm -rf /tmp/cookies.txt
+
+./datasets/DARPASubt/darpa_subt_anymal_01_sync.dir : ./datasets/DARPASubt/darpa_subt_anymal_01_sync.zip
+	mkdir $@
+	unzip $< -d $@
+
+./datasets/DARPASubt/darpa_subt_anymal_01_sync.slam : ./datasets/DARPASubt/darpa_subt_anymal_01_sync.dir
+	${check_generator}
+	./build/bin/dataset-generator -d darpasubt -i $< -o $@
 
 
 .PRECIOUS: \
@@ -350,4 +363,6 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 ./datasets/NSH/nsh_indoor_and_outdoor.dir \
 ./datasets/NSH/nsh_indoor_and_outdoor.zip \
 ./datasets/NewerCollege/newer_college_short_quad_mid.dir \
-./datasets/NewerCollege/newer_college_short_quad_mid.zip
+./datasets/NewerCollege/newer_college_short_quad_mid.zip \
+./datasets/DARPASubt/darpa_subt_anymal_01_sync.dir \
+./datasets/DARPASubt/darpa_subt_anymal_01_sync.zip

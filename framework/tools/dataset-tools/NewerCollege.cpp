@@ -424,7 +424,7 @@ SLAMFile* NewerCollegeReader::GenerateSLAMFile() {
         return nullptr;
     }
 
-    if (!imu) std::cout << "Disable IMU by default, check NewerCollege.h" << std::endl;
+    if (!imu) std::cout << "IMU sensor disabled by default, check NewerCollege.h" << std::endl;
     if (lidar && imu && !loadNewerLidarIMUData(dirname, slamfile)) {
         std::cout << "Error while loading Ouster IMU information." << std::endl;
         delete slamfilep;

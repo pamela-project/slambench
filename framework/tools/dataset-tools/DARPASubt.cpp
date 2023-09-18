@@ -472,7 +472,7 @@ SLAMFile* DARPASubtReader::GenerateSLAMFile() {
         return nullptr;
     }
 
-    if (!imu) std::cout << "Disable IMU by default, check DARPASubt.h" << std::endl;
+    if (!imu) std::cout << "IMU sensor disabled by default, check DARPASubt.h" << std::endl;
     if (stereo && imu && !loadDARPASubtIMUData(dirname, slamfile)) {
         std::cout << "Error while loading Ouster IMU information." << std::endl;
         delete slamfilep;

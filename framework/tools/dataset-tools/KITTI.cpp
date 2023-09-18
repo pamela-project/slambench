@@ -863,7 +863,7 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
     }
 
     // do not support unrectified and unsync imu and lidar data
-    if (!imu) std::cout << "Disable IMU by default, check KITTI.h" << std::endl;
+    if (!imu) std::cout << "IMU sensor disabled by default, check KITTI.h" << std::endl;
     Sensor::pose_t pose_imu = imu_2_velo;
     if (imu && !loadKITTIIMUData(dirname, slamfile, pose_imu)) {
         std::cout << "Error while loading IMU information." << std::endl;
