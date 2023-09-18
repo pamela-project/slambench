@@ -253,9 +253,8 @@ void SLAMBenchConfiguration::ComputeLoopAlgorithm(bool *stay_on, SLAMBenchUI *ui
                 // ********* [[ NEW FRAME PROCESSED BY ALGO ]] *********
                 for (size_t i = 0; i < slam_libs_.size(); i++) {
 
-                    if (frame_count < start_frame_) {
+                    if (frame_count < start_frame_ * 3) {
                         ongoing = true;
-                        std::cout << "star frame is " << start_frame_ << ", so skip frame " << frame_count << std::endl;
                         break;
                     }
                     auto lib = slam_libs_[i];
