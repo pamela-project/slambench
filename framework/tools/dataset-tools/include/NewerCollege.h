@@ -30,7 +30,7 @@ namespace slambench {
 
     public:
         std::string input;
-        bool grey=true, imu = true, gt = true, stereo = true, lidar = true;
+        bool grey=true, imu = false, gt = true, stereo = true, lidar = true;
 
         explicit NewerCollegeReader(std::string name) : DatasetReader(std::move(name)) {
                 this->addParameter(TypedParameter<std::string>("i",

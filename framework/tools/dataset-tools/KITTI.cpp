@@ -21,6 +21,12 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl/conversions.h>
+#include <pcl/PCLPointCloud2.h>
+#include <pcl/common/transforms.h>
+
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
@@ -474,15 +480,36 @@ bool loadKITTILidarData(const std::string &dirname,
             size_t actual_num_point = stream.gcount() / (sizeof(float) * 4);
             stream.close();
 
+            pcl::PointCloud<pcl::PointXYZI>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZI>);
+
+            for (size_t i = 0; i < actual_num_point; ++i) {
+                pcl::PointXYZI point;
+
+                // Assuming your data is in little endian format
+                point.x = *reinterpret_cast<float*>(&data_vector[i * sizeof(float) * 4]);
+                point.y = *reinterpret_cast<float*>(&data_vector[i * sizeof(float) * 4 + sizeof(float)]);
+                point.z = *reinterpret_cast<float*>(&data_vector[i * sizeof(float) * 4 + 2 * sizeof(float)]);
+                point.intensity = *reinterpret_cast<float*>(&data_vector[i * sizeof(float) * 4 + 3 * sizeof(float)]);
+
+                cloud->push_back(point);
+            }
+
+            // Convert the point cloud to a PCLPointCloud2
+            pcl::PCLPointCloud2 cloud2;
+            pcl::toPCLPointCloud2(*cloud, cloud2);
+
+            // Convert the PCLPointCloud2 to a std::vector<char>
+            std::vector<char> cloud_data(cloud2.data.begin(), cloud2.data.end());
+
             auto lidar_frame = new SLAMInMemoryFrame();
             lidar_frame->FrameSensor = lidar_sensor;
             lidar_frame->Timestamp.S = timestampS;
             lidar_frame->Timestamp.Ns = timestampNS;
 
-            lidar_frame->Data = malloc(data_vector.size());
-            lidar_frame->SetVariableSize(data_vector.size());
-            std::copy(data_vector.data(),
-                    data_vector.data() + data_vector.size(),
+            lidar_frame->Data = malloc(cloud_data.size());
+            lidar_frame->SetVariableSize(cloud_data.size());
+            std::copy(cloud_data.data(),
+                    cloud_data.data() + cloud_data.size(),
                     reinterpret_cast<char*>(lidar_frame->Data));
 
             file.AddFrame(lidar_frame);
@@ -836,6 +863,7 @@ SLAMFile* KITTIReader::GenerateSLAMFile() {
     }
 
     // do not support unrectified and unsync imu and lidar data
+    if (!imu) std::cout << "Disable IMU by default, check KITTI.h" << std::endl;
     Sensor::pose_t pose_imu = imu_2_velo;
     if (imu && !loadKITTIIMUData(dirname, slamfile, pose_imu)) {
         std::cout << "Error while loading IMU information." << std::endl;
