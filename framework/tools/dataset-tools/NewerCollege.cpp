@@ -289,7 +289,7 @@ bool loadNewerGroundTruthData(const std::string &dirname, SLAMFile &file) {
     std::string line;
 
     boost::smatch match;
-    std::ifstream infile(dirname + "/" + "poses.csv");
+    std::ifstream infile(dirname + "/" + "groundtruth.csv");
 
     const std::string& num = RegexPattern::number;
     const std::string& start = RegexPattern::start;
@@ -377,6 +377,10 @@ SLAMFile* NewerCollegeReader::GenerateSLAMFile() {
 
     if (lidar) {
         requirements.emplace_back("/ouster_scan");
+    }
+
+    if (gt) {
+        requirements.emplace_back("groundtruth.csv");
     }
 
     if (!checkRequirements(dirname, requirements)) {

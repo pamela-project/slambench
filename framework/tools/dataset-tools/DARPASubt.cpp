@@ -316,7 +316,7 @@ bool loadDARPASubtGroundTruthData(const std::string &dirname, SLAMFile &file) {
     std::string line;
 
     boost::smatch match;
-    std::ifstream infile(dirname + "/" + "gt.csv");
+    std::ifstream infile(dirname + "/" + "groundtruth.csv");
 
     const std::string& num = RegexPattern::number;
     const std::string& start = RegexPattern::start;
@@ -412,6 +412,10 @@ SLAMFile* DARPASubtReader::GenerateSLAMFile() {
 
     if (stereo) {
         requirements.emplace_back("cam1");
+    }
+
+    if (gt) {
+        requirements.emplace_back("groundtruth.csv");
     }
 
     if (!checkRequirements(dirname, requirements)) {

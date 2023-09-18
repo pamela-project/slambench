@@ -114,6 +114,23 @@ case "$1" in
             --mount source=aloam-vol,destination=/deps/aloam \
             aloam-img
         ;;
+    "floam")
+        echo "Select F-LOAM..."
+        
+        # Build image for F-LOAM if choice is y
+        if [ "$CHOICE" = "y" ]; then
+            echo "Building the F-LOAM image..."
+            docker build -t floam-img $PATH_DOCKERFILE/floam
+        else
+            echo "No image build requested."
+        fi
+        
+        echo "Populate volume for F-LOAM.."
+        docker run -d \
+            --name=floam \
+            --mount source=floam-vol,destination=/deps/floam \
+            floam-img
+        ;;
     "legoloam")
         echo "Select LeGO-LOAM..."
         
