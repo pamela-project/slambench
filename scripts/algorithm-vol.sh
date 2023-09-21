@@ -1,14 +1,24 @@
 #!/bin/bash
 
 PATH_DOCKERFILE=./docker/algorithms
+WRAPPER_FILE="libslambench-c-wrapper.a"
 
 if [ -z "$1" ]; then
     echo "No algorithm provided. Please provide an algorithm as an argument."
     exit 1
 fi
 
+echo "Making sure you have slambench/main image (check it by: docker images)"
 echo -n "Do you want to build image of algorithm [y/n]: "
 read CHOICE
+
+if [[ -e $WRAPPER_FILE ]]; then
+    echo "$WRAPPER_FILE exists."
+else
+    echo "$WRAPPER_FILE does not exist, copy it from container."
+    docker run --name slambench-wrapper slambench/main
+    docker cp slambench-wrapper:/slambench/build/lib/libslambench-c-wrapper.a .
+fi
 
 # Perform actions based on user input
 case "$1" in
@@ -18,7 +28,7 @@ case "$1" in
         # Build image for KFusion if choice is y
         if [ "$CHOICE" = "y" ]; then
         	echo "Building the KFusion image..."
-        	docker build -t kfusion-img $PATH_DOCKERFILE/kfusion
+        	docker build -t kfusion-img -f $PATH_DOCKERFILE/kfusion/Dockerfile .
     	else
     		echo "No image build requested."
     	fi
@@ -35,7 +45,7 @@ case "$1" in
         # Build image for LSD-SLAM if choice is y
         if [ "$CHOICE" = "y" ]; then
         	echo "Building the LSD-SLAM image..."
-    		docker build -t lsdslam-img $PATH_DOCKERFILE/lsdslam
+    		docker build -t lsdslam-img -f $PATH_DOCKERFILE/lsdslam/Dockerfile .
     	else
     		echo "No image build requested."
     	fi
@@ -52,7 +62,7 @@ case "$1" in
         # Build image for ORB-SLAM2 if choice is y
         if [ "$CHOICE" = "y" ]; then
             echo "Building the ORB-SLAM2 image..."
-            docker build -t orbslam2-img $PATH_DOCKERFILE/orbslam2
+            docker build -t orbslam2-img -f $PATH_DOCKERFILE/orbslam2/Dockerfile .
         else
             echo "No image build requested."
         fi
@@ -69,7 +79,7 @@ case "$1" in
         # Build image for ORB-SLAM3 if choice is y
         if [ "$CHOICE" = "y" ]; then
             echo "Building the ORB-SLAM3 image..."
-            docker build -t orbslam3-img $PATH_DOCKERFILE/orbslam3
+            docker build -t orbslam3-img -f $PATH_DOCKERFILE/orbslam3/Dockerfile .
         else
             echo "No image build requested."
         fi
@@ -86,7 +96,7 @@ case "$1" in
         # Build image for Open-VINS if choice is y
         if [ "$CHOICE" = "y" ]; then
             echo "Building the Open-VINS image..."
-            docker build -t openvins-img $PATH_DOCKERFILE/openvins
+            docker build -t openvins-img -f $PATH_DOCKERFILE/openvins/Dockerfile .
         else
             echo "No image build requested."
         fi
@@ -103,7 +113,7 @@ case "$1" in
         # Build image for A-LOAM if choice is y
         if [ "$CHOICE" = "y" ]; then
             echo "Building the A-LOAM image..."
-            docker build -t aloam-img $PATH_DOCKERFILE/aloam
+            docker build -t aloam-img -f $PATH_DOCKERFILE/aloam/Dockerfile .
         else
             echo "No image build requested."
         fi
@@ -120,7 +130,7 @@ case "$1" in
         # Build image for F-LOAM if choice is y
         if [ "$CHOICE" = "y" ]; then
             echo "Building the F-LOAM image..."
-            docker build -t floam-img $PATH_DOCKERFILE/floam
+            docker build -t floam-img -f $PATH_DOCKERFILE/floam/Dockerfile .
         else
             echo "No image build requested."
         fi
@@ -137,7 +147,7 @@ case "$1" in
         # Build image for LeGO-LOAM if choice is y
         if [ "$CHOICE" = "y" ]; then
             echo "Building the LeGO-LOAM image..."
-            docker build -t legoloam-img $PATH_DOCKERFILE/legoloam
+            docker build -t legoloam-img -f $PATH_DOCKERFILE/legoloam/Dockerfile .
         else
             echo "No image build requested."
         fi

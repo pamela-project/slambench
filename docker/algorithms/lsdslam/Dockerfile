@@ -103,7 +103,8 @@ RUN git clone --branch fake_slambench https://github.com/nikolaradulov/slambench
 WORKDIR $LSD_DIR
 RUN mkdir wrapper
 WORKDIR /repos/slambench/docker/wrapper
-RUN mv libslambench-c-wrapper.a $LSD_DIR/wrapper
+# RUN mv libslambench-c-wrapper.a $LSD_DIR/wrapper
+COPY ./libslambench-c-wrapper.a $LSD_DIR/wrapper/
 RUN mv null.cpp $LSD_DIR/wrapper
 
 # ====== <LSD-SLAM> ======

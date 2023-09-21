@@ -332,7 +332,7 @@ def moving_average(data, window_size=10):
     return ma_vec
 
 
-def plot_ATE_or_RPE(rpe_values, labels, start_index=0, end_index=1050, transparency=1.0, smooth=False, reduce_resolution=False):
+def plot_ATE_or_RPE(rpe_values, labels, start_index=0, end_index=0, transparency=1.0, smooth=False, reduce_resolution=False):
     """
     Plot RPE values.
 

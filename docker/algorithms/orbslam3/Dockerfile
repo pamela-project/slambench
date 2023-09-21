@@ -81,7 +81,8 @@ RUN git clone --branch fake_slambench https://github.com/nikolaradulov/slambench
 WORKDIR $ORB3_DIR
 RUN mkdir wrapper && mkdir Vocabulary
 WORKDIR /repos/slambench/docker/wrapper
-RUN mv libslambench-c-wrapper.a $ORB3_DIR/wrapper
+# RUN mv libslambench-c-wrapper.a $ORB3_DIR/wrapper
+COPY ./libslambench-c-wrapper.a $ORB3_DIR/wrapper/
 RUN mv null.cpp $ORB3_DIR/wrapper
 
 

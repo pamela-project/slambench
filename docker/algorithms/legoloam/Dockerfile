@@ -155,7 +155,8 @@ RUN git clone --branch fake_slambench https://github.com/nikolaradulov/slambench
 WORKDIR $ALG_DIR
 RUN mkdir wrapper
 WORKDIR /repos/slambench/docker/wrapper
-RUN mv libslambench-c-wrapper.a $ALG_DIR/wrapper
+# RUN mv libslambench-c-wrapper.a $ALG_DIR/wrapper
+COPY ./libslambench-c-wrapper.a $ALG_DIR/wrapper/
 RUN mv null.cpp $ALG_DIR/wrapper
 
 
