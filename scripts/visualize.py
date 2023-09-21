@@ -225,34 +225,34 @@ def visualize_metrices(values_list, algo_names, metric="NONE"):
     plt.close()
 
 
-def visualize_bar_graph(meanATE_list, maxATE_list, ATE_RMSE_list, RPE_RMSE_list, algo_names):
+def visualize_bar_graph(meanATE_list, maxATE_list, ATE_RMSE_list, algo_names):
     # Number of algorithms
     n_algos = len(algo_names)
 
     # Set the positions and width for the bars
     bar_width = 0.1
-    index = np.arange(4)  # Now four groups: meanATE, maxATE, ATE_RMSE, and RPE_RMSE
+    index = np.arange(3)  # Now four groups: meanATE, maxATE, ATE_RMSE
 
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    for i, (mean, max_, ate_rmse, rpe_rmse, name) in enumerate(zip(meanATE_list, maxATE_list, ATE_RMSE_list, RPE_RMSE_list, algo_names)):
-        ax.bar(index + i*bar_width, [mean, max_, ate_rmse, rpe_rmse], bar_width, label=name)
+    for i, (mean, max_, ate_rmse, name) in enumerate(zip(meanATE_list, maxATE_list, ATE_RMSE_list, algo_names)):
+        ax.bar(index + i*bar_width, [mean, max_, ate_rmse], bar_width, label=name)
 
     # Add some text for labels, title, and custom x-axis tick labels, etc.
     ax.set_xlabel('Metrices')
     ax.set_ylabel('Values')
     ax.set_title('Comparison of Different Algorithms')
     ax.set_xticks(index + (bar_width * n_algos / 2) - bar_width/2)
-    ax.set_xticklabels(['meanATE', 'maxATE', 'ATE_RMSE', 'RPE_RMSE'])
+    ax.set_xticklabels(['meanATE', 'maxATE', 'ATE_RMSE'])
     ax.legend()
 
     if args.output_folder:
         if not os.path.exists(args.output_folder):
             os.makedirs(args.output_folder, exist_ok=True)
 
-        output_filepath = os.path.join(args.output_folder, f"ATE_RPE.png")
+        output_filepath = os.path.join(args.output_folder, f"ATE.png")
         plt.savefig(output_filepath, dpi=300)
-        print(f"Saved ATE_RPE.png to: {output_filepath}")
+        print(f"Saved ATE.png to: {output_filepath}")
 
     if args.plot:
         plt.tight_layout()
@@ -307,7 +307,7 @@ def compute_RPE(groundtruth, estimated):
         N = len(estimated)
     rpes = []
 
-    for i in range(1, N):
+    for i in range(2, N-1):
         delta_gt = np.array([
             float(groundtruth[i][0]) - float(groundtruth[i-1][0]),
             float(groundtruth[i][1]) - float(groundtruth[i-1][1]),
@@ -332,7 +332,7 @@ def moving_average(data, window_size=10):
     return ma_vec
 
 
-def plot_ATE_or_RPE(rpe_values, labels, start_index=0, end_index=4000, transparency=1.0, smooth=True, reduce_resolution=False):
+def plot_ATE_or_RPE(rpe_values, labels, start_index=0, end_index=1050, transparency=1.0, smooth=False, reduce_resolution=False):
     """
     Plot RPE values.
 
@@ -362,7 +362,7 @@ def plot_ATE_or_RPE(rpe_values, labels, start_index=0, end_index=4000, transpare
         
     plt.xlabel('Frames', fontsize=12)
     plt.ylabel('RPE (m)', fontsize=12)
-    plt.yscale('log')
+    # plt.yscale('log')
     plt.grid(True)
     plt.legend(loc="upper left", fontsize=12)
 
@@ -454,8 +454,8 @@ def main():
 
     visualize_metrices(duration_frames_list, algo_names, "Duration Frame")
 
-    if meanATE_list[0] != -1 and maxATE_list[0] != -1 and ATE_RMSE_list[0] != -1 and RPE_RMSE_list[0] != -1:
-        visualize_bar_graph(meanATE_list, maxATE_list, ATE_RMSE_list, RPE_RMSE_list, algo_names)
+    if meanATE_list[0] != -1 and maxATE_list[0] != -1 and ATE_RMSE_list[0] != -1:
+        visualize_bar_graph(meanATE_list, maxATE_list, ATE_RMSE_list, algo_names)
 
     # ===== Save result in txt file ======
     if args.output_folder and args.groundtruth:
