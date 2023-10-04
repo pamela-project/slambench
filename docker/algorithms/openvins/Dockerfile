@@ -63,7 +63,7 @@ RUN mv null.cpp $OPENVINS_DIR/wrapper
 
 # ====== <Open-VINS> ======
 WORKDIR /repos
-RUN git clone --recursive --branch rpng-master https://github.com/yuhaozhang7/open_vins.git openvins
+RUN git clone --recursive --branch rpng-master https://github.com/yuhaozhang7/openvins-slambench.git openvins
 
 # Generate static library
 WORKDIR openvins

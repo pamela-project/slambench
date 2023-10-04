@@ -53,7 +53,7 @@ RUN mv null.cpp $ALG_DIR/wrapper
 
 # ====== <KFusion> ======
 WORKDIR /repos
-RUN git clone --recursive --branch update-master https://github.com/yuhaozhang7/kfusion.git kfusion
+RUN git clone --recursive --branch update-master https://github.com/yuhaozhang7/kfusion-slambench.git kfusion
 
 
 # Generate static library

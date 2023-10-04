@@ -109,7 +109,7 @@ RUN mv null.cpp $LSD_DIR/wrapper
 
 # ====== <LSD-SLAM> ======
 WORKDIR /repos
-RUN git clone --recursive --branch cpp https://github.com/yuhaozhang7/lsd_slam.git lsdslam
+RUN git clone --recursive --branch cpp https://github.com/yuhaozhang7/lsdslam-slambench.git lsdslam
 
 WORKDIR lsdslam
 RUN mkdir build

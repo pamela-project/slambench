@@ -87,7 +87,7 @@ RUN mv null.cpp $ORB2_DIR/wrapper
 
 # ====== <ORB-SLAM2> ======
 WORKDIR /repos
-RUN git clone --recursive --branch update-master https://github.com/yuhaozhang7/ORB_SLAM2.git orbslam2
+RUN git clone --recursive --branch update-master https://github.com/yuhaozhang7/orbslam2-slambench.git orbslam2
 
 WORKDIR orbslam2
 RUN mkdir build
