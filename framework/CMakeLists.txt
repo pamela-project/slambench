@@ -12,8 +12,6 @@ find_package(PAPI)
 
 #### BUILD SLAMBENCH AND TOOLS ####
 add_subdirectory(shared) # SLAMBench Shared library
-# remove all the tools compilation
-#IF(NOT ANDROID)
-    #add_subdirectory(tools)  # SLAMBench Tools
-#ENDIF()
-
+IF(NOT ANDROID)
+    add_subdirectory(tools)  # SLAMBench Tools
+ENDIF()

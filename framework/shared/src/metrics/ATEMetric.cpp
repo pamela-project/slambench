@@ -23,7 +23,7 @@ ATEMetric::ATEMetric(const slambench::outputs::TrajectoryInterface* tested_traje
 
 const slambench::values::ValueDescription &ATEMetric::GetValueDescription() const {
 	static const slambench::values::ValueDescription desc = slambench::values::ValueDescription({
-		std::make_pair("AbsoluteError",  slambench::values::VT_DOUBLE),
+		std::make_pair("ATE_RMSE",  slambench::values::VT_DOUBLE),
         std::make_pair("OrientationError",  slambench::values::VT_DOUBLE),
         std::make_pair("MeanATE",  slambench::values::VT_DOUBLE),
         std::make_pair("MaxATE",  slambench::values::VT_DOUBLE)});
@@ -66,6 +66,7 @@ Value *ATEMetric::GetValue(Phase* phase)
 	double LastATE   = 0.0;
 	double MaxATE   = 0.0;
 	double SumATE   = 0.0;
+	double SumSquaredATE = 0.0;
 	double CountATE = 0.0;
 	double LastAOE   = 0.0;
 
@@ -139,24 +140,27 @@ Value *ATEMetric::GetValue(Phase* phase)
 		//****************************************************************************************
 
 		MaxATE  = std::max(MaxATE,LastATE);
-		SumATE += LastATE ;
+		SumATE += LastATE;
+		SumSquaredATE += (LastATE * LastATE);
 		CountATE++;
 
 	}
 
 
 	double MeanATE = SumATE / CountATE;
+	double ATE_RMSE = (CountATE == 0) ? 0 : std::sqrt(SumSquaredATE / (double)CountATE);
 
-	auto absolute_error = new slambench::values::TypeForVT<slambench::values::VT_DOUBLE>::type(LastATE);
+	// auto absolute_error = new slambench::values::TypeForVT<slambench::values::VT_DOUBLE>::type(LastATE);
 	auto orientation_error = new slambench::values::TypeForVT<slambench::values::VT_DOUBLE>::type(LastAOE);
 	auto mean_ate = new slambench::values::TypeForVT<slambench::values::VT_DOUBLE>::type(MeanATE);
 	auto max_ate  = new slambench::values::TypeForVT<slambench::values::VT_DOUBLE>::type(MaxATE);
+	auto ate_rmse = new slambench::values::TypeForVT<slambench::values::VT_DOUBLE>::type(ATE_RMSE);
 
 	return new slambench::values::TypeForVT<slambench::values::VT_COLLECTION>::type({
-				{"AbsoluteError",absolute_error},
+				{"ATE_RMSE",ate_rmse},
 				{"OrientationError",orientation_error},
 				{"MeanATE",mean_ate},
-				{"MaxATE",max_ate},
+				{"MaxATE",max_ate}
 			});
 
 

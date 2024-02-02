@@ -37,6 +37,7 @@ static const double default_realtime_mult                      = 1;
 static const std::string default_dump_volume_file              = "";
 static const std::string default_log_file                      = "";
 static const std::string default_save_map                      = "";
+static const std::string default_save_groundtruth_file         = "";
 static const std::vector<std::string> default_slam_libraries   = {};
 static const std::vector<std::string> default_input_files      = {};
 static const bool                     default_is_false         = false;
@@ -58,6 +59,7 @@ private:
     std::vector<slambench::outputs::AlignmentOutput*> alignments_;
     std::string alignment_technique_ = "umeyama";
     std::string output_filename_;
+    std::string save_groundtruth_file_;
 
     std::vector<std::string> input_filenames_;
     slambench::ParameterManager param_manager_;
@@ -95,6 +97,7 @@ public:
     void InitAlignment();
     void InitWriter();
     void SaveResults();
+    void SaveGroundTruth();
     void ComputeLoopAlgorithm(bool *stay_on, SLAMBenchUI *ui);
     void AddSLAMLibrary(const std::string& so_file, const std::string &id);
     bool LoadNextInputInterface();

@@ -51,6 +51,7 @@ datasets/OpenLORIS/%.all :
 	${check_generator}
 	./build/bin/dataset-generator -d eurocmav -i $</mav0 -o $@ -imu true --stereo-grey true -gt true
 
+
 #### TUM ####
 # check if using tgz file or rosbag
 ifeq (TUM, $(findstring TUM, $(MAKECMDGOALS)))
@@ -274,6 +275,69 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 	./build/bin/dataset-generator -d VolumeDeform -i $< -o $@ -grey true -rgb true -gt true -depth true
 
 
+#### KITTI ####
+./datasets/KITTI/poses :
+	mkdir -p $(@D)/poses
+	cd $(@D)/poses && ${WGET} "https://s3.eu-central-1.amazonaws.com/avg-kitti/data_odometry_poses.zip" && unzip -j data_odometry_poses.zip -d .
+
+./datasets/KITTI/%.zip :
+	mkdir -p $(@D)
+	cd $(@D) && ${WGET} "https://s3.eu-central-1.amazonaws.com/avg-kitti/raw_data/$*.zip"
+
+./datasets/KITTI/%.dir : ./datasets/KITTI/%.zip ./datasets/KITTI/poses
+	mkdir $@
+	cp -r ./datasets/KITTI/poses $@
+	unzip $< -d $@
+	cd $@ && mv ./*/*/* . && rm -r ./2011_*
+
+./datasets/KITTI/%.slam :  ./datasets/KITTI/%.dir
+	${check_generator}
+	./build/bin/dataset-generator -d kitti -i $< -o $@
+
+
+#### NSH ####
+./datasets/NSH/nsh_indoor_and_outdoor.zip :
+	mkdir -p $(@D)
+	cd $(@D) && ${WGET} --load-cookies /tmp/cookies.txt "https://drive.google.com/uc?export=download&confirm=$(${WGET} --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://drive.google.com/uc?export=download&id=1s1MfoRyqfsG7h8TZCAyB42125BGuA6kE' -O- | sed -rn 's/.confirm=([0-9A-Za-z_]+)./\1\n/p')&id=1s1MfoRyqfsG7h8TZCAyB42125BGuA6kE" -O nsh_indoor_and_outdoor.zip && rm -rf /tmp/cookies.txt
+
+
+./datasets/NSH/nsh_indoor_and_outdoor.dir : ./datasets/NSH/nsh_indoor_and_outdoor.zip
+	mkdir $@
+	unzip $< -d $@
+
+./datasets/NSH/nsh_indoor_and_outdoor.slam : ./datasets/NSH/nsh_indoor_and_outdoor.dir
+	${check_generator}
+	./build/bin/dataset-generator -d nsh -i $< -o $@
+
+
+#### Newer College ####
+./datasets/NewerCollege/newer_college_short_quad_mid.zip :
+	mkdir -p $(@D)
+	cd $(@D) && ${WGET} --load-cookies /tmp/cookies.txt "https://drive.google.com/uc?export=download&confirm=$(${WGET} --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://drive.google.com/uc?export=download&id=12pX0NnDKsEzROycd-XRr4weUtdJ8ql1z' -O- | sed -rn 's/.confirm=([0-9A-Za-z_]+)./\1\n/p')&id=12pX0NnDKsEzROycd-XRr4weUtdJ8ql1z" -O newer_college_short_quad_mid.zip && rm -rf /tmp/cookies.txt
+
+./datasets/NewerCollege/newer_college_short_quad_mid.dir : ./datasets/NewerCollege/newer_college_short_quad_mid.zip
+	mkdir $@
+	unzip $< -d $@
+
+./datasets/NewerCollege/newer_college_short_quad_mid.slam : ./datasets/NewerCollege/newer_college_short_quad_mid.dir
+	${check_generator}
+	./build/bin/dataset-generator -d newercollege -i $< -o $@
+
+
+#### DARPA ####
+./datasets/DARPASubt/darpa_subt_anymal_01_sync.zip :
+	mkdir -p $(@D)
+	cd $(@D) && ${WGET} --load-cookies /tmp/cookies.txt "https://drive.google.com/uc?export=download&confirm=$(${WGET} --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://drive.google.com/uc?export=download&id=17DCNsg8LOH-LNEeNwOV1fExr3xhOYW64' -O- | sed -rn 's/.confirm=([0-9A-Za-z_]+)./\1\n/p')&id=17DCNsg8LOH-LNEeNwOV1fExr3xhOYW64" -O darpa_subt_anymal_01_sync.zip && rm -rf /tmp/cookies.txt
+
+./datasets/DARPASubt/darpa_subt_anymal_01_sync.dir : ./datasets/DARPASubt/darpa_subt_anymal_01_sync.zip
+	mkdir $@
+	unzip $< -d $@
+
+./datasets/DARPASubt/darpa_subt_anymal_01_sync.slam : ./datasets/DARPASubt/darpa_subt_anymal_01_sync.dir
+	${check_generator}
+	./build/bin/dataset-generator -d darpasubt -i $< -o $@
+
+
 .PRECIOUS: \
 ./datasets/TUM/%.tgz \
 ./datasets/TUM/%.dir \
@@ -293,4 +357,12 @@ datasets/SVO/artificial.slam: ./datasets/SVO/artificial.dir
 ./datasets/OpenLORIS/%.dir \
 ./datasets/OpenLORIS/%-package.tar \
 ./datasets/VolumeDeform/%.dir \
-./datasets/VolumeDeform/%.zip
+./datasets/VolumeDeform/%.zip \
+./datasets/KITTI/%.dir \
+./datasets/KITTI/%.zip \
+./datasets/NSH/nsh_indoor_and_outdoor.dir \
+./datasets/NSH/nsh_indoor_and_outdoor.zip \
+./datasets/NewerCollege/newer_college_short_quad_mid.dir \
+./datasets/NewerCollege/newer_college_short_quad_mid.zip \
+./datasets/DARPASubt/darpa_subt_anymal_01_sync.dir \
+./datasets/DARPASubt/darpa_subt_anymal_01_sync.zip
