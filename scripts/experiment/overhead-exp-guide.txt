@@ -1,0 +1,73 @@
+RUN overhead-exp-setup.sh first
+$ cd ~/slambench
+$ mkdir ./results/log_files/overhead/ -p
+$ ./scripts/experiment/overhead-exp-setup.sh
+
+Check you have the slambench images
+$ docker images
+
+Check you have algorithms and dataset volume
+$ docker volume ls 
+
+Copy the dataset to local machine for future experiment without docker
+$ sudo docker cp [kitti_dataset_container_name]:/slambench/datasets/KITTI/2011_09_30_drive_0027/2011_09_30_drive_0027_sync.slam ~/slambench/datasets/
+$ sudo docker cp [newercollege_dataset_container_name]:/slambench/datasets/NewerCollege/newer_college_short_quad_mid.slam ~/slambench/datasets/
+$ sudo docker cp [nsh_dataset_container_name]:/slambench/datasets/NSH/nsh_indoor_and_outdoor.slam ~/slambench/datasets/
+
+Copy the algorithms volume to local machine
+$ sudo docker cp aloam:/deps/ /deps/
+$ sudo docker cp legoloam:/deps/legoloam/ /deps/legoloam/
+
+$ cd ~/slambench
+Run the experiment without docker (You probably need to change KITTI_PATH, NewerCollege_PATH, NSH_PATH in overhead-exp-run.sh to ./datasets)
+$ ./scripts/overhead-exp-run.sh all
+
+
+# ======================================== KITTI07 Docker ===============================================
+START THE CONTAINER
+$ python3 starter.py run -t interactive-gui -dv KITTI07 -d 2011_09_30_drive_0027_sync.slam -a aloam/libaloam-original-library.so legoloam/liblegoloam-original-library.so
+
+Now you are in the container
+$ cd /slambench
+$ mkdir ./results/log_files/overhead/ -p
+$ ./scripts/experiment/overhead-exp-run.sh kitti
+Exit the container
+
+Copy log_files
+$ sudo docker cp [kitti_experiment_container_name]:/slambench/results/log_files/overhead/ ~/slambench/results/log_files_KITTI07/
+
+Visualize the copied results
+$ python3 ./scripts/visualize.py \
+    -a ./results/log_files_KITTI07/A-LOAM_KITTI07_01.txt ./results/log_files_KITTI07/LeGO-LOAM_KITTI07_01.txt \
+    -o ./results/experiments/overhead/KITTI07_Docker/
+
+
+# ======================================== Newer College Docker ===============================================
+START THE CONTAINER
+$ python3 starter.py run -t interactive-gui -dv NewerCollegeQM -d newer_college_short_quad_mid.slam -a aloam/libaloam-original-library.so legoloam/liblegoloam-original-library.so
+
+$ cd /slambench
+$ mkdir ./results/log_files/overhead/ -p
+$ ./scripts/experiment/overhead-exp-run.sh newercollege
+Exit the container
+
+$ sudo docker cp [newercollege_exp_container_name]:/slambench/results/log_files/overhead/ ~/slambench/results/log_files_NewerCollegeQM/
+
+$ python3 ./scripts/visualize.py \
+    -a ./results/log_files_NewerCollegeQM/A-LOAM_NewerCollegeQM_01.txt ./results/log_files_NewerCollegeQM/LeGO-LOAM_NewerCollegeQM_01.txt \
+    -o ./results/experiments/overhead/NewerCollegeQM_Docker/
+
+# ======================================== NSH Docker ===============================================
+START THE CONTAINER
+$ python3 starter.py run -t interactive-gui -dv NSH -d nsh_indoor_and_outdoor.slam -a aloam/libaloam-original-library.so legoloam/liblegoloam-original-library.so
+
+$ cd /slambench
+$ mkdir ./results/log_files/overhead/ -p
+$ ./scripts/experiment/overhead-exp-run.sh nsh
+Exit the container
+
+$ sudo docker cp [nsh_exp_container_name]:/slambench/results/log_files/overhead/ ~/slambench/results/log_files_NSH/
+
+$ python3 ./scripts/visualize.py \
+    -a ./results/log_files_NSH/A-LOAM_NSH_01.txt ./results/log_files_NSH/LeGO-LOAM_NSH_01.txt \
+    -o ./results/experiments/overhead/NSH_Docker/

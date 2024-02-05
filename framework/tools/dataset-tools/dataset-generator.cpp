@@ -33,6 +33,10 @@
 #include "include/UZHFPV.h"
 #include "include/OpenLORIS.h"
 #include "include/VolumeDeform.h"
+#include "include/KITTI.h"
+#include "include/NSH.h"
+#include "include/NewerCollege.h"
+#include "include/DARPASubt.h"
 
 using namespace slambench::io;
 
@@ -92,6 +96,14 @@ public:
             config->reader = new EUROCMAVReader("");
         } else if (dataset_name == "icl") {
             config->reader = new ICLReader("");
+        } else if (dataset_name == "kitti") {
+            config->reader = new KITTIReader("");
+        } else if (dataset_name == "nsh") {
+            config->reader = new NSHReader("");
+        } else if (dataset_name == "newercollege") {
+            config->reader = new NewerCollegeReader("");
+        } else if (dataset_name == "darpasubt") {
+            config->reader = new DARPASubtReader("");
         } else if (dataset_name == "svo") {
             config->reader = new SVOReader("");
         } else if (dataset_name == "bonn") {
@@ -144,7 +156,7 @@ public:
 
         this->addParameter(TypedParameter<std::string>("d", "dataset",
                                                        "Name of the input dataset type "
-                                                       "(iclnuim, tum, eurocmav, icl, svo, bonn, ethi, uzhfpv, OpenLORIS)",
+                                                       "(iclnuim, tum, eurocmav, icl, svo, bonn, ethi, uzhfpv, kitti, nsh, newercollege, darpasubt, OpenLORIS)",
                                                        &this->dataset, nullptr, dataset_callback));
         this->addParameter(TypedParameter<std::string>("o","output","Output slam file", &this->output, nullptr));
         this->addParameter(TypedParameter<bool>("q", "quiet","Hide the progress bar", &this->quiet, nullptr));

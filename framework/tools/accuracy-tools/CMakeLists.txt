@@ -45,4 +45,3 @@ endif(PCL_FOUND)
 
 	
 ENDIF(Pangolin_FOUND)
-

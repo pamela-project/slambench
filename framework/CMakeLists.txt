@@ -15,4 +15,3 @@ add_subdirectory(shared) # SLAMBench Shared library
 IF(NOT ANDROID)
     add_subdirectory(tools)  # SLAMBench Tools
 ENDIF()
-

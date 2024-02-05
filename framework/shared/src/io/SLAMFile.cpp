@@ -92,6 +92,7 @@ SLAMFile* SLAMFile::Read(const std::string& filename, FrameBufferSource &fb_sour
 bool SLAMFile::Write(const std::string& filename, SLAMFile& file, SLAMFileSerialiser::frame_callback_t callback) {
 	FILE *base_file = fopen(filename.c_str(), "w");
 	if(!base_file) {
+		perror("Error opening file");
 		return false;
 	}
 	

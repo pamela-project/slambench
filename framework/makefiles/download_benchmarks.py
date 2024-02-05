@@ -51,7 +51,7 @@ for algorithm_token, details in data.items():
         print("")
         print("%s:" % algorithm_token)
         echo("=================================================================================================================")
-        echo(f"{name} ({reference})")
+        echo("{name} ({reference})")
         echo("Original repository: %s" % original_repo)
         echo("Used repository: %s" % new_repo)
         echo("=================================================================================================================")

@@ -115,21 +115,21 @@ endif
 #### Compilation targets
 ####################################
 deps :
-	+make brisk
-	+make ceres
-	+make cvd
+#	+make brisk
+#	+make ceres
+#	+make cvd
 	+make eigen3
 	+make flann
-	+make freeimage
+#	+make freeimage
 	+make g2o
-	+make gvars
+#	+make gvars
 	+make opencv
-	+make opengv
-	+make opentuner
+#	+make opengv
+#	+make opentuner
 	+make pangolin
 	+make pcl
 	+make suitesparse
-	+make toon
-	+make Sophus
+#	+make toon
+#	+make Sophus
 
 .PHONY: deps
